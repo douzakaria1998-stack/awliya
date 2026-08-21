@@ -17,7 +17,7 @@ import { X } from 'lucide-react';
 export function AdminShell() {
   const [mounted, setMounted] = useState(false);
   const { activeTab } = useAdmin();
-  const { dir } = useLanguage();
+  const { dir, isRTL } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -96,8 +96,18 @@ export function AdminShell() {
       >
         <AdminHeader onOpenMobileMenu={() => setIsMobileMenuOpen(true)} />
 
-        <main className="flex-1 p-8 sm:p-12 lg:p-14 max-w-[1450px] w-full mx-auto animate-in fade-in duration-200">
-          {renderActiveScreen()}
+        <main
+          className="w-full pb-28 md:pb-16"
+          style={{
+            width: '100%',
+            paddingTop: '32px',
+            paddingRight: isRTL ? '56px' : '48px',
+            paddingLeft: isRTL ? '48px' : '56px',
+          }}
+        >
+          <div className="w-full max-w-6xl">
+            {renderActiveScreen()}
+          </div>
         </main>
       </div>
     </div>

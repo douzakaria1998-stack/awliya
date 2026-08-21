@@ -28,10 +28,10 @@ export function SuperAdminOverview() {
   const frenchCount = students.filter((s) => s.enrolledPathAr?.includes('الفرنسية') || s.enrolledPathAr?.includes('French')).length;
 
   return (
-    <div className="space-y-8 sm:space-y-10">
-      {/* 1. Top Welcome Banner */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white shadow-xl border border-purple-900/50 relative overflow-hidden">
-        <div className="relative z-10 space-y-4">
+    <div className="flex flex-col gap-10 sm:gap-12 w-full pb-8">
+      {/* 1. Top Welcome Banner with Generous Separation */}
+      <div className="p-8 sm:p-10 rounded-[32px] bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white shadow-xl border border-purple-900/50 relative overflow-hidden">
+        <div className="relative z-10 space-y-5">
           {/* Role Badge */}
           <div>
             <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/20 text-purple-300 text-xs font-black border border-purple-500/30">
@@ -46,15 +46,15 @@ export function SuperAdminOverview() {
             </span>
           </div>
 
-          {/* Heading */}
-          <div>
+          {/* Heading & Subtitle */}
+          <div className="space-y-2">
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight leading-snug text-white">
               مرحباً بك في لوحة تحكم أكاديمية{' '}
               <span dir="ltr" className="inline-block px-2.5 py-0.5 rounded-xl bg-white/10 text-white font-black text-lg sm:text-2xl align-middle">
                 My School
               </span>
             </h2>
-            <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed max-w-2xl mt-2">
+            <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed max-w-2xl">
               متابعة آنية لمسارات اللغتين الإنجليزية والفرنسية، إدارة طلبات أولياء الأمور، تصحيح الواجبات اللغوية، ورصد الحضور بدقة متناهية.
             </p>
           </div>
@@ -99,13 +99,13 @@ export function SuperAdminOverview() {
         <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-rose-600/20 blur-3xl pointer-events-none" />
       </div>
 
-      {/* 2. Key Metrics Grid (4 Stat Cards) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+      {/* 2. Key Metrics Grid (4 Stat Cards with Large Spacing) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
         {/* Card 1: Active Students */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3 transition-all hover:shadow-md">
+        <div className="p-7 sm:p-8 rounded-[28px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3.5 transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">الطلاب النشطون</span>
-            <div className="w-11 h-11 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-2xs">
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-2xs">
               <Users size={22} />
             </div>
           </div>
@@ -119,10 +119,10 @@ export function SuperAdminOverview() {
         </div>
 
         {/* Card 2: Pending Approvals */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3 transition-all hover:shadow-md">
+        <div className="p-7 sm:p-8 rounded-[28px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3.5 transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">طلبات التسجيل المعلقة</span>
-            <div className="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-2xs">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-2xs">
               <Clock size={22} />
             </div>
           </div>
@@ -136,10 +136,10 @@ export function SuperAdminOverview() {
         </div>
 
         {/* Card 3: Language Tracks */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3 transition-all hover:shadow-md">
+        <div className="p-7 sm:p-8 rounded-[28px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3.5 transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">مسارات اللغات المعتمدة</span>
-            <div className="w-11 h-11 rounded-2xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-2xs">
+            <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-2xs">
               <Languages size={22} />
             </div>
           </div>
@@ -154,10 +154,10 @@ export function SuperAdminOverview() {
         </div>
 
         {/* Card 4: Certified Levels Completed */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3 transition-all hover:shadow-md">
+        <div className="p-7 sm:p-8 rounded-[28px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3.5 transition-all hover:shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">الشهادات الصادرة (CEFR)</span>
-            <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-2xs">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-2xs">
               <Award size={22} />
             </div>
           </div>
@@ -171,10 +171,10 @@ export function SuperAdminOverview() {
         </div>
       </div>
 
-      {/* 3. Middle Section: Pending Approvals & Live Activity Stream with Generous Internal Margins */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+      {/* 3. Middle Section: Pending Approvals & Live Activity Stream with Large Separation */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-10">
         {/* Left 2 Cols: Pending Approvals Container with Wide Internal Margins */}
-        <div className="lg:col-span-2 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 lg:p-9 shadow-2xs space-y-6">
+        <div className="lg:col-span-2 rounded-[32px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 p-8 sm:p-10 shadow-2xs space-y-6">
           {/* Header Row */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-3.5">
@@ -245,7 +245,7 @@ export function SuperAdminOverview() {
         </div>
 
         {/* Right 1 Col: Live Activity Stream */}
-        <div className="rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 shadow-2xs flex flex-col justify-between space-y-6">
+        <div className="rounded-[32px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 p-8 sm:p-10 shadow-2xs flex flex-col justify-between space-y-6">
           <div className="space-y-5">
             <div className="flex items-center gap-3.5 pb-4 border-b border-slate-100 dark:border-slate-800">
               <div className="w-11 h-11 rounded-2xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold shadow-2xs shrink-0">

@@ -107,28 +107,39 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
       } border-slate-800 min-h-screen sticky top-0 h-screen z-30 justify-between select-none ${
         isRTL ? 'text-right' : 'text-left'
       }`}
+      suppressHydrationWarning
     >
       <div className="flex flex-col overflow-y-auto">
         {/* 1. Brand Header */}
-        <div className="h-16 px-6 border-b border-slate-800 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center text-white shadow-md shrink-0">
-              <School size={20} />
+        <div
+          className="h-16 border-b border-slate-800 flex items-center gap-3 shrink-0"
+          style={{
+            paddingRight: isRTL ? '32px' : '20px',
+            paddingLeft: isRTL ? '20px' : '32px',
+          }}
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center text-white shadow-md shrink-0">
+            <School size={20} />
+          </div>
+          <div className="min-w-0">
+            <div className="font-black text-sm text-white flex items-center gap-1.5">
+              <span>My School</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/40">
+                Admin
+              </span>
             </div>
-            <div className="min-w-0">
-              <div className="font-black text-sm text-white flex items-center gap-1.5">
-                <span>My School</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/40">
-                  Admin
-                </span>
-              </div>
-              <div className="text-[11px] text-slate-400 font-medium">لوحة التحكم الإدارية</div>
-            </div>
+            <div className="text-[11px] text-slate-400 font-medium">لوحة التحكم الإدارية</div>
           </div>
         </div>
 
         {/* 2. Admin User Profile Banner */}
-        <div className="p-3.5 mx-4 my-4 rounded-2xl bg-slate-800/90 border border-slate-700/70 shadow-sm shrink-0">
+        <div
+          className="rounded-2xl bg-slate-800/90 border border-slate-700/70 shadow-sm shrink-0"
+          style={{
+            margin: '16px 20px',
+            padding: '14px 16px',
+          }}
+        >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
               {currentAdmin.fullNameAr.split(' ')[0][0]}
@@ -153,7 +164,13 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
         </div>
 
         {/* 3. Navigation List */}
-        <nav className="px-3 space-y-1">
+        <div
+          className="flex flex-col gap-1.5"
+          style={{
+            paddingRight: isRTL ? '20px' : '16px',
+            paddingLeft: isRTL ? '16px' : '20px',
+          }}
+        >
           {visibleNavItems.map((item) => {
             const isActive = activeTab === item.key;
             const Icon = item.icon;
@@ -166,7 +183,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                   setActiveTab(item.key);
                   if (onCloseMobile) onCloseMobile();
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+                className={`w-full flex items-center justify-between h-11 px-3.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-150 cursor-pointer ${
                   isActive
                     ? 'bg-rose-600 text-white shadow-md shadow-rose-600/25 font-black'
                     : 'text-slate-300 hover:bg-slate-800 hover:text-white'
@@ -189,11 +206,16 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
               </button>
             );
           })}
-        </nav>
+        </div>
       </div>
 
       {/* 4. Bottom Link to Parent Portal */}
-      <div className="p-4 border-t border-slate-800 bg-slate-950/60 shrink-0">
+      <div
+        className="border-t border-slate-800 bg-slate-950/60 shrink-0"
+        style={{
+          padding: '16px 20px',
+        }}
+      >
         <Link
           href="/"
           className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-slate-800/90 hover:bg-slate-750 text-slate-200 hover:text-white font-bold text-xs transition-all border border-slate-700/60 shadow-xs"
