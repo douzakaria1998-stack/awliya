@@ -34,12 +34,17 @@ export interface NavItemConfig {
   iconName: 'Home' | 'Activity' | 'BarChart3' | 'CreditCard' | 'User';
 }
 
+// Feature toggle to easily activate/hide the Financials section
+export const SHOW_FINANCIALS_TAB = false;
+
 // 5 Main sections RTL order (matches image exactly: الرئيسية، المسار، الأداء، المالية، الملف)
 export const NAV_ITEMS: NavItemConfig[] = [
   { key: 'dashboard', labelAr: 'الرئيسية', iconName: 'Home' },
   { key: 'academic', labelAr: 'المسار', iconName: 'Activity' },
   { key: 'performance', labelAr: 'الأداء', iconName: 'BarChart3' },
-  { key: 'financials', labelAr: 'المالية', iconName: 'CreditCard' },
+  ...(SHOW_FINANCIALS_TAB
+    ? [{ key: 'financials' as NavTabKey, labelAr: 'المالية', iconName: 'CreditCard' as const }]
+    : []),
   { key: 'profile', labelAr: 'الملف', iconName: 'User' },
 ];
 

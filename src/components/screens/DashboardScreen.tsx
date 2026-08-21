@@ -11,7 +11,7 @@ import { useStudent } from '@/context/StudentContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { NavTabKey, PerformanceTabKey } from '@/lib/constants';
+import { NavTabKey, PerformanceTabKey, SHOW_FINANCIALS_TAB } from '@/lib/constants';
 import { levelThemes } from '@/lib/themes';
 
 interface DashboardScreenProps {
@@ -107,17 +107,52 @@ export function DashboardScreen({
           </h2>
         </div>
 
-        {/* Level Badge Pill */}
+        {/* Level Badge Pill / Pending Pill */}
         <div className={`relative z-10 ${isRTL ? 'self-start' : 'self-start'}`} style={{ padding: '0 8px 8px 8px' }}>
-          <div
-            className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-white border border-white/25 shadow-2xs"
-            style={{ padding: '8px 16px' }}
-          >
-            <Layers size={15} />
-            <span>{t.level} {levelWord}</span>
-          </div>
+          {activeStudent.status === 'pending' ? (
+            <div
+              className="inline-flex items-center gap-2 rounded-full bg-amber-500 text-xs font-bold text-white shadow-2xs"
+              style={{ padding: '8px 18px' }}
+            >
+              <Clock size={15} />
+              <span>{language === 'ar' ? 'طلب قيد المراجعة - بانتظار الاختبار' : 'Pending - Awaiting Test'}</span>
+            </div>
+          ) : (
+            <div
+              className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-white border border-white/25 shadow-2xs"
+              style={{ padding: '8px 16px' }}
+            >
+              <Layers size={15} />
+              <span>{t.level} {levelWord}</span>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Pending Account Notice Banner */}
+      {activeStudent.status === 'pending' && (
+        <div
+          className="bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/80 rounded-2xl flex items-start gap-4 shadow-xs text-right animate-fade-in"
+          style={{
+            padding: '22px 26px',
+            marginBottom: '32px',
+          }}
+        >
+          <div className="w-11 h-11 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+            <Clock size={22} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h4 className="font-black text-amber-950 dark:text-amber-100 text-sm sm:text-base mb-1">
+              {language === 'ar' ? 'طلب تسجيل الطالب قيد المراجعة لدى الإدارة' : 'Registration Request Under Review'}
+            </h4>
+            <p className="text-xs sm:text-sm text-amber-800/90 dark:text-amber-300/90 leading-relaxed font-medium">
+              {language === 'ar'
+                ? `تم استلام طلب تسجيل الطالب (${activeStudent.fullNameAr}) في مسار (${activeStudent.enrolledPathAr}) بنجاح. سيقوم فريق الإدارة بالتواصل معكم لتحديد موعد اختبار تحديد المستوى واعتماد التفعيل النهائي.`
+                : `The registration request for (${activeStudent.fullNameAr}) is under review. Our administration team will contact you to schedule the placement test.`}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* =========================================================================
           2. Progress Card (32px bottom margin)
@@ -255,52 +290,54 @@ export function DashboardScreen({
             </span>
           </div>
 
-          {/* Card 2: Course Expiry Alert */}
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => onNavigate('financials')}
-            onKeyDown={(e) => e.key === 'Enter' && onNavigate('financials')}
-            className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex items-center justify-between cursor-pointer"
-            style={{
-              minHeight: '76px',
-              padding: '18px 24px',
-              borderRadius: '16px',
-              gap: '16px',
-            }}
-          >
-            <div className="flex items-center min-w-0" style={{ gap: '16px' }}>
-              {/* Icon: 48px x 48px */}
-              <div
-                className="rounded-full bg-orange-50 dark:bg-orange-950/40 text-orange-500 border border-orange-200/70 dark:border-orange-800/60 flex items-center justify-center shrink-0"
-                style={{ width: '48px', height: '48px', minWidth: '48px' }}
-              >
-                <Clock size={24} />
-              </div>
-              <div className="min-w-0">
-                <h4
-                  className="font-bold text-slate-900 dark:text-white truncate"
-                  style={{ fontSize: '17px', lineHeight: '24px', marginBottom: '4px' }}
-                >
-                  {t.courseEndingSoon}
-                </h4>
-                <p
-                  className="text-slate-400 font-medium truncate"
-                  style={{ fontSize: '14px', lineHeight: '22px' }}
-                >
-                  {t.courseEndingSoonDesc}
-                </p>
-              </div>
-            </div>
-
-            {/* Timestamp */}
-            <span
-              className="text-slate-400 font-semibold whitespace-nowrap shrink-0 text-xs"
-              style={{ fontSize: '13px', lineHeight: '20px' }}
+          {/* Card 2: Course Expiry / Payment Alert (Shown only when financials feature is active) */}
+          {SHOW_FINANCIALS_TAB && (
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => onNavigate('financials')}
+              onKeyDown={(e) => e.key === 'Enter' && onNavigate('financials')}
+              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex items-center justify-between cursor-pointer"
+              style={{
+                minHeight: '76px',
+                padding: '18px 24px',
+                borderRadius: '16px',
+                gap: '16px',
+              }}
             >
-              {t.yesterday}
-            </span>
-          </div>
+              <div className="flex items-center min-w-0" style={{ gap: '16px' }}>
+                {/* Icon: 48px x 48px */}
+                <div
+                  className="rounded-full bg-orange-50 dark:bg-orange-950/40 text-orange-500 border border-orange-200/70 dark:border-orange-800/60 flex items-center justify-center shrink-0"
+                  style={{ width: '48px', height: '48px', minWidth: '48px' }}
+                >
+                  <Clock size={24} />
+                </div>
+                <div className="min-w-0">
+                  <h4
+                    className="font-bold text-slate-900 dark:text-white truncate"
+                    style={{ fontSize: '17px', lineHeight: '24px', marginBottom: '4px' }}
+                  >
+                    {t.courseEndingSoon}
+                  </h4>
+                  <p
+                    className="text-slate-400 font-medium truncate"
+                    style={{ fontSize: '14px', lineHeight: '22px' }}
+                  >
+                    {t.courseEndingSoonDesc}
+                  </p>
+                </div>
+              </div>
+
+              {/* Timestamp */}
+              <span
+                className="text-slate-400 font-semibold whitespace-nowrap shrink-0 text-xs"
+                style={{ fontSize: '13px', lineHeight: '20px' }}
+              >
+                {t.yesterday}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

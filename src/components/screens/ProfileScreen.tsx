@@ -16,12 +16,14 @@ import {
   Moon,
   Sun,
   MessageCircle,
+  Clock,
 } from 'lucide-react';
 import { useStudent } from '@/context/StudentContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { levelThemes } from '@/lib/themes';
 import { LevelId } from '@/types';
+import { SHOW_FINANCIALS_TAB } from '@/lib/constants';
 import { StudentSwitcher } from '../layout/StudentSwitcher';
 
 interface ProfileScreenProps {
@@ -118,14 +120,44 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 text-xs sm:text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 text-xs sm:text-sm">
               <div
                 className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
                 style={{ padding: '22px 28px', borderRadius: '20px' }}
               >
-                <span className="text-xs text-slate-400 font-semibold block">اسم الطالب</span>
+                <span className="text-xs text-slate-400 font-semibold block">الاسم الأول</span>
                 <span className="font-bold text-slate-900 dark:text-white truncate block text-sm">
-                  {activeStudent.fullNameAr}
+                  {activeStudent.firstNameAr || activeStudent.fullNameAr.split(' ')[0]}
+                </span>
+              </div>
+
+              <div
+                className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
+                style={{ padding: '22px 28px', borderRadius: '20px' }}
+              >
+                <span className="text-xs text-slate-400 font-semibold block">اللقب / اسم العائلة</span>
+                <span className="font-bold text-slate-900 dark:text-white truncate block text-sm">
+                  {activeStudent.lastNameAr || activeStudent.fullNameAr.split(' ').slice(1).join(' ') || 'الدوزكري'}
+                </span>
+              </div>
+
+              <div
+                className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
+                style={{ padding: '22px 28px', borderRadius: '20px' }}
+              >
+                <span className="text-xs text-slate-400 font-semibold block">تاريخ الميلاد</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white block text-sm">
+                  {activeStudent.birthday || '2016-09-20'}
+                </span>
+              </div>
+
+              <div
+                className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
+                style={{ padding: '22px 28px', borderRadius: '20px' }}
+              >
+                <span className="text-xs text-slate-400 font-semibold block">المستوى المدرسي</span>
+                <span className="font-bold text-slate-900 dark:text-white truncate block text-sm">
+                  {activeStudent.schoolLevelAr || 'المرحلة الابتدائية'}
                 </span>
               </div>
 
@@ -150,22 +182,12 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
               </div>
 
               <div
-                className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
-                style={{ padding: '22px 28px', borderRadius: '20px' }}
-              >
-                <span className="text-xs text-slate-400 font-semibold block">السنة الدراسية</span>
-                <span className="font-bold text-slate-900 dark:text-white block text-sm">
-                  {activeStudent.academicYearAr}
-                </span>
-              </div>
-
-              <div
                 className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2 sm:col-span-2"
                 style={{ padding: '22px 28px', borderRadius: '20px' }}
               >
-                <span className="text-xs text-slate-400 font-semibold block">الفرع وتاريخ القيد</span>
+                <span className="text-xs text-slate-400 font-semibold block">الفرع والسنة الدراسية</span>
                 <span className="font-bold text-slate-900 dark:text-white truncate block text-sm">
-                  {activeStudent.branchAr} (تاريخ التسجيل: {activeStudent.enrollmentDate})
+                  {activeStudent.branchAr} • {activeStudent.academicYearAr}
                 </span>
               </div>
             </div>
@@ -396,9 +418,9 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                           <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white block truncate">
                             {st.fullNameAr}
                           </span>
-                          {isSelected && (
+                          {st.status === 'pending' ? (
                             <span
-                              className="inline-flex items-center justify-center rounded-full text-xs font-black bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 select-none whitespace-nowrap shadow-2xs"
+                              className="inline-flex items-center gap-1.5 rounded-full text-xs font-black bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 select-none whitespace-nowrap shadow-2xs"
                               style={{
                                 paddingRight: '14px',
                                 paddingLeft: '14px',
@@ -408,8 +430,25 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                                 lineHeight: '1',
                               }}
                             >
-                              النشط حالياً
+                              <Clock size={12} className="shrink-0" />
+                              <span>قيد المراجعة والاعتماد</span>
                             </span>
+                          ) : (
+                            isSelected && (
+                              <span
+                                className="inline-flex items-center justify-center rounded-full text-xs font-black bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 select-none whitespace-nowrap shadow-2xs"
+                                style={{
+                                  paddingRight: '14px',
+                                  paddingLeft: '14px',
+                                  paddingTop: '4px',
+                                  paddingBottom: '4px',
+                                  height: '26px',
+                                  lineHeight: '1',
+                                }}
+                              >
+                                النشط حالياً
+                              </span>
+                            )
                           )}
                         </div>
                         <span className="text-xs text-slate-400 font-medium block truncate">
@@ -419,17 +458,30 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0">
-                      <span
-                        className="inline-flex items-center rounded-full text-xs font-black text-white shadow-2xs select-none"
-                        style={{
-                          backgroundColor: stTheme.primary,
-                          height: '32px',
-                          paddingRight: '16px',
-                          paddingLeft: '16px',
-                        }}
-                      >
-                        المستوى {st.currentLevel}
-                      </span>
+                      {st.status === 'pending' ? (
+                        <span
+                          className="inline-flex items-center rounded-full text-xs font-black text-white bg-amber-500 shadow-2xs select-none"
+                          style={{
+                            height: '32px',
+                            paddingRight: '16px',
+                            paddingLeft: '16px',
+                          }}
+                        >
+                          بانتظار الاختبار
+                        </span>
+                      ) : (
+                        <span
+                          className="inline-flex items-center rounded-full text-xs font-black text-white shadow-2xs select-none"
+                          style={{
+                            backgroundColor: stTheme.primary,
+                            height: '32px',
+                            paddingRight: '16px',
+                            paddingLeft: '16px',
+                          }}
+                        >
+                          المستوى {st.currentLevel}
+                        </span>
+                      )}
                     </div>
                   </div>
                 );
@@ -487,34 +539,36 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 </label>
               </div>
 
-              {/* Payment alerts */}
-              <div
-                className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 gap-6"
-                style={{ padding: '22px 28px', borderRadius: '20px' }}
-              >
-                <div className="space-y-1">
-                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 block">
-                    تنبيهات الرسوم والدفع
-                  </span>
-                  <span className="text-xs text-slate-400 font-medium block leading-relaxed">
-                    تذكير بمواعيد الاستحقاق وفواتير الاشتراك
-                  </span>
+              {/* Payment alerts (Shown only when financials feature is enabled) */}
+              {SHOW_FINANCIALS_TAB && (
+                <div
+                  className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 gap-6"
+                  style={{ padding: '22px 28px', borderRadius: '20px' }}
+                >
+                  <div className="space-y-1">
+                    <span className="text-sm font-bold text-slate-800 dark:text-slate-200 block">
+                      تنبيهات الرسوم والدفع
+                    </span>
+                    <span className="text-xs text-slate-400 font-medium block leading-relaxed">
+                      تذكير بمواعيد الاستحقاق وفواتير الاشتراك
+                    </span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={notificationSettings.payments}
+                      onChange={() => handleToggleNotif('payments')}
+                      className="sr-only peer"
+                    />
+                    <div
+                      className="w-12 h-6.5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:right-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
+                      style={{
+                        backgroundColor: notificationSettings.payments ? theme.primary : undefined,
+                      }}
+                    />
+                  </label>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                  <input
-                    type="checkbox"
-                    checked={notificationSettings.payments}
-                    onChange={() => handleToggleNotif('payments')}
-                    className="sr-only peer"
-                  />
-                  <div
-                    className="w-12 h-6.5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:right-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
-                    style={{
-                      backgroundColor: notificationSettings.payments ? theme.primary : undefined,
-                    }}
-                  />
-                </label>
-              </div>
+              )}
 
               {/* Attendance alerts */}
               <div

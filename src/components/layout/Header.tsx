@@ -471,9 +471,15 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                             <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block leading-snug truncate">
                               {st.fullNameAr}
                             </span>
-                            <span className="text-xs text-slate-400 font-medium block" style={{ marginTop: '5px' }}>
-                              {t.level} {st.currentLevel}
-                            </span>
+                            {st.status === 'pending' ? (
+                              <span className="text-[11px] text-amber-600 dark:text-amber-400 font-bold block" style={{ marginTop: '3px' }}>
+                                {language === 'ar' ? 'قيد المراجعة والاعتماد' : 'Pending Approval'}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-slate-400 font-medium block" style={{ marginTop: '5px' }}>
+                                {t.level} {st.currentLevel}
+                              </span>
+                            )}
                           </div>
                         </div>
 

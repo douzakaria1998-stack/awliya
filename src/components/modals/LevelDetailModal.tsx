@@ -16,6 +16,8 @@ import {
 import { AcademicLevel } from '@/types';
 import { levelThemes } from '@/lib/themes';
 import { useLanguage } from '@/context/LanguageContext';
+import { useStudent } from '@/context/StudentContext';
+import { downloadCertificateHTML } from '@/lib/certificateGenerator';
 
 interface LevelDetailModalProps {
   level: AcademicLevel | null;
@@ -25,6 +27,7 @@ interface LevelDetailModalProps {
 
 export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalProps) {
   const [downloaded, setDownloaded] = useState(false);
+  const { activeStudent } = useStudent();
   const { t, isRTL, language } = useLanguage();
 
   if (!isOpen || !level) return null;
@@ -33,6 +36,7 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
 
   const handleDownloadCertificate = () => {
     setDownloaded(true);
+    downloadCertificateHTML(level, activeStudent?.fullNameAr || 'مريم الدوزكري');
     setTimeout(() => {
       setDownloaded(false);
     }, 2500);
@@ -315,9 +319,6 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
                         {mod.titleAr}
                       </span>
                     </div>
-                    <span className="text-xs sm:text-sm text-slate-400 font-semibold whitespace-nowrap shrink-0">
-                      {mod.lessonsCount} {t.lessons}
-                    </span>
                   </div>
                 ))}
               </div>

@@ -33,6 +33,10 @@ export interface Student {
   id: string;
   parentId: string;
   fullNameAr: string;
+  firstNameAr?: string;
+  lastNameAr?: string;
+  birthday?: string;
+  schoolLevelAr?: string;
   nicknameAr?: string;
   enrolledPathAr: string;
   currentLevel: LevelId;
@@ -41,6 +45,8 @@ export interface Student {
   studentIdNumber: string;
   academicYearAr: string;
   branchAr: string;
+  timingAr?: string;
+  status?: 'active' | 'pending';
   enrollmentDate: string;
   age: number;
 }
@@ -161,6 +167,7 @@ export interface PaymentRecord {
   id: string;
   studentId: string;
   descriptionAr: string;
+  feeTitleAr?: string;
   amount: number;
   currency: string;
   date: string;
@@ -168,6 +175,8 @@ export interface PaymentRecord {
   methodAr: string; // مدى، فيزا، Apple Pay، تحويل بنكي
   status: 'successful' | 'refunded';
 }
+
+export type Payment = PaymentRecord;
 
 export interface FinancialSummary {
   currentBalance: number;

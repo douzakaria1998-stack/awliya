@@ -17,7 +17,7 @@ import {
   LevelId,
 } from '@/types';
 import { getItem, setItem } from '@/lib/localStorage';
-import { STORAGE_KEYS } from '@/lib/constants';
+import { STORAGE_KEYS, SHOW_FINANCIALS_TAB } from '@/lib/constants';
 import {
   mockStudents,
   getAcademicLevelsForStudent,
@@ -39,13 +39,20 @@ interface StudentContextType {
   activeStudentId: string;
   setActiveStudentId: (id: string) => void;
   addStudent: (data: {
-    fullNameAr: string;
+    fullNameAr?: string;
+    firstNameAr?: string;
+    lastNameAr?: string;
+    birthday?: string;
+    schoolLevelAr?: string;
+    timingAr?: string;
+    status?: 'active' | 'pending';
     nicknameAr?: string;
     enrolledPathAr: string;
-    currentLevel: LevelId;
-    age: number;
+    currentLevel?: LevelId;
+    age?: number;
     branchAr?: string;
   }) => Student;
+  approveStudent: (id: string) => void;
   updateStudent: (id: string, data: Partial<Student>) => void;
   academicLevels: AcademicLevel[];
   homeworkList: Homework[];
@@ -146,31 +153,45 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     [students, setLevel]
   );
 
-  // Add new student
   const addStudent = useCallback(
     (data: {
-      fullNameAr: string;
+      fullNameAr?: string;
+      firstNameAr?: string;
+      lastNameAr?: string;
+      birthday?: string;
+      schoolLevelAr?: string;
+      timingAr?: string;
+      status?: 'active' | 'pending';
       nicknameAr?: string;
       enrolledPathAr: string;
-      currentLevel: LevelId;
-      age: number;
+      currentLevel?: LevelId;
+      age?: number;
       branchAr?: string;
     }): Student => {
       const newId = `student-${Date.now().toString().slice(-4)}`;
       const randomIdNum = Math.floor(1000 + Math.random() * 9000);
+      const computedFullName = data.fullNameAr || `${data.firstNameAr || ''} ${data.lastNameAr || ''}`.trim() || 'طالب جديد';
+      const computedNickname = data.nicknameAr || data.firstNameAr || computedFullName.split(' ')[0];
+      
       const newStudent: Student = {
         id: newId,
         parentId: 'parent-001',
-        fullNameAr: data.fullNameAr,
-        nicknameAr: data.nicknameAr || data.fullNameAr.split(' ')[0],
+        fullNameAr: computedFullName,
+        firstNameAr: data.firstNameAr || computedFullName.split(' ')[0],
+        lastNameAr: data.lastNameAr || computedFullName.split(' ').slice(1).join(' '),
+        birthday: data.birthday || '2016-01-01',
+        schoolLevelAr: data.schoolLevelAr || 'المرحلة الابتدائية',
+        timingAr: data.timingAr || 'خلال أيام الأسبوع (Weekdays)',
+        status: data.status || 'pending',
+        nicknameAr: computedNickname,
         enrolledPathAr: data.enrolledPathAr,
-        currentLevel: data.currentLevel,
-        currentLevelProgress: 25,
+        currentLevel: data.currentLevel || 1,
+        currentLevelProgress: 0,
         studentIdNumber: `STD-2025-${randomIdNum}`,
         academicYearAr: '1446-1447هـ (2024-2025)',
         branchAr: data.branchAr || 'فرع الروضة - الرياض',
         enrollmentDate: new Date().toISOString().split('T')[0],
-        age: data.age,
+        age: data.age || 8,
       };
 
       const updated = [...students, newStudent];
@@ -185,6 +206,18 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       return newStudent;
     },
     [students, setLevel]
+  );
+
+  // Approve student (e.g. when administration approves placement test)
+  const approveStudent = useCallback(
+    (id: string) => {
+      setStudents((prev) => {
+        const updated = prev.map((s) => (s.id === id ? { ...s, status: 'active' as const, currentLevelProgress: 25 } : s));
+        setItem(STORAGE_KEYS.STUDENTS_LIST, updated);
+        return updated;
+      });
+    },
+    []
   );
 
   // Update existing student
@@ -307,7 +340,12 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
   // Notifications for active student
   const filteredNotifications = useMemo(() => {
-    return notifications.filter((n) => !n.studentId || n.studentId === activeStudent.id);
+    return notifications.filter((n) => {
+      if (!SHOW_FINANCIALS_TAB && (n.type === 'payment' || n.routeTo === 'financials')) {
+        return false;
+      }
+      return !n.studentId || n.studentId === activeStudent.id;
+    });
   }, [notifications, activeStudent.id]);
 
   // Handlers
@@ -395,6 +433,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         activeStudentId,
         setActiveStudentId,
         addStudent,
+        approveStudent,
         updateStudent,
         academicLevels,
         homeworkList,

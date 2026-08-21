@@ -11,8 +11,11 @@ import {
   Calendar,
 } from 'lucide-react';
 import { useStudent } from '@/context/StudentContext';
+import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { StudentSwitcher } from '../layout/StudentSwitcher';
+import { downloadReceiptHTML } from '@/lib/receiptGenerator';
+import { Payment } from '@/types';
 
 interface FinancialsScreenProps {
   onOpenAddStudent: () => void;
@@ -20,12 +23,14 @@ interface FinancialsScreenProps {
 
 export function FinancialsScreen({ onOpenAddStudent }: FinancialsScreenProps) {
   const {
+    activeStudent,
     fees,
     payments,
     financialSummary,
     notificationSettings,
     updateNotificationSettings,
   } = useStudent();
+  const { parent } = useAuth();
   const { theme } = useTheme();
 
   const [downloadedReceiptId, setDownloadedReceiptId] = useState<string | null>(null);
@@ -59,11 +64,16 @@ export function FinancialsScreen({ onOpenAddStudent }: FinancialsScreenProps) {
 
   const dynamicNotice = getDynamicNotice();
 
-  const handleDownloadReceipt = (id: string) => {
-    setDownloadedReceiptId(id);
+  const handleDownloadReceipt = (pay: Payment) => {
+    setDownloadedReceiptId(pay.id);
+    downloadReceiptHTML(
+      pay,
+      activeStudent?.fullNameAr || 'مريم الدوزكري',
+      parent?.fullNameAr || 'أحمد الدوزكري'
+    );
     setTimeout(() => {
       setDownloadedReceiptId(null);
-    }, 2000);
+    }, 2500);
   };
 
   const handleToggleCourseExpiryAlert = () => {
@@ -257,7 +267,7 @@ export function FinancialsScreen({ onOpenAddStudent }: FinancialsScreenProps) {
 
                 <button
                   type="button"
-                  onClick={() => handleDownloadReceipt(pay.id)}
+                  onClick={() => handleDownloadReceipt(pay)}
                   title="تحميل الإيصال"
                   className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors shrink-0 cursor-pointer shadow-2xs"
                 >

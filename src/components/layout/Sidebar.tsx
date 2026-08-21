@@ -12,7 +12,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { NavTabKey } from '@/lib/constants';
+import { NavTabKey, SHOW_FINANCIALS_TAB } from '@/lib/constants';
 
 interface SidebarProps {
   activeTab: NavTabKey;
@@ -29,7 +29,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     { key: 'dashboard' as NavTabKey, label: t.navDashboard, iconName: 'Home' },
     { key: 'academic' as NavTabKey, label: t.navAcademic, iconName: 'Compass' },
     { key: 'performance' as NavTabKey, label: t.navPerformance, iconName: 'BarChart3' },
-    { key: 'financials' as NavTabKey, label: t.navFinancials, iconName: 'CreditCard' },
+    ...(SHOW_FINANCIALS_TAB ? [{ key: 'financials' as NavTabKey, label: t.navFinancials, iconName: 'CreditCard' }] : []),
     { key: 'profile' as NavTabKey, label: t.navProfile, iconName: 'User' },
   ];
 

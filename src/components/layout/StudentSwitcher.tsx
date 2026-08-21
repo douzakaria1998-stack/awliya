@@ -53,12 +53,18 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
               <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
                 {activeStudent.fullNameAr}
               </span>
-              <span
-                className="px-2 py-0.5 rounded-full text-[10.5px] font-bold text-white shadow-xs"
-                style={{ backgroundColor: activeLevelTheme.primary }}
-              >
-                {activeLevelTheme.shortNameAr}
-              </span>
+              {activeStudent.status === 'pending' ? (
+                <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold text-white bg-amber-500 shadow-xs">
+                  بانتظار الاختبار
+                </span>
+              ) : (
+                <span
+                  className="px-2 py-0.5 rounded-full text-[10.5px] font-bold text-white shadow-xs"
+                  style={{ backgroundColor: activeLevelTheme.primary }}
+                >
+                  {activeLevelTheme.shortNameAr}
+                </span>
+              )}
             </div>
             <p className="text-[11.5px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[210px]">
               {activeStudent.enrolledPathAr}
@@ -131,20 +137,32 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
                         <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                           {student.fullNameAr}
                         </span>
-                        <span
-                          className="px-1.5 py-0.2 rounded text-[10px] font-bold text-white"
-                          style={{ backgroundColor: theme.primary }}
-                        >
-                          المستوى {student.currentLevel}
-                        </span>
+                        {student.status === 'pending' ? (
+                          <span className="px-1.5 py-0.2 rounded text-[10px] font-bold text-white bg-amber-500">
+                            بانتظار الاختبار
+                          </span>
+                        ) : (
+                          <span
+                            className="px-1.5 py-0.2 rounded text-[10px] font-bold text-white"
+                            style={{ backgroundColor: theme.primary }}
+                          >
+                            المستوى {student.currentLevel}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-[10.5px] text-slate-500 dark:text-slate-400">
                           {student.enrolledPathAr}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-semibold">
-                          ({student.currentLevelProgress}%)
-                        </span>
+                        {student.status === 'pending' ? (
+                          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">
+                            (قيد المراجعة)
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-400 font-semibold">
+                            ({student.currentLevelProgress}%)
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -34,22 +34,6 @@ export function AppLayout() {
     }
   };
 
-  if (!mounted || isLoading) {
-    return (
-      <div
-        className="min-h-screen w-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center"
-        suppressHydrationWarning
-      >
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center text-white font-black text-xl shadow-md animate-pulse">
-            و
-          </div>
-          <span className="text-xs font-bold text-slate-400">Loading Portal...</span>
-        </div>
-      </div>
-    );
-  }
-
   if (!isAuthenticated) {
     return <LoginScreen />;
   }
