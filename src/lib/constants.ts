@@ -37,6 +37,9 @@ export interface NavItemConfig {
 // Feature toggle to easily activate/hide the Financials section
 export const SHOW_FINANCIALS_TAB = false;
 
+// Feature toggle to easily activate/hide the Add Student (+ إضافة) button
+export const SHOW_ADD_STUDENT_BUTTON = false;
+
 // 5 Main sections RTL order (matches image exactly: الرئيسية، المسار، الأداء، المالية، الملف)
 export const NAV_ITEMS: NavItemConfig[] = [
   { key: 'dashboard', labelAr: 'الرئيسية', iconName: 'Home' },

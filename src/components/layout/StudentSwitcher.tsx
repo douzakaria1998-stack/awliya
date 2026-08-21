@@ -5,6 +5,7 @@ import { ChevronDown, UserPlus, Sparkles, Check } from 'lucide-react';
 import { useStudent } from '@/context/StudentContext';
 import { levelThemes } from '@/lib/themes';
 import { LevelId } from '@/types';
+import { SHOW_ADD_STUDENT_BUTTON } from '@/lib/constants';
 
 interface StudentSwitcherProps {
   onOpenAddStudent: () => void;
@@ -181,19 +182,21 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
           </div>
 
           {/* Add Student Action Button */}
-          <div className="pt-2 mt-1 border-t border-slate-100 dark:border-slate-800">
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false);
-                onOpenAddStudent();
-              }}
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors"
-            >
-              <UserPlus size={15} />
-              <span>إضافة طالب جديد (ربط ابن)</span>
-            </button>
-          </div>
+          {SHOW_ADD_STUDENT_BUTTON && (
+            <div className="pt-2 mt-1 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  onOpenAddStudent();
+                }}
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors"
+              >
+                <UserPlus size={15} />
+                <span>إضافة طالب جديد (ربط ابن)</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

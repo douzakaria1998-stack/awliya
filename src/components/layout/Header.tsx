@@ -23,7 +23,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { levelThemes } from '@/lib/themes';
 import { LevelId } from '@/types';
-import { NavTabKey, PerformanceTabKey, getStudentGenderNoun } from '@/lib/constants';
+import { NavTabKey, PerformanceTabKey, getStudentGenderNoun, SHOW_ADD_STUDENT_BUTTON } from '@/lib/constants';
 import { Language } from '@/lib/translations';
 
 interface HeaderProps {
@@ -566,19 +566,21 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                 </div>
 
                 {/* Prominent & Clean Add Student Action at the Bottom */}
-                <div className="pt-4 mt-3.5 border-t border-slate-100 dark:border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsProfileOpen(false);
-                      onOpenAddStudent();
-                    }}
-                    className="w-full h-11 px-4 rounded-xl border border-dashed border-emerald-500/80 hover:border-emerald-600 bg-emerald-50/60 hover:bg-emerald-100/70 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs"
-                  >
-                    <UserPlus size={16} />
-                    <span>{t.addStudent}</span>
-                  </button>
-                </div>
+                {SHOW_ADD_STUDENT_BUTTON && (
+                  <div className="pt-4 mt-3.5 border-t border-slate-100 dark:border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                        onOpenAddStudent();
+                      }}
+                      className="w-full h-11 px-4 rounded-xl border border-dashed border-emerald-500/80 hover:border-emerald-600 bg-emerald-50/60 hover:bg-emerald-100/70 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs"
+                    >
+                      <UserPlus size={16} />
+                      <span>{t.addStudent}</span>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

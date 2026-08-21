@@ -23,7 +23,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { levelThemes } from '@/lib/themes';
 import { LevelId } from '@/types';
-import { SHOW_FINANCIALS_TAB } from '@/lib/constants';
+import { SHOW_FINANCIALS_TAB, SHOW_ADD_STUDENT_BUTTON } from '@/lib/constants';
 import { StudentSwitcher } from '../layout/StudentSwitcher';
 
 interface ProfileScreenProps {
@@ -367,20 +367,22 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                   إدارة الأبناء المربوطين بالحساب ({students.length})
                 </h3>
               </div>
-              <button
-                type="button"
-                onClick={onOpenAddStudent}
-                className="font-bold text-xs sm:text-sm text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 cursor-pointer transition-all shadow-2xs flex items-center justify-center gap-2"
-                style={{
-                  padding: '8px 20px',
-                  borderRadius: '14px',
-                  minHeight: '38px',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                <UserPlus size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
-                <span>إضافة طالب</span>
-              </button>
+              {SHOW_ADD_STUDENT_BUTTON && (
+                <button
+                  type="button"
+                  onClick={onOpenAddStudent}
+                  className="font-bold text-xs sm:text-sm text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 cursor-pointer transition-all shadow-2xs flex items-center justify-center gap-2"
+                  style={{
+                    padding: '8px 20px',
+                    borderRadius: '14px',
+                    minHeight: '38px',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <UserPlus size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+                  <span>إضافة طالب</span>
+                </button>
+              )}
             </div>
 
             <div className="space-y-4">
