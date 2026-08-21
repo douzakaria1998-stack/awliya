@@ -50,35 +50,50 @@ const SUBJECT_CONTAINER_THEMES: Record<
     badgeBg: string;
   }
 > = {
-  'حفظ وتجويد': {
-    bgClass: 'bg-emerald-50/70 dark:bg-emerald-950/30',
-    borderClass: 'border-emerald-200/90 dark:border-emerald-800/60',
-    badgeBg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200',
+  'اللغة الإنجليزية': {
+    bgClass: 'bg-blue-50/70 dark:bg-blue-950/30',
+    borderClass: 'border-blue-200/90 dark:border-blue-800/60',
+    badgeBg: 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200',
   },
-  'الرسم والضبط': {
-    bgClass: 'bg-sky-50/70 dark:bg-sky-950/30',
-    borderClass: 'border-sky-200/90 dark:border-sky-800/60',
-    badgeBg: 'bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200',
-  },
-  'تجويد نظري': {
+  'اللغة الفرنسية': {
     bgClass: 'bg-purple-50/70 dark:bg-purple-950/30',
     borderClass: 'border-purple-200/90 dark:border-purple-800/60',
     badgeBg: 'bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-200',
   },
-  'تفسير وتدبر': {
+  'محادثة إنجليزية': {
+    bgClass: 'bg-emerald-50/70 dark:bg-emerald-950/30',
+    borderClass: 'border-emerald-200/90 dark:border-emerald-800/60',
+    badgeBg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200',
+  },
+  'ورشة النطق الفرنسي': {
+    bgClass: 'bg-violet-50/70 dark:bg-violet-950/30',
+    borderClass: 'border-violet-200/90 dark:border-violet-800/60',
+    badgeBg: 'bg-violet-100 text-violet-800 dark:bg-violet-900/60 dark:text-violet-200',
+  },
+  'قواعد وتراكيب': {
+    bgClass: 'bg-indigo-50/70 dark:bg-indigo-950/30',
+    borderClass: 'border-indigo-200/90 dark:border-indigo-800/60',
+    badgeBg: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-200',
+  },
+  'استماع ومناقشة': {
     bgClass: 'bg-amber-50/70 dark:bg-amber-950/30',
     borderClass: 'border-amber-200/90 dark:border-amber-800/60',
     badgeBg: 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200',
   },
-  'المراجعة التراكمية': {
+  'قراءة وفهم نصوص': {
+    bgClass: 'bg-teal-50/70 dark:bg-teal-950/30',
+    borderClass: 'border-teal-200/90 dark:border-teal-800/60',
+    badgeBg: 'bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-200',
+  },
+  'تعبير وكتابة': {
     bgClass: 'bg-rose-50/70 dark:bg-rose-950/30',
     borderClass: 'border-rose-200/90 dark:border-rose-800/60',
     badgeBg: 'bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-200',
   },
-  'تحضير مسبق': {
-    bgClass: 'bg-teal-50/70 dark:bg-teal-950/30',
-    borderClass: 'border-teal-200/90 dark:border-teal-800/60',
-    badgeBg: 'bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-200',
+  'محادثة وتطبيق': {
+    bgClass: 'bg-sky-50/70 dark:bg-sky-950/30',
+    borderClass: 'border-sky-200/90 dark:border-sky-800/60',
+    badgeBg: 'bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200',
   },
 };
 
@@ -605,10 +620,10 @@ export function PerformanceScreen({
                 const isAbsent = rec.status === 'absent';
                 const isLate = rec.status === 'late';
 
-                const subject = rec.subjectAr || 'حفظ وتجويد';
+                const subject = rec.subjectAr || 'اللغة الإنجليزية';
                 const dayName = rec.dayNameAr || 'الخميس';
                 const themeStyles =
-                  SUBJECT_CONTAINER_THEMES[subject] || SUBJECT_CONTAINER_THEMES['حفظ وتجويد'];
+                  SUBJECT_CONTAINER_THEMES[subject] || SUBJECT_CONTAINER_THEMES['اللغة الإنجليزية'];
 
                 return (
                   <div
@@ -718,10 +733,10 @@ export function PerformanceScreen({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { name: 'جودة الحفظ والاستحضار', score: 94 },
-                { name: 'تطبيق أحكام التجويد', score: 88 },
-                { name: 'مخارج الحروف والترتيل', score: 92 },
-                { name: 'الوقف والابتداء وفهم المعاني', score: 85 },
+                { name: 'المحادثة والطلاقة الشفهية (Speaking Fluency)', score: 94 },
+                { name: 'الفهم السمعي والاستيعاب (Listening Comprehension)', score: 92 },
+                { name: 'القواعد وبناء التراكيب (Grammar & Structure)', score: 88 },
+                { name: 'القراءة والتعبير الكتابي (Reading & Writing)', score: 85 },
               ].map((skill, idx) => (
                 <div
                   key={idx}

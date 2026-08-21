@@ -264,12 +264,12 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       {
         id: `hw-gen-2`,
         studentId: activeStudent.id,
-        titleAr: 'تطبيق الأحكام التجويدية المقررة',
-        subjectAr: 'التجويد التطبيقي',
+        titleAr: 'تطبيق مهارات النطق والطلاقة الشفهية',
+        subjectAr: 'محادثة ونطق',
         level: activeStudent.currentLevel,
         status: 'needs_revision' as const,
         dueDate: '2025-02-28',
-        teacherNote: 'يرجى إعادة التسجيل الصوتي مع مراعاة زمن الغنن.',
+        teacherNote: 'يرجى إعادة التسجيل الصوتي مع مراعاة النطق السليم ومخارج الأصوات.',
       },
     ];
   }, [homeworkMap, activeStudent.id, activeStudent.enrolledPathAr, activeStudent.currentLevel]);

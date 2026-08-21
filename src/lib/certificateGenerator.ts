@@ -289,17 +289,15 @@ export function downloadCertificateHTML(
     <div class="corner-ornament bottom-left"></div>
     <div class="corner-ornament bottom-right"></div>
 
-    <div class="basmala">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
-
     <div class="header">
-      <div class="academy-name">مقرأة الإتقان • منصة أَوْلِيَاء للتعليم القرآني</div>
-      <h1 class="cert-title">شَهَادَةُ إِتْمَامِ مُسْتَوًى</h1>
-      <div class="cert-subtitle">Certificate of Level Completion</div>
+      <div class="academy-name">أكاديمية اللغات الحية • منصة أَوْلِيَاء للغات (English & French Academy)</div>
+      <h1 class="cert-title">شَهَادَةُ إِتْمَامِ مُسْتَوًى دَوْلِيّ</h1>
+      <div class="cert-subtitle">Certificate of Language Level Completion</div>
     </div>
 
     <div class="content">
-      <p class="intro-text">تَشْهَدُ إِدَارَةُ الْمَقْرَأَةِ بِأَنَّ الطَّالِبَ(ـة):</p>
-      <div class="student-name">${studentName || 'مريم الدوزكري'}</div>
+      <p class="intro-text">تَشْهَدُ إِدَارَةُ الأَكَادِيمِيَّةِ بِأَنَّ الطَّالِبَ(ـة):</p>
+      <div class="student-name">${studentName || 'يوسف الدوزكري'}</div>
       <div class="achievement-text">
         <span>قَدْ أَتَمَّ(تْ) بِنَجَاحٍ وَتَفَوُّقٍ مُتَطَلَّبَاتِ</span>
         <span class="level-badge">${level.nameAr}</span>
@@ -313,23 +311,26 @@ export function downloadCertificateHTML(
 
     <div class="footer-grid">
       <div class="signature-box">
-        <div>أستاذ ومقرئ الحلقة</div>
+        <div>أستاذ وموجه المادة</div>
         <div class="signature-line"></div>
-        <div style="color: #0f172a;">الشيخ / المشرف التربوي</div>
+        <div style="color: #0f172a;">Language Instructor</div>
       </div>
 
-      <div class="seal-box">
-        <div class="gold-seal">
-          معتمد<br>
-          مقرأة الإتقان<br>
-          ★ ★ ★
+      <div class="seal-container">
+        <div class="seal">
+          <div class="seal-inner">
+            <span class="seal-star">★</span>
+            <span>مُعْتَمَد</span>
+            <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px;">ACCREDITED</span>
+            <span class="seal-star">★</span>
+          </div>
         </div>
       </div>
 
       <div class="signature-box">
-        <div>إدارة المقرأة والشؤون التعليمية</div>
+        <div>مدير الشؤون الأكاديمية</div>
         <div class="signature-line"></div>
-        <div style="color: #0f172a;">منصة أَوْلِيَاء</div>
+        <div style="color: #0f172a;">Academic Director</div>
       </div>
     </div>
 

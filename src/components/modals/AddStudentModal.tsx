@@ -20,7 +20,7 @@ export function AddStudentModal({ isOpen, onClose }: AddStudentModalProps) {
   const [lastNameAr, setLastNameAr] = useState('');
   const [birthday, setBirthday] = useState('2016-05-15');
   const [schoolLevelAr, setSchoolLevelAr] = useState('السنة الثالثة ابتدائي');
-  const [enrolledPathAr, setEnrolledPathAr] = useState('مسار حفظ القرآن الكريم وتجويده');
+  const [enrolledPathAr, setEnrolledPathAr] = useState('مسار اللغة الإنجليزية المكثف (English Language Path)');
   const [timingOption, setTimingOption] = useState<'weekdays' | 'weekend'>('weekdays');
   const [branchAr, setBranchAr] = useState('فرع الروضة - الرياض');
   const [isSuccess, setIsSuccess] = useState(false);
@@ -348,17 +348,17 @@ export function AddStudentModal({ isOpen, onClose }: AddStudentModalProps) {
                     paddingLeft: isRTL ? '16px' : '18px',
                   }}
                 >
-                  <option value="مسار حفظ القرآن الكريم وتجويده">
-                    مسار حفظ القرآن الكريم وتجويده
+                  <option value="مسار اللغة الإنجليزية المكثف (English Language Path)">
+                    مسار اللغة الإنجليزية المكثف (English Language Path)
                   </option>
-                  <option value="مسار التجويد المتقدم والقراءات">
-                    مسار التجويد المتقدم والقراءات
+                  <option value="مسار اللغة الفرنسية المتقدم (French Language Path)">
+                    مسار اللغة الفرنسية المتقدم (French Language Path)
                   </option>
-                  <option value="مسار التأسيس والقاعدة النورانية">
-                    مسار التأسيس والقاعدة النورانية
+                  <option value="المسار المزدوج: إنجليزية وفرنسية (Dual Languages Path)">
+                    المسار المزدوج: إنجليزية وفرنسية (Dual Languages Path)
                   </option>
-                  <option value="مسار الحفظ المكثف والإتقان">
-                    مسار الحفظ المكثف والإتقان
+                  <option value="مسار الإعداد للاختبارات الدولية (IELTS & DELF Prep)">
+                    مسار الإعداد للاختبارات الدولية (IELTS & DELF Prep)
                   </option>
                 </select>
               </div>
