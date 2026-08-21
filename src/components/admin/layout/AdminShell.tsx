@@ -80,7 +80,7 @@ export function AdminShell() {
       >
         <AdminHeader onOpenMobileMenu={() => setIsMobileMenuOpen(true)} />
 
-        <main className="flex-1 p-6 sm:p-8 max-w-7xl w-full mx-auto animate-in fade-in duration-200">
+        <main className="flex-1 p-8 sm:p-12 lg:p-14 max-w-[1450px] w-full mx-auto animate-in fade-in duration-200">
           {renderActiveScreen()}
         </main>
       </div>
