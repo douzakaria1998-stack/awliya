@@ -89,9 +89,28 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
   // Sync from localStorage after client mount
   useEffect(() => {
-    const storedStudents = getItem<Student[]>(STORAGE_KEYS.STUDENTS_LIST);
+    const storedStudents = getItem<Student[]>(STORAGE_KEYS.STUDENTS_LIST) || getItem<Student[]>('awliya_students_list');
     if (storedStudents && storedStudents.length > 0) {
-      setStudents(storedStudents);
+      const sanitized = storedStudents.map((s) => {
+        if (
+          !s.enrolledPathAr ||
+          s.enrolledPathAr.includes('القرآن') ||
+          s.enrolledPathAr.includes('تجويد') ||
+          s.enrolledPathAr.includes('نورانية') ||
+          s.enrolledPathAr.includes('حفظ')
+        ) {
+          const defaultTrack =
+            s.id === 'student-002'
+              ? 'مسار اللغة الفرنسية المتقدم (French Language Path)'
+              : s.id === 'student-003'
+              ? 'المسار المزدوج: إنجليزية وفرنسية (Dual Languages Path)'
+              : 'مسار اللغة الإنجليزية المكثف (English Language Path)';
+          return { ...s, enrolledPathAr: defaultTrack };
+        }
+        return s;
+      });
+      setStudents(sanitized);
+      setItem(STORAGE_KEYS.STUDENTS_LIST, sanitized);
     }
 
     const storedActiveId = getItem<string>(STORAGE_KEYS.ACTIVE_STUDENT_ID);

@@ -16,6 +16,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { levelThemes } from '@/lib/themes';
 import { AcademicLevel } from '@/types';
+import { LEVEL_TITLES_EN, LEVEL_TITLES_FR } from '@/lib/constants';
 import { LevelDetailModal } from '../modals/LevelDetailModal';
 import { StudentSwitcher } from '../layout/StudentSwitcher';
 
@@ -32,41 +33,15 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
 
   const completedCount = academicLevels.filter((l) => l.status === 'studied').length;
 
-  const levelTitlesEn: Record<number, { name: string; stage: string }> = {
-    1: { name: 'Level 1: Quranic Foundation & Reading', stage: 'Nooraniyah Qaida & Foundation Rules' },
-    2: { name: 'Level 2: Short Surahs & Fluency', stage: 'Recitation practice & vowel accuracy' },
-    3: { name: 'Level 3: Nun Sakinah & Tanween Rules', stage: 'Core Tajweed foundation rules' },
-    4: { name: 'Level 4: Juz Amma & Tajweed Mastery', stage: 'Completion of Juz Amma & theoretical applications' },
-    5: { name: 'Level 5: Juz Tabarak & Articulation Points', stage: 'Makharij & Sifat detailed training' },
-    6: { name: 'Level 6: Raa, Laam & Madd Rules', stage: 'Tafkheem, Tarqeeq, and Madd varieties' },
-    7: { name: 'Level 7: Juz Adh-Dhariyat & Al-Ahqaf', stage: 'Advanced memorization with Tadabbur' },
-    8: { name: 'Level 8: Mutashabihat & Retention Precision', stage: 'Verbal Mutashabihat mastery' },
-    9: { name: 'Level 9: Uthmani Script & Waqf Rules', stage: 'Endings, pauses, and script rules' },
-    10: { name: 'Level 10: Complete Khatm & Sanad Grant', stage: 'Continuous connected chain of transmission' },
-  };
-
-  const levelTitlesFr: Record<number, { name: string; stage: string }> = {
-    1: { name: 'Niveau 1 : Initiation & Lecture Coranique', stage: 'Méthode Nouraniya et bases de lecture' },
-    2: { name: 'Niveau 2 : Petites Sourates & Fluidité', stage: 'Pratique de récitation et vocalisation' },
-    3: { name: 'Niveau 3 : Règles du Noun Sakin & Tanwin', stage: 'Fondamentaux des règles de Tajweed' },
-    4: { name: 'Niveau 4 : Juz Amma & Maîtrise du Tajweed', stage: 'Finalisation du Juz Amma et théorie' },
-    5: { name: 'Niveau 5 : Juz Tabarak & Points d’Articulation', stage: 'Makharij et Sifat détaillés' },
-    6: { name: 'Niveau 6 : Règles des Raa, Laam & Prolongations', stage: 'Tafkheem, Tarqeeq et types de Madd' },
-    7: { name: 'Niveau 7 : Juz Adh-Dhariyat & Al-Ahqaf', stage: 'Mémorisation avancée avec méditation' },
-    8: { name: 'Niveau 8 : Mutashabihat & Précision', stage: 'Maîtrise des versets similaires' },
-    9: { name: 'Niveau 9 : Graphie Othmane & Arrêts', stage: 'Règles de Waqf et d’écriture' },
-    10: { name: 'Niveau 10 : Clôture Complète & Sanad (Ijaza)', stage: 'Chaîne de transmission continue (Ijaza)' },
-  };
-
   const getLevelName = (lvl: AcademicLevel) => {
-    if (language === 'en' && levelTitlesEn[lvl.level]) return levelTitlesEn[lvl.level].name;
-    if (language === 'fr' && levelTitlesFr[lvl.level]) return levelTitlesFr[lvl.level].name;
+    if (language === 'en' && LEVEL_TITLES_EN[lvl.level]) return LEVEL_TITLES_EN[lvl.level].name;
+    if (language === 'fr' && LEVEL_TITLES_FR[lvl.level]) return LEVEL_TITLES_FR[lvl.level].name;
     return lvl.nameAr;
   };
 
   const getLevelStage = (lvl: AcademicLevel) => {
-    if (language === 'en' && levelTitlesEn[lvl.level]) return levelTitlesEn[lvl.level].stage;
-    if (language === 'fr' && levelTitlesFr[lvl.level]) return levelTitlesFr[lvl.level].stage;
+    if (language === 'en' && LEVEL_TITLES_EN[lvl.level]) return LEVEL_TITLES_EN[lvl.level].stage;
+    if (language === 'fr' && LEVEL_TITLES_FR[lvl.level]) return LEVEL_TITLES_FR[lvl.level].stage;
     return lvl.stageAr;
   };
 
@@ -135,7 +110,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
               style={{ backgroundColor: theme.primary }}
             />
             <span className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-              {t.studentTrack} {activeStudent.fullNameAr}: {language === 'ar' ? activeStudent.enrolledPathAr : 'Quranic Studies Track'}
+              {t.studentTrack}: {activeStudent.fullNameAr}: {activeStudent.enrolledPathAr}
             </span>
           </div>
           <span className="text-sm font-bold text-slate-500 dark:text-slate-400">

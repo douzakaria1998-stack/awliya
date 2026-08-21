@@ -8,21 +8,21 @@ export const APP_NAME_EN = 'Parent Portal';
 
 // localStorage keys
 export const STORAGE_KEYS = {
-  AUTH_USER: 'awliya_auth_user',
-  AUTH_STATUS: 'awliya_auth_status',
-  STUDENTS_LIST: 'awliya_students_list',
-  ACTIVE_STUDENT_ID: 'awliya_active_student_id',
-  CURRENT_LEVEL: 'awliya_current_level',
-  NOTIFICATIONS: 'awliya_notifications',
-  NOTIFICATION_SETTINGS: 'awliya_notification_settings',
-  HOMEWORK: 'awliya_homework',
-  ATTENDANCE: 'awliya_attendance',
-  ASSESSMENTS: 'awliya_assessments',
-  FEEDBACK: 'awliya_feedback',
-  FEES: 'awliya_fees',
-  PAYMENTS: 'awliya_payments',
-  THEME_MODE: 'awliya_theme_mode',
-  VIEWPORT_MODE: 'awliya_viewport_mode',
+  AUTH_USER: 'awliya_auth_user_v4',
+  AUTH_STATUS: 'awliya_auth_status_v4',
+  STUDENTS_LIST: 'awliya_students_list_v4',
+  ACTIVE_STUDENT_ID: 'awliya_active_student_id_v4',
+  CURRENT_LEVEL: 'awliya_current_level_v4',
+  NOTIFICATIONS: 'awliya_notifications_v4',
+  NOTIFICATION_SETTINGS: 'awliya_notification_settings_v4',
+  HOMEWORK: 'awliya_homework_v4',
+  ATTENDANCE: 'awliya_attendance_v4',
+  ASSESSMENTS: 'awliya_assessments_v4',
+  FEEDBACK: 'awliya_feedback_v4',
+  FEES: 'awliya_fees_v4',
+  PAYMENTS: 'awliya_payments_v4',
+  THEME_MODE: 'awliya_theme_mode_v4',
+  VIEWPORT_MODE: 'awliya_viewport_mode_v4',
 } as const;
 
 // Navigation tabs
@@ -111,3 +111,29 @@ export function getStudentGenderNoun(
   }
   return 'الطالب';
 }
+
+export const LEVEL_TITLES_EN: Record<number, { name: string; stage: string }> = {
+  1: { name: 'Level 1: Phonics & Basic Vocabulary (Starter A1.1)', stage: 'Phonetics, Alphabet & Everyday Greetings' },
+  2: { name: 'Level 2: Sentence Building & Daily Routines (Beginner A1.2)', stage: 'Basic Grammar & Simple Dialogues' },
+  3: { name: 'Level 3: Listening & Everyday Conversation (Elementary A2.1)', stage: 'Interactive Listening & Speaking Practice' },
+  4: { name: 'Level 4: Oral Fluency & Paragraph Writing (Pre-Intermediate A2.2)', stage: 'Storytelling & Applied Sentence Structures' },
+  5: { name: 'Level 5: Advanced Structures & Debates (Intermediate B1.1)', stage: 'Language Autonomy & Group Discussions' },
+  6: { name: 'Level 6: Analytical Reading & Idioms (Upper-Intermediate B1.2)', stage: 'Essay Writing & Idiomatic Expressions' },
+  7: { name: 'Level 7: Academic Presentations & Debates (Advanced B2.1)', stage: 'Public Speaking & Formal Debates' },
+  8: { name: 'Level 8: Accent Mastery & Global Literature (Advanced B2.2)', stage: 'Accent Reduction & Advanced Rhetoric' },
+  9: { name: 'Level 9: Academic Proficiency & Exam Prep (Proficiency C1)', stage: 'IELTS / DELF Certification Preparation' },
+  10: { name: 'Level 10: Bilingual Mastery & Professional Fluency (Mastery C2)', stage: 'Native-like Fluency & Capstone Project' },
+};
+
+export const LEVEL_TITLES_FR: Record<number, { name: string; stage: string }> = {
+  1: { name: 'Niveau 1 : Phonétique & Vocabulaire de Base (Débutant A1.1)', stage: 'Phonétique, Alphabet et Salutations' },
+  2: { name: 'Niveau 2 : Construction de Phrases & Vie Quotidienne (A1.2)', stage: 'Grammaire de Base et Dialogues Simples' },
+  3: { name: 'Niveau 3 : Compréhension Orale & Conversation (A2.1)', stage: 'Écoute Interactive et Pratique Orale' },
+  4: { name: 'Niveau 4 : Fluidité Orale & Expression Écrite (A2.2)', stage: 'Récits et Structures de Phrases Appliquées' },
+  5: { name: 'Niveau 5 : Structures Avancées & Débats (Intermédiaire B1.1)', stage: 'Autonomie Linguistique et Discussions de Groupe' },
+  6: { name: 'Niveau 6 : Lecture Analytique & Expressions Idiomatiques (B1.2)', stage: 'Rédaction de Textes et Expressions Courantes' },
+  7: { name: 'Niveau 7 : Présentations Académiques & Débats (Avancé B2.1)', stage: 'Prise de Parole en Public et Débats Formels' },
+  8: { name: 'Niveau 8 : Maîtrise de l’Accent & Littérature Mondiale (B2.2)', stage: 'Perfectionnement de l’Accent et Rhétorique' },
+  9: { name: 'Niveau 9 : Compétence Académique & Préparation aux Examens (C1)', stage: 'Préparation aux Certifications IELTS / DELF' },
+  10: { name: 'Niveau 10 : Maîtrise Bilingue & Aisance Professionnelle (C2)', stage: 'Aisance Bilingue Complète et Projet Final' },
+};

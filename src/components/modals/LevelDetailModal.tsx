@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { AcademicLevel } from '@/types';
 import { levelThemes } from '@/lib/themes';
+import { LEVEL_TITLES_EN, LEVEL_TITLES_FR } from '@/lib/constants';
 import { useLanguage } from '@/context/LanguageContext';
 import { useStudent } from '@/context/StudentContext';
 import { downloadCertificateHTML } from '@/lib/certificateGenerator';
@@ -42,44 +43,18 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
     }, 2500);
   };
 
-  const levelTitlesEn: Record<number, { name: string; stage: string }> = {
-    1: { name: 'Level 1: Quranic Foundation & Reading', stage: 'Nooraniyah Qaida & Foundation Rules' },
-    2: { name: 'Level 2: Short Surahs & Fluency', stage: 'Recitation practice & vowel accuracy' },
-    3: { name: 'Level 3: Nun Sakinah & Tanween Rules', stage: 'Core Tajweed foundation rules' },
-    4: { name: 'Level 4: Juz Amma & Tajweed Mastery', stage: 'Completion of Juz Amma & theoretical applications' },
-    5: { name: 'Level 5: Juz Tabarak & Articulation Points', stage: 'Makharij & Sifat detailed training' },
-    6: { name: 'Level 6: Raa, Laam & Madd Rules', stage: 'Tafkheem, Tarqeeq, and Madd varieties' },
-    7: { name: 'Level 7: Juz Adh-Dhariyat & Al-Ahqaf', stage: 'Advanced memorization with Tadabbur' },
-    8: { name: 'Level 8: Mutashabihat & Retention Precision', stage: 'Verbal Mutashabihat mastery' },
-    9: { name: 'Level 9: Uthmani Script & Waqf Rules', stage: 'Endings, pauses, and script rules' },
-    10: { name: 'Level 10: Complete Khatm & Sanad Grant', stage: 'Continuous connected chain of transmission' },
-  };
-
-  const levelTitlesFr: Record<number, { name: string; stage: string }> = {
-    1: { name: 'Niveau 1 : Initiation & Lecture Coranique', stage: 'Méthode Nouraniya et bases de lecture' },
-    2: { name: 'Niveau 2 : Petites Sourates & Fluidité', stage: 'Pratique de récitation et vocalisation' },
-    3: { name: 'Niveau 3 : Règles du Noun Sakin & Tanwin', stage: 'Fondamentaux des règles de Tajweed' },
-    4: { name: 'Niveau 4 : Juz Amma & Maîtrise du Tajweed', stage: 'Finalisation du Juz Amma et théorie' },
-    5: { name: 'Niveau 5 : Juz Tabarak & Points d’Articulation', stage: 'Makharij et Sifat détaillés' },
-    6: { name: 'Niveau 6 : Règles des Raa, Laam & Prolongations', stage: 'Tafkheem, Tarqeeq et types de Madd' },
-    7: { name: 'Niveau 7 : Juz Adh-Dhariyat & Al-Ahqaf', stage: 'Mémorisation avancée avec méditation' },
-    8: { name: 'Niveau 8 : Mutashabihat & Précision', stage: 'Maîtrise des versets similaires' },
-    9: { name: 'Niveau 9 : Graphie Othmane & Arrêts', stage: 'Règles de Waqf et d’écriture' },
-    10: { name: 'Niveau 10 : Clôture Complète & Sanad (Ijaza)', stage: 'Chaîne de transmission continue (Ijaza)' },
-  };
-
   const levelName =
-    language === 'en' && levelTitlesEn[level.level]
-      ? levelTitlesEn[level.level].name
-      : language === 'fr' && levelTitlesFr[level.level]
-      ? levelTitlesFr[level.level].name
+    language === 'en' && LEVEL_TITLES_EN[level.level]
+      ? LEVEL_TITLES_EN[level.level].name
+      : language === 'fr' && LEVEL_TITLES_FR[level.level]
+      ? LEVEL_TITLES_FR[level.level].name
       : level.nameAr;
 
   const levelStage =
-    language === 'en' && levelTitlesEn[level.level]
-      ? levelTitlesEn[level.level].stage
-      : language === 'fr' && levelTitlesFr[level.level]
-      ? levelTitlesFr[level.level].stage
+    language === 'en' && LEVEL_TITLES_EN[level.level]
+      ? LEVEL_TITLES_EN[level.level].stage
+      : language === 'fr' && LEVEL_TITLES_FR[level.level]
+      ? LEVEL_TITLES_FR[level.level].stage
       : level.stageAr;
 
   return (
