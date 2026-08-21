@@ -23,7 +23,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { levelThemes } from '@/lib/themes';
 import { LevelId } from '@/types';
-import { NavTabKey, PerformanceTabKey } from '@/lib/constants';
+import { NavTabKey, PerformanceTabKey, getStudentGenderNoun } from '@/lib/constants';
 import { Language } from '@/lib/translations';
 
 interface HeaderProps {
@@ -397,7 +397,7 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                                     className="w-2 h-2 rounded-full shrink-0"
                                     style={{ backgroundColor: stTheme?.primary || theme.primary }}
                                   />
-                                  <span>الطالب: {notifStudent.fullNameAr}</span>
+                                  <span>{getStudentGenderNoun(notifStudent)}: {notifStudent.fullNameAr}</span>
                                 </span>
                               </div>
                             )}

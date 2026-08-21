@@ -46,6 +46,7 @@ export interface Student {
   academicYearAr: string;
   branchAr: string;
   timingAr?: string;
+  gender?: 'male' | 'female';
   status?: 'active' | 'pending';
   enrollmentDate: string;
   age: number;

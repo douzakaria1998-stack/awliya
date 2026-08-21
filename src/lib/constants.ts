@@ -89,3 +89,25 @@ export const STATUS_LABELS = {
   late: 'متأخر',
   excused: 'غياب بعذر',
 } as const;
+
+// Helper to determine Arabic noun (الطالب vs الطالبة) based on gender and name
+export function getStudentGenderNoun(
+  student?: { gender?: 'male' | 'female'; firstNameAr?: string; fullNameAr?: string; nicknameAr?: string } | null
+): string {
+  if (!student) return 'الطالب';
+  if (student.gender === 'female') return 'الطالبة';
+  if (student.gender === 'male') return 'الطالب';
+
+  const name = (student.firstNameAr || student.nicknameAr || student.fullNameAr || '').trim().split(' ')[0];
+  const femaleNames = [
+    'مريم', 'فاطمة', 'عائشة', 'سارة', 'نورة', 'سلمى', 'زينب', 'خديجة',
+    'ريناد', 'لينا', 'جنى', 'هدى', 'شهد', 'يارا', 'ريما', 'تسنيم',
+    'آية', 'أميرة', 'حفصة', 'روان', 'رغد', 'لجين', 'ملاك', 'أسماء',
+    'أروى', 'حنين', 'بيان', 'لمى', 'نور', 'دانة', 'تولين', 'تالا'
+  ];
+
+  if (femaleNames.includes(name) || name.endsWith('ة') || name.endsWith('اء') || name.endsWith('ى')) {
+    return 'الطالبة';
+  }
+  return 'الطالب';
+}

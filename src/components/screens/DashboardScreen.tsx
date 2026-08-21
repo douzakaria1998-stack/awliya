@@ -11,7 +11,7 @@ import { useStudent } from '@/context/StudentContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { NavTabKey, PerformanceTabKey, SHOW_FINANCIALS_TAB } from '@/lib/constants';
+import { NavTabKey, PerformanceTabKey, SHOW_FINANCIALS_TAB, getStudentGenderNoun } from '@/lib/constants';
 import { levelThemes } from '@/lib/themes';
 
 interface DashboardScreenProps {
@@ -143,11 +143,11 @@ export function DashboardScreen({
           </div>
           <div className="min-w-0 flex-1">
             <h4 className="font-black text-amber-950 dark:text-amber-100 text-sm sm:text-base mb-1">
-              {language === 'ar' ? 'طلب تسجيل الطالب قيد المراجعة لدى الإدارة' : 'Registration Request Under Review'}
+              {language === 'ar' ? `طلب تسجيل ${getStudentGenderNoun(activeStudent)} قيد المراجعة لدى الإدارة` : 'Registration Request Under Review'}
             </h4>
             <p className="text-xs sm:text-sm text-amber-800/90 dark:text-amber-300/90 leading-relaxed font-medium">
               {language === 'ar'
-                ? `تم استلام طلب تسجيل الطالب (${activeStudent.fullNameAr}) في مسار (${activeStudent.enrolledPathAr}) بنجاح. سيقوم فريق الإدارة بالتواصل معكم لتحديد موعد اختبار تحديد المستوى واعتماد التفعيل النهائي.`
+                ? `تم استلام طلب تسجيل ${getStudentGenderNoun(activeStudent)} (${activeStudent.fullNameAr}) في مسار (${activeStudent.enrolledPathAr}) بنجاح. سيقوم فريق الإدارة بالتواصل معكم لتحديد موعد اختبار تحديد المستوى واعتماد التفعيل النهائي.`
                 : `The registration request for (${activeStudent.fullNameAr}) is under review. Our administration team will contact you to schedule the placement test.`}
             </p>
           </div>
