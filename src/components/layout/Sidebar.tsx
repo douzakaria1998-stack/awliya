@@ -92,15 +92,16 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           </div>
         </div>
 
-        {/* 2. Navigation Menu with 28px right padding to ensure generous distance from screen edge */}
+        {/* 2. Navigation Menu with generous top spacing and right padding */}
         <div
-          className="pt-6 pb-2"
           style={{
+            paddingTop: '36px',
+            paddingBottom: '16px',
             paddingRight: isRTL ? '28px' : '20px',
             paddingLeft: isRTL ? '20px' : '28px',
           }}
         >
-          <nav className="space-y-2.5" aria-label="Navigation">
+          <nav className="space-y-3" aria-label="Navigation">
             {navItems.map((item) => {
               const isActive = activeTab === item.key;
 
