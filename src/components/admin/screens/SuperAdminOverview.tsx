@@ -60,14 +60,14 @@ export function SuperAdminOverview() {
           </div>
 
           {/* Dedicated Action Buttons Row */}
-          <div className="flex flex-wrap items-center gap-3.5 pt-4 border-t border-purple-800/40">
+          <div className="flex flex-wrap items-center gap-4 pt-5 border-t border-purple-800/40">
             {pendingCount > 0 && (
               <button
                 type="button"
                 onClick={() => setActiveTab('approvals')}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-md flex items-center gap-2 cursor-pointer whitespace-nowrap hover:scale-105 active:scale-95"
+                className="px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-md flex items-center gap-2.5 cursor-pointer whitespace-nowrap hover:scale-105 active:scale-95 shrink-0"
               >
-                <Clock size={16} />
+                <Clock size={18} className="shrink-0" />
                 <span>مراجعة طلبات التسجيل ({pendingCount})</span>
               </button>
             )}
@@ -76,18 +76,18 @@ export function SuperAdminOverview() {
               <button
                 type="button"
                 onClick={() => setActiveTab('gradebook')}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition-all shadow-md flex items-center gap-2 cursor-pointer whitespace-nowrap hover:scale-105 active:scale-95"
+                className="px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition-all shadow-md flex items-center gap-2.5 cursor-pointer whitespace-nowrap hover:scale-105 active:scale-95 shrink-0"
               >
-                <BookOpen size={16} />
+                <BookOpen size={18} className="shrink-0" />
                 <span>فتح دفتر الواجبات والدرجات</span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => setActiveTab('students')}
-                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm transition-all shadow-md flex items-center gap-2 cursor-pointer whitespace-nowrap hover:scale-105 active:scale-95"
+                className="px-6 py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm transition-all shadow-md flex items-center gap-2.5 cursor-pointer whitespace-nowrap hover:scale-105 active:scale-95 shrink-0"
               >
-                <Users size={16} />
+                <Users size={18} className="shrink-0" />
                 <span>إدارة شؤون الطلاب</span>
               </button>
             )}
