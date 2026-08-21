@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import {
   Bell,
   ChevronDown,
   Moon,
   Sun,
+  Shield,
   UserPlus,
   Check,
   CheckCheck,
@@ -565,22 +567,17 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                   })}
                 </div>
 
-                {/* Prominent & Clean Add Student Action at the Bottom */}
-                {SHOW_ADD_STUDENT_BUTTON && (
-                  <div className="pt-4 mt-3.5 border-t border-slate-100 dark:border-slate-800">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsProfileOpen(false);
-                        onOpenAddStudent();
-                      }}
-                      className="w-full h-11 px-4 rounded-xl border border-dashed border-emerald-500/80 hover:border-emerald-600 bg-emerald-50/60 hover:bg-emerald-100/70 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs"
-                    >
-                      <UserPlus size={16} />
-                      <span>{t.addStudent}</span>
-                    </button>
-                  </div>
-                )}
+                {/* Direct Link to Control Panel (/admin) */}
+                <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800">
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsProfileOpen(false)}
+                    className="w-full h-10 px-3 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs"
+                  >
+                    <Shield size={14} className="text-rose-600 dark:text-rose-400" />
+                    <span>لوحة التحكم الإدارية (Control Panel)</span>
+                  </Link>
+                </div>
               </div>
             )}
           </div>
