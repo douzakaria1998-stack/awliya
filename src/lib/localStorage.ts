@@ -1,0 +1,32 @@
+// =============================================
+// localStorage Helpers
+// =============================================
+
+export function getItem<T>(key: string): T | null {
+    if (typeof window === 'undefined') return null;
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : null;
+    } catch {
+        return null;
+    }
+}
+
+export function setItem<T>(key: string, value: T): void {
+    if (typeof window === 'undefined') return;
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+        console.error(`Error setting localStorage key "${key}":`, error);
+    }
+}
+
+export function removeItem(key: string): void {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(key);
+}
+
+export function clearAll(): void {
+    if (typeof window === 'undefined') return;
+    localStorage.clear();
+}

@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900;1000&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-slate-850: #172033;
+  --color-slate-750: #253349;
+  --color-slate-950: #0B0F19;
+}
+
+/* =============================================
+   DESIGN SYSTEM & SPACING TOKENS – Awliya Portal
+   ============================================= */
+
+:root {
+  /* Dynamic Level Theme Colors */
+  --color-primary: #16A34A;
+  --color-primary-light: #DCFCE7;
+  --color-primary-dark: #15803D;
+  --color-primary-rgb: 22, 163, 74;
+  --gradient-primary: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+  --color-accent: #4ADE80;
+
+  /* Fixed Status Colors */
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-error: #DC2626;
+
+  /* Typography & Layout Tokens */
+  --font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --sidebar-width: 300px;
+  --header-height: 64px;
+  --nav-height: 64px;
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Base Reset & RTL Configuration */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  direction: rtl;
+  font-family: var(--font-family);
+  background-color: #F8FAFC;
+  color: #0F172A;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark {
+  background-color: #0B0F19;
+  color: #F8FAFC;
+}
+
+body {
+  min-height: 100vh;
+  background-color: transparent;
+  color: inherit;
+  font-family: var(--font-family);
+  overflow-x: hidden;
+}
+
+/* Mobile Bottom Navigation */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-height);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid #E2E8F0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 12px;
+  padding-bottom: var(--safe-area-bottom);
+  z-index: 50;
+}
+
+.dark .mobile-bottom-nav {
+  background: rgba(17, 24, 39, 0.96);
+  border-top-color: #1F2937;
+}
+
+.nav-tab-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px 2px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  color: #94A3B8;
+  user-select: none;
+}
+
+.nav-tab-button.active {
+  color: var(--color-primary);
+}
+
+.nav-tab-button.active .nav-icon-container {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(var(--color-primary-rgb), 0.15);
+}
+
+.dark .nav-tab-button.active .nav-icon-container {
+  background-color: rgba(var(--color-primary-rgb), 0.2);
+}
+
+.nav-icon-container {
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-tab-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+/* Custom Clean Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.55);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.4);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.65);
+}
