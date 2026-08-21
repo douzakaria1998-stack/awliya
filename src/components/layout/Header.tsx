@@ -23,13 +23,13 @@ import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { levelThemes } from '@/lib/themes';
 import { LevelId } from '@/types';
-import { NavTabKey } from '@/lib/constants';
+import { NavTabKey, PerformanceTabKey } from '@/lib/constants';
 import { Language } from '@/lib/translations';
 
 interface HeaderProps {
   activeTab?: NavTabKey;
   onOpenAddStudent: () => void;
-  onNavigate?: (tab: NavTabKey) => void;
+  onNavigate?: (tab: NavTabKey, subTab?: PerformanceTabKey) => void;
 }
 
 export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }: HeaderProps) {
@@ -337,6 +337,10 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                   ) : (
                     notifications.map((notif) => {
                       const details = getNotificationDetails(notif.type);
+                      const notifStudent = students.find((s) => s.id === notif.studentId);
+                      const stTheme = notifStudent
+                        ? levelThemes[notifStudent.currentLevel as LevelId] || levelThemes[1]
+                        : undefined;
 
                       return (
                         <div
@@ -345,15 +349,19 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                           tabIndex={0}
                           onClick={() => {
                             markNotificationRead(notif.id);
+                            if (notif.studentId) {
+                              setActiveStudentId(notif.studentId);
+                            }
                             if (notif.routeTo && onNavigate) {
-                              onNavigate(notif.routeTo as NavTabKey);
+                              const targetSubTab = notif.actionPayload?.tab as PerformanceTabKey | undefined;
+                              onNavigate(notif.routeTo as NavTabKey, targetSubTab);
                               setIsNotifOpen(false);
                             }
                           }}
-                          className={`border transition-all cursor-pointer flex items-start ${
+                          className={`group border transition-all cursor-pointer flex items-start ${
                             notif.isRead
                               ? 'bg-slate-50/70 dark:bg-slate-800/40 border-slate-100 dark:border-slate-800/60 opacity-85 hover:opacity-100'
-                              : 'bg-white dark:bg-slate-800 border-slate-200/90 dark:border-slate-700 shadow-2xs hover:border-slate-300'
+                              : 'bg-white dark:bg-slate-800 border-slate-200/90 dark:border-slate-700 shadow-2xs hover:border-slate-300 dark:hover:border-slate-600'
                           }`}
                           style={{
                             padding: '16px 20px',
@@ -370,6 +378,30 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
 
                           {/* Content */}
                           <div className="min-w-0 flex-1 space-y-1.5">
+                            {/* Student Badge - Mentioning the student's name clearly */}
+                            {notifStudent && (
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="inline-flex items-center gap-1.5 rounded-full font-black select-none shadow-2xs"
+                                  style={{
+                                    backgroundColor: `${stTheme?.primary || theme.primary}18`,
+                                    color: stTheme?.primary || theme.primary,
+                                    fontSize: '11px',
+                                    paddingRight: '10px',
+                                    paddingLeft: '10px',
+                                    paddingTop: '2px',
+                                    paddingBottom: '2px',
+                                  }}
+                                >
+                                  <span
+                                    className="w-2 h-2 rounded-full shrink-0"
+                                    style={{ backgroundColor: stTheme?.primary || theme.primary }}
+                                  />
+                                  <span>الطالب: {notifStudent.fullNameAr}</span>
+                                </span>
+                              </div>
+                            )}
+
                             <div className="flex items-center justify-between gap-3">
                               <span
                                 className={`text-sm font-black truncate block ${
@@ -389,9 +421,18 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                               {notif.messageAr}
                             </p>
 
-                            <div className="flex items-center gap-1.5 pt-1 text-[11px] text-slate-400 font-medium">
-                              <Clock size={12} className="shrink-0" />
-                              <span>{formatNotifDate(notif.date)}</span>
+                            <div className="flex items-center justify-between pt-1">
+                              <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+                                <Clock size={12} className="shrink-0" />
+                                <span>{formatNotifDate(notif.date)}</span>
+                              </div>
+                              <span
+                                className="text-[11px] font-bold flex items-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity"
+                                style={{ color: theme.primary }}
+                              >
+                                <span>عرض التفاصيل</span>
+                                <span className="text-xs">←</span>
+                              </span>
                             </div>
                           </div>
                         </div>

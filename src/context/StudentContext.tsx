@@ -338,15 +338,16 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     };
   }, [studentFees]);
 
-  // Notifications for active student
+  // Central notifications for all registered students of the parent
   const filteredNotifications = useMemo(() => {
+    const studentIds = new Set(students.map((s) => s.id));
     return notifications.filter((n) => {
       if (!SHOW_FINANCIALS_TAB && (n.type === 'payment' || n.routeTo === 'financials')) {
         return false;
       }
-      return !n.studentId || n.studentId === activeStudent.id;
+      return !n.studentId || studentIds.has(n.studentId);
     });
-  }, [notifications, activeStudent.id]);
+  }, [notifications, students]);
 
   // Handlers
   const updateNotificationSettings = useCallback((settings: Partial<NotificationSettings>) => {
