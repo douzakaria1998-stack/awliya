@@ -37,7 +37,7 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
 
   const handleDownloadCertificate = () => {
     setDownloaded(true);
-    downloadCertificateHTML(level, activeStudent?.fullNameAr || 'مريم الدوزكري');
+    downloadCertificateHTML(level, activeStudent?.fullNameAr || 'Larbi Guemmoudi', activeStudent);
     setTimeout(() => {
       setDownloaded(false);
     }, 2500);
