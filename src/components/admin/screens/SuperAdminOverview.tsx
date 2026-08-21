@@ -291,12 +291,12 @@ export function SuperAdminOverview() {
 
         {/* Right 1 Col: Live Activity Stream with Generous 4-Side Padding */}
         <div
-          className="rounded-[32px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col justify-between space-y-6"
+          className="rounded-[32px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col justify-between"
           style={{
             padding: '32px 36px',
           }}
         >
-          <div className="space-y-5">
+          <div className="space-y-6">
             <div className="flex items-center gap-3.5 pb-4 border-b border-slate-100 dark:border-slate-800">
               <div className="w-11 h-11 rounded-2xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold shadow-2xs shrink-0">
                 <ShieldCheck size={22} />
@@ -307,20 +307,29 @@ export function SuperAdminOverview() {
               </div>
             </div>
 
+            {/* List of activity items with generous internal and external margins */}
             <div className="space-y-3.5">
               {activityLogs.slice(0, 4).map((log) => (
-                <div key={log.id} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-750 text-xs space-y-1.5">
-                  <div className="flex items-center justify-between text-slate-400">
-                    <span className="font-bold text-slate-700 dark:text-slate-200">{log.actorName}</span>
-                    <span className="font-mono text-[11px]">{log.timestamp.split(' ')[1] || log.timestamp}</span>
+                <div
+                  key={log.id}
+                  className="rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/60 transition-all hover:border-slate-300 dark:hover:border-slate-650"
+                  style={{
+                    padding: '16px 20px',
+                  }}
+                >
+                  <div className="flex items-center justify-between text-slate-400 pb-1.5 border-b border-slate-100 dark:border-slate-750/70 mb-2">
+                    <span className="font-bold text-xs text-slate-800 dark:text-slate-200">{log.actorName}</span>
+                    <span className="font-mono text-[11px] text-slate-400 font-semibold">{log.timestamp.split(' ')[1] || log.timestamp}</span>
                   </div>
-                  <div className="font-medium text-slate-800 dark:text-slate-300 leading-snug">{log.actionAr}</div>
+                  <div className="font-medium text-xs sm:text-[13px] text-slate-700 dark:text-slate-300 leading-relaxed">
+                    {log.actionAr}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
+          <div className="pt-5 mt-4 border-t border-slate-100 dark:border-slate-800 text-center">
             <span className="text-xs text-slate-400 font-medium">سجل العمليات محدث تلقائياً</span>
           </div>
         </div>
