@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Bell,
   ChevronDown,
@@ -48,6 +48,34 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+
+  const langRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  // Close popups when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
+      if (isLangOpen && langRef.current && !langRef.current.contains(target)) {
+        setIsLangOpen(false);
+      }
+      if (isNotifOpen && notifRef.current && !notifRef.current.contains(target)) {
+        setIsNotifOpen(false);
+      }
+      if (isProfileOpen && profileRef.current && !profileRef.current.contains(target)) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isLangOpen, isNotifOpen, isProfileOpen]);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
@@ -148,7 +176,7 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
         {/* Controls: Language Switcher, Dark Mode, Notifications, Parent Profile */}
         <div className="flex items-center gap-2.5 sm:gap-3">
           {/* Language Switcher Dropdown */}
-          <div className="relative">
+          <div ref={langRef} className="relative">
             <button
               type="button"
               onClick={() => {
@@ -235,7 +263,7 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
           </button>
 
           {/* Notification Bell Dropdown */}
-          <div className="relative">
+          <div ref={notifRef} className="relative">
             <button
               type="button"
               onClick={() => {
@@ -376,7 +404,7 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
           </div>
 
           {/* Parent Profile Pill */}
-          <div className="relative">
+          <div ref={profileRef} className="relative">
             <button
               type="button"
               onClick={() => {
