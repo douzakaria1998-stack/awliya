@@ -14,7 +14,7 @@ const CEFR_LEVELS: Record<number, string> = {
 };
 
 function formatDisplayDate(dateStr?: string): string {
-  if (!dateStr) return '25 May 2024';
+  if (!dateStr) return '25 May 2018';
   try {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
@@ -29,7 +29,7 @@ function formatDisplayDate(dateStr?: string): string {
 }
 
 function formatBirthDate(dateStr?: string): string {
-  if (!dateStr) return '04-09-2014';
+  if (!dateStr) return '04-09-1981';
   try {
     const parts = dateStr.split('-');
     if (parts.length === 3) {
@@ -69,7 +69,7 @@ export function downloadCertificateHTML(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Certificate of Achievement - ${recipientName} - ${subjectName} ${cefrCode}</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
     * {
       box-sizing: border-box;
@@ -97,8 +97,8 @@ export function downloadCertificateHTML(
 
     /* Outer Container matching the exact colorful frame */
     .certificate-frame {
-      width: 1060px;
-      height: 750px;
+      width: 1050px;
+      height: 742px;
       max-width: 100%;
       position: relative;
       background: #f8fafc;
@@ -107,7 +107,7 @@ export function downloadCertificateHTML(
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 22px;
+      padding: 24px;
     }
 
     /* Background Geometric Corner Decorations */
@@ -115,8 +115,8 @@ export function downloadCertificateHTML(
       position: absolute;
       top: 0;
       left: 0;
-      width: 530px;
-      height: 180px;
+      width: 520px;
+      height: 170px;
       z-index: 1;
       overflow: hidden;
     }
@@ -126,7 +126,7 @@ export function downloadCertificateHTML(
       top: 0;
       right: 0;
       width: 320px;
-      height: 220px;
+      height: 200px;
       z-index: 1;
       overflow: hidden;
     }
@@ -135,8 +135,8 @@ export function downloadCertificateHTML(
       position: absolute;
       bottom: 0;
       left: 0;
-      width: 280px;
-      height: 280px;
+      width: 260px;
+      height: 260px;
       z-index: 1;
       overflow: hidden;
     }
@@ -145,8 +145,8 @@ export function downloadCertificateHTML(
       position: absolute;
       bottom: 0;
       right: 0;
-      width: 530px;
-      height: 200px;
+      width: 520px;
+      height: 190px;
       z-index: 1;
       overflow: hidden;
     }
@@ -154,9 +154,9 @@ export function downloadCertificateHTML(
     .frame-bg-right-mosaic {
       position: absolute;
       right: 0;
-      top: 220px;
-      bottom: 200px;
-      width: 70px;
+      top: 200px;
+      bottom: 190px;
+      width: 65px;
       z-index: 1;
     }
 
@@ -172,7 +172,7 @@ export function downloadCertificateHTML(
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 36px 54px 30px 54px;
+      padding: 28px 50px 24px 50px;
       text-align: center;
     }
 
@@ -181,8 +181,9 @@ export function downloadCertificateHTML(
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 20px;
-      margin-bottom: 8px;
+      gap: 16px;
+      margin-top: 6px;
+      margin-bottom: 14px;
     }
 
     .accent-triangle-left {
@@ -205,7 +206,7 @@ export function downloadCertificateHTML(
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 3px;
+      gap: 4px;
     }
 
     .badge-my {
@@ -213,8 +214,8 @@ export function downloadCertificateHTML(
       color: #ffffff;
       font-family: 'Montserrat', sans-serif;
       font-weight: 800;
-      font-size: 20px;
-      padding: 4px 14px;
+      font-size: 19px;
+      padding: 4px 13px;
       border-radius: 9999px;
       box-shadow: 0 3px 8px rgba(234, 88, 12, 0.35);
       letter-spacing: -0.5px;
@@ -223,7 +224,7 @@ export function downloadCertificateHTML(
     .text-school {
       font-family: 'Montserrat', sans-serif;
       font-weight: 800;
-      font-size: 24px;
+      font-size: 23px;
       color: #3b1442;
       letter-spacing: -0.5px;
       margin-left: 2px;
@@ -231,22 +232,22 @@ export function downloadCertificateHTML(
 
     /* Titles */
     .title-block {
-      margin-bottom: 12px;
+      margin-bottom: 18px;
     }
 
     .main-title {
-      font-family: 'Montserrat', 'Outfit', sans-serif;
-      font-size: 42px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 38px;
       font-weight: 900;
       color: #3b1442;
-      letter-spacing: 2px;
+      letter-spacing: 2.5px;
       line-height: 1;
       margin-bottom: 6px;
     }
 
     .sub-title {
       font-family: 'Outfit', sans-serif;
-      font-size: 15px;
+      font-size: 13.5px;
       font-weight: 700;
       color: #1e293b;
       letter-spacing: 3.5px;
@@ -255,22 +256,21 @@ export function downloadCertificateHTML(
 
     /* Preamble */
     .certifies-text {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 500;
       color: #475569;
-      margin-top: 14px;
-      margin-bottom: 4px;
+      margin-bottom: 8px;
     }
 
     /* Student Name */
     .student-name-container {
-      margin: 4px 0 10px 0;
+      margin: 4px 0 12px 0;
     }
 
     .student-name {
       font-family: 'Outfit', 'Montserrat', sans-serif;
-      font-size: 46px;
-      font-weight: 900;
+      font-size: 38px;
+      font-weight: 800;
       color: #ea580c;
       letter-spacing: -0.5px;
       line-height: 1.1;
@@ -278,7 +278,7 @@ export function downloadCertificateHTML(
     }
 
     .teal-bar {
-      width: 90px;
+      width: 100px;
       height: 4px;
       background: #0d9488;
       border-radius: 2px;
@@ -287,19 +287,19 @@ export function downloadCertificateHTML(
 
     /* Metadata & Paragraphs */
     .born-text {
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 800;
       color: #0f172a;
-      margin-top: 6px;
-      margin-bottom: 12px;
+      margin-top: 4px;
+      margin-bottom: 16px;
     }
 
     .body-paragraph-1 {
-      font-size: 14.5px;
-      line-height: 1.6;
+      font-size: 13.5px;
+      line-height: 1.65;
       color: #334155;
-      max-width: 780px;
-      margin: 0 auto 10px;
+      max-width: 760px;
+      margin: 0 auto 12px;
       font-weight: 500;
     }
 
@@ -309,12 +309,17 @@ export function downloadCertificateHTML(
     }
 
     .body-paragraph-2 {
-      font-size: 14px;
-      line-height: 1.5;
+      font-size: 13px;
+      line-height: 1.6;
       color: #334155;
-      max-width: 680px;
+      max-width: 660px;
       margin: 0 auto;
       font-weight: 500;
+    }
+
+    .body-paragraph-2 strong {
+      color: #0f172a;
+      font-weight: 700;
     }
 
     /* Footer Section */
@@ -322,15 +327,15 @@ export function downloadCertificateHTML(
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-top: 24px;
-      padding-top: 12px;
+      margin-top: 18px;
+      padding-top: 10px;
     }
 
     .footer-left {
       text-align: left;
       font-size: 12px;
       color: #334155;
-      line-height: 1.6;
+      line-height: 1.55;
     }
 
     .footer-left-school {
@@ -356,20 +361,20 @@ export function downloadCertificateHTML(
       flex-direction: column;
       align-items: center;
       text-align: center;
-      width: 170px;
+      width: 160px;
     }
 
     .signature-svg {
-      width: 96px;
-      height: 52px;
-      margin-bottom: -4px;
+      width: 90px;
+      height: 48px;
+      margin-bottom: -2px;
     }
 
     .signature-divider {
       width: 140px;
       height: 1px;
       background: #cbd5e1;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
 
     .signature-label {
@@ -420,7 +425,7 @@ export function downloadCertificateHTML(
         max-width: 100vw;
         max-height: 100vh;
         box-shadow: none;
-        padding: 12mm;
+        padding: 8mm;
         page-break-inside: avoid;
         page-break-after: avoid;
       }
@@ -435,10 +440,10 @@ export function downloadCertificateHTML(
   <div class="certificate-frame">
     <!-- Top-Left Teal Guilloche Pattern Arc -->
     <div class="frame-bg-tl">
-      <svg width="530" height="180" viewBox="0 0 530 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0" y="0" width="530" height="180" fill="#0284c7" fill-opacity="0.12"/>
-        <path d="M0 0 H530 V40 Q380 40 260 0 Z" fill="#0d9488" fill-opacity="0.85"/>
-        <path d="M0 0 Q140 180 320 0 Z" fill="#0284c7" fill-opacity="0.3"/>
+      <svg width="520" height="170" viewBox="0 0 520 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="520" height="170" fill="#0284c7" fill-opacity="0.12"/>
+        <path d="M0 0 H520 V36 Q380 36 260 0 Z" fill="#0d9488" fill-opacity="0.85"/>
+        <path d="M0 0 Q140 170 320 0 Z" fill="#0284c7" fill-opacity="0.3"/>
         <g stroke="#0d9488" stroke-width="1.2" stroke-opacity="0.45" fill="none">
           <path d="M-50 0 C40 120 180 160 380 0"/>
           <path d="M-50 15 C45 130 185 170 385 15"/>
@@ -454,61 +459,62 @@ export function downloadCertificateHTML(
 
     <!-- Top-Right Deep Purple Geometric Block -->
     <div class="frame-bg-tr">
-      <svg width="320" height="220" viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M70 0 H320 V160 Q220 120 160 60 L70 0 Z" fill="#3b1442"/>
-        <polygon points="320,160 320,220 260,180" fill="#ea580c"/>
+      <svg width="320" height="200" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M70 0 H320 V150 Q220 110 160 55 L70 0 Z" fill="#3b1442"/>
+        <polygon points="320,150 320,200 260,170" fill="#ea580c"/>
       </svg>
     </div>
 
     <!-- Right Side Geometric Mosaic -->
     <div class="frame-bg-right-mosaic">
-      <svg width="70" height="330" viewBox="0 0 70 330" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polygon points="70,0 70,70 0,70" fill="#3b1442"/>
-        <polygon points="0,70 70,70 0,110" fill="#ffffff"/>
-        <polygon points="0,110 70,70 70,160" fill="#e11d48"/>
-        <polygon points="0,160 70,160 70,230" fill="#0d9488"/>
-        <polygon points="0,230 70,230 70,300" fill="#ea580c"/>
-        <polygon points="0,300 70,300 0,330" fill="#f59e0b"/>
+      <svg width="65" height="330" viewBox="0 0 65 330" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="65,0 65,70 0,70" fill="#3b1442"/>
+        <polygon points="0,70 65,70 0,110" fill="#ffffff"/>
+        <polygon points="0,110 65,70 65,160" fill="#e11d48"/>
+        <polygon points="0,160 65,160 65,230" fill="#0d9488"/>
+        <polygon points="0,230 65,230 65,300" fill="#ea580c"/>
+        <polygon points="0,300 65,300 0,330" fill="#f59e0b"/>
       </svg>
     </div>
 
     <!-- Bottom-Left Coral/Pink Concentric Wave -->
     <div class="frame-bg-bl">
-      <svg width="280" height="280" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0 120 Q120 120 120 280 H0 Z" fill="#e11d48" fill-opacity="0.85"/>
+      <svg width="260" height="260" viewBox="0 0 260 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 110 Q110 110 110 260 H0 Z" fill="#e11d48" fill-opacity="0.85"/>
         <g stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.4" fill="none">
-          <circle cx="0" cy="280" r="40"/>
-          <circle cx="0" cy="280" r="60"/>
-          <circle cx="0" cy="280" r="80"/>
-          <circle cx="0" cy="280" r="100"/>
-          <circle cx="0" cy="280" r="120"/>
-          <circle cx="0" cy="280" r="140"/>
-          <circle cx="0" cy="280" r="160"/>
+          <circle cx="0" cy="260" r="35"/>
+          <circle cx="0" cy="260" r="55"/>
+          <circle cx="0" cy="260" r="75"/>
+          <circle cx="0" cy="260" r="95"/>
+          <circle cx="0" cy="260" r="115"/>
+          <circle cx="0" cy="260" r="135"/>
+          <circle cx="0" cy="260" r="155"/>
         </g>
       </svg>
     </div>
 
     <!-- Bottom-Right Orange Guilloche Waves -->
     <div class="frame-bg-br">
-      <svg width="530" height="200" viewBox="0 0 530 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0 200 H530 V0 Q360 80 180 200 Z" fill="#ea580c" fill-opacity="0.8"/>
+      <svg width="520" height="190" viewBox="0 0 520 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 190 H520 V0 Q360 75 180 190 Z" fill="#ea580c" fill-opacity="0.8"/>
         <g stroke="#ffffff" stroke-width="1.1" stroke-opacity="0.35" fill="none">
-          <path d="M120 200 Q260 80 530 0"/>
-          <path d="M140 200 Q280 90 530 15"/>
-          <path d="M160 200 Q300 100 530 30"/>
-          <path d="M180 200 Q320 110 530 45"/>
-          <path d="M200 200 Q340 120 530 60"/>
-          <path d="M220 200 Q360 130 530 75"/>
-          <path d="M240 200 Q380 140 530 90"/>
-          <path d="M260 200 Q400 150 530 105"/>
+          <path d="M120 190 Q260 75 520 0"/>
+          <path d="M140 190 Q280 85 520 15"/>
+          <path d="M160 190 Q300 95 520 30"/>
+          <path d="M180 190 Q320 105 520 45"/>
+          <path d="M200 190 Q340 115 520 60"/>
+          <path d="M220 190 Q360 125 520 75"/>
+          <path d="M240 190 Q380 135 520 90"/>
+          <path d="M260 190 Q400 145 520 105"/>
         </g>
       </svg>
     </div>
 
     <!-- The White Certificate Inner Card -->
     <div class="cert-card">
-      <!-- 1. Header: Logo & Accent Triangles -->
+      <!-- Top / Center Content -->
       <div>
+        <!-- 1. Header: Logo & Accent Triangles -->
         <div class="logo-row">
           <div class="accent-triangle-left"></div>
           <div class="brand-logo">
@@ -538,11 +544,11 @@ export function downloadCertificateHTML(
 
         <!-- 6. Completion Paragraphs -->
         <p class="body-paragraph-1">
-          Has successfully completed a course in <strong>${subjectName} ${cefrCode} level</strong> following <strong>the CEFR model</strong> and the standards required by <strong>My School</strong> to merit this certificate.
+          Has successfully completed a course in <strong>${subjectName} ${cefrCode} level</strong> following <strong>the CEFR model</strong><br>and the standards required by <strong>My School</strong> to merit this certificate.
         </p>
 
         <p class="body-paragraph-2">
-          My School has therefore decreed its signature and conferred upon the holder this certificate on <strong>${completionDateFormatted}</strong> in <strong>El Oued, Algeria.</strong>
+          My School has therefore decreed its signature and conferred<br>upon the holder this certificate on <strong>${completionDateFormatted}</strong><br>in <strong>El Oued, Algeria.</strong>
         </p>
       </div>
 
