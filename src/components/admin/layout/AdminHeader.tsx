@@ -6,15 +6,10 @@ import {
   Menu,
   Sun,
   Moon,
-  Globe,
-  Bell,
   Shield,
   User,
-  GraduationCap,
-  Sparkles,
   ChevronDown,
   Check,
-  Search,
   ExternalLink,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
@@ -32,19 +27,13 @@ export function AdminHeader({ onOpenMobileMenu }: AdminHeaderProps) {
   const { language, setLanguage, isRTL } = useLanguage();
 
   const [isRolePickerOpen, setIsRolePickerOpen] = useState(false);
-  const [isLangPickerOpen, setIsLangPickerOpen] = useState(false);
-
   const rolePickerRef = useRef<HTMLDivElement>(null);
-  const langPickerRef = useRef<HTMLDivElement>(null);
 
   // Click-outside listener
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (rolePickerRef.current && !rolePickerRef.current.contains(e.target as Node)) {
         setIsRolePickerOpen(false);
-      }
-      if (langPickerRef.current && !langPickerRef.current.contains(e.target as Node)) {
-        setIsLangPickerOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -80,57 +69,57 @@ export function AdminHeader({ onOpenMobileMenu }: AdminHeaderProps) {
   };
 
   return (
-    <header className="h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 select-none">
-      {/* Left: Mobile trigger & Current Section Title */}
+    <header className="h-20 sm:h-22 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 px-6 sm:px-10 flex items-center justify-between sticky top-0 z-30 select-none">
+      {/* Right in RTL: Section Title */}
       <div className="flex items-center gap-4 min-w-0">
         <button
           type="button"
           onClick={onOpenMobileMenu}
-          className="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+          className="lg:hidden p-2.5 rounded-2xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
           aria-label="Open Navigation"
         >
           <Menu size={22} />
         </button>
 
-        <div>
-          <h1 className="text-base sm:text-lg font-black text-slate-900 dark:text-white truncate">
+        <div className="space-y-0.5">
+          <h1 className="text-base sm:text-xl font-black text-slate-900 dark:text-white truncate">
             {tabTitles[activeTab] || 'لوحة التحكم الإدارية'}
           </h1>
-          <div className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2">
+          <div className="text-xs text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-2">
             <span>أكاديمية اللغات الدولية</span>
             <span>•</span>
-            <span className="text-rose-600 dark:text-rose-400 font-bold">My School Management</span>
+            <span className="text-rose-600 dark:text-rose-400 font-black">My School Management</span>
           </div>
         </div>
       </div>
 
-      {/* Right Actions: Quick Role Switcher, Theme, Language, Profile */}
-      <div className="flex items-center gap-3">
-        {/* Quick Role Switcher (Crucial for pair programming & easy review) */}
+      {/* Left in RTL: Role Switcher & Controls */}
+      <div className="flex items-center gap-3.5">
+        {/* Quick Role Switcher */}
         <div className="relative" ref={rolePickerRef}>
           <button
             type="button"
             onClick={() => setIsRolePickerOpen(!isRolePickerOpen)}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-100 transition-all cursor-pointer shadow-2xs"
+            className="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 transition-all cursor-pointer shadow-xs"
           >
-            <Shield size={16} className="text-rose-600 dark:text-rose-400" />
-            <div className="text-right hidden sm:block">
-              <div className="text-[11px] text-slate-400 font-bold leading-tight">تبديل الحساب والدور</div>
-              <div className="text-xs font-black truncate max-w-[130px]">{currentAdmin.fullNameAr}</div>
+            <Shield size={18} className="text-rose-600 dark:text-rose-400 shrink-0" />
+            <div className="text-right hidden md:block">
+              <div className="text-[10.5px] text-slate-400 font-bold leading-none">تبديل الحساب والدور</div>
+              <div className="text-xs font-black truncate max-w-[130px] mt-1">{currentAdmin.fullNameAr}</div>
             </div>
-            <ChevronDown size={14} className="text-slate-400" />
+            <ChevronDown size={14} className="text-slate-400 shrink-0" />
           </button>
 
-          {/* Role Switcher Dropdown */}
+          {/* Dropdown Menu */}
           {isRolePickerOpen && (
             <div
-              className={`absolute top-full mt-2 w-80 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-750 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 ${
+              className={`absolute top-full mt-2 w-84 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-750 shadow-2xl p-3.5 z-50 animate-in fade-in zoom-in-95 ${
                 isRTL ? 'left-0' : 'right-0'
               }`}
             >
-              <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 mb-2">
+              <div className="px-3.5 py-2 border-b border-slate-100 dark:border-slate-800 mb-2">
                 <div className="text-xs font-black text-slate-900 dark:text-white">تبديل مستخدم لوحة التحكم</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                   اختر أي دور لتجربة الصلاحيات والشاشات المخصصة
                 </div>
               </div>
@@ -148,23 +137,23 @@ export function AdminHeader({ onOpenMobileMenu }: AdminHeaderProps) {
                         switchRole(user.role, user.id);
                         setIsRolePickerOpen(false);
                       }}
-                      className={`w-full p-2.5 rounded-xl flex items-center justify-between gap-3 text-right transition-all cursor-pointer ${
+                      className={`w-full p-3 rounded-2xl flex items-center justify-between gap-3 text-right transition-all cursor-pointer ${
                         isCurrent
                           ? 'bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60'
                           : 'hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0">
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${roleMeta.color}`}
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-black shrink-0 shadow-xs ${roleMeta.color}`}
                         >
-                          {user.role === 'super_admin' ? <Shield size={14} /> : <User size={14} />}
+                          {user.role === 'super_admin' ? <Shield size={16} /> : <User size={16} />}
                         </div>
                         <div className="min-w-0">
                           <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
                             {user.fullNameAr}
                           </div>
-                          <div className="text-[10.5px] text-slate-500 dark:text-slate-400 truncate">
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
                             {user.departmentAr}
                           </div>
                         </div>
@@ -183,17 +172,17 @@ export function AdminHeader({ onOpenMobileMenu }: AdminHeaderProps) {
         <button
           type="button"
           onClick={toggleDarkMode}
-          className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors cursor-pointer border border-slate-200/60 dark:border-slate-700/60"
+          className="w-11 h-11 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors cursor-pointer border border-slate-200/80 dark:border-slate-700/80 shadow-2xs"
           aria-label="Toggle Dark Mode"
         >
-          {isDarkMode ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} />}
+          {isDarkMode ? <Sun size={19} className="text-amber-400" /> : <Moon size={19} />}
         </button>
 
-        {/* Portal Home Direct Link */}
+        {/* Return to Portal Link */}
         <Link
           href="/"
           title="العودة لبوابة ولي الأمر"
-          className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-800 text-xs font-bold transition-all"
+          className="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-800 text-xs font-bold transition-all shadow-2xs"
         >
           <ExternalLink size={14} />
           <span>بوابة ولي الأمر</span>

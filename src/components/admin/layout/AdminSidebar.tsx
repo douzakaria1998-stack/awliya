@@ -25,7 +25,7 @@ interface AdminSidebarProps {
 }
 
 export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
-  const { currentAdmin, currentRole, activeTab, setActiveTab, pendingApprovals, switchRole } = useAdmin();
+  const { currentAdmin, currentRole, activeTab, setActiveTab, pendingApprovals } = useAdmin();
 
   const pendingCount = pendingApprovals.filter((a) => a.status === 'pending').length;
 
@@ -33,20 +33,20 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
     super_admin: {
       labelAr: 'المدير العام',
       labelEn: 'Super Admin',
-      badgeClass: 'bg-purple-500/15 text-purple-600 dark:text-purple-300 border-purple-500/30',
-      dotClass: 'bg-purple-500',
+      badgeClass: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+      dotClass: 'bg-purple-400',
     },
     administrator: {
       labelAr: 'الإدارة والقبول',
       labelEn: 'Administrator',
-      badgeClass: 'bg-blue-500/15 text-blue-600 dark:text-blue-300 border-blue-500/30',
-      dotClass: 'bg-blue-500',
+      badgeClass: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+      dotClass: 'bg-blue-400',
     },
     teacher: {
       labelAr: 'هيئة التدريس',
       labelEn: 'Teacher',
-      badgeClass: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30',
-      dotClass: 'bg-emerald-500',
+      badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+      dotClass: 'bg-emerald-400',
     },
   };
 
@@ -113,38 +113,38 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
   const visibleNavItems = navItems.filter((item) => item.allowedRoles.includes(currentRole));
 
   return (
-    <aside className="w-72 bg-slate-900 text-slate-100 flex flex-col justify-between border-l border-slate-800 shrink-0 select-none z-40 h-full min-h-screen">
+    <aside className="w-80 bg-slate-900 text-slate-100 flex flex-col justify-between border-l border-slate-800/80 shrink-0 select-none z-40 h-full min-h-screen">
       {/* Top Branding & User Info */}
-      <div>
+      <div className="flex flex-col">
         {/* Brand Header */}
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center text-white shadow-md">
-              <School size={22} />
+        <div className="py-6 px-6 border-b border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center text-white shadow-md shadow-rose-500/20 shrink-0">
+              <School size={24} />
             </div>
             <div>
-              <div className="font-black text-base tracking-tight text-white flex items-center gap-1.5">
+              <div className="font-black text-base tracking-tight text-white flex items-center gap-2">
                 <span>My School</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
+                <span className="text-[10px] px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-black border border-rose-500/40 uppercase">
                   Admin
                 </span>
               </div>
-              <div className="text-[11px] text-slate-400 font-medium">لوحة التحكم الإدارية</div>
+              <div className="text-xs text-slate-400 font-medium mt-0.5">لوحة التحكم الإدارية</div>
             </div>
           </div>
         </div>
 
         {/* Current Active Admin Profile Banner */}
-        <div className="p-4 mx-4 mt-4 rounded-2xl bg-slate-800/80 border border-slate-700/60 shadow-inner">
+        <div className="mx-5 my-5 p-4 rounded-2xl bg-slate-800/90 border border-slate-700/80 shadow-md">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center font-black text-base shadow-sm shrink-0">
               {currentAdmin.fullNameAr.split(' ')[0][0]}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="font-bold text-sm text-white truncate">{currentAdmin.fullNameAr}</div>
-              <div className="flex items-center gap-1.5 mt-0.5">
+              <div className="font-black text-sm text-white truncate">{currentAdmin.fullNameAr}</div>
+              <div className="flex items-center gap-1.5 mt-1">
                 <span className={`w-2 h-2 rounded-full ${roleConfig[currentRole].dotClass} animate-pulse`} />
-                <span className={`text-[10.5px] font-extrabold px-2 py-0.5 rounded-full border ${roleConfig[currentRole].badgeClass}`}>
+                <span className={`text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border ${roleConfig[currentRole].badgeClass}`}>
                   {roleConfig[currentRole].labelAr}
                 </span>
               </div>
@@ -152,14 +152,14 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           </div>
 
           {/* Specialization / Department */}
-          <div className="mt-3 pt-2.5 border-t border-slate-700/50 text-[11px] text-slate-400 truncate flex items-center gap-1">
-            <GraduationCap size={13} className="text-slate-500 shrink-0" />
+          <div className="mt-3 pt-3 border-t border-slate-700/60 text-xs text-slate-400 truncate flex items-center gap-1.5">
+            <GraduationCap size={14} className="text-slate-400 shrink-0" />
             <span className="truncate">{currentAdmin.departmentAr}</span>
           </div>
         </div>
 
         {/* Navigation Items */}
-        <nav className="p-4 space-y-1.5 mt-2">
+        <nav className="px-4 space-y-1.5">
           {visibleNavItems.map((item) => {
             const isActive = activeTab === item.key;
             const Icon = item.icon;
@@ -172,21 +172,21 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                   setActiveTab(item.key);
                   if (onCloseMobile) onCloseMobile();
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20'
-                    : 'text-slate-300 hover:bg-slate-800/90 hover:text-white'
+                    ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30 font-black'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                 }`}
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <Icon size={18} className={isActive ? 'text-white' : 'text-slate-400'} />
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <Icon size={19} className={isActive ? 'text-white' : 'text-slate-400'} />
                   <span className="truncate">{item.labelAr}</span>
                 </div>
 
                 {item.countBadge && (
                   <span
-                    className={`text-[11px] px-2 py-0.5 rounded-full font-black ${
-                      isActive ? 'bg-white text-rose-600' : 'bg-rose-500 text-white shadow-xs'
+                    className={`text-[11px] px-2.5 py-0.5 rounded-full font-black ${
+                      isActive ? 'bg-white text-rose-600' : 'bg-amber-500 text-slate-950 shadow-xs'
                     }`}
                   >
                     {item.countBadge}
@@ -198,15 +198,14 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
         </nav>
       </div>
 
-      {/* Bottom Role Switcher & Return to Parent Portal */}
-      <div className="p-4 border-t border-slate-800 space-y-2 bg-slate-950/40">
-        {/* Switch to Parent Portal */}
+      {/* Bottom Switch to Parent Portal */}
+      <div className="p-5 border-t border-slate-800 bg-slate-950/50 mt-4">
         <Link
           href="/"
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs transition-all border border-slate-700/60"
+          className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl bg-slate-800/90 hover:bg-slate-750 text-slate-200 hover:text-white font-bold text-xs transition-all border border-slate-700/70 shadow-sm"
         >
-          <ExternalLink size={14} />
-          <span>العودة لبوابة ولي الأمر (Parent Portal)</span>
+          <ExternalLink size={15} className="text-rose-400" />
+          <span>العودة لبوابة ولي الأمر</span>
         </Link>
       </div>
     </aside>
