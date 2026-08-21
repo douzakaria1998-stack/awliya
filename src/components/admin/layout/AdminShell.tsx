@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdminSidebar } from './AdminSidebar';
@@ -15,9 +15,14 @@ import { SystemSettingsScreen } from '../screens/SystemSettingsScreen';
 import { X } from 'lucide-react';
 
 export function AdminShell() {
+  const [mounted, setMounted] = useState(false);
   const { activeTab } = useAdmin();
-  const { dir, isRTL } = useLanguage();
+  const { dir } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const renderActiveScreen = () => {
     switch (activeTab) {
@@ -39,6 +44,17 @@ export function AdminShell() {
         return <SuperAdminOverview />;
     }
   };
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen w-full bg-slate-900 flex items-center justify-center" dir="rtl">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 rounded-full border-3 border-rose-500 border-t-transparent animate-spin" />
+          <span className="text-xs font-bold text-slate-400">جاري تحميل لوحة التحكم...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
