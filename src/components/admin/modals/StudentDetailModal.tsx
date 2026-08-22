@@ -315,86 +315,101 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
 
           {/* TAB 5: 4-Skill Assessment */}
           {activeTab === 'assessment' && (
-            <div className="space-y-6">
-              <h4 className="text-sm font-black text-slate-900 dark:text-white">
-                {language === 'ar' ? 'تقييم المهارات اللغوية الأربعة (4 Language Skills)' : '4-Skill Language Assessment'}
-              </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h4 className="text-sm font-black text-slate-900 dark:text-white">
+                  {language === 'ar' ? 'تقييم المهارات اللغوية الأربعة (4 Language Skills)' : '4-Skill Language Assessment'}
+                </h4>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {[
-                  { name: 'الاستماع (Listening)', score: student.skills.listening, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/40' },
-                  { name: 'المحادثة (Speaking)', score: student.skills.speaking, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/40' },
-                  { name: 'القراءة (Reading)', score: student.skills.reading, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950/40' },
-                  { name: 'الكتابة (Writing)', score: student.skills.writing, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/40' },
-                ].map((sk, idx) => (
-                  <div key={idx} className={`${sk.bg} p-4 rounded-2xl text-center space-y-1`}>
-                    <span className="text-xs font-bold text-slate-500 block">{sk.name}</span>
-                    <span className={`text-2xl font-black font-mono ${sk.color}`}>{sk.score}%</span>
-                  </div>
-                ))}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                  {[
+                    { name: 'الاستماع (Listening)', score: student.skills.listening, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50/80 dark:bg-blue-950/40' },
+                    { name: 'المحادثة (Speaking)', score: student.skills.speaking, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50/80 dark:bg-emerald-950/40' },
+                    { name: 'القراءة (Reading)', score: student.skills.reading, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50/80 dark:bg-purple-950/40' },
+                    { name: 'الكتابة (Writing)', score: student.skills.writing, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50/80 dark:bg-amber-950/40' },
+                  ].map((sk, idx) => (
+                    <div
+                      key={idx}
+                      className={`${sk.bg} rounded-2xl text-center border border-slate-100 dark:border-slate-800/80`}
+                      style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}
+                    >
+                      <span className="text-xs font-bold text-slate-600 dark:text-slate-300 block">{sk.name}</span>
+                      <span className={`text-2xl font-black font-mono ${sk.color}`}>{sk.score}%</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Assessment History */}
-              <div className="space-y-3 pt-2">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
                 <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   {language === 'ar' ? 'سجل الاختبارات الدورية' : 'Assessment History'}
                 </h5>
-                {studentAssessments.map((asm) => (
-                  <div
-                    key={asm.id}
-                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between"
-                  >
-                    <div>
-                      <span className="font-bold text-sm text-slate-900 dark:text-white block">{asm.level} — {asm.assessmentType}</span>
-                      <span className="text-xs text-slate-400 font-mono">{asm.date}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {studentAssessments.map((asm) => (
+                    <div
+                      key={asm.id}
+                      className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between"
+                      style={{ padding: '16px 22px' }}
+                    >
+                      <div>
+                        <span className="font-bold text-sm text-slate-900 dark:text-white block">{asm.level} — {asm.assessmentType}</span>
+                        <span className="text-xs text-slate-400 font-mono mt-1 block">{asm.date}</span>
+                      </div>
+                      <span className="text-sm font-mono font-black text-purple-600 dark:text-purple-400">{asm.scores.overall}% ({asm.gradeLetterAr})</span>
                     </div>
-                    <span className="text-sm font-mono font-black text-purple-600">{asm.scores.overall}% ({asm.gradeLetterAr})</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
           {/* TAB 6: Teacher Feedback */}
           {activeTab === 'feedback' && (
-            <div className="space-y-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <h4 className="text-sm font-black text-slate-900 dark:text-white">
                 {language === 'ar' ? 'التوجيهات التربوية والتواصل مع ولي الأمر' : 'Teacher Guidance & Parent Feedback'}
               </h4>
 
-              {studentFeedback.map((fb) => (
-                <div
-                  key={fb.id}
-                  className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-4"
-                >
-                  <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700/60 pb-3">
-                    <span className="font-bold text-sm text-slate-900 dark:text-white">{fb.teacherName}</span>
-                    <span className="text-xs text-slate-400 font-mono">{fb.date}</span>
-                  </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {studentFeedback.map((fb) => (
+                  <div
+                    key={fb.id}
+                    className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-4"
+                    style={{ padding: '20px 24px' }}
+                  >
+                    <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700/60 pb-3">
+                      <span className="font-bold text-sm text-slate-900 dark:text-white">{fb.teacherName}</span>
+                      <span className="text-xs text-slate-400 font-mono">{fb.date}</span>
+                    </div>
 
-                  <div className="space-y-2 text-xs sm:text-sm">
-                    <div>
-                      <span className="font-bold text-emerald-600 block">نقاط القوة:</span>
-                      <p className="text-slate-700 dark:text-slate-300">{fb.teacherFeedback.strengths.join(' • ')}</p>
+                    <div className="space-y-2 text-xs sm:text-sm">
+                      <div>
+                        <span className="font-bold text-emerald-600 block">نقاط القوة:</span>
+                        <p className="text-slate-700 dark:text-slate-300">{fb.teacherFeedback.strengths.join(' • ')}</p>
+                      </div>
+                      <div>
+                        <span className="font-bold text-amber-600 block">مجالات التطوير:</span>
+                        <p className="text-slate-700 dark:text-slate-300">{fb.teacherFeedback.needsImprovement.join(' • ')}</p>
+                      </div>
+                      <div>
+                        <span className="font-bold text-indigo-600 block">التوصية للمنزل:</span>
+                        <p className="text-slate-700 dark:text-slate-300">"{fb.teacherFeedback.recommendations}"</p>
+                      </div>
                     </div>
-                    <div>
-                      <span className="font-bold text-amber-600 block">مجالات التطوير:</span>
-                      <p className="text-slate-700 dark:text-slate-300">{fb.teacherFeedback.needsImprovement.join(' • ')}</p>
-                    </div>
-                    <div>
-                      <span className="font-bold text-indigo-600 block">التوصية للمنزل:</span>
-                      <p className="text-slate-700 dark:text-slate-300">"{fb.teacherFeedback.recommendations}"</p>
-                    </div>
-                  </div>
 
-                  {fb.parentFeedback && (
-                    <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs sm:text-sm">
-                      <span className="font-bold text-purple-600 block mb-1">رد ولي الأمر:</span>
-                      <p className="text-slate-800 dark:text-slate-200 font-medium">"{fb.parentFeedback.message}"</p>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    {fb.parentFeedback && (
+                      <div
+                        className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 text-xs sm:text-sm"
+                        style={{ padding: '12px 16px' }}
+                      >
+                        <span className="font-bold text-purple-600 block mb-1">رد ولي الأمر:</span>
+                        <p className="text-slate-800 dark:text-slate-200 font-medium">"{fb.parentFeedback.message}"</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
