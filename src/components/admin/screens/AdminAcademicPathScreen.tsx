@@ -60,6 +60,13 @@ export function AdminAcademicPathScreen() {
   }
 
   const [unitsDraft, setUnitsDraft] = useState<UnitDraft[]>([]);
+  const [expandedDraftUnitIds, setExpandedDraftUnitIds] = useState<string[]>([]);
+
+  const toggleDraftUnit = (unitId: string) => {
+    setExpandedDraftUnitIds((prev) =>
+      prev.includes(unitId) ? prev.filter((id) => id !== unitId) : [...prev, unitId]
+    );
+  };
 
   const activeLevel = curricula.find(
     (c) => c.levelNumber === selectedLevelNumber && c.language === selectedCurriculumLanguage
@@ -109,6 +116,7 @@ export function AdminAcademicPathScreen() {
     });
 
     setUnitsDraft(initialUnits);
+    setExpandedDraftUnitIds(initialUnits.map((u) => u.id));
     setModalStep('units');
   };
 
@@ -133,6 +141,7 @@ export function AdminAcademicPathScreen() {
       ],
     };
     setUnitsDraft((prev) => [...prev, newUnit]);
+    setExpandedDraftUnitIds((prev) => [...prev, newUnit.id]);
   };
 
   const handleRemoveUnit = (unitId: string) => {
@@ -867,198 +876,243 @@ export function AdminAcademicPathScreen() {
                   gap: '24px',
                 }}
               >
-                {unitsDraft.map((unit, uIdx) => (
-                  <div
-                    key={unit.id}
-                    className="bg-slate-50 dark:bg-slate-800/60 rounded-3xl border border-slate-200 dark:border-slate-750 shadow-xs"
-                    style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}
-                  >
-                    {/* Unit Header: Top Action Bar */}
-                    <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-700/80 pb-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
-                          {uIdx + 1}
-                        </span>
-                        <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white">
-                          {language === 'ar' ? `الوحدة ${uIdx + 1}` : `Unit ${uIdx + 1}`}
-                        </h4>
-                      </div>
+                {unitsDraft.map((unit, uIdx) => {
+                  const isExpanded = expandedDraftUnitIds.includes(unit.id);
+                  return (
+                    <div
+                      key={unit.id}
+                      className="bg-slate-50 dark:bg-slate-800/60 rounded-3xl border border-slate-200 dark:border-slate-750 shadow-xs transition-all"
+                      style={{
+                        padding: isExpanded ? '22px 24px' : '16px 20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: isExpanded ? '20px' : '0px',
+                      }}
+                    >
+                      {/* Unit Header: Clickable Accordion Bar */}
+                      <div
+                        onClick={() => toggleDraftUnit(unit.id)}
+                        className={`flex items-center justify-between transition-all cursor-pointer select-none ${
+                          isExpanded
+                            ? 'border-b border-slate-200/80 dark:border-slate-700/80 pb-5 mb-2'
+                            : 'pb-0 mb-0'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="w-9 h-9 rounded-xl bg-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
+                            {uIdx + 1}
+                          </span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white">
+                                {unit.titleAr ? unit.titleAr : (language === 'ar' ? `الوحدة ${uIdx + 1}` : `Unit ${uIdx + 1}`)}
+                              </h4>
+                              <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold text-[11px] border border-indigo-200/60 dark:border-indigo-800/60">
+                                {language === 'ar' ? `${unit.lessons.length} دروس` : `${unit.lessons.length} Lessons`}
+                              </span>
+                            </div>
+                            {!isExpanded && unit.titleEn && (
+                              <p className="text-xs font-mono text-slate-400 mt-0.5">
+                                {unit.titleEn}
+                              </p>
+                            )}
+                          </div>
+                        </div>
 
-                      <div className="flex items-center gap-2.5">
-                        <button
-                          type="button"
-                          onClick={() => handleAddLesson(unit.id)}
-                          className="rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 transition-colors cursor-pointer shadow-2xs"
-                          style={{ padding: '7px 14px' }}
-                        >
-                          <Plus size={14} />
-                          <span>{language === 'ar' ? 'إضافة درس' : 'Add Lesson'}</span>
-                        </button>
-
-                        {unitsDraft.length > 1 && (
+                        <div className="flex items-center gap-2.5" onClick={(e) => e.stopPropagation()}>
                           <button
                             type="button"
-                            onClick={() => handleRemoveUnit(unit.id)}
-                            className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer"
-                            title={language === 'ar' ? 'حذف الوحدة' : 'Delete Unit'}
+                            onClick={() => {
+                              if (!isExpanded) toggleDraftUnit(unit.id);
+                              handleAddLesson(unit.id);
+                            }}
+                            className="rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 transition-colors cursor-pointer shadow-2xs"
+                            style={{ padding: '7px 14px' }}
                           >
-                            <Trash2 size={15} />
+                            <Plus size={14} />
+                            <span>{language === 'ar' ? 'إضافة درس' : 'Add Lesson'}</span>
                           </button>
-                        )}
-                      </div>
-                    </div>
 
-                    {/* Unit Titles Inputs Row */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">
-                          {language === 'ar' ? 'اسم الوحدة بالعربية *' : 'Unit Title (Arabic) *'}
-                        </label>
-                        <input
-                          type="text"
-                          value={unit.titleAr}
-                          onChange={(e) => handleUpdateUnit(unit.id, { titleAr: e.target.value })}
-                          placeholder={language === 'ar' ? `مثال: الوحدة ${uIdx + 1}: محاور التأسيس` : `Unit ${uIdx + 1} Title (AR)`}
-                          className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                          style={{ paddingLeft: '18px', paddingRight: '18px' }}
-                          dir="rtl"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">
-                          {language === 'ar' ? 'اسم الوحدة بالإنجليزية:' : 'Unit Title (English):'}
-                        </label>
-                        <input
-                          type="text"
-                          value={unit.titleEn}
-                          onChange={(e) => handleUpdateUnit(unit.id, { titleEn: e.target.value })}
-                          placeholder={`e.g. Unit ${uIdx + 1}: Core Foundations`}
-                          className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
-                          style={{ paddingLeft: '18px', paddingRight: '18px' }}
-                          dir="ltr"
-                        />
-                      </div>
-                    </div>
+                          {unitsDraft.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveUnit(unit.id)}
+                              className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer"
+                              title={language === 'ar' ? 'حذف الوحدة' : 'Delete Unit'}
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          )}
 
-                    {/* Lessons in this Unit */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-                          {language === 'ar' ? `دروس ومحتويات الوحدة (${unit.lessons.length} دروس)` : `Unit Lessons (${unit.lessons.length} Lessons)`}
-                        </span>
-                      </div>
-
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                        {unit.lessons.map((lesson, lIdx) => (
                           <div
-                            key={lesson.id}
-                            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-750 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-800 transition-all"
-                            style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}
+                            onClick={() => toggleDraftUnit(unit.id)}
+                            className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-300 flex items-center justify-center cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                           >
-                            {/* Lesson Top Bar: Number, Label, and Delete */}
-                            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
-                              <div className="flex items-center gap-2">
-                                <span className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-bold text-xs flex items-center justify-center shrink-0">
-                                  {lIdx + 1}
-                                </span>
-                                <span className="font-bold text-xs text-slate-800 dark:text-slate-200">
-                                  {language === 'ar' ? `الدرس رقم ${lIdx + 1}` : `Lesson #${lIdx + 1}`}
-                                </span>
-                              </div>
+                            <ChevronDown
+                              size={18}
+                              className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : 'rotate-0'}`}
+                            />
+                          </div>
+                        </div>
+                      </div>
 
-                              {unit.lessons.length > 1 && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveLesson(unit.id, lesson.id)}
-                                  className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/60 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                                  title={language === 'ar' ? 'حذف الدرس' : 'Delete Lesson'}
-                                >
-                                  <Trash2 size={13} />
-                                </button>
-                              )}
-                            </div>
-
-                            {/* Lesson Titles Row */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                              <div>
-                                <label className="block text-[11px] font-bold text-slate-400 mb-1">
-                                  {language === 'ar' ? 'عنوان الدرس (عربي) *' : 'Lesson Title (Arabic) *'}
-                                </label>
-                                <input
-                                  type="text"
-                                  value={lesson.titleAr}
-                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleAr: e.target.value })}
-                                  placeholder={language === 'ar' ? `عنوان الدرس ${lIdx + 1}` : `Lesson ${lIdx + 1} Title (AR)`}
-                                  className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                                  style={{ paddingLeft: '16px', paddingRight: '16px' }}
-                                  dir="rtl"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-[11px] font-bold text-slate-400 mb-1">
-                                  {language === 'ar' ? 'عنوان الدرس (إنجليزي):' : 'Lesson Title (English):'}
-                                </label>
-                                <input
-                                  type="text"
-                                  value={lesson.titleEn}
-                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleEn: e.target.value })}
-                                  placeholder={`Lesson ${lIdx + 1} Title (EN)`}
-                                  className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
-                                  style={{ paddingLeft: '16px', paddingRight: '16px' }}
-                                  dir="ltr"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Lesson Summary & Vocabulary inputs */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                              <div>
-                                <label className="block text-[11px] font-bold text-slate-400 mb-1">
-                                  {language === 'ar' ? 'ملخص محتوى الدرس:' : 'Lesson Content Summary:'}
-                                </label>
-                                <input
-                                  type="text"
-                                  value={lesson.contentSummary}
-                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { contentSummary: e.target.value })}
-                                  placeholder={language === 'ar' ? 'ملخص ومخرجات الدرس...' : 'Lesson content summary...'}
-                                  className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
-                                  style={{ paddingLeft: '16px', paddingRight: '16px' }}
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-[11px] font-bold text-slate-400 mb-1">
-                                  {language === 'ar' ? 'المفردات المفتاحية:' : 'Key Vocabulary (comma-separated):'}
-                                </label>
-                                <input
-                                  type="text"
-                                  value={lesson.vocabString}
-                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { vocabString: e.target.value })}
-                                  placeholder={language === 'ar' ? 'المفردات (مفصولة بفواصل)' : 'Key Vocabulary (comma-separated)'}
-                                  className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
-                                  style={{ paddingLeft: '16px', paddingRight: '16px' }}
-                                  dir="ltr"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Assessment Checkbox */}
-                            <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800">
-                              <label className="flex items-center gap-2.5 cursor-pointer select-none text-xs font-bold text-slate-600 dark:text-slate-300">
-                                <input
-                                  type="checkbox"
-                                  checked={lesson.hasAssessment}
-                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { hasAssessment: e.target.checked })}
-                                  className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                                />
-                                <span>{language === 'ar' ? 'يتضمن اختبار كفاءة وتقييم مهارة ✓' : 'Includes skill assessment checkpoint ✓'}</span>
+                      {/* Expanded Unit Body */}
+                      {isExpanded && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                          {/* Unit Titles Inputs Row */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">
+                                {language === 'ar' ? 'اسم الوحدة بالعربية *' : 'Unit Title (Arabic) *'}
                               </label>
+                              <input
+                                type="text"
+                                value={unit.titleAr}
+                                onChange={(e) => handleUpdateUnit(unit.id, { titleAr: e.target.value })}
+                                placeholder={language === 'ar' ? `مثال: الوحدة ${uIdx + 1}: محاور التأسيس` : `Unit ${uIdx + 1} Title (AR)`}
+                                className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                style={{ paddingLeft: '18px', paddingRight: '18px' }}
+                                dir="rtl"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">
+                                {language === 'ar' ? 'اسم الوحدة بالإنجليزية:' : 'Unit Title (English):'}
+                              </label>
+                              <input
+                                type="text"
+                                value={unit.titleEn}
+                                onChange={(e) => handleUpdateUnit(unit.id, { titleEn: e.target.value })}
+                                placeholder={`e.g. Unit ${uIdx + 1}: Core Foundations`}
+                                className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                                style={{ paddingLeft: '18px', paddingRight: '18px' }}
+                                dir="ltr"
+                              />
                             </div>
                           </div>
-                        ))}
-                      </div>
+
+                          {/* Lessons in this Unit */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
+                                {language === 'ar' ? `دروس ومحتويات الوحدة (${unit.lessons.length} دروس)` : `Unit Lessons (${unit.lessons.length} Lessons)`}
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                              {unit.lessons.map((lesson, lIdx) => (
+                                <div
+                                  key={lesson.id}
+                                  className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-750 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-800 transition-all"
+                                  style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}
+                                >
+                                  {/* Lesson Top Bar: Number, Label, and Delete */}
+                                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                                    <div className="flex items-center gap-2">
+                                      <span className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                                        {lIdx + 1}
+                                      </span>
+                                      <span className="font-bold text-xs text-slate-800 dark:text-slate-200">
+                                        {language === 'ar' ? `الدرس رقم ${lIdx + 1}` : `Lesson #${lIdx + 1}`}
+                                      </span>
+                                    </div>
+
+                                    {unit.lessons.length > 1 && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveLesson(unit.id, lesson.id)}
+                                        className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/60 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                                        title={language === 'ar' ? 'حذف الدرس' : 'Delete Lesson'}
+                                      >
+                                        <Trash2 size={13} />
+                                      </button>
+                                    )}
+                                  </div>
+
+                                  {/* Lesson Titles Row */}
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                                        {language === 'ar' ? 'عنوان الدرس (عربي) *' : 'Lesson Title (Arabic) *'}
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={lesson.titleAr}
+                                        onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleAr: e.target.value })}
+                                        placeholder={language === 'ar' ? `عنوان الدرس ${lIdx + 1}` : `Lesson ${lIdx + 1} Title (AR)`}
+                                        className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                        style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                                        dir="rtl"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                                        {language === 'ar' ? 'عنوان الدرس (إنجليزي):' : 'Lesson Title (English):'}
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={lesson.titleEn}
+                                        onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleEn: e.target.value })}
+                                        placeholder={`Lesson ${lIdx + 1} Title (EN)`}
+                                        className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                                        style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                                        dir="ltr"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Lesson Summary & Vocabulary inputs */}
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                                        {language === 'ar' ? 'ملخص محتوى الدرس:' : 'Lesson Content Summary:'}
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={lesson.contentSummary}
+                                        onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { contentSummary: e.target.value })}
+                                        placeholder={language === 'ar' ? 'ملخص ومخرجات الدرس...' : 'Lesson content summary...'}
+                                        className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                                        style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                                        {language === 'ar' ? 'المفردات المفتاحية:' : 'Key Vocabulary (comma-separated):'}
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={lesson.vocabString}
+                                        onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { vocabString: e.target.value })}
+                                        placeholder={language === 'ar' ? 'المفردات (مفصولة بفواصل)' : 'Key Vocabulary (comma-separated)'}
+                                        className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                                        style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                                        dir="ltr"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Assessment Checkbox */}
+                                  <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800">
+                                    <label className="flex items-center gap-2.5 cursor-pointer select-none text-xs font-bold text-slate-600 dark:text-slate-300">
+                                      <input
+                                        type="checkbox"
+                                        checked={lesson.hasAssessment}
+                                        onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { hasAssessment: e.target.checked })}
+                                        className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                      />
+                                      <span>{language === 'ar' ? 'يتضمن اختبار كفاءة وتقييم مهارة ✓' : 'Includes skill assessment checkpoint ✓'}</span>
+                                    </label>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Step 2 Footer */}
