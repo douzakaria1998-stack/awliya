@@ -1256,10 +1256,11 @@ export function AdminAcademicPathScreen() {
                                   e.stopPropagation();
                                   handleOpenGroupDetail(grp.id);
                                 }}
-                                className="px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center gap-1.5 border border-indigo-200/60 dark:border-indigo-800/60 transition-all cursor-pointer shadow-2xs mx-auto"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs border border-indigo-200/60 dark:border-indigo-800/60 transition-all cursor-pointer shadow-2xs mx-auto whitespace-nowrap"
+                                style={{ padding: '8px 18px' }}
                               >
                                 <span>{language === 'ar' ? 'عرض الفوج' : 'View Group'}</span>
-                                {isRTL ? <ArrowLeft size={14} /> : <ArrowRight size={14} />}
+                                {isRTL ? <ArrowLeft size={15} /> : <ArrowRight size={15} />}
                               </button>
                             </td>
                           </tr>
@@ -1493,13 +1494,14 @@ export function AdminAcademicPathScreen() {
 
                             <td className="py-4.5 px-6 text-center">
                               <span
-                                className={`inline-flex items-center justify-center px-3 py-1 rounded-full font-bold text-[11px] border ${
+                                className={`inline-flex items-center justify-center font-bold text-xs border whitespace-nowrap ${
                                   progress === 100
                                     ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-800/80'
                                     : progress > 0
                                     ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border-indigo-200/80 dark:border-indigo-800/80'
                                     : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                                 }`}
+                                style={{ padding: '6px 16px', borderRadius: '12px' }}
                               >
                                 {statusLabel}
                               </span>
@@ -1518,9 +1520,10 @@ export function AdminAcademicPathScreen() {
                                   e.stopPropagation();
                                   handleOpenStudentDetail(st.id);
                                 }}
-                                className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer mx-auto"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-2xs hover:shadow-md transition-all cursor-pointer whitespace-nowrap mx-auto"
+                                style={{ padding: '8px 18px' }}
                               >
-                                <Eye size={14} />
+                                <Eye size={15} className="shrink-0" />
                                 <span>{language === 'ar' ? 'عرض التقدم' : 'View'}</span>
                               </button>
                             </td>
