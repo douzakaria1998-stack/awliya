@@ -54,16 +54,16 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
         {/* Modal Header */}
         <div
           className="bg-slate-900 text-white flex items-center justify-between shrink-0"
-          style={{ padding: '24px 32px' }}
+          style={{ padding: '16px 24px' }}
         >
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-black text-lg shadow-md shrink-0">
-              <School size={24} />
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-black text-sm shadow-md shrink-0">
+              <School size={18} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl font-black text-white">{group.name}</h3>
-                <span className="px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-mono font-bold text-xs border border-amber-500/30">
+                <h3 className="text-base sm:text-lg font-black text-white">{group.name}</h3>
+                <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-mono font-bold text-[11px] border border-amber-500/30">
                   {group.code} • {group.level}
                 </span>
               </div>
@@ -76,14 +76,17 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
         {/* Tab Navigation (Section 13) */}
-        <div className="flex items-center gap-1.5 p-2 bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 overflow-x-auto shrink-0">
+        <div
+          className="flex items-center bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 overflow-x-auto shrink-0"
+          style={{ padding: '10px 18px', gap: '8px' }}
+        >
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.key;
@@ -92,13 +95,14 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+                className={`rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   isActive
-                    ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs'
+                    ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs border border-amber-200/60 dark:border-amber-900/60'
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                 }`}
+                style={{ padding: '8px 16px' }}
               >
-                <Icon size={16} />
+                <Icon size={15} />
                 <span>{language === 'ar' ? tab.labelAr : tab.labelEn}</span>
               </button>
             );
@@ -106,49 +110,64 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
         </div>
 
         {/* Modal Body */}
-        <div className={`overflow-y-auto flex-1 p-6 sm:p-8 space-y-6 ${isRTL ? 'text-right' : 'text-left'}`}>
+        <div
+          className={`overflow-y-auto flex-1 space-y-5 ${isRTL ? 'text-right' : 'text-left'}`}
+          style={{ padding: '20px 24px' }}
+        >
           {/* TAB 1: Overview */}
           {activeTab === 'overview' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                 <div
                   className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
-                  style={{ padding: '20px 24px' }}
+                  style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '4px' }}
                 >
-                  <span className="text-xs text-slate-400 block mb-1">المعلم المشرف:</span>
-                  <span className="font-bold text-slate-900 dark:text-white text-sm">{group.teacherName}</span>
+                  <span className="text-xs text-slate-400 font-medium">
+                    {language === 'ar' ? 'المعلم المشرف:' : 'Assigned Teacher:'}
+                  </span>
+                  <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{group.teacherName}</span>
                 </div>
                 <div
                   className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
-                  style={{ padding: '20px 24px' }}
+                  style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '4px' }}
                 >
-                  <span className="text-xs text-slate-400 block mb-1">أيام الحصص والتوقيت:</span>
-                  <span className="font-bold text-slate-900 dark:text-white text-sm">{group.daysAr} ({group.startTime}–{group.endTime})</span>
+                  <span className="text-xs text-slate-400 font-medium">
+                    {language === 'ar' ? 'أيام الحصص والتوقيت:' : 'Schedule & Timing:'}
+                  </span>
+                  <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{group.daysAr} ({group.startTime}–{group.endTime})</span>
                 </div>
                 <div
                   className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
-                  style={{ padding: '20px 24px' }}
+                  style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '4px' }}
                 >
-                  <span className="text-xs text-slate-400 block mb-1">الطلاب / السعة:</span>
-                  <span className="font-mono font-bold text-purple-600 text-sm">{groupStudents.length} / {group.maxCapacity} طلاب</span>
+                  <span className="text-xs text-slate-400 font-medium">
+                    {language === 'ar' ? 'الطلاب / السعة:' : 'Students / Capacity:'}
+                  </span>
+                  <span className="font-mono font-bold text-purple-600 dark:text-purple-400 text-xs sm:text-sm">
+                    {groupStudents.length} / {group.maxCapacity} {language === 'ar' ? 'طلاب' : 'students'}
+                  </span>
                 </div>
               </div>
 
               {/* Progress and Attendance Stat Boxes */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div
-                  className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/60 space-y-2"
-                  style={{ padding: '24px 28px' }}
+                  className="rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/60"
+                  style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '8px' }}
                 >
-                  <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">متوسط نسبة حضور الفوج:</span>
-                  <div className="text-3xl font-black font-mono text-emerald-900 dark:text-emerald-200">{group.attendanceRate}%</div>
+                  <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                    {language === 'ar' ? 'متوسط نسبة حضور الفوج:' : 'Average Group Attendance:'}
+                  </span>
+                  <div className="text-2xl font-black font-mono text-emerald-900 dark:text-emerald-200">{group.attendanceRate}%</div>
                 </div>
                 <div
-                  className="rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/60 space-y-2"
-                  style={{ padding: '24px 28px' }}
+                  className="rounded-2xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/60"
+                  style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '8px' }}
                 >
-                  <span className="text-xs font-bold text-blue-800 dark:text-blue-300">متوسط التقدم في المنهاج:</span>
-                  <div className="text-3xl font-black font-mono text-blue-900 dark:text-blue-200">{group.averageProgress}%</div>
+                  <span className="text-xs font-bold text-blue-800 dark:text-blue-300">
+                    {language === 'ar' ? 'متوسط التقدم في المنهاج:' : 'Average Curriculum Progress:'}
+                  </span>
+                  <div className="text-2xl font-black font-mono text-blue-900 dark:text-blue-200">{group.averageProgress}%</div>
                 </div>
               </div>
             </div>
@@ -156,30 +175,35 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
 
           {/* TAB 2: Students List */}
           {activeTab === 'students' && (
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <h4 className="text-sm font-black text-slate-900 dark:text-white">
                 {language === 'ar' ? `قائمة الطلاب المسجلين بالفوج (${groupStudents.length})` : `Students Roster (${groupStudents.length})`}
               </h4>
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {groupStudents.map((st) => (
                   <div
                     key={st.id}
                     className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4"
-                    style={{ padding: '18px 24px' }}
+                    style={{ padding: '14px 18px' }}
                   >
                     <div>
-                      <div className="font-bold text-sm text-slate-900 dark:text-white">{st.fullNameAr} ({st.fullNameEn})</div>
-                      <div className="text-xs text-slate-400">ولي الأمر: {st.parentName} ({st.parentPhone})</div>
+                      <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{st.fullNameAr} ({st.fullNameEn})</div>
+                      <div className="text-[11px] text-slate-400 mt-0.5">
+                        {language === 'ar' ? 'ولي الأمر:' : 'Parent:'} {st.parentName} ({st.parentPhone})
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <span
-                        className="font-mono text-xs font-bold text-emerald-600 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700"
-                        style={{ padding: '6px 14px' }}
+                        className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700/80"
+                        style={{ padding: '4px 10px' }}
                       >
-                        {st.attendanceRate}% حضور
+                        {st.attendanceRate}% {language === 'ar' ? 'حضور' : 'Att.'}
                       </span>
-                      <span className="font-mono text-xs font-bold text-purple-600 bg-white dark:bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-700">
-                        {st.overallProgress}% تقدم
+                      <span
+                        className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700/80"
+                        style={{ padding: '4px 10px' }}
+                      >
+                        {st.overallProgress}% {language === 'ar' ? 'تقدم' : 'Prog.'}
                       </span>
                     </div>
                   </div>
@@ -190,30 +214,31 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
 
           {/* TAB 3: Attendance History */}
           {activeTab === 'attendance' && (
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <h4 className="text-sm font-black text-slate-900 dark:text-white">
                 {language === 'ar' ? 'سجل جلسات الحضور المسجلة' : 'Attendance Sessions History'}
               </h4>
               {groupAttendance.length === 0 ? (
                 <div className="py-8 text-center text-slate-400 text-xs font-semibold">
-                  لا توجد جلسات مسجلة حتى الآن
+                  {language === 'ar' ? 'لا توجد جلسات مسجلة حتى الآن' : 'No recorded sessions yet'}
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {groupAttendance.map((sess) => (
                     <div
                       key={sess.id}
-                      className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-2"
+                      className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-2"
+                      style={{ padding: '14px 18px' }}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-sm text-slate-900 dark:text-white font-mono">{sess.date} ({sess.dayNameAr})</span>
+                        <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white font-mono">{sess.date} ({sess.dayNameAr})</span>
                         <span className="text-xs text-slate-400 font-mono">{sess.sessionTime}</span>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap text-xs">
                         {sess.records.map((r, i) => (
                           <span
                             key={i}
-                            className={`px-2.5 py-1 rounded-lg font-bold ${
+                            className={`px-2.5 py-1 rounded-lg font-bold text-[11px] ${
                               r.status === 'present'
                                 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
                                 : r.status === 'late'
@@ -234,19 +259,23 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
 
           {/* TAB 4: Academic Progress */}
           {activeTab === 'progress' && (
-            <div className="space-y-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <h4 className="text-sm font-black text-slate-900 dark:text-white">
                 {language === 'ar' ? 'معدلات التقدم الأكاديمي لطلاب الفوج' : 'Academic Progress Across Curriculum'}
               </h4>
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {groupStudents.map((st) => (
-                  <div key={st.id} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1.5">
+                  <div
+                    key={st.id}
+                    className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                    style={{ padding: '12px 18px', display: 'flex', flexDirection: 'column', gap: '8px' }}
+                  >
                     <div className="flex items-center justify-between text-xs font-bold">
                       <span className="text-slate-900 dark:text-white">{st.fullNameAr}</span>
-                      <span className="font-mono text-purple-600">{st.overallProgress}%</span>
+                      <span className="font-mono text-purple-600 dark:text-purple-400">{st.overallProgress}%</span>
                     </div>
-                    <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-purple-600 rounded-full" style={{ width: `${st.overallProgress}%` }} />
+                    <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-700/80 rounded-full overflow-hidden">
+                      <div className="h-full bg-purple-600 rounded-full transition-all duration-500" style={{ width: `${st.overallProgress}%` }} />
                     </div>
                   </div>
                 ))}
@@ -256,18 +285,24 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
 
           {/* TAB 5: Performance & Homework */}
           {activeTab === 'performance' && (
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <h4 className="text-sm font-black text-slate-900 dark:text-white">
                 {language === 'ar' ? 'الواجبات المسندة للفوج' : 'Homework Tasks Assigned'}
               </h4>
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {groupHomework.map((hw) => (
-                  <div key={hw.id} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1">
+                  <div
+                    key={hw.id}
+                    className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                    style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '6px' }}
+                  >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-sm text-slate-900 dark:text-white">{hw.assignmentNameAr}</span>
-                      <span className="font-mono text-xs text-slate-400">تاريخ التسليم: {hw.dueDate}</span>
+                      <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{hw.assignmentNameAr}</span>
+                      <span className="font-mono text-[11px] text-slate-400">
+                        {language === 'ar' ? 'تاريخ التسليم:' : 'Due Date:'} {hw.dueDate}
+                      </span>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{hw.descriptionAr}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{hw.descriptionAr}</p>
                   </div>
                 ))}
               </div>
@@ -276,18 +311,22 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
 
           {/* TAB 6: Assessments */}
           {activeTab === 'assessments' && (
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <h4 className="text-sm font-black text-slate-900 dark:text-white">
                 {language === 'ar' ? 'نتائج التقييمات والاختبارات للفوج' : 'Group Assessment Results'}
               </h4>
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {groupAssessments.map((asm) => (
-                  <div key={asm.id} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div
+                    key={asm.id}
+                    className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between"
+                    style={{ padding: '14px 18px' }}
+                  >
                     <div>
-                      <span className="font-bold text-sm text-slate-900 dark:text-white block">{asm.studentNameAr} — {asm.assessmentType}</span>
-                      <span className="text-xs text-slate-400 font-mono">{asm.date}</span>
+                      <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white block">{asm.studentNameAr} — {asm.assessmentType}</span>
+                      <span className="text-[11px] text-slate-400 font-mono mt-0.5 block">{asm.date}</span>
                     </div>
-                    <span className="font-mono font-black text-sm text-purple-600">{asm.scores.overall}% ({asm.gradeLetterAr})</span>
+                    <span className="font-mono font-black text-xs sm:text-sm text-purple-600 dark:text-purple-400">{asm.scores.overall}% ({asm.gradeLetterAr})</span>
                   </div>
                 ))}
               </div>
