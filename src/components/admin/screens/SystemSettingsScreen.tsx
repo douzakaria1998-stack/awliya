@@ -69,51 +69,71 @@ export function SystemSettingsScreen() {
       <form onSubmit={handleSave}>
         {/* Card 1: Academy Profile */}
         <div
-          className="rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-4"
+          className="rounded-[32px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs"
           style={{
-            padding: '32px 36px',
-            marginBottom: '32px',
+            padding: '36px 42px',
+            marginBottom: '36px',
           }}
         >
-          <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-            <School size={20} className="text-rose-500" />
-            <h3 className="font-black text-base text-slate-900 dark:text-white">بيانات الأكاديمية الرسمية</h3>
+          <div
+            className="flex items-center gap-3.5 border-b border-slate-100 dark:border-slate-800"
+            style={{ paddingBottom: '20px', marginBottom: '28px' }}
+          >
+            <div className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-500 flex items-center justify-center font-black shrink-0">
+              <School size={20} />
+            </div>
+            <div>
+              <h3 className="font-black text-lg text-slate-900 dark:text-white">بيانات الأكاديمية الرسمية</h3>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">تحديث المعلومات الأساسية وعنوان المدرسة وأرقام التواصل</p>
+            </div>
           </div>
 
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '26px' }}>
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label
+                className="block text-xs sm:text-sm font-black text-slate-700 dark:text-slate-300"
+                style={{ marginBottom: '10px' }}
+              >
                 اسم الأكاديمية (Brand Name):
               </label>
               <input
                 type="text"
                 value={academyName}
                 onChange={(e) => setAcademyName(e.target.value)}
-                className="w-full h-11 px-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                className="w-full rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/90 dark:border-slate-750 text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500/80 transition-all"
+                style={{ padding: '14px 22px', height: '52px' }}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label
+                className="block text-xs sm:text-sm font-black text-slate-700 dark:text-slate-300"
+                style={{ marginBottom: '10px' }}
+              >
                 العنوان الرسمي (يظهر في أسفل الشهادة):
               </label>
               <input
                 type="text"
                 value={academyAddress}
                 onChange={(e) => setAcademyAddress(e.target.value)}
-                className="w-full h-11 px-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                className="w-full rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/90 dark:border-slate-750 text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500/80 transition-all"
+                style={{ padding: '14px 22px', height: '52px' }}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label
+                className="block text-xs sm:text-sm font-black text-slate-700 dark:text-slate-300"
+                style={{ marginBottom: '10px' }}
+              >
                 أرقام الهواتف الرسمية:
               </label>
               <input
                 type="text"
                 value={academyPhone}
                 onChange={(e) => setAcademyPhone(e.target.value)}
-                className="w-full h-11 px-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                className="w-full rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/90 dark:border-slate-750 text-sm font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500/80 transition-all"
+                style={{ padding: '14px 22px', height: '52px' }}
               />
             </div>
           </div>
@@ -121,37 +141,49 @@ export function SystemSettingsScreen() {
 
         {/* Card 2: Certificate Design Preview & Actions */}
         <div
-          className="rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-4"
+          className="rounded-[32px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-5"
           style={{
-            padding: '32px 36px',
-            marginBottom: '32px',
+            padding: '36px 42px',
+            marginBottom: '36px',
           }}
         >
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-            <div className="flex items-center gap-3">
-              <Award size={20} className="text-amber-500" />
-              <h3 className="font-black text-base text-slate-900 dark:text-white">نموذج الشهادات المعتمد (Certificate Template)</h3>
+          <div
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800"
+            style={{ paddingBottom: '20px', marginBottom: '24px' }}
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center font-black shrink-0">
+                <Award size={20} />
+              </div>
+              <div>
+                <h3 className="font-black text-lg text-slate-900 dark:text-white">نموذج الشهادات المعتمد (Certificate Template)</h3>
+                <p className="text-xs text-slate-400 font-medium mt-0.5">معاينة وتخصيص معايير الشهادات الصادرة للطلاب</p>
+              </div>
             </div>
 
             <button
               type="button"
               onClick={handleTestCertificate}
-              className="px-4 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 border border-rose-200 dark:border-rose-800 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              className="rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 border border-rose-200 dark:border-rose-800 text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 whitespace-nowrap shadow-2xs hover:scale-105 active:scale-95"
+              style={{ padding: '12px 24px' }}
             >
-              <Download size={14} />
+              <Download size={15} />
               <span>تنزيل شهادة تجريبية (My School)</span>
             </button>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs text-slate-600 dark:text-slate-300 font-medium">
-            <div className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Sparkles size={14} className="text-amber-500" />
-              <span>المعايير المدمجة:</span>
+          <div
+            className="rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-750 space-y-2.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium"
+            style={{ padding: '22px 26px' }}
+          >
+            <div className="font-black text-slate-900 dark:text-white flex items-center gap-2 text-sm">
+              <Sparkles size={16} className="text-amber-500" />
+              <span>المعايير المدمجة في الشهادة:</span>
             </div>
-            <ul className="list-disc list-inside space-y-1 text-slate-500 dark:text-slate-400">
-              <li>الإطار الهندسي الملون (Guilloche & Geometric Frame) A4 Landscape.</li>
-              <li>شعار My School الرسمي مع شارة الإنجاز وتوقيع الإدارة الأكاديمية.</li>
-              <li>الترميز اللغوي الدولي CEFR (A1.1 حتى C2).</li>
+            <ul className="list-disc list-inside space-y-1.5 text-slate-500 dark:text-slate-400 leading-relaxed pr-2">
+              <li>الإطار الهندسي الملون (Guilloche & Geometric Frame) بحجم A4 Landscape.</li>
+              <li>شعار My School الرسمي مع شارة الإنجاز وتوقيع الإدارة الأكاديمية المعتمد.</li>
+              <li>الترميز اللغوي الدولي المعياري CEFR (من المستوى A1.1 حتى C2).</li>
             </ul>
           </div>
         </div>
@@ -160,9 +192,10 @@ export function SystemSettingsScreen() {
         <div className="flex justify-end pt-2">
           <button
             type="submit"
-            className="px-8 py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-sm shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+            className="rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2.5 cursor-pointer whitespace-nowrap"
+            style={{ padding: '14px 36px' }}
           >
-            <Save size={16} />
+            <Save size={18} />
             <span>حفظ التغييرات</span>
           </button>
         </div>
