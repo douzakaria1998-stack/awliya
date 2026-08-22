@@ -735,28 +735,30 @@ export function StudentsManagementScreen() {
                   </div>
 
                   {/* Mode Toggles */}
-                  <div className="flex items-center gap-1 rounded-xl bg-white dark:bg-slate-850 p-1 border border-purple-200/60 dark:border-purple-800/60 shadow-2xs">
+                  <div className="inline-flex items-center gap-1.5 rounded-2xl bg-slate-100 dark:bg-slate-900 p-1.5 border border-purple-200/50 dark:border-slate-800 shadow-inner shrink-0">
                     <button
                       type="button"
                       onClick={() => setParentLinkMode('existing')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                      className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                         parentLinkMode === 'existing'
-                          ? 'bg-purple-600 text-white shadow-xs'
-                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                          ? 'bg-purple-600 text-white shadow-sm scale-[1.02]'
+                          : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                       }`}
                     >
-                      {language === 'ar' ? 'ولي أمر مسجل' : 'Existing Parent'}
+                      <UserCheck size={14} />
+                      <span>{language === 'ar' ? 'ولي أمر مسجل' : 'Existing Parent'}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setParentLinkMode('new')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                      className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                         parentLinkMode === 'new'
-                          ? 'bg-purple-600 text-white shadow-xs'
-                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                          ? 'bg-purple-600 text-white shadow-sm scale-[1.02]'
+                          : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                       }`}
                     >
-                      {language === 'ar' ? 'ولي أمر جديد' : 'New Parent'}
+                      <UserPlus size={14} />
+                      <span>{language === 'ar' ? 'ولي أمر جديد' : 'New Parent'}</span>
                     </button>
                   </div>
                 </div>
