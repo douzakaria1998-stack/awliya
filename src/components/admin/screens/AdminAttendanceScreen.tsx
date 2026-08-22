@@ -509,10 +509,10 @@ export function AdminAttendanceScreen() {
                             e.stopPropagation();
                             openAttendanceDrawer(grp);
                           }}
-                          className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                          style={{ padding: '10px 22px' }}
+                          className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                          style={{ padding: '7px 16px' }}
                         >
-                          <CalendarCheck2 size={16} />
+                          <CalendarCheck2 size={14} />
                           <span>{language === 'ar' ? 'رصد الحضور' : language === 'fr' ? 'Faire l\'appel' : 'Take Attendance'}</span>
                         </button>
                       </td>
