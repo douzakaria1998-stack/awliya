@@ -165,7 +165,8 @@ export function AdminPerformanceScreen() {
           <button
             type="button"
             onClick={() => setIsAddHomeworkOpen(true)}
-            className="px-5 py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+            className="rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
+            style={{ padding: '12px 28px', gap: '10px' }}
           >
             <Plus size={16} />
             <span>{language === 'ar' ? 'إسناد واجب جديد' : 'Create Homework'}</span>
@@ -176,7 +177,8 @@ export function AdminPerformanceScreen() {
           <button
             type="button"
             onClick={() => setIsAddAssessmentOpen(true)}
-            className="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+            className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
+            style={{ padding: '12px 28px', gap: '10px' }}
           >
             <Plus size={16} />
             <span>{language === 'ar' ? 'رصد تقييم مهارات جديد' : 'Record 4-Skill Assessment'}</span>
@@ -187,7 +189,8 @@ export function AdminPerformanceScreen() {
           <button
             type="button"
             onClick={() => setIsAddFeedbackOpen(true)}
-            className="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+            className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
+            style={{ padding: '12px 28px', gap: '10px' }}
           >
             <Plus size={16} />
             <span>{language === 'ar' ? 'إرسال توجيه تربوي لولي الأمر' : 'Send Teacher Feedback'}</span>
@@ -197,17 +200,22 @@ export function AdminPerformanceScreen() {
 
       {/* 3-Part Navigation Bar (Section 22 in PDF: 1. Homework, 2. Assessments, 3. Teacher Feedback) */}
       <div
-        className="flex items-center gap-2.5 p-2 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs"
-        style={{ marginBottom: '36px' }}
+        className="flex items-center bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[24px] shadow-2xs"
+        style={{
+          padding: '8px 10px',
+          gap: '10px',
+          marginBottom: '36px',
+        }}
       >
         <button
           type="button"
           onClick={() => setActiveSubTab('homework')}
-          className={`flex-1 py-3.5 px-5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
+          className={`flex-1 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center transition-all cursor-pointer ${
             activeSubTab === 'homework'
               ? 'bg-purple-600 text-white shadow-md'
               : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          style={{ padding: '13px 22px', gap: '10px' }}
         >
           <BookCheck size={18} />
           <span>1. {language === 'ar' ? 'الواجبات المنزلية (Homework)' : 'Homework'}</span>
@@ -216,11 +224,12 @@ export function AdminPerformanceScreen() {
         <button
           type="button"
           onClick={() => setActiveSubTab('assessments')}
-          className={`flex-1 py-3.5 px-5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
+          className={`flex-1 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center transition-all cursor-pointer ${
             activeSubTab === 'assessments'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          style={{ padding: '13px 22px', gap: '10px' }}
         >
           <Award size={18} />
           <span>2. {language === 'ar' ? 'تقييم المهارات واختبار المستوى (Assessments)' : 'Assessments (4 Skills)'}</span>
@@ -229,11 +238,12 @@ export function AdminPerformanceScreen() {
         <button
           type="button"
           onClick={() => setActiveSubTab('feedback')}
-          className={`flex-1 py-3.5 px-5 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
+          className={`flex-1 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center transition-all cursor-pointer ${
             activeSubTab === 'feedback'
               ? 'bg-emerald-600 text-white shadow-md'
               : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          style={{ padding: '13px 22px', gap: '10px' }}
         >
           <MessageSquareQuote size={18} />
           <span>3. {language === 'ar' ? 'التوجيهات التربوية والتواصل (2-Way Feedback)' : 'Teacher & Parent Feedback'}</span>
