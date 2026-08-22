@@ -686,7 +686,9 @@ export function AdminAcademicPathScreen() {
                     value={newLevelNameAr}
                     onChange={(e) => setNewLevelNameAr(e.target.value)}
                     placeholder="مثال: المستوى A1 — المبتدئ والتأسيس"
-                    className="w-full h-10 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+                    style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                    dir="rtl"
                   />
                 </div>
 
@@ -699,7 +701,9 @@ export function AdminAcademicPathScreen() {
                     value={newLevelNameEn}
                     onChange={(e) => setNewLevelNameEn(e.target.value)}
                     placeholder="e.g. Level A1 — Beginner & Foundation"
-                    className="w-full h-10 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+                    className="w-full h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+                    style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                    dir="ltr"
                   />
                 </div>
 
@@ -711,7 +715,8 @@ export function AdminAcademicPathScreen() {
                     <select
                       value={newLevelCode}
                       onChange={(e) => setNewLevelCode(e.target.value as any)}
-                      className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
+                      className="w-full h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
+                      style={{ paddingLeft: '14px', paddingRight: '14px' }}
                     >
                       <option value="A1">A1 — Breakthrough</option>
                       <option value="A2">A2 — Waystage</option>
@@ -731,7 +736,8 @@ export function AdminAcademicPathScreen() {
                       onChange={(e) => setNewUnitsCount(Math.max(1, Number(e.target.value)))}
                       min={1}
                       max={12}
-                      className="w-full h-10 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
+                      className="w-full h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
+                      style={{ paddingLeft: '16px', paddingRight: '16px' }}
                     />
                   </div>
                 </div>
@@ -745,7 +751,8 @@ export function AdminAcademicPathScreen() {
                     value={newLevelDescAr}
                     onChange={(e) => setNewLevelDescAr(e.target.value)}
                     placeholder="اكتساب المفردات الأساسية وتكوين الجمل البسيطة..."
-                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors resize-none leading-relaxed"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors resize-none leading-relaxed"
+                    style={{ padding: '12px 16px' }}
                   />
                 </div>
 
@@ -912,7 +919,8 @@ export function AdminAcademicPathScreen() {
                           value={unit.titleAr}
                           onChange={(e) => handleUpdateUnit(unit.id, { titleAr: e.target.value })}
                           placeholder={language === 'ar' ? `مثال: الوحدة ${uIdx + 1}: محاور التأسيس` : `Unit ${uIdx + 1} Title (AR)`}
-                          className="w-full h-10 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                          className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                          style={{ paddingLeft: '18px', paddingRight: '18px' }}
                           dir="rtl"
                         />
                       </div>
@@ -925,7 +933,8 @@ export function AdminAcademicPathScreen() {
                           value={unit.titleEn}
                           onChange={(e) => handleUpdateUnit(unit.id, { titleEn: e.target.value })}
                           placeholder={`e.g. Unit ${uIdx + 1}: Core Foundations`}
-                          className="w-full h-10 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                          className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                          style={{ paddingLeft: '18px', paddingRight: '18px' }}
                           dir="ltr"
                         />
                       </div>
@@ -980,7 +989,8 @@ export function AdminAcademicPathScreen() {
                                   value={lesson.titleAr}
                                   onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleAr: e.target.value })}
                                   placeholder={language === 'ar' ? `عنوان الدرس ${lIdx + 1}` : `Lesson ${lIdx + 1} Title (AR)`}
-                                  className="w-full h-9 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                  className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                  style={{ paddingLeft: '16px', paddingRight: '16px' }}
                                   dir="rtl"
                                 />
                               </div>
@@ -993,7 +1003,8 @@ export function AdminAcademicPathScreen() {
                                   value={lesson.titleEn}
                                   onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleEn: e.target.value })}
                                   placeholder={`Lesson ${lIdx + 1} Title (EN)`}
-                                  className="w-full h-9 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                                  className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                                  style={{ paddingLeft: '16px', paddingRight: '16px' }}
                                   dir="ltr"
                                 />
                               </div>
@@ -1010,7 +1021,8 @@ export function AdminAcademicPathScreen() {
                                   value={lesson.contentSummary}
                                   onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { contentSummary: e.target.value })}
                                   placeholder={language === 'ar' ? 'ملخص ومخرجات الدرس...' : 'Lesson content summary...'}
-                                  className="w-full h-9 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                                  className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                                  style={{ paddingLeft: '16px', paddingRight: '16px' }}
                                 />
                               </div>
                               <div>
@@ -1022,7 +1034,8 @@ export function AdminAcademicPathScreen() {
                                   value={lesson.vocabString}
                                   onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { vocabString: e.target.value })}
                                   placeholder={language === 'ar' ? 'المفردات (مفصولة بفواصل)' : 'Key Vocabulary (comma-separated)'}
-                                  className="w-full h-9 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                                  className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                                  style={{ paddingLeft: '16px', paddingRight: '16px' }}
                                   dir="ltr"
                                 />
                               </div>
