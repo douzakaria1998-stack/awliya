@@ -1274,9 +1274,9 @@ export function AdminAcademicPathScreen() {
 
           {/* LEVEL 2: Group Detail Page */}
           {progressViewMode === 'group_detail' && activeProgressGroup && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-              {/* Back Button & Group Header */}
-              <div className="flex flex-col gap-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              {/* Back Button */}
+              <div>
                 <button
                   type="button"
                   onClick={handleBackToGroups}
@@ -1286,69 +1286,69 @@ export function AdminAcademicPathScreen() {
                   {isRTL ? <ArrowRight size={15} /> : <ArrowLeft size={15} />}
                   <span>{language === 'ar' ? 'العودة لقائمة الأفواج' : 'Back to Groups'}</span>
                 </button>
+              </div>
 
-                {/* Group Summary Card */}
-                <div
-                  className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6"
-                  style={{ padding: '26px 30px' }}
-                >
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white font-mono font-black text-xs shadow-xs">
-                        {activeProgressGroup.level}
-                      </span>
-                      <h3 className="font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
-                        {activeProgressGroup.name}
-                      </h3>
-                      <span className="text-xs text-slate-400 font-mono font-medium">
-                        ({activeProgressGroup.code})
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-5 text-xs font-bold text-slate-500 dark:text-slate-400 pt-1">
-                      <span className="flex items-center gap-1.5">
-                        <Languages size={15} className="text-indigo-500" />
-                        {activeProgressGroup.language === 'French' ? 'اللغة الفرنسية (DELF)' : 'اللغة الإنجليزية (CEFR)'}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1.5">
-                        <GraduationCap size={15} className="text-purple-500" />
-                        {language === 'ar' ? `المعلم: ${activeProgressGroup.teacherName}` : `Teacher: ${activeProgressGroup.teacherName}`}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1.5">
-                        <Users size={15} className="text-emerald-500" />
-                        {groupStudentsList.length} {language === 'ar' ? 'طلاب مسجلين' : 'Students'}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1.5">
-                        <Clock size={15} className="text-amber-500" />
-                        {activeProgressGroup.daysAr} ({activeProgressGroup.startTime} - {activeProgressGroup.endTime})
-                      </span>
-                    </div>
+              {/* Container 1: Group Summary Card */}
+              <div
+                className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6"
+                style={{ padding: '26px 30px' }}
+              >
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white font-mono font-black text-xs shadow-xs">
+                      {activeProgressGroup.level}
+                    </span>
+                    <h3 className="font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
+                      {activeProgressGroup.name}
+                    </h3>
+                    <span className="text-xs text-slate-400 font-mono font-medium">
+                      ({activeProgressGroup.code})
+                    </span>
                   </div>
 
-                  {/* Group Average Progress Metric */}
-                  <div
-                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center gap-4 shrink-0 shadow-2xs"
-                    style={{ padding: '16px 24px' }}
-                  >
-                    <div>
-                      <span className="text-[11px] font-bold text-slate-400 block">
-                        {language === 'ar' ? 'متوسط تقدم الفوج' : 'Average Group Progress'}
-                      </span>
-                      <span className="text-2xl font-black font-mono text-indigo-600 dark:text-indigo-400 block mt-0.5">
-                        {activeProgressGroup.averageProgress || 0}%
-                      </span>
-                    </div>
-                    <div className="w-13 h-13 rounded-full border-4 border-indigo-500/20 border-t-indigo-600 flex items-center justify-center font-bold text-xs font-mono">
+                  <div className="flex flex-wrap items-center gap-5 text-xs font-bold text-slate-500 dark:text-slate-400 pt-1">
+                    <span className="flex items-center gap-1.5">
+                      <Languages size={15} className="text-indigo-500" />
+                      {activeProgressGroup.language === 'French' ? 'اللغة الفرنسية (DELF)' : 'اللغة الإنجليزية (CEFR)'}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1.5">
+                      <GraduationCap size={15} className="text-purple-500" />
+                      {language === 'ar' ? `المعلم: ${activeProgressGroup.teacherName}` : `Teacher: ${activeProgressGroup.teacherName}`}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1.5">
+                      <Users size={15} className="text-emerald-500" />
+                      {groupStudentsList.length} {language === 'ar' ? 'طلاب مسجلين' : 'Students'}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1.5">
+                      <Clock size={15} className="text-amber-500" />
+                      {activeProgressGroup.daysAr} ({activeProgressGroup.startTime} - {activeProgressGroup.endTime})
+                    </span>
+                  </div>
+                </div>
+
+                {/* Group Average Progress Metric */}
+                <div
+                  className="bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center gap-4 shrink-0 shadow-2xs"
+                  style={{ padding: '16px 24px' }}
+                >
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-400 block">
+                      {language === 'ar' ? 'متوسط تقدم الفوج' : 'Average Group Progress'}
+                    </span>
+                    <span className="text-2xl font-black font-mono text-indigo-600 dark:text-indigo-400 block mt-0.5">
                       {activeProgressGroup.averageProgress || 0}%
-                    </div>
+                    </span>
+                  </div>
+                  <div className="w-13 h-13 rounded-full border-4 border-indigo-500/20 border-t-indigo-600 flex items-center justify-center font-bold text-xs font-mono">
+                    {activeProgressGroup.averageProgress || 0}%
                   </div>
                 </div>
               </div>
 
-              {/* Section 3: Students Table (Group Detail) */}
+              {/* Container 2: Section 3: Students Table (Group Detail) */}
               <div className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
                 <div
                   className="border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
@@ -1406,11 +1406,11 @@ export function AdminAcademicPathScreen() {
                           {language === 'ar' ? 'التقدم الإجمالي (Overall Progress)' : 'Overall Progress'}
                         </th>
                         <th
-                          className={`py-4 px-6 font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
+                          className={`py-4 px-8 font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
                         >
                           {language === 'ar' ? 'الوحدة الحالية (Current Unit)' : 'Current Unit'}
                         </th>
-                        <th className="py-4 px-6 font-extrabold text-center">
+                        <th className="py-4 px-8 font-extrabold text-center">
                           {language === 'ar' ? 'الحالة (Status)' : 'Status'}
                         </th>
                         <th
@@ -1470,7 +1470,7 @@ export function AdminAcademicPathScreen() {
                             </td>
 
                             <td className="py-4.5 px-8 text-center">
-                              <div className="flex items-center justify-center gap-3 min-w-[140px]">
+                              <div className="flex items-center justify-center gap-3.5 min-w-[160px]">
                                 <div className="flex-1 h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                                   <div
                                     className="h-full rounded-full transition-all duration-500"
@@ -1481,19 +1481,19 @@ export function AdminAcademicPathScreen() {
                                     }}
                                   />
                                 </div>
-                                <span className="font-mono font-black text-xs text-slate-900 dark:text-white shrink-0">
+                                <span className="font-mono font-black text-xs text-slate-900 dark:text-white shrink-0 min-w-[36px]">
                                   {progress}%
                                 </span>
                               </div>
                             </td>
 
-                            <td className="py-4.5 px-6 font-bold text-slate-700 dark:text-slate-300 text-xs">
+                            <td className="py-4.5 px-8 font-bold text-slate-700 dark:text-slate-300 text-xs">
                               {language === 'ar'
                                 ? `الوحدة ${currentUnitNumber}: المحور التعليمي ${currentUnitNumber}`
                                 : `Unit ${currentUnitNumber}`}
                             </td>
 
-                            <td className="py-4.5 px-6 text-center">
+                            <td className="py-4.5 px-8 text-center">
                               <span
                                 className={`px-3 py-1 rounded-full font-bold text-[11px] border ${
                                   progress === 100
@@ -1538,9 +1538,9 @@ export function AdminAcademicPathScreen() {
 
           {/* LEVEL 3: Student Academic Progress Detail */}
           {progressViewMode === 'student_detail' && activeProgressStudent && studentCurriculumLevel && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-              {/* Back Button & Student Header (Section 4 of PDF) */}
-              <div className="flex flex-col gap-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              {/* Back Button & Navigation Bar */}
+              <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
                   <button
                     type="button"
@@ -1563,7 +1563,7 @@ export function AdminAcademicPathScreen() {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pt-1">
                   <button
                     type="button"
                     onClick={handleBackToGroupDetail}
@@ -1574,56 +1574,56 @@ export function AdminAcademicPathScreen() {
                     <span>{language === 'ar' ? 'العودة للفوج' : 'Back to Group'}</span>
                   </button>
                 </div>
+              </div>
 
-                {/* Student Profile & Progress Banner */}
-                <div
-                  className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6"
-                  style={{ padding: '26px 30px' }}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shrink-0 shadow-md">
-                      {activeProgressStudent.fullNameAr.slice(0, 1)}
-                    </div>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2.5">
-                        <h3 className="font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
-                          {activeProgressStudent.fullNameAr}
-                        </h3>
-                        <span
-                          className="px-2.5 py-0.5 rounded-lg text-white font-mono font-bold text-xs shadow-2xs"
-                          style={{ backgroundColor: studentCurriculumLevel.color }}
-                        >
-                          {studentCurriculumLevel.cefrCode} — {studentCurriculumLevel.language}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-400 font-medium mt-1">
-                        {language === 'ar' ? `المعلم المسؤول: ${activeProgressStudent.teacherName}` : `Teacher: ${activeProgressStudent.teacherName}`} • {activeProgressStudent.groupName}
-                      </p>
-                    </div>
+              {/* Container 1: Student Profile & Progress Banner */}
+              <div
+                className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6"
+                style={{ padding: '26px 30px' }}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shrink-0 shadow-md">
+                    {activeProgressStudent.fullNameAr.slice(0, 1)}
                   </div>
-
-                  {/* Calculated Overall Progress Card */}
-                  <div
-                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center gap-4 shrink-0 shadow-2xs"
-                    style={{ padding: '16px 24px' }}
-                  >
-                    <div>
-                      <span className="text-[11px] font-bold text-slate-400 block">
-                        {language === 'ar' ? 'التقدم الأكاديمي الإجمالي' : 'Overall Progress'}
-                      </span>
-                      <span className="text-2xl sm:text-3xl font-black font-mono text-indigo-600 dark:text-indigo-400 block mt-0.5">
-                        {activeProgressStudent.overallProgress || 0}%
-                      </span>
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block mt-0.5">
-                        {language === 'ar' ? 'محتسب تلقائياً من الدروس المنجزة ✓' : 'Auto-calculated from lessons ✓'}
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <h3 className="font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
+                        {activeProgressStudent.fullNameAr}
+                      </h3>
+                      <span
+                        className="px-2.5 py-0.5 rounded-lg text-white font-mono font-bold text-xs shadow-2xs"
+                        style={{ backgroundColor: studentCurriculumLevel.color }}
+                      >
+                        {studentCurriculumLevel.cefrCode} — {studentCurriculumLevel.language}
                       </span>
                     </div>
+                    <p className="text-xs text-slate-400 font-medium mt-1">
+                      {language === 'ar' ? `المعلم المسؤول: ${activeProgressStudent.teacherName}` : `Teacher: ${activeProgressStudent.teacherName}`} • {activeProgressStudent.groupName}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Calculated Overall Progress Card */}
+                <div
+                  className="bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center gap-4 shrink-0 shadow-2xs"
+                  style={{ padding: '16px 24px' }}
+                >
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-400 block">
+                      {language === 'ar' ? 'التقدم الأكاديمي الإجمالي' : 'Overall Progress'}
+                    </span>
+                    <span className="text-2xl sm:text-3xl font-black font-mono text-indigo-600 dark:text-indigo-400 block mt-0.5">
+                      {activeProgressStudent.overallProgress || 0}%
+                    </span>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block mt-0.5">
+                      {language === 'ar' ? 'محتسب تلقائياً من الدروس المنجزة ✓' : 'Auto-calculated from lessons ✓'}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Section 4, 5, 6: Units & Lessons Breakdown with 3 Interactive States */}
-              <div className="space-y-4">
+              {/* Container 2: Section 4, 5, 6: Units & Lessons Breakdown with 3 Interactive States */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div className="flex items-center justify-between">
                   <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
                     <BookOpen size={18} className="text-indigo-600 dark:text-indigo-400" />
