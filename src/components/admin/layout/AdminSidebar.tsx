@@ -269,18 +269,18 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
         </div>
 
         {/* 3. Navigation List grouped into 3 Categories (Section 33, 35) */}
-        <div className="space-y-5 px-3">
+        <div className="space-y-7 px-4">
           {navigationCategories.map((cat, catIdx) => {
             const visibleItems = cat.items.filter((item) => item.allowedRoles.includes(currentRole));
             if (visibleItems.length === 0) return null;
 
             return (
-              <div key={catIdx} className="space-y-1">
-                <div className="px-3 text-[10px] font-black text-slate-500 uppercase tracking-wider">
+              <div key={catIdx}>
+                <div className="px-3 text-[11px] font-black text-slate-400/80 uppercase tracking-wider mb-2.5">
                   {language === 'ar' ? cat.titleAr : cat.titleEn}
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-2">
                   {visibleItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeTab === item.key;
@@ -292,19 +292,20 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                           setActiveTab(item.key);
                           if (onCloseMobile) onCloseMobile();
                         }}
-                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+                        className={`w-full flex items-center justify-between rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
                           isActive
-                            ? 'bg-purple-600 text-white shadow-sm'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800/70'
+                            ? 'bg-purple-600 text-white shadow-md'
+                            : 'text-slate-400 hover:text-white hover:bg-slate-800/80'
                         }`}
+                        style={{ padding: '12px 18px' }}
                       >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <Icon size={18} className="shrink-0" />
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <Icon size={20} className={isActive ? 'text-white shrink-0' : 'text-slate-400 shrink-0'} />
                           <span className="truncate">{language === 'ar' ? item.labelAr : item.labelEn}</span>
                         </div>
 
                         {item.badgeCount !== undefined && item.badgeCount > 0 && (
-                          <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white font-mono font-bold text-[10px] shadow-xs">
+                          <span className="px-2.5 py-0.5 rounded-full bg-rose-500 text-white font-mono font-extrabold text-[11px] shadow-xs shrink-0">
                             {item.badgeCount}
                           </span>
                         )}
