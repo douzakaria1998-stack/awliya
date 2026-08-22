@@ -146,13 +146,13 @@ export function StudentsManagementScreen() {
 
       {/* Search & Comprehensive Multi-Filters (Section 25) */}
       <div
-        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs space-y-4"
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs space-y-6"
         style={{
-          padding: '28px 32px',
-          marginBottom: '32px',
+          padding: '36px 40px',
+          marginBottom: '36px',
         }}
       >
-        <div className="flex flex-col lg:flex-row gap-3 items-center justify-between">
+        <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
           {/* Search Input */}
           <div className="relative flex-1 w-full">
             <input
@@ -160,35 +160,38 @@ export function StudentsManagementScreen() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={language === 'ar' ? 'بحث بالاسم، ولي الأمر، الفوج، أو المسار...' : 'Search student, parent, group...'}
-              className={`w-full h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-medium focus:outline-none focus:border-purple-500 transition-colors ${
-                isRTL ? 'pr-10 pl-4 text-right' : 'pl-10 pr-4 text-left'
-              }`}
+              className="w-full h-12 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-medium focus:outline-none focus:border-purple-500 transition-colors shadow-2xs"
+              style={{
+                paddingLeft: isRTL ? '20px' : '50px',
+                paddingRight: isRTL ? '50px' : '20px',
+                textAlign: isRTL ? 'right' : 'left',
+              }}
             />
             <Search
-              size={18}
+              size={20}
               className={`absolute top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none ${
-                isRTL ? 'right-3.5' : 'left-3.5'
+                isRTL ? 'right-4' : 'left-4'
               }`}
             />
           </div>
 
           {/* Quick Result Counter */}
-          <div className="text-xs font-bold text-slate-400 shrink-0">
+          <div className="text-xs sm:text-sm font-bold text-slate-400 shrink-0">
             {language === 'ar' ? `النتائج المعروضة: ${filteredStudents.length} طالب` : `Showing ${filteredStudents.length} students`}
           </div>
         </div>
 
         {/* Filter Dropdowns Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 pt-5 border-t border-slate-100 dark:border-slate-800">
           {/* Level Filter */}
           <div>
-            <label className="text-[11px] font-bold text-slate-400 block mb-1">
+            <label className="text-xs font-bold text-slate-400 block mb-2">
               {language === 'ar' ? 'المستوى (Level)' : 'Level'}
             </label>
             <select
               value={selectedLevel}
               onChange={(e) => setSelectedLevel(e.target.value)}
-              className="w-full h-9 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-2 cursor-pointer"
+              className="w-full h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer"
             >
               <option value="all">{language === 'ar' ? 'جميع المستويات' : 'All Levels'}</option>
               <option value="A1">A1 — Beginner</option>
@@ -201,13 +204,13 @@ export function StudentsManagementScreen() {
 
           {/* Group Filter */}
           <div>
-            <label className="text-[11px] font-bold text-slate-400 block mb-1">
+            <label className="text-xs font-bold text-slate-400 block mb-2">
               {language === 'ar' ? 'الفوج (Group)' : 'Group'}
             </label>
             <select
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value)}
-              className="w-full h-9 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-2 cursor-pointer"
+              className="w-full h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer"
             >
               <option value="all">{language === 'ar' ? 'جميع الأفواج' : 'All Groups'}</option>
               {groups.map((g) => (
@@ -220,13 +223,13 @@ export function StudentsManagementScreen() {
 
           {/* Teacher Filter */}
           <div>
-            <label className="text-[11px] font-bold text-slate-400 block mb-1">
+            <label className="text-xs font-bold text-slate-400 block mb-2">
               {language === 'ar' ? 'المعلم (Teacher)' : 'Teacher'}
             </label>
             <select
               value={selectedTeacher}
               onChange={(e) => setSelectedTeacher(e.target.value)}
-              className="w-full h-9 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-2 cursor-pointer"
+              className="w-full h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer"
             >
               <option value="all">{language === 'ar' ? 'جميع المعلمين' : 'All Teachers'}</option>
               {teachers.map((t) => (
@@ -239,13 +242,13 @@ export function StudentsManagementScreen() {
 
           {/* Language Filter */}
           <div>
-            <label className="text-[11px] font-bold text-slate-400 block mb-1">
+            <label className="text-xs font-bold text-slate-400 block mb-2">
               {language === 'ar' ? 'المسار اللغوي' : 'Language'}
             </label>
             <select
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="w-full h-9 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-2 cursor-pointer"
+              className="w-full h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer"
             >
               <option value="all">{language === 'ar' ? 'كل المسارات' : 'All Tracks'}</option>
               <option value="English">English</option>
@@ -256,13 +259,13 @@ export function StudentsManagementScreen() {
 
           {/* Status Filter */}
           <div>
-            <label className="text-[11px] font-bold text-slate-400 block mb-1">
+            <label className="text-xs font-bold text-slate-400 block mb-2">
               {language === 'ar' ? 'الحالة (Status)' : 'Status'}
             </label>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full h-9 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-2 cursor-pointer"
+              className="w-full h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer"
             >
               <option value="all">{language === 'ar' ? 'جميع الحالات' : 'All Statuses'}</option>
               <option value="active">Active (نشط)</option>
@@ -276,27 +279,28 @@ export function StudentsManagementScreen() {
 
       {/* Main Students Table (Section 7, 38) */}
       <div
-        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs overflow-hidden"
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs overflow-hidden"
+        style={{ marginBottom: '40px' }}
       >
         <div className="overflow-x-auto">
           <table className="w-full text-xs sm:text-sm text-right">
-            <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-400 font-bold">
+            <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
               <tr>
-                <th className="py-3.5 px-6 text-right">{language === 'ar' ? 'الطالب' : 'Student'}</th>
-                <th className="py-3.5 px-4 text-center">{language === 'ar' ? 'المستوى' : 'Level'}</th>
-                <th className="py-3.5 px-4 text-center">{language === 'ar' ? 'الفوج' : 'Group'}</th>
-                <th className="py-3.5 px-4 text-center">{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
-                <th className="py-3.5 px-4 text-center">{language === 'ar' ? 'ولي الأمر' : 'Parent'}</th>
-                <th className="py-3.5 px-4 text-center">{language === 'ar' ? 'الانضباط' : 'Attendance'}</th>
-                <th className="py-3.5 px-4 text-center">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
-                <th className="py-3.5 px-4 text-center">{language === 'ar' ? 'الحالة' : 'Status'}</th>
-                <th className="py-3.5 px-6 text-center">{language === 'ar' ? 'الإجراءات' : 'Actions'}</th>
+                <th className="py-5 px-6 text-right font-extrabold">{language === 'ar' ? 'الطالب' : 'Student'}</th>
+                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'المستوى' : 'Level'}</th>
+                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الفوج' : 'Group'}</th>
+                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
+                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'ولي الأمر' : 'Parent'}</th>
+                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الانضباط' : 'Attendance'}</th>
+                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
+                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الحالة' : 'Status'}</th>
+                <th className="py-5 px-6 text-center font-extrabold">{language === 'ar' ? 'الإجراءات' : 'Actions'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-slate-400 font-bold">
+                  <td colSpan={9} className="py-16 text-center text-slate-400 font-bold">
                     {language === 'ar' ? 'لم يتم العثور على أي طالب مطابق لمعايير البحث' : 'No students found matching your filters'}
                   </td>
                 </tr>
@@ -304,20 +308,20 @@ export function StudentsManagementScreen() {
                 filteredStudents.map((st) => (
                   <tr
                     key={st.id}
-                    className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group cursor-pointer"
+                    className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer"
                     onClick={() => handleOpenStudent(st)}
                   >
                     {/* Student Name */}
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 flex items-center justify-center font-bold text-xs shrink-0">
+                    <td className="py-6 px-6">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 flex items-center justify-center font-black text-sm shrink-0">
                           {st.fullNameAr[0]}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 dark:text-white">
+                          <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-snug">
                             {st.fullNameAr}
                           </div>
-                          <div className="text-[11px] text-slate-400 font-mono">
+                          <div className="text-xs text-slate-400 font-mono mt-0.5">
                             {st.fullNameEn}
                           </div>
                         </div>
@@ -325,37 +329,40 @@ export function StudentsManagementScreen() {
                     </td>
 
                     {/* Level */}
-                    <td className="py-4 px-4 text-center">
-                      <span className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs">
+                    <td className="py-6 px-4 text-center">
+                      <span
+                        className="rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs"
+                        style={{ padding: '6px 14px' }}
+                      >
                         {st.cefrLevel} (L{st.currentLevel})
                       </span>
                     </td>
 
                     {/* Group */}
-                    <td className="py-4 px-4 text-center font-semibold text-slate-700 dark:text-slate-300">
+                    <td className="py-6 px-4 text-center font-semibold text-slate-700 dark:text-slate-300 text-xs sm:text-sm">
                       {st.groupName.split('(')[0].trim()}
                     </td>
 
                     {/* Teacher */}
-                    <td className="py-4 px-4 text-center font-medium text-slate-600 dark:text-slate-400">
+                    <td className="py-6 px-4 text-center font-medium text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
                       {st.teacherName}
                     </td>
 
                     {/* Parent */}
-                    <td className="py-4 px-4 text-center">
-                      <div className="font-medium text-slate-800 dark:text-slate-200">{st.parentName}</div>
-                      <div className="text-[10px] text-slate-400 font-mono" dir="ltr">{st.parentPhone}</div>
+                    <td className="py-6 px-4 text-center">
+                      <div className="font-medium text-slate-800 dark:text-slate-200 text-xs sm:text-sm">{st.parentName}</div>
+                      <div className="text-[11px] text-slate-400 font-mono mt-0.5" dir="ltr">{st.parentPhone}</div>
                     </td>
 
                     {/* Attendance */}
-                    <td className="py-4 px-4 text-center font-mono font-bold">
+                    <td className="py-6 px-4 text-center font-mono font-black text-sm sm:text-base">
                       <span
                         className={
                           st.attendanceRate >= 85
-                            ? 'text-emerald-600'
+                            ? 'text-emerald-600 dark:text-emerald-400'
                             : st.attendanceRate >= 75
-                            ? 'text-amber-600'
-                            : 'text-rose-600'
+                            ? 'text-amber-600 dark:text-amber-400'
+                            : 'text-rose-600 dark:text-rose-400'
                         }
                       >
                         {st.attendanceRate}%
@@ -363,33 +370,35 @@ export function StudentsManagementScreen() {
                     </td>
 
                     {/* Progress */}
-                    <td className="py-4 px-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="font-mono font-bold text-purple-600">{st.overallProgress}%</span>
-                      </div>
+                    <td className="py-6 px-4 text-center">
+                      <span className="font-mono font-black text-purple-600 dark:text-purple-400 text-sm sm:text-base">
+                        {st.overallProgress}%
+                      </span>
                     </td>
 
                     {/* Status */}
-                    <td className="py-4 px-4 text-center">
+                    <td className="py-6 px-4 text-center">
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                        className={`text-xs font-bold rounded-full ${
                           st.status === 'active'
                             ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
                             : st.status === 'archived'
                             ? 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
                             : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
                         }`}
+                        style={{ padding: '6px 14px' }}
                       >
                         {st.status === 'active' ? 'نشط' : st.status === 'archived' ? 'مؤرشف' : 'موقوف'}
                       </span>
                     </td>
 
                     {/* Action */}
-                    <td className="py-4 px-6 text-center" onClick={(e) => e.stopPropagation()}>
+                    <td className="py-6 px-6 text-center" onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
                         onClick={() => handleOpenStudent(st)}
-                        className="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-300 font-bold text-xs transition-colors cursor-pointer"
+                        className="rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-300 font-bold text-xs transition-colors cursor-pointer"
+                        style={{ padding: '8px 18px' }}
                       >
                         {language === 'ar' ? 'الملف الشامل' : 'View Profile'} →
                       </button>
