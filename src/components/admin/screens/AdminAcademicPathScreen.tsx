@@ -892,11 +892,13 @@ export function AdminAcademicPathScreen() {
                       {/* Unit Header: Clickable Accordion Bar */}
                       <div
                         onClick={() => toggleDraftUnit(unit.id)}
-                        className={`flex items-center justify-between transition-all cursor-pointer select-none ${
-                          isExpanded
-                            ? 'border-b border-slate-200/80 dark:border-slate-700/80 pb-5 mb-2'
-                            : 'pb-0 mb-0'
-                        }`}
+                        className="flex items-center justify-between transition-all cursor-pointer select-none border-slate-200/80 dark:border-slate-700/80"
+                        style={{
+                          paddingBottom: isExpanded ? '18px' : '0px',
+                          marginBottom: isExpanded ? '16px' : '0px',
+                          borderBottomWidth: isExpanded ? '1px' : '0px',
+                          borderBottomStyle: 'solid',
+                        }}
                       >
                         <div className="flex items-center gap-3">
                           <span className="w-9 h-9 rounded-xl bg-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
