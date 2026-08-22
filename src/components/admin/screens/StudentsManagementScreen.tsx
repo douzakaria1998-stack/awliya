@@ -25,6 +25,11 @@ import {
   Sparkles,
   Shield,
   BookOpen,
+  Calendar,
+  Link2,
+  UserCheck,
+  Phone,
+  Check,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -32,7 +37,7 @@ import { AdminStudent, EntityStatus } from '@/types/admin';
 import { StudentDetailModal } from '../modals/StudentDetailModal';
 
 export function StudentsManagementScreen() {
-  const { visibleStudents, groups, teachers, addStudent, updateStudent, archiveStudent } = useAdmin();
+  const { visibleStudents, groups, teachers, parents, addStudent, updateStudent, archiveStudent } = useAdmin();
   const { isRTL, language } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,15 +53,22 @@ export function StudentsManagementScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
 
-  // New Student Form State
-  const [newNameAr, setNewNameAr] = useState('');
-  const [newNameEn, setNewNameEn] = useState('');
+  // New Student Form State (First Name, Last Name, Birthday, Link to Parent, etc.)
+  const [firstNameAr, setFirstNameAr] = useState('');
+  const [lastNameAr, setLastNameAr] = useState('');
+  const [firstNameEn, setFirstNameEn] = useState('');
+  const [lastNameEn, setLastNameEn] = useState('');
+  const [birthDate, setBirthDate] = useState('2015-05-15');
   const [newGender, setNewGender] = useState<'male' | 'female'>('male');
   const [newLanguage, setNewLanguage] = useState<'English' | 'French'>('English');
   const [newCefrLevel, setNewCefrLevel] = useState<'A1' | 'A2' | 'B1' | 'B2' | 'C1'>('A1');
   const [newGroupId, setNewGroupId] = useState<string>(groups[0]?.id || 'grp-a1-01');
-  const [newParentName, setNewParentName] = useState('');
-  const [newParentPhone, setNewParentPhone] = useState('');
+
+  // Link to Parent Mode State
+  const [parentLinkMode, setParentLinkMode] = useState<'existing' | 'new'>('existing');
+  const [selectedParentId, setSelectedParentId] = useState<string>(parents[0]?.id || '');
+  const [customParentName, setCustomParentName] = useState('');
+  const [customParentPhone, setCustomParentPhone] = useState('');
 
   // Filter and Sort Pipeline
   const filteredStudents = useMemo(() => {
@@ -112,14 +124,35 @@ export function StudentsManagementScreen() {
 
   const handleCreateStudent = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newNameAr.trim()) return;
+    if (!firstNameAr.trim() || !lastNameAr.trim()) return;
+
+    const fullNameAr = `${firstNameAr.trim()} ${lastNameAr.trim()}`;
+    const fullNameEn = firstNameEn.trim() && lastNameEn.trim()
+      ? `${firstNameEn.trim()} ${lastNameEn.trim()}`
+      : fullNameAr;
 
     const matchedGroup = groups.find((g) => g.id === newGroupId) || groups[0];
     const matchedTeacher = teachers.find((t) => t.id === matchedGroup?.teacherId) || teachers[0];
 
+    let parentId = 'par-01';
+    let parentName = 'محمد بن علي';
+    let parentPhone = '+213 555 123 456';
+
+    if (parentLinkMode === 'existing') {
+      const existingParent = parents.find((p) => p.id === selectedParentId) || parents[0];
+      if (existingParent) {
+        parentId = existingParent.id;
+        parentName = existingParent.fullNameAr;
+        parentPhone = existingParent.phone;
+      }
+    } else {
+      parentName = customParentName.trim() || 'ولي أمر الطالب';
+      parentPhone = customParentPhone.trim() || '+213 550 000 000';
+    }
+
     addStudent({
-      fullNameAr: newNameAr.trim(),
-      fullNameEn: newNameEn.trim() || newNameAr.trim(),
+      fullNameAr,
+      fullNameEn,
       gender: newGender,
       language: newLanguage,
       cefrLevel: newCefrLevel,
@@ -128,8 +161,9 @@ export function StudentsManagementScreen() {
       groupName: matchedGroup?.name || 'Group A1 — Beginner',
       teacherId: matchedTeacher?.id || 'usr-teach-01',
       teacherName: matchedTeacher?.fullNameEn || 'Sarah Benali',
-      parentName: newParentName.trim() || 'ولي أمر الطالب',
-      parentPhone: newParentPhone.trim() || '+213 550 000 000',
+      parentId,
+      parentName,
+      parentPhone,
       status: 'active',
       overallProgress: 0,
       attendanceRate: 100,
@@ -137,10 +171,12 @@ export function StudentsManagementScreen() {
     });
 
     // Reset Form
-    setNewNameAr('');
-    setNewNameEn('');
-    setNewParentName('');
-    setNewParentPhone('');
+    setFirstNameAr('');
+    setLastNameAr('');
+    setFirstNameEn('');
+    setLastNameEn('');
+    setCustomParentName('');
+    setCustomParentPhone('');
     setIsAddStudentOpen(false);
   };
 
@@ -508,11 +544,11 @@ export function StudentsManagementScreen() {
         }}
       />
 
-      {/* Add New Student Modal Dialog */}
+      {/* Add New Student Modal Dialog (Section: First Name, Last Name, Birthday, Link to Parent) */}
       {isAddStudentOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-md animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/70 backdrop-blur-md animate-fade-in">
           <div
-            className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl border border-slate-200/80 dark:border-slate-800 animate-fade-in-up"
+            className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl border border-slate-200/80 dark:border-slate-800 animate-fade-in-up max-h-[92vh] overflow-y-auto"
             style={{ padding: '28px 32px' }}
           >
             {/* Modal Header */}
@@ -530,8 +566,8 @@ export function StudentsManagementScreen() {
                   </h3>
                   <p className="text-[11px] text-slate-400 font-medium">
                     {language === 'ar'
-                      ? 'إدراج الطالب وتعيين الفوج والمسار والبيانات الأكاديمية'
-                      : 'Enroll student and assign to academic group and curriculum'}
+                      ? 'إدخال البيانات الشخصية، تاريخ الميلاد، وربط الطالب بولي الأمر'
+                      : 'Enter student info, birthday, and link to parent profile'}
                   </p>
                 </div>
               </div>
@@ -546,54 +582,116 @@ export function StudentsManagementScreen() {
 
             {/* Form */}
             <form onSubmit={handleCreateStudent} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {/* 1. Name Section: First Name & Last Name */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Full Name (Arabic) */}
+                {/* First Name (Arabic) */}
                 <div>
                   <label
                     className="block text-xs font-bold text-slate-700 dark:text-slate-300"
                     style={{ marginBottom: '5px' }}
                   >
-                    {language === 'ar' ? 'الاسم الكامل بالعربية *' : 'Full Name (Arabic) *'}
+                    {language === 'ar' ? 'الاسم الأول (First Name) *' : 'First Name (Arabic) *'}
                   </label>
                   <input
                     type="text"
                     required
-                    value={newNameAr}
-                    onChange={(e) => setNewNameAr(e.target.value)}
-                    placeholder="مثال: ياسمين التواتي"
+                    value={firstNameAr}
+                    onChange={(e) => setFirstNameAr(e.target.value)}
+                    placeholder="مثال: ياسمين"
                     className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
                     style={{ height: '42px', padding: '8px 14px' }}
                   />
                 </div>
 
-                {/* Full Name (English) */}
+                {/* Last Name (Arabic) */}
                 <div>
                   <label
                     className="block text-xs font-bold text-slate-700 dark:text-slate-300"
                     style={{ marginBottom: '5px' }}
                   >
-                    {language === 'ar' ? 'الاسم بالإنجليزية (English)' : 'Full Name (English)'}
+                    {language === 'ar' ? 'اللقب / اسم العائلة (Last Name) *' : 'Last Name (Arabic) *'}
                   </label>
                   <input
                     type="text"
-                    value={newNameEn}
-                    onChange={(e) => setNewNameEn(e.target.value)}
-                    placeholder="e.g. Yasmine Touati"
+                    required
+                    value={lastNameAr}
+                    onChange={(e) => setLastNameAr(e.target.value)}
+                    placeholder="مثال: التواتي"
                     className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
                     style={{ height: '42px', padding: '8px 14px' }}
+                  />
+                </div>
+              </div>
+
+              {/* Optional English Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label
+                    className="block text-[11px] font-bold text-slate-500 dark:text-slate-400"
+                    style={{ marginBottom: '4px' }}
+                  >
+                    First Name (English)
+                  </label>
+                  <input
+                    type="text"
+                    value={firstNameEn}
+                    onChange={(e) => setFirstNameEn(e.target.value)}
+                    placeholder="e.g. Yasmine"
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                    style={{ height: '40px', padding: '6px 12px' }}
+                    dir="ltr"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    className="block text-[11px] font-bold text-slate-500 dark:text-slate-400"
+                    style={{ marginBottom: '4px' }}
+                  >
+                    Last Name (English)
+                  </label>
+                  <input
+                    type="text"
+                    value={lastNameEn}
+                    onChange={(e) => setLastNameEn(e.target.value)}
+                    placeholder="e.g. Touati"
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                    style={{ height: '40px', padding: '6px 12px' }}
                     dir="ltr"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* 2. Birthday & Gender */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Birthday */}
+                <div>
+                  <label
+                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '5px' }}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Calendar size={14} className="text-purple-600" />
+                      <span>{language === 'ar' ? 'تاريخ الميلاد (Birthday) *' : 'Birthday *'}</span>
+                    </span>
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(e.target.value)}
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
+                    style={{ height: '42px', padding: '8px 14px' }}
+                  />
+                </div>
+
                 {/* Gender */}
                 <div>
                   <label
                     className="block text-xs font-bold text-slate-700 dark:text-slate-300"
                     style={{ marginBottom: '5px' }}
                   >
-                    {language === 'ar' ? 'الجنس' : 'Gender'}
+                    {language === 'ar' ? 'الجنس (Gender)' : 'Gender'}
                   </label>
                   <select
                     value={newGender}
@@ -605,8 +703,91 @@ export function StudentsManagementScreen() {
                     <option value="female">{language === 'ar' ? 'أنثى (Female)' : 'Female'}</option>
                   </select>
                 </div>
+              </div>
 
-                {/* Language Track */}
+              {/* 3. Link to Parent Section (Section requested by User) */}
+              <div
+                className="rounded-2xl bg-purple-50/40 dark:bg-purple-950/20 border border-purple-200/80 dark:border-purple-900/40"
+                style={{ padding: '14px 18px' }}
+              >
+                <div className="flex items-center justify-between gap-2 mb-2.5">
+                  <div className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <Link2 size={15} className="text-purple-600" />
+                    <span>{language === 'ar' ? 'ربط الطالب بولي الأمر (Link to Parent):' : 'Link to Parent:'}</span>
+                  </div>
+
+                  {/* Toggle Modes: Existing or New Parent */}
+                  <div className="flex items-center rounded-xl bg-white dark:bg-slate-850 p-1 border border-slate-200 dark:border-slate-700">
+                    <button
+                      type="button"
+                      onClick={() => setParentLinkMode('existing')}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                        parentLinkMode === 'existing'
+                          ? 'bg-purple-600 text-white shadow-xs'
+                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {language === 'ar' ? 'ولي أمر مسجل' : 'Existing Parent'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setParentLinkMode('new')}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                        parentLinkMode === 'new'
+                          ? 'bg-purple-600 text-white shadow-xs'
+                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {language === 'ar' ? 'ولي أمر جديد' : 'New Parent'}
+                    </button>
+                  </div>
+                </div>
+
+                {parentLinkMode === 'existing' ? (
+                  <div>
+                    <select
+                      value={selectedParentId}
+                      onChange={(e) => setSelectedParentId(e.target.value)}
+                      className="w-full rounded-xl bg-white dark:bg-slate-850 border border-purple-200 dark:border-purple-800 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all cursor-pointer"
+                      style={{ height: '42px', padding: '8px 14px' }}
+                    >
+                      {parents.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.fullNameAr} ({p.fullNameEn}) — 📱 {p.phone}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <input
+                        type="text"
+                        value={customParentName}
+                        onChange={(e) => setCustomParentName(e.target.value)}
+                        placeholder={language === 'ar' ? 'اسم ولي الأمر الكامل' : 'Parent full name'}
+                        className="w-full rounded-xl bg-white dark:bg-slate-850 border border-purple-200 dark:border-purple-800 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all placeholder:text-slate-400"
+                        style={{ height: '40px', padding: '6px 12px' }}
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        value={customParentPhone}
+                        onChange={(e) => setCustomParentPhone(e.target.value)}
+                        placeholder="+213 550 000 000"
+                        className="w-full rounded-xl bg-white dark:bg-slate-850 border border-purple-200 dark:border-purple-800 font-mono text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all placeholder:text-slate-400"
+                        style={{ height: '40px', padding: '6px 12px' }}
+                        dir="ltr"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 4. Academic Track & Group */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Language */}
                 <div>
                   <label
                     className="block text-xs font-bold text-slate-700 dark:text-slate-300"
@@ -625,7 +806,7 @@ export function StudentsManagementScreen() {
                   </select>
                 </div>
 
-                {/* CEFR Level */}
+                {/* Level */}
                 <div>
                   <label
                     className="block text-xs font-bold text-slate-700 dark:text-slate-300"
@@ -646,66 +827,27 @@ export function StudentsManagementScreen() {
                     <option value="C1">C1 (Level 5)</option>
                   </select>
                 </div>
-              </div>
 
-              {/* Group Assignment */}
-              <div>
-                <label
-                  className="block text-xs font-bold text-slate-700 dark:text-slate-300"
-                  style={{ marginBottom: '5px' }}
-                >
-                  {language === 'ar' ? 'الفوج والمجموعة الدراسية (Assigned Group) *' : 'Assigned Group *'}
-                </label>
-                <select
-                  value={newGroupId}
-                  onChange={(e) => setNewGroupId(e.target.value)}
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
-                  style={{ height: '42px', padding: '8px 14px' }}
-                >
-                  {groups.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.name} — {isRTL ? g.daysAr : g.daysEn} ({g.startTime} - {g.endTime})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Parent Name */}
+                {/* Group Assignment */}
                 <div>
                   <label
                     className="block text-xs font-bold text-slate-700 dark:text-slate-300"
                     style={{ marginBottom: '5px' }}
                   >
-                    {language === 'ar' ? 'اسم ولي الأمر' : 'Parent Name'}
+                    {language === 'ar' ? 'الفوج (Group) *' : 'Group *'}
                   </label>
-                  <input
-                    type="text"
-                    value={newParentName}
-                    onChange={(e) => setNewParentName(e.target.value)}
-                    placeholder="أ. فريد التواتي"
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
-                    style={{ height: '42px', padding: '8px 14px' }}
-                  />
-                </div>
-
-                {/* Parent Phone */}
-                <div>
-                  <label
-                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
-                    style={{ marginBottom: '5px' }}
+                  <select
+                    value={newGroupId}
+                    onChange={(e) => setNewGroupId(e.target.value)}
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
+                    style={{ height: '42px', padding: '8px 12px' }}
                   >
-                    {language === 'ar' ? 'رقم هاتف ولي الأمر' : 'Parent Phone'}
-                  </label>
-                  <input
-                    type="text"
-                    value={newParentPhone}
-                    onChange={(e) => setNewParentPhone(e.target.value)}
-                    placeholder="+213 550 000 000"
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
-                    style={{ height: '42px', padding: '8px 14px' }}
-                    dir="ltr"
-                  />
+                    {groups.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.name} — {isRTL ? g.daysAr : g.daysEn}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -726,7 +868,7 @@ export function StudentsManagementScreen() {
                   style={{ height: '44px' }}
                 >
                   <CheckCircle2 size={16} />
-                  <span>{language === 'ar' ? 'حفظ وإضافة الطالب' : 'Save & Register'}</span>
+                  <span>{language === 'ar' ? 'تسجيل وتأكيد الطالب' : 'Confirm & Register Student'}</span>
                 </button>
               </div>
             </form>
