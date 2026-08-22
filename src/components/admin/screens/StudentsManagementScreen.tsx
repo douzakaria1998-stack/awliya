@@ -399,29 +399,29 @@ export function StudentsManagementScreen() {
             <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
               <tr>
                 <th
-                  className={`font-extrabold text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`font-extrabold text-xs ${isRTL ? 'text-right' : 'text-left'}`}
                   style={{
-                    paddingTop: '26px',
-                    paddingBottom: '26px',
-                    paddingLeft: isRTL ? '24px' : '40px',
-                    paddingRight: isRTL ? '40px' : '24px',
+                    paddingTop: '14px',
+                    paddingBottom: '14px',
+                    paddingLeft: isRTL ? '20px' : '28px',
+                    paddingRight: isRTL ? '28px' : '20px',
                   }}
                 >
                   {language === 'ar' ? 'الطالب' : 'Student'}
                 </th>
-                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'المستوى' : 'Level'}</th>
-                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'الفوج' : 'Group'}</th>
-                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
-                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'الانضباط' : 'Attendance'}</th>
-                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
-                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'الحالة' : 'Status'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'المستوى' : 'Level'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الفوج' : 'Group'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الانضباط' : 'Attendance'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الحالة' : 'Status'}</th>
                 <th
-                  className="font-extrabold text-center"
+                  className="font-extrabold text-center text-xs"
                   style={{
-                    paddingTop: '26px',
-                    paddingBottom: '26px',
-                    paddingRight: isRTL ? '40px' : '24px',
-                    paddingLeft: isRTL ? '24px' : '40px',
+                    paddingTop: '14px',
+                    paddingBottom: '14px',
+                    paddingRight: isRTL ? '28px' : '20px',
+                    paddingLeft: isRTL ? '20px' : '28px',
                   }}
                 >
                   {language === 'ar' ? 'الإجراءات' : 'Actions'}
@@ -431,7 +431,7 @@ export function StudentsManagementScreen() {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center text-slate-400 font-bold">
+                  <td colSpan={8} className="py-12 text-center text-slate-400 font-bold">
                     {language === 'ar' ? 'لم يتم العثور على أي طالب مطابق لمعايير البحث' : 'No students found matching your filters'}
                   </td>
                 </tr>
@@ -444,21 +444,21 @@ export function StudentsManagementScreen() {
                   >
                     {/* Student Name */}
                     <td
-                      className="py-8"
+                      className="py-3.5"
                       style={{
-                        paddingLeft: isRTL ? '24px' : '40px',
-                        paddingRight: isRTL ? '40px' : '24px',
+                        paddingLeft: isRTL ? '20px' : '28px',
+                        paddingRight: isRTL ? '28px' : '20px',
                       }}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="w-11 h-11 rounded-2xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 flex items-center justify-center font-black text-sm shrink-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 flex items-center justify-center font-black text-xs shrink-0">
                           {st.fullNameAr[0]}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-snug">
+                          <div className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm leading-snug">
                             {st.fullNameAr}
                           </div>
-                          <div className="text-xs text-slate-400 font-mono mt-1">
+                          <div className="text-[11px] text-slate-400 font-mono mt-0.5">
                             {st.fullNameEn}
                           </div>
                         </div>
@@ -466,27 +466,27 @@ export function StudentsManagementScreen() {
                     </td>
 
                     {/* Level */}
-                    <td className="py-8 px-6 text-center">
+                    <td className="py-3.5 px-4 text-center">
                       <span
-                        className="rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs"
-                        style={{ padding: '8px 16px' }}
+                        className="rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs"
+                        style={{ padding: '5px 10px' }}
                       >
                         {st.cefrLevel} (L{st.currentLevel})
                       </span>
                     </td>
 
                     {/* Group */}
-                    <td className="py-8 px-6 text-center font-semibold text-slate-700 dark:text-slate-300 text-xs sm:text-sm">
+                    <td className="py-3.5 px-4 text-center font-semibold text-slate-700 dark:text-slate-300 text-xs">
                       {st.groupName.split('(')[0].trim()}
                     </td>
 
                     {/* Teacher */}
-                    <td className="py-8 px-6 text-center font-medium text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
+                    <td className="py-3.5 px-4 text-center font-medium text-slate-600 dark:text-slate-400 text-xs">
                       {st.teacherName}
                     </td>
 
                     {/* Attendance */}
-                    <td className="py-8 px-6 text-center font-mono font-black text-sm sm:text-base">
+                    <td className="py-3.5 px-4 text-center font-mono font-black text-xs sm:text-sm">
                       <span
                         className={
                           st.attendanceRate >= 85
@@ -501,14 +501,14 @@ export function StudentsManagementScreen() {
                     </td>
 
                     {/* Progress */}
-                    <td className="py-8 px-6 text-center">
-                      <span className="font-mono font-black text-purple-600 dark:text-purple-400 text-sm sm:text-base">
+                    <td className="py-3.5 px-4 text-center">
+                      <span className="font-mono font-black text-purple-600 dark:text-purple-400 text-xs sm:text-sm">
                         {st.overallProgress}%
                       </span>
                     </td>
 
                     {/* Status */}
-                    <td className="py-8 px-6 text-center">
+                    <td className="py-3.5 px-4 text-center">
                       <span
                         className={`text-xs font-bold rounded-full ${
                           st.status === 'active'
@@ -517,7 +517,7 @@ export function StudentsManagementScreen() {
                             ? 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
                             : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
                         }`}
-                        style={{ padding: '8px 18px' }}
+                        style={{ padding: '5px 12px' }}
                       >
                         {st.status === 'active' ? 'نشط' : st.status === 'archived' ? 'مؤرشف' : 'موقوف'}
                       </span>
@@ -525,18 +525,18 @@ export function StudentsManagementScreen() {
 
                     {/* Action */}
                     <td
-                      className="py-8 text-center"
+                      className="py-3.5 text-center"
                       style={{
-                        paddingRight: isRTL ? '40px' : '24px',
-                        paddingLeft: isRTL ? '24px' : '40px',
+                        paddingRight: isRTL ? '28px' : '20px',
+                        paddingLeft: isRTL ? '20px' : '28px',
                       }}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <button
                         type="button"
                         onClick={() => handleOpenStudent(st)}
-                        className="rounded-2xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-300 font-bold text-xs transition-colors cursor-pointer"
-                        style={{ padding: '10px 22px' }}
+                        className="rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-300 font-bold text-xs transition-colors cursor-pointer"
+                        style={{ padding: '6px 14px' }}
                       >
                         {language === 'ar' ? 'الملف الشامل' : 'View Profile'} →
                       </button>
