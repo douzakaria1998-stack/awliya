@@ -95,7 +95,10 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
         </div>
 
         {/* Tab Navigation (Connected Profile Hub) */}
-        <div className="flex items-center gap-1.5 p-2 bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 overflow-x-auto shrink-0">
+        <div
+          className="flex items-center bg-slate-100/90 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 overflow-x-auto shrink-0"
+          style={{ padding: '10px 18px', gap: '8px' }}
+        >
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.key;
@@ -104,11 +107,12 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+                className={`rounded-xl font-bold text-xs sm:text-sm flex items-center transition-all cursor-pointer whitespace-nowrap ${
                   isActive
-                    ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-xs border border-purple-200/60 dark:border-purple-900/60 scale-[1.02]'
+                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/50'
                 }`}
+                style={{ padding: '8px 16px', gap: '8px' }}
               >
                 <Icon size={15} />
                 <span>{language === 'ar' ? tab.labelAr : tab.labelEn}</span>
