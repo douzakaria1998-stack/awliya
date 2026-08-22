@@ -263,10 +263,10 @@ export function AdminAttendanceScreen() {
 
   return (
     <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
-      {/* 1. Header & Date Navigator */}
+      {/* 1. Main Screen Header */}
       <div
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-        style={{ marginBottom: '32px' }}
+        style={{ marginBottom: '28px' }}
       >
         <div>
           <span className="text-xs sm:text-sm font-bold text-slate-400">
@@ -276,102 +276,108 @@ export function AdminAttendanceScreen() {
             {language === 'ar' ? 'سجل الحضور والجلسات (Attendance Module)' : language === 'fr' ? 'Gestion des Présences' : 'Attendance Management'}
           </h2>
         </div>
-
-        {/* Date Navigator Bar */}
-        <div className="flex items-center gap-2.5 bg-white dark:bg-slate-850 p-2 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs shrink-0">
-          <button
-            type="button"
-            onClick={isRTL ? handleNextDay : handlePrevDay}
-            className="w-10 h-10 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
-            title="Previous Day"
-          >
-            <ChevronRight size={20} />
-          </button>
-
-          <div className="flex items-center gap-2.5 px-4 py-1.5 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
-            <Calendar size={18} className="text-indigo-600" />
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-transparent focus:outline-none cursor-pointer text-xs sm:text-sm font-mono"
-            />
-          </div>
-
-          <button
-            type="button"
-            onClick={isRTL ? handlePrevDay : handleNextDay}
-            className="w-10 h-10 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
-            title="Next Day"
-          >
-            <ChevronLeft size={20} />
-          </button>
-        </div>
       </div>
 
-      {/* 2. Today's Groups Table or Off-Day Empty State */}
-      {dayGroups.length === 0 ? (
+      {/* 2. Today's Groups Card (With Integrated Big Day Display & Day Switcher) */}
+      <div
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs overflow-hidden"
+        style={{ marginBottom: '44px' }}
+      >
+        {/* Card Header Bar */}
         <div
-          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs text-center space-y-3"
-          style={{ padding: '64px 40px', marginBottom: '44px' }}
+          className="border-b border-slate-100 dark:border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+          style={{ padding: '24px 32px' }}
         >
-          <div className="w-16 h-16 rounded-3xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-xs">
-            <Calendar size={32} />
+          {/* Left: Title & Subtitle */}
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black shrink-0 shadow-2xs">
+              <School size={22} />
+            </div>
+            <div>
+              <h3 className="font-black text-lg sm:text-xl text-slate-900 dark:text-white leading-tight">
+                {language === 'ar' ? 'أفواج وحصص اليوم الدراسية' : language === 'fr' ? 'Groupes & Cours du Jour' : 'Scheduled Classes & Groups Today'}
+              </h3>
+              <p className="text-xs text-slate-400 font-medium mt-1">
+                {language === 'ar'
+                  ? 'انقر على أي فوج لفتح نافذة رصد الحضور وقائمة الطلاب الخاصة به'
+                  : language === 'fr'
+                  ? 'Cliquez sur un groupe pour ouvrir le panneau d\'appel des élèves'
+                  : 'Click on any class to open the student attendance slide-over panel'}
+              </p>
+            </div>
           </div>
-          <h3 className="text-xl font-black text-slate-900 dark:text-white">
-            {language === 'ar'
-              ? `عطلة / لا توجد أفواج دراسية مجدولة ليوم ${getDayName(selectedDate)}`
-              : language === 'fr'
-              ? `Jour de repos / Aucun cours le ${getDayName(selectedDate)}`
-              : `Off-Day / No classes scheduled on ${getDayName(selectedDate)}`}
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
-            {language === 'ar'
-              ? 'يرجى التنقل إلى يوم دراسي آخر باستخدام أسهم التقويم أعلاه لعرض وتثبيت حضور الطلاب.'
-              : language === 'fr'
-              ? 'Veuillez utiliser les flèches du calendrier ci-dessus pour naviguer vers un jour de cours actif.'
-              : 'Please use the date navigation arrows above to select an active study day to record attendance.'}
-          </p>
+
+          {/* Right: Prominent Big Day Name & Day Switcher */}
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            {/* Big Day Name Display */}
+            <div className="flex items-center gap-2.5 px-4 py-2 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/80 dark:border-emerald-800/80 rounded-2xl shadow-2xs">
+              <Calendar size={19} className="text-emerald-600 dark:text-emerald-400" />
+              <span className="text-base sm:text-lg font-black text-emerald-950 dark:text-emerald-100">
+                {getDayName(selectedDate)}
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="text-xs font-mono font-extrabold text-emerald-700 dark:text-emerald-300">
+                {dayGroups.length} {language === 'ar' ? 'أفواج نشطة' : language === 'fr' ? 'groupes' : 'active groups'}
+              </span>
+            </div>
+
+            {/* Day Switcher Controls (< Date Picker >) */}
+            <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+              <button
+                type="button"
+                onClick={isRTL ? handleNextDay : handlePrevDay}
+                className="w-9 h-9 rounded-xl hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                title="Previous Day"
+              >
+                <ChevronRight size={18} />
+              </button>
+
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-850 rounded-xl border border-slate-200/60 dark:border-slate-750 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white shadow-2xs">
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="bg-transparent focus:outline-none cursor-pointer text-xs sm:text-sm font-mono font-bold"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={isRTL ? handlePrevDay : handleNextDay}
+                className="w-9 h-9 rounded-xl hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                title="Next Day"
+              >
+                <ChevronLeft size={18} />
+              </button>
+            </div>
+          </div>
         </div>
-      ) : (
-        <div
-          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs overflow-hidden"
-          style={{ marginBottom: '44px' }}
-        >
-          {/* Table Header Bar */}
+
+        {/* Card Body: Table or Off-Day Empty State */}
+        {dayGroups.length === 0 ? (
           <div
-            className="border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-            style={{ padding: '28px 36px' }}
+            className="text-center space-y-3"
+            style={{ padding: '64px 40px' }}
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black shrink-0">
-                <School size={20} />
-              </div>
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <h3 className="font-black text-lg sm:text-xl text-slate-900 dark:text-white leading-tight">
-                    {language === 'ar' ? 'أفواج وحصص اليوم الدراسية' : language === 'fr' ? 'Groupes & Cours du Jour' : 'Scheduled Classes & Groups Today'}
-                  </h3>
-                  <span className="px-2.5 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 font-extrabold text-xs">
-                    {getDayName(selectedDate)}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 font-medium mt-1">
-                  {language === 'ar'
-                    ? 'انقر على أي فوج لفتح نافذة رصد الحضور وقائمة الطلاب الخاصة به'
-                    : language === 'fr'
-                    ? 'Cliquez sur un groupe pour ouvrir le panneau d\'appel des élèves'
-                    : 'Click on any class to open the student attendance slide-over panel'}
-                </p>
-              </div>
+            <div className="w-16 h-16 rounded-3xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-xs">
+              <Calendar size={32} />
             </div>
-
-            <div className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 shrink-0">
-              {dayGroups.length} {language === 'ar' ? 'أفواج نشطة' : language === 'fr' ? 'groupes actifs' : 'active groups'}
-            </div>
+            <h3 className="text-xl font-black text-slate-900 dark:text-white">
+              {language === 'ar'
+                ? `عطلة / لا توجد أفواج دراسية مجدولة ليوم ${getDayName(selectedDate)}`
+                : language === 'fr'
+                ? `Jour de repos / Aucun cours le ${getDayName(selectedDate)}`
+                : `Off-Day / No classes scheduled on ${getDayName(selectedDate)}`}
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+              {language === 'ar'
+                ? 'يرجى التنقل إلى يوم دراسي آخر باستخدام أسهم التقويم أعلاه لعرض وتثبيت حضور الطلاب.'
+                : language === 'fr'
+                ? 'Veuillez utiliser les flèches du calendrier ci-dessus pour naviguer vers un jour de cours actif.'
+                : 'Please use the date navigation arrows above to select an active study day to record attendance.'}
+            </p>
           </div>
-
-          {/* Groups Table */}
+        ) : (
           <div className="overflow-x-auto">
             <table className={`w-full text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
               <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-400 font-bold">
@@ -508,8 +514,8 @@ export function AdminAttendanceScreen() {
               </tbody>
             </table>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* 3. Slide-Over Attendance Drawer from the Right (Full Screen Height, Compact Width) */}
       {isDrawerOpen && activeDrawerGroup && (
