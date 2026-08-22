@@ -415,35 +415,36 @@ export function AdminRolesScreen() {
                 <div>
                   <label
                     className="block text-xs font-bold text-slate-700 dark:text-slate-300"
-                    style={{ marginBottom: '8px' }}
+                    style={{ marginBottom: '10px' }}
                   >
                     اختر الدور الوظيفي للحساب (Select Account Role):
                   </label>
 
-                  <div className="grid grid-cols-1 gap-2.5">
+                  <div className="grid grid-cols-1 gap-3">
                     {/* Option 1: Administrator */}
                     <div
                       onClick={() => setNewRole('administrator')}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                      className={`rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
                         newRole === 'administrator'
                           ? 'bg-blue-50/90 dark:bg-blue-950/50 border-blue-500 ring-2 ring-blue-500/20 shadow-xs'
                           : 'bg-slate-50/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                       }`}
+                      style={{ padding: '14px 18px' }}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center font-black shrink-0">
-                          <UserCheck size={16} />
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center font-black shrink-0">
+                          <UserCheck size={18} />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-2">
                             <span>مدير عمليات وشؤون طلاب (Administrator)</span>
                           </div>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
                             إدارة شاملة للطلاب، الأفواج، الحضور، والتسجيل
                           </p>
                         </div>
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mr-2 ${
                         newRole === 'administrator' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 dark:border-slate-600'
                       }`}>
                         {newRole === 'administrator' && <Check size={12} className="stroke-[3]" />}
@@ -453,29 +454,30 @@ export function AdminRolesScreen() {
                     {/* Option 2: Super Admin */}
                     <div
                       onClick={() => setNewRole('super_admin')}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                      className={`rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
                         newRole === 'super_admin'
                           ? 'bg-purple-50/90 dark:bg-purple-950/50 border-purple-500 ring-2 ring-purple-500/20 shadow-xs'
                           : 'bg-slate-50/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                       }`}
+                      style={{ padding: '14px 18px' }}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-950/80 text-purple-600 flex items-center justify-center font-black shrink-0">
-                          <ShieldCheck size={16} />
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950/80 text-purple-600 flex items-center justify-center font-black shrink-0">
+                          <ShieldCheck size={18} />
                         </div>
-                        <div>
-                          <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                        <div className="min-w-0">
+                          <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white flex flex-wrap items-center gap-2">
                             <span>مدير عام تنفيذي (Super Admin)</span>
-                            <span className="text-[10px] bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300 px-2 py-0.5 rounded-full font-bold">
+                            <span className="text-[10px] bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300 px-2.5 py-0.5 rounded-full font-bold">
                               وصول كامل 100%
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
                             صلاحيات مطلقة لإدارة الحسابات، الأمان، وإعدادات النظام
                           </p>
                         </div>
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mr-2 ${
                         newRole === 'super_admin' ? 'border-purple-600 bg-purple-600 text-white' : 'border-slate-300 dark:border-slate-600'
                       }`}>
                         {newRole === 'super_admin' && <Check size={12} className="stroke-[3]" />}
@@ -485,26 +487,27 @@ export function AdminRolesScreen() {
                     {/* Option 3: Teacher */}
                     <div
                       onClick={() => setNewRole('teacher')}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                      className={`rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
                         newRole === 'teacher'
                           ? 'bg-emerald-50/90 dark:bg-emerald-950/50 border-emerald-500 ring-2 ring-emerald-500/20 shadow-xs'
                           : 'bg-slate-50/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                       }`}
+                      style={{ padding: '14px 18px' }}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 flex items-center justify-center font-black shrink-0">
-                          <GraduationCap size={16} />
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 flex items-center justify-center font-black shrink-0">
+                          <GraduationCap size={18} />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-2">
                             <span>معلم ومؤطر أكاديمي (Teacher)</span>
                           </div>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
                             متابعة أفواجه الخاصة ورصد الحضور والواجبات والتقييمات
                           </p>
                         </div>
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mr-2 ${
                         newRole === 'teacher' ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300 dark:border-slate-600'
                       }`}>
                         {newRole === 'teacher' && <Check size={12} className="stroke-[3]" />}
@@ -514,12 +517,15 @@ export function AdminRolesScreen() {
                 </div>
 
                 {/* Permissions Preview Tag Cloud */}
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
-                  <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                    <Sparkles size={13} className="text-purple-600" />
+                <div
+                  className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80"
+                  style={{ padding: '14px 18px' }}
+                >
+                  <div className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1.5">
+                    <Sparkles size={14} className="text-purple-600" />
                     <span>الصلاحيات الممنوحة تلقائياً لهذا الدور:</span>
                   </div>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-2">
                     {(newRole === 'super_admin'
                       ? ['كافة الوحدات بدون قيود', 'إدارة المستخدمين والأمان', 'إعدادات المنظومة والشهادات', 'الطلاب والأولياء والمعلمين', 'الأفواج والمنهج والحضور', 'الواجبات والتقييمات']
                       : newRole === 'administrator'
@@ -528,7 +534,8 @@ export function AdminRolesScreen() {
                     ).map((perm, i) => (
                       <span
                         key={i}
-                        className="px-2 py-0.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-700 dark:text-slate-300"
+                        className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-2xs"
+                        style={{ padding: '5px 12px' }}
                       >
                         ✓ {perm}
                       </span>
