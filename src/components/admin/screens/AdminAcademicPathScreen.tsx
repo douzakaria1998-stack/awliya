@@ -1467,10 +1467,10 @@ export function AdminAcademicPathScreen() {
                                   {st.fullNameAr.slice(0, 1)}
                                 </div>
                                 <div>
-                                  <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white block group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                  <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white block group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-normal">
                                     {st.fullNameAr}
                                   </span>
-                                  <span className="text-[11px] text-slate-400 font-mono mt-0.5 block">
+                                  <span className="text-[11px] text-slate-400 font-mono block" style={{ marginTop: '4px' }}>
                                     {st.fullNameEn} • {st.id}
                                   </span>
                                 </div>
@@ -1595,9 +1595,9 @@ export function AdminAcademicPathScreen() {
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shrink-0 shadow-md">
                     {activeProgressStudent.fullNameAr.slice(0, 1)}
                   </div>
-                  <div>
+                  <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <h3 className="font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
+                      <h3 className="font-black text-xl sm:text-2xl text-slate-900 dark:text-white leading-normal">
                         {activeProgressStudent.fullNameAr}
                       </h3>
                       <span
@@ -1612,7 +1612,7 @@ export function AdminAcademicPathScreen() {
                         {studentCurriculumLevel.cefrCode} — {studentCurriculumLevel.language}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-400 font-medium mt-1">
+                    <p className="text-xs text-slate-400 font-medium" style={{ marginTop: '6px' }}>
                       {language === 'ar' ? `المعلم المسؤول: ${activeProgressStudent.teacherName}` : `Teacher: ${activeProgressStudent.teacherName}`} • {activeProgressStudent.groupName}
                     </p>
                   </div>
