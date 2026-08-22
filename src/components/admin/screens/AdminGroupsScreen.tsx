@@ -82,6 +82,32 @@ export function AdminGroupsScreen() {
     setIsAddGroupOpen(false);
   };
 
+  const getDaysAbbreviation = (daysAr: string) => {
+    if (language === 'ar') {
+      if (daysAr.includes('الأحد') && daysAr.includes('الثلاثاء')) return 'أحد • ثلاثاء';
+      if (daysAr.includes('الإثنين') && daysAr.includes('الأربعاء')) return 'إثنين • أربعاء';
+      if (daysAr.includes('السبت') && daysAr.includes('الخميس')) return 'سبت • خميس';
+      if (daysAr.includes('السبت') && daysAr.includes('الإثنين')) return 'سبت • إثنين';
+      if (daysAr.includes('الجمعة') && daysAr.includes('السبت')) return 'جمعة • سبت';
+      return daysAr;
+    }
+    if (language === 'fr') {
+      if (daysAr.includes('الأحد') && daysAr.includes('الثلاثاء')) return 'Dim / Mar';
+      if (daysAr.includes('الإثنين') && daysAr.includes('الأربعاء')) return 'Lun / Mer';
+      if (daysAr.includes('السبت') && daysAr.includes('الخميس')) return 'Sam / Jeu';
+      if (daysAr.includes('السبت') && daysAr.includes('الإثنين')) return 'Sam / Lun';
+      if (daysAr.includes('الجمعة') && daysAr.includes('السبت')) return 'Ven / Sam';
+      return daysAr;
+    }
+    // English default
+    if (daysAr.includes('الأحد') && daysAr.includes('الثلاثاء')) return 'Sun / Tue';
+    if (daysAr.includes('الإثنين') && daysAr.includes('الأربعاء')) return 'Mon / Wed';
+    if (daysAr.includes('السبت') && daysAr.includes('الخميس')) return 'Sat / Thu';
+    if (daysAr.includes('السبت') && daysAr.includes('الإثنين')) return 'Sat / Mon';
+    if (daysAr.includes('الجمعة') && daysAr.includes('السبت')) return 'Fri / Sat';
+    return daysAr;
+  };
+
   return (
     <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header */}
@@ -91,7 +117,7 @@ export function AdminGroupsScreen() {
       >
         <div>
           <span className="text-xs sm:text-sm font-bold text-slate-400">
-            {language === 'ar' ? 'إدارة القاعات والفصول الدراسية' : 'Class Sessions & Groups Management'}
+            {language === 'ar' ? 'إدارة الأفواج والقاعات والمواعيد' : 'Classes & Classrooms Schedule'}
           </span>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-0.5">
             {language === 'ar' ? 'سجل الأفواج والحصص (Groups Hub)' : 'Groups Management'}
@@ -146,20 +172,20 @@ export function AdminGroupsScreen() {
       {/* Groups Table (Section 12) */}
       <div
         className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs overflow-hidden"
-        style={{ marginBottom: '40px' }}
+        style={{ marginBottom: '44px' }}
       >
         <div className="overflow-x-auto">
           <table className="w-full text-xs sm:text-sm text-right">
             <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
               <tr>
-                <th className="py-5 px-6 text-right font-extrabold">{language === 'ar' ? 'الفوج والكود' : 'Group Code & Name'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'اللغة والمستوى' : 'Language & Level'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'المعلم المشرف' : 'Assigned Teacher'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الأيام والتوقيت' : 'Schedule'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الطلاب / السعة' : 'Capacity'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
-                <th className="py-5 px-6 text-center font-extrabold">{language === 'ar' ? 'الإجراءات' : 'Actions'}</th>
+                <th className="py-6 px-7 text-right font-extrabold">{language === 'ar' ? 'الفوج والكود' : 'Group Code & Name'}</th>
+                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'اللغة والمستوى' : 'Language & Level'}</th>
+                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'المعلم المشرف' : 'Assigned Teacher'}</th>
+                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الأيام والتوقيت' : 'Schedule'}</th>
+                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الطلاب / السعة' : 'Capacity'}</th>
+                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
+                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
+                <th className="py-6 px-7 text-center font-extrabold">{language === 'ar' ? 'الإجراءات' : 'Actions'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -169,54 +195,56 @@ export function AdminGroupsScreen() {
                   className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
                   onClick={() => handleOpenGroup(grp)}
                 >
-                  <td className="py-6 px-6">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center font-black text-xs shrink-0 font-mono">
+                  <td className="py-8 px-7">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center font-black text-xs shrink-0 font-mono shadow-xs">
                         {grp.code}
                       </div>
                       <div>
-                        <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">{grp.name}</div>
-                        <div className="text-xs text-slate-400 mt-0.5">{grp.language} Track</div>
+                        <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-snug">{grp.name}</div>
+                        <div className="text-xs text-slate-400 mt-1">{grp.language} Track</div>
                       </div>
                     </div>
                   </td>
 
-                  <td className="py-6 px-4 text-center">
+                  <td className="py-8 px-6 text-center">
                     <span
                       className="rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs"
-                      style={{ padding: '6px 14px' }}
+                      style={{ padding: '8px 16px' }}
                     >
                       {grp.level}
                     </span>
                   </td>
 
-                  <td className="py-6 px-4 text-center font-bold text-slate-700 dark:text-slate-300 text-xs sm:text-sm">
+                  <td className="py-8 px-6 text-center font-bold text-slate-700 dark:text-slate-300 text-xs sm:text-sm">
                     {grp.teacherName}
                   </td>
 
-                  <td className="py-6 px-4 text-center text-xs sm:text-sm">
-                    <div className="font-bold text-slate-800 dark:text-slate-200">{grp.daysAr}</div>
-                    <div className="font-mono text-slate-400 text-xs mt-0.5">{grp.startTime}–{grp.endTime}</div>
+                  <td className="py-8 px-6 text-center text-xs sm:text-sm">
+                    <div className="font-black text-slate-900 dark:text-white text-sm tracking-wide">
+                      {getDaysAbbreviation(grp.daysAr)}
+                    </div>
+                    <div className="font-mono text-slate-400 text-xs mt-1">{grp.startTime}–{grp.endTime}</div>
                   </td>
 
-                  <td className="py-6 px-4 text-center font-mono font-bold text-purple-600 text-xs sm:text-sm">
+                  <td className="py-8 px-6 text-center font-mono font-bold text-purple-600 text-xs sm:text-sm">
                     {grp.studentIds.length} / {grp.maxCapacity}
                   </td>
 
-                  <td className="py-6 px-4 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-sm">
+                  <td className="py-8 px-6 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-sm sm:text-base">
                     {grp.attendanceRate}%
                   </td>
 
-                  <td className="py-6 px-4 text-center font-mono font-black text-blue-600 dark:text-blue-400 text-sm">
+                  <td className="py-8 px-6 text-center font-mono font-black text-blue-600 dark:text-blue-400 text-sm sm:text-base">
                     {grp.averageProgress}%
                   </td>
 
-                  <td className="py-6 px-6 text-center" onClick={(e) => e.stopPropagation()}>
+                  <td className="py-8 px-7 text-center" onClick={(e) => e.stopPropagation()}>
                     <button
                       type="button"
                       onClick={() => handleOpenGroup(grp)}
-                      className="rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-xs transition-colors cursor-pointer"
-                      style={{ padding: '8px 18px' }}
+                      className="rounded-2xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-xs transition-colors cursor-pointer"
+                      style={{ padding: '10px 22px' }}
                     >
                       {language === 'ar' ? 'الملف الشامل' : 'Group Hub'} →
                     </button>
