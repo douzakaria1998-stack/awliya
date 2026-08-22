@@ -1205,8 +1205,8 @@ export function AdminAcademicPathScreen() {
 
                             <td className="py-4 px-6 text-center">
                               <span
-                                className="inline-flex items-center justify-center px-3 py-1 rounded-lg text-white font-mono font-bold text-xs shadow-2xs"
-                                style={{ backgroundColor: levelColor }}
+                                className="inline-flex items-center justify-center text-white font-mono font-bold text-xs shadow-2xs whitespace-nowrap"
+                                style={{ backgroundColor: levelColor, padding: '4px 14px', borderRadius: '9999px', lineHeight: '1.2' }}
                               >
                                 {grp.level}
                               </span>
@@ -1222,7 +1222,10 @@ export function AdminAcademicPathScreen() {
                             </td>
 
                             <td className="py-4 px-6 text-center font-mono font-bold text-slate-900 dark:text-white text-xs">
-                              <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
+                              <span
+                                className="inline-flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap shadow-2xs"
+                                style={{ padding: '4px 14px', borderRadius: '9999px', lineHeight: '1.2' }}
+                              >
                                 {studentCount} {language === 'ar' ? 'طلاب' : 'students'}
                               </span>
                             </td>
@@ -1598,8 +1601,13 @@ export function AdminAcademicPathScreen() {
                         {activeProgressStudent.fullNameAr}
                       </h3>
                       <span
-                        className="px-2.5 py-0.5 rounded-lg text-white font-mono font-bold text-xs shadow-2xs"
-                        style={{ backgroundColor: studentCurriculumLevel.color }}
+                        className="text-white font-mono font-bold text-xs shadow-2xs inline-flex items-center justify-center whitespace-nowrap"
+                        style={{
+                          backgroundColor: studentCurriculumLevel.color,
+                          padding: '5px 14px',
+                          borderRadius: '9999px',
+                          lineHeight: '1.2',
+                        }}
                       >
                         {studentCurriculumLevel.cefrCode} — {studentCurriculumLevel.language}
                       </span>
@@ -1638,7 +1646,10 @@ export function AdminAcademicPathScreen() {
                     </div>
                     <span>{language === 'ar' ? 'تفاصيل الوحدات والدروس ومستويات الإنجاز' : 'Curriculum Units & Lessons Progress'}</span>
                   </h4>
-                  <span className="text-xs font-bold text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl">
+                  <span
+                    className="text-xs font-bold text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 inline-flex items-center justify-center whitespace-nowrap shadow-2xs"
+                    style={{ padding: '5px 14px', borderRadius: '9999px', lineHeight: '1.2' }}
+                  >
                     {studentCurriculumLevel.units.length} {language === 'ar' ? 'وحدات' : 'Units'}
                   </span>
                 </div>
@@ -1691,13 +1702,14 @@ export function AdminAcademicPathScreen() {
                           <div className="flex items-center gap-3 shrink-0">
                             {/* Unit Progress Badge */}
                             <span
-                              className={`px-3 py-1 rounded-full font-mono font-black text-xs border flex items-center gap-1.5 ${
+                              className={`font-mono font-black text-xs border inline-flex items-center gap-2 whitespace-nowrap shadow-2xs ${
                                 isUnitCompleted
                                   ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-800/80'
                                   : isUnitInProgress
                                   ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border-indigo-200/80 dark:border-indigo-800/80'
                                   : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
                               }`}
+                              style={{ padding: '5px 14px', borderRadius: '9999px', lineHeight: '1.2' }}
                             >
                               <span>{unitPercentage}%</span>
                               <span>{isUnitCompleted ? '✓' : isUnitInProgress ? '●' : '■'}</span>
@@ -1708,10 +1720,11 @@ export function AdminAcademicPathScreen() {
                               <button
                                 type="button"
                                 onClick={() => handleMarkUnitComplete(unit.id)}
-                                className="px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5 border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer shadow-2xs"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 font-bold text-xs border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer shadow-2xs whitespace-nowrap"
+                                style={{ padding: '6px 16px', borderRadius: '9999px', lineHeight: '1.2' }}
                                 title={language === 'ar' ? 'تعليم جميع دروس الوحدة كمكتملة' : 'Mark all unit lessons completed'}
                               >
-                                <CheckCircle2 size={14} />
+                                <CheckCircle2 size={15} className="shrink-0" />
                                 <span>{language === 'ar' ? 'إتمام الوحدة' : 'Complete All'}</span>
                               </button>
                             )}
