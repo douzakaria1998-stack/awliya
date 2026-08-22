@@ -414,14 +414,18 @@ export function AdminAcademicPathScreen() {
             >
               <div className="border-b border-slate-100 dark:border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center" style={{ gap: '14px' }}>
                     <span
-                      className="rounded-lg font-mono font-black text-white text-xs shadow-xs"
-                      style={{ backgroundColor: activeLevel.color, padding: '4px 10px' }}
+                      className="rounded-xl font-mono font-black text-white text-xs shadow-xs shrink-0 flex items-center justify-center"
+                      style={{
+                        backgroundColor: activeLevel.color,
+                        padding: '5px 12px',
+                        marginInlineEnd: '4px',
+                      }}
                     >
                       {activeLevel.cefrCode}
                     </span>
-                    <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">{activeLevel.nameAr}</h3>
+                    <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-tight">{activeLevel.nameAr}</h3>
                   </div>
                   <p className="text-xs text-slate-400 font-medium mt-1 leading-relaxed">{activeLevel.descriptionAr}</p>
                 </div>
@@ -815,16 +819,20 @@ export function AdminAcademicPathScreen() {
                     {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
                   </button>
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center" style={{ gap: '14px' }}>
                       <span
-                        className="px-2 py-0.5 rounded-md text-white font-mono font-bold text-xs shadow-xs"
-                        style={{ backgroundColor: newLevelColor }}
+                        className="rounded-xl text-white font-mono font-bold text-xs shadow-xs shrink-0 flex items-center justify-center"
+                        style={{
+                          backgroundColor: newLevelColor,
+                          padding: '5px 14px',
+                          marginInlineEnd: '4px',
+                        }}
                       >
                         {newLevelCode}
                       </span>
-                      <h3 className="text-base sm:text-lg font-black text-white">{newLevelNameAr}</h3>
+                      <h3 className="text-base sm:text-lg font-black text-white leading-tight">{newLevelNameAr}</h3>
                     </div>
-                    <p className="text-xs text-slate-400 font-medium mt-0.5">
+                    <p className="text-xs text-slate-400 font-medium mt-1">
                       {language === 'ar'
                         ? 'الخطوة 2: تحديد مسميات الوحدات وتفاصيل الدروس والمفردات والتقييمات'
                         : 'Step 2: Enter unit names, lessons, vocabulary, and assessments'}
@@ -900,21 +908,24 @@ export function AdminAcademicPathScreen() {
                           borderBottomStyle: 'solid',
                         }}
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3.5" style={{ gap: '14px' }}>
                           <span className="w-9 h-9 rounded-xl bg-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
                             {uIdx + 1}
                           </span>
                           <div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center" style={{ gap: '12px' }}>
                               <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white">
                                 {unit.titleAr ? unit.titleAr : (language === 'ar' ? `الوحدة ${uIdx + 1}` : `Unit ${uIdx + 1}`)}
                               </h4>
-                              <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold text-[11px] border border-indigo-200/60 dark:border-indigo-800/60">
+                              <span
+                                className="rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold text-[11px] border border-indigo-200/60 dark:border-indigo-800/60"
+                                style={{ padding: '3px 10px', marginInlineStart: '6px' }}
+                              >
                                 {language === 'ar' ? `${unit.lessons.length} دروس` : `${unit.lessons.length} Lessons`}
                               </span>
                             </div>
                             {!isExpanded && unit.titleEn && (
-                              <p className="text-xs font-mono text-slate-400 mt-0.5">
+                              <p className="text-xs font-mono text-slate-400 mt-1">
                                 {unit.titleEn}
                               </p>
                             )}
