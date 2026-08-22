@@ -850,7 +850,8 @@ export function StudentsManagementScreen() {
 
                     {/* Linked Parent Live Info Badge */}
                     {(() => {
-                      const activeParent = parents.find((p) => p.id === selectedParentId) || parents[0];
+                      if (!selectedParentId) return null;
+                      const activeParent = parents.find((p) => p.id === selectedParentId);
                       if (!activeParent) return null;
                       return (
                         <div
@@ -870,10 +871,21 @@ export function StudentsManagementScreen() {
                               </div>
                             </div>
                           </div>
-                          <span className="text-[11px] font-black px-3 py-1 rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 flex items-center gap-1 shrink-0">
-                            <Check size={14} />
-                            <span>{language === 'ar' ? 'تم الربط' : 'Linked'}</span>
-                          </span>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-[11px] font-black px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 flex items-center gap-1">
+                              <Check size={14} />
+                              <span>{language === 'ar' ? 'تم الربط' : 'Linked'}</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedParentId('')}
+                              title={language === 'ar' ? 'إلغاء الربط' : 'Remove Link'}
+                              className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer border border-rose-200/60 dark:border-rose-900/50 hover:scale-105 active:scale-95"
+                            >
+                              <X size={15} />
+                            </button>
+                          </div>
                         </div>
                       );
                     })()}
