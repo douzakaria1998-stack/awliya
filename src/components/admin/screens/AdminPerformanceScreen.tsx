@@ -242,113 +242,127 @@ export function AdminPerformanceScreen() {
 
       {/* SUB-TAB 1: Homework (Section 23, 24, 25) */}
       {activeSubTab === 'homework' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 gap-6">
-            {visibleHomework.map((hw) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          {visibleHomework.map((hw) => (
+            <div
+              key={hw.id}
+              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs"
+              style={{ padding: '36px 40px' }}
+            >
+              {/* Header Row */}
               <div
-                key={hw.id}
-                className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] p-7 sm:p-9 space-y-6 shadow-xs"
+                className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800"
+                style={{ paddingBottom: '24px', marginBottom: '24px' }}
               >
-                {/* Header Row */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <span className="px-3 py-1 rounded-xl bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-mono font-black text-xs">
-                        {hw.groupName}
-                      </span>
-                      <h4 className="font-black text-lg sm:text-xl text-slate-900 dark:text-white">{hw.assignmentNameAr}</h4>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">{hw.descriptionAr}</p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                    <span className="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-bold text-xs flex items-center gap-1.5">
-                      <Calendar size={14} className="text-purple-600" />
-                      <span>{language === 'ar' ? 'تاريخ الاستحقاق:' : 'Due Date:'} {hw.dueDate}</span>
+                <div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="px-3.5 py-1.5 rounded-xl bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-mono font-black text-xs">
+                      {hw.groupName}
                     </span>
-                    <span className="px-3.5 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-mono font-black text-xs border border-purple-200/60 dark:border-purple-800/60 flex items-center gap-1.5">
-                      <Award size={14} className="text-purple-600" />
-                      <span>{language === 'ar' ? 'الدرجة القصوى:' : 'Max Score:'} {hw.totalScore}</span>
-                    </span>
+                    <h4 className="font-black text-xl text-slate-900 dark:text-white">{hw.assignmentNameAr}</h4>
                   </div>
+                  <p className="text-xs sm:text-sm text-slate-400 font-medium mt-2 leading-relaxed">{hw.descriptionAr}</p>
                 </div>
 
-                {/* Teacher Note Callout (Section 23 in PDF) */}
-                {hw.teacherNote && (
-                  <div className="p-5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 space-y-1.5 text-xs sm:text-sm">
-                    <div className="flex items-center gap-2 font-bold text-amber-900 dark:text-amber-300">
-                      <MessageSquareQuote size={16} />
-                      <span>{language === 'ar' ? 'توجيه وملاحظة المعلم:' : 'Teacher Note & Instruction:'}</span>
-                    </div>
-                    <p className="text-slate-800 dark:text-amber-100 font-medium leading-relaxed italic">
-                      "{hw.teacherNote}"
-                    </p>
-                  </div>
-                )}
-
-                {/* Submissions & Evaluations Table (Section 25) */}
-                <div className="space-y-3 pt-1">
-                  <span className="text-xs sm:text-sm font-black text-slate-400 uppercase tracking-wider block">
-                    {language === 'ar' ? 'تسليمات وتقييمات الطلاب:' : 'Student Submissions & Evaluations:'}
+                <div className="flex flex-wrap items-center gap-3 shrink-0">
+                  <span className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-bold text-xs flex items-center gap-2">
+                    <Calendar size={15} className="text-purple-600" />
+                    <span>{language === 'ar' ? 'تاريخ الاستحقاق:' : 'Due Date:'} {hw.dueDate}</span>
                   </span>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {hw.evaluations.map((ev, idx) => (
-                      <div
-                        key={idx}
-                        className="p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-750 flex items-center justify-between gap-4 shadow-2xs hover:border-purple-300 dark:hover:border-purple-700 transition-all"
-                      >
-                        <div>
-                          <div className="font-black text-sm text-slate-900 dark:text-white leading-snug">{ev.studentNameAr}</div>
-                          <div className="text-xs font-mono font-bold mt-1">
-                            {ev.score !== undefined ? (
-                              <span className="text-emerald-600 dark:text-emerald-400">
-                                {language === 'ar' ? `الدرجة: ${ev.score} / ${hw.totalScore}` : `Score: ${ev.score} / ${hw.totalScore}`}
-                              </span>
-                            ) : (
-                              <span className="text-amber-600 dark:text-amber-400">
-                                {language === 'ar' ? 'لم يتم التصحيح' : 'Not graded'}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedHwToGrade(hw);
-                            setGradeStudentId(ev.studentId);
-                            setGradeScore(ev.score || 18);
-                            setGradeComment(ev.teacherComment || 'عمل ممتاز!');
-                          }}
-                          className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
-                        >
-                          {ev.score !== undefined
-                            ? (language === 'ar' ? 'تعديل التقييم' : 'Edit Grade')
-                            : (language === 'ar' ? 'تصحيح الواجب' : 'Grade Homework')}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                  <span className="px-4 py-2 rounded-xl bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-mono font-black text-xs border border-purple-200/60 dark:border-purple-800/60 flex items-center gap-2">
+                    <Award size={15} className="text-purple-600" />
+                    <span>{language === 'ar' ? 'الدرجة القصوى:' : 'Max Score:'} {hw.totalScore}</span>
+                  </span>
                 </div>
               </div>
-            ))}
-          </div>
+
+              {/* Teacher Note Callout (Section 23 in PDF) */}
+              {hw.teacherNote && (
+                <div
+                  className="rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200/90 dark:border-amber-800/70 space-y-2 text-xs sm:text-sm"
+                  style={{ padding: '20px 24px', marginBottom: '28px' }}
+                >
+                  <div className="flex items-center gap-2.5 font-bold text-amber-900 dark:text-amber-300">
+                    <MessageSquareQuote size={18} />
+                    <span className="text-sm font-black">{language === 'ar' ? 'توجيه وملاحظة المعلم:' : 'Teacher Note & Instruction:'}</span>
+                  </div>
+                  <p className="text-slate-800 dark:text-amber-100 font-medium leading-relaxed italic pr-1">
+                    "{hw.teacherNote}"
+                  </p>
+                </div>
+              )}
+
+              {/* Submissions & Evaluations Table (Section 25) */}
+              <div style={{ paddingTop: '8px' }}>
+                <span
+                  className="text-xs sm:text-sm font-black text-slate-400 uppercase tracking-wider block"
+                  style={{ marginBottom: '16px' }}
+                >
+                  {language === 'ar' ? 'تسليمات وتقييمات الطلاب:' : 'Student Submissions & Evaluations:'}
+                </span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  {hw.evaluations.map((ev, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded-2xl bg-slate-50/90 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-750 flex items-center justify-between gap-4 shadow-2xs hover:border-purple-300 dark:hover:border-purple-700 transition-all"
+                      style={{ padding: '18px 22px' }}
+                    >
+                      <div>
+                        <div className="font-black text-sm text-slate-900 dark:text-white leading-snug">{ev.studentNameAr}</div>
+                        <div className="text-xs font-mono font-bold mt-1.5">
+                          {ev.score !== undefined ? (
+                            <span className="text-emerald-600 dark:text-emerald-400">
+                              {language === 'ar' ? `الدرجة: ${ev.score} / ${hw.totalScore}` : `Score: ${ev.score} / ${hw.totalScore}`}
+                            </span>
+                          ) : (
+                            <span className="text-amber-600 dark:text-amber-400">
+                              {language === 'ar' ? 'لم يتم التصحيح' : 'Not graded'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedHwToGrade(hw);
+                          setGradeStudentId(ev.studentId);
+                          setGradeScore(ev.score || 18);
+                          setGradeComment(ev.teacherComment || 'عمل ممتاز!');
+                        }}
+                        className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
+                        style={{ padding: '8px 18px' }}
+                      >
+                        {ev.score !== undefined
+                          ? (language === 'ar' ? 'تعديل التقييم' : 'Edit Grade')
+                          : (language === 'ar' ? 'تصحيح الواجب' : 'Grade Homework')}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
       {/* SUB-TAB 2: Assessments & 4 Skills (Section 27, 28, 29) */}
       {activeSubTab === 'assessments' && (
-        <div className="space-y-6">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {visibleAssessments.map((asm) => (
               <div
                 key={asm.id}
-                className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] p-7 sm:p-9 space-y-6 shadow-xs"
+                className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs"
+                style={{ padding: '36px 40px' }}
               >
-                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div
+                  className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800"
+                  style={{ paddingBottom: '20px', marginBottom: '24px' }}
+                >
                   <div>
-                    <h4 className="font-black text-lg text-slate-900 dark:text-white">{asm.studentNameAr}</h4>
-                    <span className="text-xs text-slate-400 mt-0.5 block">{asm.groupName} • {asm.level}</span>
+                    <h4 className="font-black text-xl text-slate-900 dark:text-white">{asm.studentNameAr}</h4>
+                    <span className="text-xs text-slate-400 mt-1 block font-medium">{asm.groupName} • {asm.level}</span>
                   </div>
                   <span className="px-4 py-2 rounded-2xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200/60 dark:border-indigo-800/60 font-mono font-black text-indigo-700 dark:text-indigo-300 text-sm shadow-2xs">
                     {asm.scores.overall}% ({asm.gradeLetterAr})
@@ -356,27 +370,30 @@ export function AdminPerformanceScreen() {
                 </div>
 
                 {/* 4 Skills Radar (Listening, Speaking, Reading, Writing - Section 27) */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
-                  <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40 p-3.5 rounded-2xl">
-                    <span className="text-[11px] text-slate-400 block font-bold mb-1">{language === 'ar' ? 'الاستماع' : 'Listening'}</span>
-                    <span className="font-mono font-black text-blue-600 dark:text-blue-400 text-base">{asm.scores.listening}%</span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-center text-xs" style={{ marginBottom: '24px' }}>
+                  <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40 rounded-2xl" style={{ padding: '16px 12px' }}>
+                    <span className="text-[11px] text-slate-400 block font-bold mb-1.5">{language === 'ar' ? 'الاستماع' : 'Listening'}</span>
+                    <span className="font-mono font-black text-blue-600 dark:text-blue-400 text-lg">{asm.scores.listening}%</span>
                   </div>
-                  <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/40 p-3.5 rounded-2xl">
-                    <span className="text-[11px] text-slate-400 block font-bold mb-1">{language === 'ar' ? 'المحادثة' : 'Speaking'}</span>
-                    <span className="font-mono font-black text-emerald-600 dark:text-emerald-400 text-base">{asm.scores.speaking}%</span>
+                  <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/40 rounded-2xl" style={{ padding: '16px 12px' }}>
+                    <span className="text-[11px] text-slate-400 block font-bold mb-1.5">{language === 'ar' ? 'المحادثة' : 'Speaking'}</span>
+                    <span className="font-mono font-black text-emerald-600 dark:text-emerald-400 text-lg">{asm.scores.speaking}%</span>
                   </div>
-                  <div className="bg-purple-50 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-900/40 p-3.5 rounded-2xl">
-                    <span className="text-[11px] text-slate-400 block font-bold mb-1">{language === 'ar' ? 'القراءة' : 'Reading'}</span>
-                    <span className="font-mono font-black text-purple-600 dark:text-purple-400 text-base">{asm.scores.reading}%</span>
+                  <div className="bg-purple-50 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-900/40 rounded-2xl" style={{ padding: '16px 12px' }}>
+                    <span className="text-[11px] text-slate-400 block font-bold mb-1.5">{language === 'ar' ? 'القراءة' : 'Reading'}</span>
+                    <span className="font-mono font-black text-purple-600 dark:text-purple-400 text-lg">{asm.scores.reading}%</span>
                   </div>
-                  <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-900/40 p-3.5 rounded-2xl">
-                    <span className="text-[11px] text-slate-400 block font-bold mb-1">{language === 'ar' ? 'الكتابة' : 'Writing'}</span>
-                    <span className="font-mono font-black text-amber-600 dark:text-amber-400 text-base">{asm.scores.writing}%</span>
+                  <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-900/40 rounded-2xl" style={{ padding: '16px 12px' }}>
+                    <span className="text-[11px] text-slate-400 block font-bold mb-1.5">{language === 'ar' ? 'الكتابة' : 'Writing'}</span>
+                    <span className="font-mono font-black text-amber-600 dark:text-amber-400 text-lg">{asm.scores.writing}%</span>
                   </div>
                 </div>
 
                 {asm.teacherComment && (
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 p-4 rounded-2xl italic">
+                  <p
+                    className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed bg-slate-50/90 dark:bg-slate-900/80 border border-slate-100 dark:border-slate-800 rounded-2xl italic"
+                    style={{ padding: '18px 22px' }}
+                  >
                     "{asm.teacherComment}"
                   </p>
                 )}
@@ -388,58 +405,66 @@ export function AdminPerformanceScreen() {
 
       {/* SUB-TAB 3: Teacher Feedback & Parent Comments (Section 26, 30) */}
       {activeSubTab === 'feedback' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 gap-6">
-            {feedbackList.map((fb) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          {feedbackList.map((fb) => (
+            <div
+              key={fb.id}
+              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs"
+              style={{ padding: '36px 40px' }}
+            >
               <div
-                key={fb.id}
-                className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] p-7 sm:p-9 space-y-6 shadow-xs"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800"
+                style={{ paddingBottom: '20px', marginBottom: '24px' }}
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-black text-sm shadow-2xs">
-                      {fb.studentNameAr[0]}
-                    </div>
-                    <div>
-                      <h4 className="font-black text-lg text-slate-900 dark:text-white">{fb.studentNameAr}</h4>
-                      <span className="text-xs text-slate-400">{language === 'ar' ? 'ولي الأمر:' : 'Parent:'} {fb.parentName}</span>
-                    </div>
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-black text-base shadow-2xs">
+                    {fb.studentNameAr[0]}
                   </div>
-                  <span className="text-xs text-slate-400 font-mono font-bold bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl w-fit">{fb.date}</span>
-                </div>
-
-                {/* Two-Way Stream (Section 26: Teacher Feedback & Parent Feedback) */}
-                <div className="space-y-4 text-xs sm:text-sm">
-                  {/* Teacher Side */}
-                  <div className="bg-emerald-50/60 dark:bg-emerald-950/30 p-5 rounded-2xl border border-emerald-200/60 dark:border-emerald-800/40 space-y-2.5">
-                    <span className="font-bold text-emerald-800 dark:text-emerald-300 block text-sm">
-                      {language === 'ar' ? `توجيه المعلم (${fb.teacherName}):` : `Teacher Guidance (${fb.teacherName}):`}
-                    </span>
-                    <div className="space-y-1.5 text-slate-700 dark:text-slate-300 leading-relaxed">
-                      <div>• <span className="font-bold">{language === 'ar' ? 'نقاط القوة:' : 'Strengths:'}</span> {fb.teacherFeedback.strengths.join(', ')}</div>
-                      <div>• <span className="font-bold">{language === 'ar' ? 'بحاجة لتطوير:' : 'Needs Improvement:'}</span> {fb.teacherFeedback.needsImprovement.join(', ')}</div>
-                      <div>• <span className="font-bold">{language === 'ar' ? 'توصية للمنزل:' : 'Home Recommendation:'}</span> "{fb.teacherFeedback.recommendations}"</div>
-                    </div>
+                  <div>
+                    <h4 className="font-black text-xl text-slate-900 dark:text-white">{fb.studentNameAr}</h4>
+                    <span className="text-xs text-slate-400 font-medium">{language === 'ar' ? 'ولي الأمر:' : 'Parent:'} {fb.parentName}</span>
                   </div>
-
-                  {/* Parent Response */}
-                  {fb.parentFeedback && (
-                    <div className="bg-purple-50/60 dark:bg-purple-950/30 p-5 rounded-2xl border border-purple-200/60 dark:border-purple-800/40 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-purple-800 dark:text-purple-300 text-sm">
-                          {language === 'ar' ? `رد وملاحظة ولي الأمر (${fb.parentName}):` : `Parent Note (${fb.parentName}):`}
-                        </span>
-                        <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">{fb.parentFeedback.date}</span>
-                      </div>
-                      <p className="text-slate-800 dark:text-slate-200 font-medium leading-relaxed italic">
-                        "{fb.parentFeedback.message}"
-                      </p>
-                    </div>
-                  )}
                 </div>
+                <span className="text-xs text-slate-400 font-mono font-bold bg-slate-100 dark:bg-slate-800 px-3.5 py-1.5 rounded-xl w-fit">{fb.date}</span>
               </div>
-            ))}
-          </div>
+
+              {/* Two-Way Stream (Section 26: Teacher Feedback & Parent Feedback) */}
+              <div className="space-y-5 text-xs sm:text-sm">
+                {/* Teacher Side */}
+                <div
+                  className="bg-emerald-50/60 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200/60 dark:border-emerald-800/40 space-y-3"
+                  style={{ padding: '22px 26px' }}
+                >
+                  <span className="font-bold text-emerald-800 dark:text-emerald-300 block text-sm">
+                    {language === 'ar' ? `توجيه المعلم (${fb.teacherName}):` : `Teacher Guidance (${fb.teacherName}):`}
+                  </span>
+                  <div className="space-y-2 text-slate-700 dark:text-slate-300 leading-relaxed">
+                    <div>• <span className="font-bold">{language === 'ar' ? 'نقاط القوة:' : 'Strengths:'}</span> {fb.teacherFeedback.strengths.join(', ')}</div>
+                    <div>• <span className="font-bold">{language === 'ar' ? 'بحاجة لتطوير:' : 'Needs Improvement:'}</span> {fb.teacherFeedback.needsImprovement.join(', ')}</div>
+                    <div>• <span className="font-bold">{language === 'ar' ? 'توصية للمنزل:' : 'Home Recommendation:'}</span> "{fb.teacherFeedback.recommendations}"</div>
+                  </div>
+                </div>
+
+                {/* Parent Response */}
+                {fb.parentFeedback && (
+                  <div
+                    className="bg-purple-50/60 dark:bg-purple-950/30 rounded-2xl border border-purple-200/60 dark:border-purple-800/40 space-y-2.5"
+                    style={{ padding: '22px 26px' }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-purple-800 dark:text-purple-300 text-sm">
+                        {language === 'ar' ? `رد وملاحظة ولي الأمر (${fb.parentName}):` : `Parent Note (${fb.parentName}):`}
+                      </span>
+                      <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">{fb.parentFeedback.date}</span>
+                    </div>
+                    <p className="text-slate-800 dark:text-slate-200 font-medium leading-relaxed italic">
+                      "{fb.parentFeedback.message}"
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
