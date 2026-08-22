@@ -29,6 +29,7 @@ import {
   Link2,
   UserCheck,
   Phone,
+  Mail,
   Check,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
@@ -70,6 +71,7 @@ export function StudentsManagementScreen() {
   const [parentSearchQuery, setParentSearchQuery] = useState('');
   const [customParentName, setCustomParentName] = useState('');
   const [customParentPhone, setCustomParentPhone] = useState('');
+  const [customParentEmail, setCustomParentEmail] = useState('');
 
   // Filtered Parents for Link to Parent search
   const filteredParents = useMemo(() => {
@@ -867,7 +869,7 @@ export function StudentsManagementScreen() {
                     })()}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                         {language === 'ar' ? 'اسم ولي الأمر الجديد *' : 'New Parent Full Name *'}
@@ -890,6 +892,20 @@ export function StudentsManagementScreen() {
                         value={customParentPhone}
                         onChange={(e) => setCustomParentPhone(e.target.value)}
                         placeholder="+213 550 000 000"
+                        className="w-full rounded-xl bg-white dark:bg-slate-850 border border-purple-200 dark:border-purple-800 font-mono text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all placeholder:text-slate-400 shadow-2xs"
+                        style={{ height: '42px', padding: '8px 14px' }}
+                        dir="ltr"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                        {language === 'ar' ? 'البريد الإلكتروني (Email)' : 'Parent Email'}
+                      </label>
+                      <input
+                        type="email"
+                        value={customParentEmail}
+                        onChange={(e) => setCustomParentEmail(e.target.value)}
+                        placeholder="parent@example.com"
                         className="w-full rounded-xl bg-white dark:bg-slate-850 border border-purple-200 dark:border-purple-800 font-mono text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all placeholder:text-slate-400 shadow-2xs"
                         style={{ height: '42px', padding: '8px 14px' }}
                         dir="ltr"
