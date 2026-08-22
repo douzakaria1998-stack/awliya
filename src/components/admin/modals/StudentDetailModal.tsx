@@ -64,15 +64,15 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
         {/* Modal Header */}
         <div
           className="bg-slate-900 text-white flex items-center justify-between shrink-0"
-          style={{ padding: '24px 32px' }}
+          style={{ padding: '20px 28px' }}
         >
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-lg shadow-md shrink-0">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-base shadow-md shrink-0">
               {student.fullNameAr[0]}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-lg sm:text-xl font-black text-white truncate">
+                <h3 className="text-base sm:text-lg font-black text-white truncate">
                   {student.fullNameAr} ({student.fullNameEn})
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold font-mono">
@@ -88,9 +88,9 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
@@ -104,13 +104,13 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
                   isActive
                     ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-xs'
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <Icon size={16} />
+                <Icon size={15} />
                 <span>{language === 'ar' ? tab.labelAr : tab.labelEn}</span>
               </button>
             );
@@ -118,57 +118,60 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
         </div>
 
         {/* Modal Body */}
-        <div className={`overflow-y-auto flex-1 p-6 sm:p-8 space-y-6 ${isRTL ? 'text-right' : 'text-left'}`}>
+        <div
+          className={`overflow-y-auto flex-1 ${isRTL ? 'text-right' : 'text-left'}`}
+          style={{ padding: '24px 28px' }}
+        >
           {/* TAB 1: Overview */}
           {activeTab === 'overview' && (
-            <div className="space-y-6">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Basic Information Grid */}
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   {language === 'ar' ? 'المعلومات الشخصية والأكاديمية' : 'Personal & Academic Details'}
                 </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                   <div
                     className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '20px 24px' }}
+                    style={{ padding: '14px 18px' }}
                   >
                     <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'الاسم الكامل:' : 'Full Name:'}</span>
-                    <span className="font-bold text-slate-900 dark:text-white text-sm">{student.fullNameAr}</span>
+                    <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{student.fullNameAr}</span>
                   </div>
                   <div
                     className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '20px 24px' }}
+                    style={{ padding: '14px 18px' }}
                   >
                     <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'الفوج المسند:' : 'Assigned Group:'}</span>
-                    <span className="font-bold text-slate-900 dark:text-white text-sm">{student.groupName}</span>
+                    <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{student.groupName}</span>
                   </div>
                   <div
                     className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '20px 24px' }}
+                    style={{ padding: '14px 18px' }}
                   >
                     <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'المعلم المشرف:' : 'Assigned Teacher:'}</span>
-                    <span className="font-bold text-slate-900 dark:text-white text-sm">{student.teacherName}</span>
+                    <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{student.teacherName}</span>
                   </div>
                   <div
                     className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '20px 24px' }}
+                    style={{ padding: '14px 18px' }}
                   >
                     <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'ولي الأمر المربوط:' : 'Linked Parent:'}</span>
-                    <span className="font-bold text-slate-900 dark:text-white text-sm">{student.parentName} ({student.relationship})</span>
+                    <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{student.parentName} ({student.relationship})</span>
                   </div>
                   <div
                     className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '20px 24px' }}
+                    style={{ padding: '14px 18px' }}
                   >
                     <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'هاتف التواصل:' : 'Parent Phone:'}</span>
-                    <span className="font-mono font-bold text-slate-900 dark:text-white text-sm" dir="ltr">{student.parentPhone}</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm" dir="ltr">{student.parentPhone}</span>
                   </div>
                   <div
                     className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '20px 24px' }}
+                    style={{ padding: '14px 18px' }}
                   >
                     <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'تاريخ التسجيل:' : 'Enrollment Date:'}</span>
-                    <span className="font-mono font-bold text-slate-900 dark:text-white text-sm">{student.enrollmentDate}</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{student.enrollmentDate}</span>
                   </div>
                 </div>
               </div>
@@ -177,14 +180,14 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
               {student.placementTest && (
                 <div
                   className="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60 rounded-2xl space-y-2"
-                  style={{ padding: '22px 26px' }}
+                  style={{ padding: '16px 20px' }}
                 >
                   <div className="flex items-center justify-between">
-                    <h5 className="font-black text-blue-950 dark:text-blue-200 text-sm flex items-center gap-2">
-                      <Sparkles size={16} className="text-blue-600" />
+                    <h5 className="font-black text-blue-950 dark:text-blue-200 text-xs sm:text-sm flex items-center gap-2">
+                      <Sparkles size={15} className="text-blue-600" />
                       <span>{language === 'ar' ? 'نتيجة اختبار تحديد المستوى (Placement Test)' : 'Placement Test Result'}</span>
                     </h5>
-                    <span className="px-3 py-1 rounded-full bg-blue-600 text-white font-mono font-bold text-xs">
+                    <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white font-mono font-bold text-xs">
                       {student.placementTest.score}% — Level {student.placementTest.recommendedLevel}
                     </span>
                   </div>
