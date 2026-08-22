@@ -529,7 +529,7 @@ export function AdminAcademicPathScreen() {
                 {/* Bottom Row: Reorder Actions and Edit Button */}
                 {currentRole !== 'teacher' && (
                   <div
-                    className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80 gap-1 mt-1"
+                    className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80 gap-1.5 mt-1"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {/* Move Left / Prev */}
@@ -537,25 +537,26 @@ export function AdminAcademicPathScreen() {
                       type="button"
                       disabled={lvlIdx === 0}
                       onClick={(e) => handleMoveLevel(e, lvl.levelNumber, 'prev')}
-                      className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0 ${
                         lvlIdx === 0
                           ? 'opacity-20 cursor-not-allowed text-slate-400'
                           : 'hover:bg-indigo-100 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-300 cursor-pointer'
                       }`}
                       title={language === 'ar' ? 'تقديم المستوى (تحريك لليسار)' : 'Move level previous'}
                     >
-                      <ChevronLeft size={14} />
+                      <ChevronLeft size={15} />
                     </button>
 
                     {/* Edit Level Button */}
                     <button
                       type="button"
                       onClick={() => handleOpenEditModal(lvl)}
-                      className="px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-[10px] flex items-center gap-1 border border-indigo-200/60 dark:border-indigo-800/60 transition-colors cursor-pointer"
+                      className="rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-[11px] flex items-center justify-center border border-indigo-200/80 dark:border-indigo-800/80 transition-colors cursor-pointer shadow-2xs"
+                      style={{ padding: '3px 12px', gap: '5px' }}
                       title={language === 'ar' ? 'تعديل بيانات المستوى' : 'Edit Level'}
                     >
-                      <Pencil size={11} />
-                      <span>{language === 'ar' ? 'تعديل' : 'Edit'}</span>
+                      <Pencil size={11} className="shrink-0" />
+                      <span className="leading-none">{language === 'ar' ? 'تعديل' : 'Edit'}</span>
                     </button>
 
                     {/* Move Right / Next */}
@@ -563,14 +564,14 @@ export function AdminAcademicPathScreen() {
                       type="button"
                       disabled={lvlIdx === currentLangLevels.length - 1}
                       onClick={(e) => handleMoveLevel(e, lvl.levelNumber, 'next')}
-                      className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0 ${
                         lvlIdx === currentLangLevels.length - 1
                           ? 'opacity-20 cursor-not-allowed text-slate-400'
                           : 'hover:bg-indigo-100 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-300 cursor-pointer'
                       }`}
                       title={language === 'ar' ? 'تأخير المستوى (تحريك لليمين)' : 'Move level next'}
                     >
-                      <ChevronRight size={14} />
+                      <ChevronRight size={15} />
                     </button>
                   </div>
                 )}
