@@ -378,21 +378,24 @@ export function AdminDashboardScreen() {
 
       {/* 4. Groups Performance Matrix (Section 4, 39) */}
       <div
-        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs"
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs"
         style={{
-          padding: '34px 38px',
-          marginBottom: '36px',
+          padding: '44px 48px',
+          marginBottom: '48px',
         }}
       >
-        <div className="flex items-center justify-between mb-7">
-          <h4 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2.5">
-            <School size={20} className="text-amber-500" />
+        <div
+          className="flex items-center justify-between gap-4 flex-wrap"
+          style={{ marginBottom: '32px' }}
+        >
+          <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+            <School size={24} className="text-amber-500 shrink-0" />
             <span>{language === 'ar' ? 'مؤشرات أداء الأفواج التعليمية (Groups Performance)' : 'Class Groups Performance'}</span>
           </h4>
           <button
             type="button"
             onClick={() => setActiveTab('groups')}
-            className="text-xs font-bold text-amber-600 hover:underline cursor-pointer"
+            className="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
           >
             {language === 'ar' ? 'إدارة جميع الأفواج' : 'Manage All Groups'} →
           </button>
@@ -401,39 +404,42 @@ export function AdminDashboardScreen() {
         <div className="overflow-x-auto">
           <table className="w-full text-xs sm:text-sm text-right">
             <thead>
-              <tr className="border-b border-slate-200/80 dark:border-slate-800 text-slate-400 font-bold">
-                <th className="pb-4 pt-1 px-4 text-right">{language === 'ar' ? 'الفوج والكود' : 'Group Code & Name'}</th>
-                <th className="pb-4 pt-1 px-4 text-center">{language === 'ar' ? 'المعلم المسند' : 'Teacher'}</th>
-                <th className="pb-4 pt-1 px-4 text-center">{language === 'ar' ? 'الطلاب / السعة' : 'Students / Capacity'}</th>
-                <th className="pb-4 pt-1 px-4 text-center">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
-                <th className="pb-4 pt-1 px-4 text-center">{language === 'ar' ? 'التقدم الأكاديمي' : 'Progress'}</th>
-                <th className="pb-4 pt-1 px-4 text-center">{language === 'ar' ? 'المعدل العام' : 'Performance'}</th>
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
+                <th className="pb-5 pt-2 px-6 text-right font-extrabold">{language === 'ar' ? 'الفوج والكود' : 'Group Code & Name'}</th>
+                <th className="pb-5 pt-2 px-6 text-center font-extrabold">{language === 'ar' ? 'المعلم المسند' : 'Teacher'}</th>
+                <th className="pb-5 pt-2 px-6 text-center font-extrabold">{language === 'ar' ? 'الطلاب / السعة' : 'Students / Capacity'}</th>
+                <th className="pb-5 pt-2 px-6 text-center font-extrabold">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
+                <th className="pb-5 pt-2 px-6 text-center font-extrabold">{language === 'ar' ? 'التقدم الأكاديمي' : 'Progress'}</th>
+                <th className="pb-5 pt-2 px-6 text-center font-extrabold">{language === 'ar' ? 'المعدل العام' : 'Performance'}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {visibleGroups.map((grp) => (
                 <tr key={grp.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
-                  <td className="py-5 px-4 font-bold text-slate-900 dark:text-white">
-                    <div className="flex items-center gap-3">
-                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 font-mono text-xs font-black text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60">
+                  <td className="py-7 px-6 font-bold text-slate-900 dark:text-white">
+                    <div className="flex items-center gap-4">
+                      <span
+                        className="rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-xs font-black text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80"
+                        style={{ padding: '6px 14px' }}
+                      >
                         {grp.code}
                       </span>
-                      <span className="text-sm font-bold">{grp.name}</span>
+                      <span className="text-sm sm:text-base font-bold">{grp.name}</span>
                     </div>
                   </td>
-                  <td className="py-5 px-4 text-center font-medium text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+                  <td className="py-7 px-6 text-center font-medium text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
                     {grp.teacherName}
                   </td>
-                  <td className="py-5 px-4 text-center font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
+                  <td className="py-7 px-6 text-center font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
                     {grp.studentIds.length} / {grp.maxCapacity}
                   </td>
-                  <td className="py-5 px-4 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-sm">
+                  <td className="py-7 px-6 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-base">
                     {grp.attendanceRate}%
                   </td>
-                  <td className="py-5 px-4 text-center font-mono font-black text-blue-600 dark:text-blue-400 text-sm">
+                  <td className="py-7 px-6 text-center font-mono font-black text-blue-600 dark:text-blue-400 text-base">
                     {grp.averageProgress}%
                   </td>
-                  <td className="py-5 px-4 text-center font-mono font-black text-purple-600 dark:text-purple-400 text-sm">
+                  <td className="py-7 px-6 text-center font-mono font-black text-purple-600 dark:text-purple-400 text-base">
                     {grp.averagePerformance}%
                   </td>
                 </tr>
