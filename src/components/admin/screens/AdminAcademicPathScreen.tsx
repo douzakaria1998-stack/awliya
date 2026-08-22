@@ -854,10 +854,10 @@ export function AdminAcademicPathScreen() {
                                 </div>
                                 {lesson.hasAssessment && (
                                   <span
-                                    className="text-[11px] font-bold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 shrink-0 self-start sm:self-auto"
-                                    style={{ padding: '2px 10px' }}
+                                    className="inline-flex items-center justify-center text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shrink-0 self-start sm:self-auto shadow-2xs whitespace-nowrap"
+                                    style={{ padding: '5px 14px', borderRadius: '9999px', lineHeight: '1.2' }}
                                   >
-                                    اختبار مهارة ✓
+                                    {language === 'ar' ? 'اختبار مهارة ✓' : 'Assessment'}
                                   </span>
                                 )}
                               </div>
@@ -1745,8 +1745,8 @@ export function AdminAcademicPathScreen() {
 
                                   {lesson.hasAssessment && (
                                     <span
-                                      className="inline-flex items-center justify-center font-bold text-[11px] bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200/80 dark:border-amber-800/80 shrink-0 whitespace-nowrap shadow-2xs"
-                                      style={{ padding: '3px 10px', borderRadius: '8px' }}
+                                      className="inline-flex items-center justify-center font-bold text-xs bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-700 shrink-0 whitespace-nowrap shadow-2xs"
+                                      style={{ padding: '5px 14px', borderRadius: '9999px', lineHeight: '1.2' }}
                                     >
                                       {language === 'ar' ? 'اختبار مهارة ✓' : 'Assessment'}
                                     </span>
