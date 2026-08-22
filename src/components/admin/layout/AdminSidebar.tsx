@@ -195,33 +195,33 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
 
   return (
     <aside
-      className={`hidden lg:flex flex-col w-[300px] min-w-[300px] max-w-[300px] shrink-0 bg-slate-900 text-slate-100 ${
+      className={`hidden lg:flex flex-col w-[270px] min-w-[270px] max-w-[270px] shrink-0 bg-slate-900 text-slate-100 ${
         isRTL ? 'border-l' : 'border-r'
       } border-slate-800 min-h-screen sticky top-0 h-screen z-30 justify-between select-none ${
         isRTL ? 'text-right' : 'text-left'
       }`}
       suppressHydrationWarning
     >
-      <div className="flex flex-col overflow-y-auto flex-1 pb-4">
+      <div className="flex flex-col overflow-y-auto flex-1 pb-3">
         {/* 1. Brand Header */}
         <div
-          className="h-20 border-b border-slate-800 flex items-center gap-3 shrink-0"
+          className="h-16 border-b border-slate-800 flex items-center gap-3 shrink-0"
           style={{
-            paddingRight: isRTL ? '24px' : '16px',
-            paddingLeft: isRTL ? '16px' : '24px',
+            paddingRight: isRTL ? '20px' : '14px',
+            paddingLeft: isRTL ? '14px' : '20px',
           }}
         >
-          <div className="h-11 px-2.5 py-1 rounded-xl bg-white flex items-center justify-center shadow-xs shrink-0">
-            <img src="/myschool-logo.png" alt="My School" className="h-8 w-auto object-contain" />
+          <div className="h-9 px-2 py-1 rounded-xl bg-white flex items-center justify-center shadow-xs shrink-0">
+            <img src="/myschool-logo.png" alt="My School" className="h-6.5 w-auto object-contain" />
           </div>
           <div className="min-w-0">
-            <div className="font-black text-sm text-white flex items-center gap-1.5">
+            <div className="font-black text-xs text-white flex items-center gap-1.5">
               <span>My School</span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40">
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40">
                 Back Office
               </span>
             </div>
-            <div className="text-[11px] text-slate-400 font-medium">
+            <div className="text-[10px] text-slate-400 font-medium truncate">
               {language === 'ar' ? 'لوحة التحكم والمتابعة' : language === 'fr' ? 'Panneau de Contrôle & Suivi' : 'Control & Analytics Panel'}
             </div>
           </div>
@@ -231,21 +231,21 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
         <div
           className="rounded-2xl bg-slate-800/90 border border-slate-700/70 shadow-sm shrink-0"
           style={{
-            margin: '16px 20px',
-            padding: '14px 16px',
+            margin: '12px 14px',
+            padding: '10px 12px',
           }}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
               {currentAdmin.fullNameAr[0]}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="font-black text-xs sm:text-sm text-white truncate">
+              <div className="font-black text-xs text-white truncate">
                 {currentAdmin.fullNameAr}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className={`w-2 h-2 rounded-full ${roleConfig[currentRole].dotClass}`} />
-                <span className="text-[11px] font-bold text-slate-300 truncate">
+                <span className={`w-1.5 h-1.5 rounded-full ${roleConfig[currentRole].dotClass}`} />
+                <span className="text-[10px] font-bold text-slate-300 truncate">
                   {language === 'ar' ? roleConfig[currentRole].labelAr : language === 'fr' ? roleConfig[currentRole].labelFr : roleConfig[currentRole].labelEn}
                 </span>
               </div>
@@ -253,15 +253,15 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           </div>
 
           {/* Quick Interactive Role Switcher Pill */}
-          <div className="mt-3 pt-2.5 border-t border-slate-700/70 flex items-center justify-between text-[11px]">
+          <div className="mt-2.5 pt-2 border-t border-slate-700/70 flex items-center justify-between text-[10px]">
             <span className="text-slate-400 font-bold">
-              {language === 'ar' ? 'معاينة دور:' : language === 'fr' ? 'Tester un rôle:' : 'Preview role:'}
+              {language === 'ar' ? 'معاينة دور:' : language === 'fr' ? 'Tester:' : 'Preview:'}
             </span>
             <div className="flex gap-1">
               <button
                 type="button"
                 onClick={() => switchRole('super_admin')}
-                className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                className={`px-1.5 py-0.5 rounded text-[9px] font-bold cursor-pointer transition-colors ${
                   currentRole === 'super_admin' ? 'bg-purple-600 text-white' : 'bg-slate-700 text-slate-300 hover:text-white'
                 }`}
                 title="Super Admin"
@@ -271,7 +271,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
               <button
                 type="button"
                 onClick={() => switchRole('administrator')}
-                className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                className={`px-1.5 py-0.5 rounded text-[9px] font-bold cursor-pointer transition-colors ${
                   currentRole === 'administrator' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:text-white'
                 }`}
                 title="Admin"
@@ -281,7 +281,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
               <button
                 type="button"
                 onClick={() => switchRole('teacher')}
-                className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                className={`px-1.5 py-0.5 rounded text-[9px] font-bold cursor-pointer transition-colors ${
                   currentRole === 'teacher' ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-slate-300 hover:text-white'
                 }`}
                 title="Teacher (Sarah Benali)"
@@ -293,18 +293,18 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
         </div>
 
         {/* 3. Navigation List grouped into 3 Categories (Section 33, 35) */}
-        <div className="space-y-7 px-4">
+        <div className="space-y-4 px-3">
           {navigationCategories.map((cat, catIdx) => {
             const visibleItems = cat.items.filter((item) => item.allowedRoles.includes(currentRole));
             if (visibleItems.length === 0) return null;
 
             return (
               <div key={catIdx}>
-                <div className="px-3 text-[11px] font-black text-slate-400/80 uppercase tracking-wider mb-2.5">
+                <div className="px-2.5 text-[10px] font-black text-slate-400/80 uppercase tracking-wider mb-1.5">
                   {language === 'ar' ? cat.titleAr : language === 'fr' ? cat.titleFr : cat.titleEn}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {visibleItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeTab === item.key;
@@ -316,22 +316,22 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                           setActiveTab(item.key);
                           if (onCloseMobile) onCloseMobile();
                         }}
-                        className={`w-full flex items-center justify-between rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+                        className={`w-full flex items-center justify-between rounded-xl font-bold text-xs transition-all cursor-pointer ${
                           isActive
                             ? 'bg-purple-600 text-white shadow-md'
                             : 'text-slate-400 hover:text-white hover:bg-slate-800/80'
                         }`}
-                        style={{ padding: '12px 18px' }}
+                        style={{ padding: '8px 12px' }}
                       >
-                        <div className="flex items-center gap-3.5 min-w-0">
-                          <Icon size={20} className={isActive ? 'text-white shrink-0' : 'text-slate-400 shrink-0'} />
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Icon size={17} className={isActive ? 'text-white shrink-0' : 'text-slate-400 shrink-0'} />
                           <span className="truncate">
                             {language === 'ar' ? item.labelAr : language === 'fr' ? item.labelFr : item.labelEn}
                           </span>
                         </div>
 
                         {item.badgeCount !== undefined && item.badgeCount > 0 && (
-                          <span className="px-2.5 py-0.5 rounded-full bg-rose-500 text-white font-mono font-extrabold text-[11px] shadow-xs shrink-0">
+                          <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white font-mono font-extrabold text-[10px] shadow-xs shrink-0">
                             {item.badgeCount}
                           </span>
                         )}
