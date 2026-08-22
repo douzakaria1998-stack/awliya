@@ -78,32 +78,37 @@ export function AdminAcademicPathScreen() {
 
       {/* Main Two Tabs Bar (Section 17) */}
       <div
-        className="flex items-center gap-3 p-2 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs"
-        style={{ marginBottom: '36px' }}
+        className="flex items-center gap-4 rounded-[28px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs"
+        style={{
+          padding: '12px 16px',
+          marginBottom: '40px',
+        }}
       >
         <button
           type="button"
           onClick={() => setActiveTab('curriculum')}
-          className={`flex-1 py-3.5 px-6 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
+          className={`flex-1 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-3 transition-all cursor-pointer ${
             activeTab === 'curriculum'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          style={{ padding: '16px 28px' }}
         >
-          <Settings size={18} />
+          <Settings size={20} />
           <span>{language === 'ar' ? 'التبويب 1: هيكل المنهاج والإعدادات (Curriculum / Settings)' : 'Tab 1 — Curriculum / Settings'}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('student_progress')}
-          className={`flex-1 py-3.5 px-6 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
+          className={`flex-1 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-3 transition-all cursor-pointer ${
             activeTab === 'student_progress'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          style={{ padding: '16px 28px' }}
         >
-          <TrendingUp size={18} />
+          <TrendingUp size={20} />
           <span>{language === 'ar' ? 'التبويب 2: مصفوفة تقدم الطلاب (Student Progress Matrix)' : 'Tab 2 — Student Progress'}</span>
         </button>
       </div>
