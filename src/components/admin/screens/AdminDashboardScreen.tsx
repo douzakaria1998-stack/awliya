@@ -97,31 +97,6 @@ export function AdminDashboardScreen() {
                 : 'Real-time monitoring of students, class groups, attendance rates, and curriculum progress across languages.'}
             </p>
           </div>
-
-          {/* Action Row */}
-          <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-purple-800/40">
-            {pendingCount > 0 && currentRole !== 'teacher' && (
-              <button
-                type="button"
-                onClick={() => setActiveTab('approvals')}
-                className="rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-md flex items-center gap-2.5 cursor-pointer leading-normal"
-                style={{ padding: '14px 26px' }}
-              >
-                <Clock size={18} className="shrink-0" />
-                <span>{language === 'ar' ? `طلبات التسجيل المعلقة (${pendingCount})` : `Pending Approvals (${pendingCount})`}</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('groups')}
-              className="rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm transition-all border border-white/20 flex items-center gap-2.5 cursor-pointer leading-normal"
-              style={{ padding: '14px 26px' }}
-            >
-              <School size={18} className="shrink-0" />
-              <span>{language === 'ar' ? 'استعراض الأفواج والحصص' : 'View Groups & Sessions'}</span>
-            </button>
-          </div>
         </div>
       </div>
 
