@@ -84,8 +84,8 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
 
         {/* Tab Navigation (Section 13) */}
         <div
-          className="flex items-center bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 overflow-x-auto shrink-0 scrollbar-none"
-          style={{ padding: '8px 14px', gap: '6px' }}
+          className="grid grid-cols-6 bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 shrink-0"
+          style={{ padding: '8px 12px', gap: '6px' }}
         >
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -95,15 +95,15 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap w-full ${
                   isActive
                     ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs border border-amber-200/60 dark:border-amber-900/60'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-slate-800/40'
                 }`}
-                style={{ padding: '6px 12px' }}
+                style={{ padding: '8px 6px' }}
               >
-                <Icon size={14} />
-                <span>{language === 'ar' ? tab.labelAr : tab.labelEn}</span>
+                <Icon size={14} className="shrink-0" />
+                <span className="truncate">{language === 'ar' ? tab.labelAr : tab.labelEn}</span>
               </button>
             );
           })}
