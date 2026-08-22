@@ -1023,37 +1023,43 @@ export function AdminAcademicPathScreen() {
                 {/* Filter Controls */}
                 <div className="flex flex-wrap items-center gap-2.5">
                   {/* Language Filter */}
-                  <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                  <div
+                    className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200/60 dark:border-slate-750"
+                    style={{ padding: '4px' }}
+                  >
                     <button
                       type="button"
                       onClick={() => setGroupLanguageFilter('all')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         groupLanguageFilter === 'all'
                           ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs'
                           : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                       }`}
+                      style={{ padding: '6px 14px' }}
                     >
                       {language === 'ar' ? 'الكل' : 'All'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setGroupLanguageFilter('English')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         groupLanguageFilter === 'English'
                           ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-2xs'
                           : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                       }`}
+                      style={{ padding: '6px 14px' }}
                     >
                       🇬🇧 English
                     </button>
                     <button
                       type="button"
                       onClick={() => setGroupLanguageFilter('French')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         groupLanguageFilter === 'French'
                           ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-2xs'
                           : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                       }`}
+                      style={{ padding: '6px 14px' }}
                     >
                       🇫🇷 French
                     </button>
@@ -1768,7 +1774,8 @@ export function AdminAcademicPathScreen() {
 
                               {/* Right: Interactive 3-State Toggle (Section 5 of PDF) */}
                               <div
-                                className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shrink-0 self-start md:self-center shadow-2xs"
+                                className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900/90 rounded-2xl border border-slate-200/80 dark:border-slate-800 shrink-0 self-start md:self-center shadow-2xs"
+                                style={{ padding: '6px 8px' }}
                               >
                                 {/* 1. Not Started */}
                                 <button
@@ -1781,13 +1788,14 @@ export function AdminAcademicPathScreen() {
                                       studentCurriculumLevel.levelNumber
                                     )
                                   }
-                                  className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                                  className={`font-bold text-xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
                                     currentStatus === 'not_started'
                                       ? 'bg-white dark:bg-slate-750 text-slate-700 dark:text-slate-200 shadow-xs ring-1 ring-slate-300 dark:ring-slate-600'
                                       : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
                                   }`}
+                                  style={{ padding: '8px 14px', borderRadius: '12px' }}
                                 >
-                                  <Circle size={12} />
+                                  <Circle size={13} className="shrink-0" />
                                   <span>{language === 'ar' ? 'لم يبدأ' : 'Not Started'}</span>
                                 </button>
 
@@ -1802,13 +1810,14 @@ export function AdminAcademicPathScreen() {
                                       studentCurriculumLevel.levelNumber
                                     )
                                   }
-                                  className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                                  className={`font-bold text-xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
                                     currentStatus === 'in_progress'
                                       ? 'bg-amber-500 text-white shadow-xs ring-2 ring-amber-400/40'
                                       : 'text-slate-400 hover:text-amber-600'
                                   }`}
+                                  style={{ padding: '8px 14px', borderRadius: '12px' }}
                                 >
-                                  <CircleDot size={12} />
+                                  <CircleDot size={13} className="shrink-0" />
                                   <span>{language === 'ar' ? 'قيد التقدم' : 'In Progress'}</span>
                                 </button>
 
@@ -1823,13 +1832,14 @@ export function AdminAcademicPathScreen() {
                                       studentCurriculumLevel.levelNumber
                                     )
                                   }
-                                  className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                                  className={`font-bold text-xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
                                     currentStatus === 'completed'
                                       ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-400/40'
                                       : 'text-slate-400 hover:text-emerald-600'
                                   }`}
+                                  style={{ padding: '8px 14px', borderRadius: '12px' }}
                                 >
-                                  <CheckCircle size={12} />
+                                  <CheckCircle size={13} className="shrink-0" />
                                   <span>{language === 'ar' ? 'مكتمل ✓' : 'Completed'}</span>
                                 </button>
                               </div>
