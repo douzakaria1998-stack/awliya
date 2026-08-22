@@ -20,6 +20,11 @@ import {
   AlertCircle,
   Clock,
   ArrowUpDown,
+  UserPlus,
+  X,
+  Sparkles,
+  Shield,
+  BookOpen,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -27,7 +32,7 @@ import { AdminStudent, EntityStatus } from '@/types/admin';
 import { StudentDetailModal } from '../modals/StudentDetailModal';
 
 export function StudentsManagementScreen() {
-  const { visibleStudents, groups, teachers, updateStudent, archiveStudent } = useAdmin();
+  const { visibleStudents, groups, teachers, addStudent, updateStudent, archiveStudent } = useAdmin();
   const { isRTL, language } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,6 +46,17 @@ export function StudentsManagementScreen() {
 
   const [selectedStudentForModal, setSelectedStudentForModal] = useState<AdminStudent | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
+
+  // New Student Form State
+  const [newNameAr, setNewNameAr] = useState('');
+  const [newNameEn, setNewNameEn] = useState('');
+  const [newGender, setNewGender] = useState<'male' | 'female'>('male');
+  const [newLanguage, setNewLanguage] = useState<'English' | 'French'>('English');
+  const [newCefrLevel, setNewCefrLevel] = useState<'A1' | 'A2' | 'B1' | 'B2' | 'C1'>('A1');
+  const [newGroupId, setNewGroupId] = useState<string>(groups[0]?.id || 'grp-a1-01');
+  const [newParentName, setNewParentName] = useState('');
+  const [newParentPhone, setNewParentPhone] = useState('');
 
   // Filter and Sort Pipeline
   const filteredStudents = useMemo(() => {
@@ -94,6 +110,40 @@ export function StudentsManagementScreen() {
     setIsModalOpen(true);
   };
 
+  const handleCreateStudent = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newNameAr.trim()) return;
+
+    const matchedGroup = groups.find((g) => g.id === newGroupId) || groups[0];
+    const matchedTeacher = teachers.find((t) => t.id === matchedGroup?.teacherId) || teachers[0];
+
+    addStudent({
+      fullNameAr: newNameAr.trim(),
+      fullNameEn: newNameEn.trim() || newNameAr.trim(),
+      gender: newGender,
+      language: newLanguage,
+      cefrLevel: newCefrLevel,
+      currentLevel: newCefrLevel === 'A1' ? 1 : newCefrLevel === 'A2' ? 2 : newCefrLevel === 'B1' ? 3 : newCefrLevel === 'B2' ? 4 : 5,
+      groupId: matchedGroup?.id || 'grp-a1-01',
+      groupName: matchedGroup?.name || 'Group A1 — Beginner',
+      teacherId: matchedTeacher?.id || 'usr-teach-01',
+      teacherName: matchedTeacher?.fullNameEn || 'Sarah Benali',
+      parentName: newParentName.trim() || 'ولي أمر الطالب',
+      parentPhone: newParentPhone.trim() || '+213 550 000 000',
+      status: 'active',
+      overallProgress: 0,
+      attendanceRate: 100,
+      averagePerformance: 80,
+    });
+
+    // Reset Form
+    setNewNameAr('');
+    setNewNameEn('');
+    setNewParentName('');
+    setNewParentPhone('');
+    setIsAddStudentOpen(false);
+  };
+
   return (
     <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header & Export Bar */}
@@ -111,7 +161,18 @@ export function StudentsManagementScreen() {
         </div>
 
         {/* Export & Actions */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Add New Student Button */}
+          <button
+            type="button"
+            onClick={() => setIsAddStudentOpen(true)}
+            className="rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            style={{ padding: '12px 24px' }}
+          >
+            <UserPlus size={17} />
+            <span>{language === 'ar' ? 'إضافة طالب جديد' : 'Add New Student'}</span>
+          </button>
+
           <div className="flex items-center rounded-2xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 p-1.5 shadow-2xs">
             <button
               type="button"
@@ -446,6 +507,232 @@ export function StudentsManagementScreen() {
           setSelectedStudentForModal(null);
         }}
       />
+
+      {/* Add New Student Modal Dialog */}
+      {isAddStudentOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-md animate-fade-in">
+          <div
+            className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl border border-slate-200/80 dark:border-slate-800 animate-fade-in-up"
+            style={{ padding: '28px 32px' }}
+          >
+            {/* Modal Header */}
+            <div
+              className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800"
+              style={{ paddingBottom: '14px', marginBottom: '18px' }}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-2xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center font-black shrink-0">
+                  <UserPlus size={18} />
+                </div>
+                <div>
+                  <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">
+                    {language === 'ar' ? 'تسجيل وإضافة طالب جديد' : 'Register New Student'}
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-medium">
+                    {language === 'ar'
+                      ? 'إدراج الطالب وتعيين الفوج والمسار والبيانات الأكاديمية'
+                      : 'Enroll student and assign to academic group and curriculum'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddStudentOpen(false)}
+                className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleCreateStudent} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Full Name (Arabic) */}
+                <div>
+                  <label
+                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '5px' }}
+                  >
+                    {language === 'ar' ? 'الاسم الكامل بالعربية *' : 'Full Name (Arabic) *'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newNameAr}
+                    onChange={(e) => setNewNameAr(e.target.value)}
+                    placeholder="مثال: ياسمين التواتي"
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                    style={{ height: '42px', padding: '8px 14px' }}
+                  />
+                </div>
+
+                {/* Full Name (English) */}
+                <div>
+                  <label
+                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '5px' }}
+                  >
+                    {language === 'ar' ? 'الاسم بالإنجليزية (English)' : 'Full Name (English)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={newNameEn}
+                    onChange={(e) => setNewNameEn(e.target.value)}
+                    placeholder="e.g. Yasmine Touati"
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                    style={{ height: '42px', padding: '8px 14px' }}
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Gender */}
+                <div>
+                  <label
+                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '5px' }}
+                  >
+                    {language === 'ar' ? 'الجنس' : 'Gender'}
+                  </label>
+                  <select
+                    value={newGender}
+                    onChange={(e) => setNewGender(e.target.value as any)}
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
+                    style={{ height: '42px', padding: '8px 12px' }}
+                  >
+                    <option value="male">{language === 'ar' ? 'ذكر (Male)' : 'Male'}</option>
+                    <option value="female">{language === 'ar' ? 'أنثى (Female)' : 'Female'}</option>
+                  </select>
+                </div>
+
+                {/* Language Track */}
+                <div>
+                  <label
+                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '5px' }}
+                  >
+                    {language === 'ar' ? 'المسار اللغوي' : 'Language'}
+                  </label>
+                  <select
+                    value={newLanguage}
+                    onChange={(e) => setNewLanguage(e.target.value as any)}
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
+                    style={{ height: '42px', padding: '8px 12px' }}
+                  >
+                    <option value="English">الإنجليزية (English)</option>
+                    <option value="French">الفرنسية (Français)</option>
+                  </select>
+                </div>
+
+                {/* CEFR Level */}
+                <div>
+                  <label
+                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '5px' }}
+                  >
+                    {language === 'ar' ? 'المستوى (Level)' : 'Level'}
+                  </label>
+                  <select
+                    value={newCefrLevel}
+                    onChange={(e) => setNewCefrLevel(e.target.value as any)}
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
+                    style={{ height: '42px', padding: '8px 12px' }}
+                  >
+                    <option value="A1">A1 (Level 1)</option>
+                    <option value="A2">A2 (Level 2)</option>
+                    <option value="B1">B1 (Level 3)</option>
+                    <option value="B2">B2 (Level 4)</option>
+                    <option value="C1">C1 (Level 5)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Group Assignment */}
+              <div>
+                <label
+                  className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                  style={{ marginBottom: '5px' }}
+                >
+                  {language === 'ar' ? 'الفوج والمجموعة الدراسية (Assigned Group) *' : 'Assigned Group *'}
+                </label>
+                <select
+                  value={newGroupId}
+                  onChange={(e) => setNewGroupId(e.target.value)}
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
+                  style={{ height: '42px', padding: '8px 14px' }}
+                >
+                  {groups.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name} — {isRTL ? g.daysAr : g.daysEn} ({g.startTime} - {g.endTime})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Parent Name */}
+                <div>
+                  <label
+                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '5px' }}
+                  >
+                    {language === 'ar' ? 'اسم ولي الأمر' : 'Parent Name'}
+                  </label>
+                  <input
+                    type="text"
+                    value={newParentName}
+                    onChange={(e) => setNewParentName(e.target.value)}
+                    placeholder="أ. فريد التواتي"
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                    style={{ height: '42px', padding: '8px 14px' }}
+                  />
+                </div>
+
+                {/* Parent Phone */}
+                <div>
+                  <label
+                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '5px' }}
+                  >
+                    {language === 'ar' ? 'رقم هاتف ولي الأمر' : 'Parent Phone'}
+                  </label>
+                  <input
+                    type="text"
+                    value={newParentPhone}
+                    onChange={(e) => setNewParentPhone(e.target.value)}
+                    placeholder="+213 550 000 000"
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                    style={{ height: '42px', padding: '8px 14px' }}
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddStudentOpen(false)}
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all cursor-pointer text-xs sm:text-sm flex items-center justify-center"
+                  style={{ height: '44px' }}
+                >
+                  <span>{language === 'ar' ? 'إلغاء' : 'Cancel'}</span>
+                </button>
+
+                <button
+                  type="submit"
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-xl shadow-md hover:scale-[1.01] active:scale-95 transition-all cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-2"
+                  style={{ height: '44px' }}
+                >
+                  <CheckCircle2 size={16} />
+                  <span>{language === 'ar' ? 'حفظ وإضافة الطالب' : 'Save & Register'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
