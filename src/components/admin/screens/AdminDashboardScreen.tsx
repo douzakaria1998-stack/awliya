@@ -277,12 +277,12 @@ export function AdminDashboardScreen() {
         {/* Student Progress By Level */}
         <div
           className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs flex flex-col justify-between"
-          style={{ padding: '32px 36px' }}
+          style={{ padding: '34px 38px' }}
         >
           <div>
-            <div className="flex items-center justify-between mb-5">
-              <h4 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                <TrendingUp size={18} className="text-indigo-600" />
+            <div className="flex items-center justify-between mb-7">
+              <h4 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2.5">
+                <TrendingUp size={20} className="text-indigo-600" />
                 <span>{language === 'ar' ? 'نسبة الإنجاز الأكاديمي حسب المستويات' : 'Student Progress by Level'}</span>
               </h4>
               <button
@@ -294,18 +294,18 @@ export function AdminDashboardScreen() {
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6 sm:space-y-7">
               {levelProgressData.map((item) => (
-                <div key={item.level} className="space-y-1.5">
+                <div key={item.level} className="space-y-2.5">
                   <div className="flex items-center justify-between text-xs sm:text-sm font-bold">
                     <span className="text-slate-700 dark:text-slate-200 font-mono">
                       {item.level} — {language === 'ar' ? item.nameAr : item.nameEn} ({item.count} {language === 'ar' ? 'طلاب' : 'students'})
                     </span>
-                    <span className="font-mono font-black text-indigo-600">{item.progress}%</span>
+                    <span className="font-mono font-black text-indigo-600 text-sm">{item.progress}%</span>
                   </div>
-                  <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="w-full h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200/40 dark:border-slate-700/40">
                     <div
-                      className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all"
+                      className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-purple-600 rounded-full transition-all"
                       style={{ width: `${item.progress}%` }}
                     />
                   </div>
@@ -318,12 +318,12 @@ export function AdminDashboardScreen() {
         {/* Attendance Breakdown (Today, Yesterday, This Week) */}
         <div
           className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs flex flex-col justify-between"
-          style={{ padding: '32px 36px' }}
+          style={{ padding: '34px 38px' }}
         >
           <div>
-            <div className="flex items-center justify-between mb-5">
-              <h4 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                <CalendarCheck2 size={18} className="text-emerald-600" />
+            <div className="flex items-center justify-between mb-7">
+              <h4 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2.5">
+                <CalendarCheck2 size={20} className="text-emerald-600" />
                 <span>{language === 'ar' ? 'مؤشرات الحضور الأسبوعي' : 'Attendance Overview'}</span>
               </h4>
               <button
