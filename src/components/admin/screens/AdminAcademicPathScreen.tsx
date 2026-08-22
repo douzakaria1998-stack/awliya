@@ -782,12 +782,12 @@ export function AdminAcademicPathScreen() {
           {/* STEP 2: Configure Units and Lessons Popup */}
           {modalStep === 'units' && (
             <div
-              className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up flex flex-col max-h-[90vh] overflow-hidden"
+              className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up flex flex-col max-h-[90vh] overflow-hidden"
             >
               {/* Step 2 Header */}
               <div
                 className="bg-slate-900 text-white flex items-center justify-between shrink-0"
-                style={{ padding: '16px 24px' }}
+                style={{ padding: '18px 26px' }}
               >
                 <div className="flex items-center gap-3">
                   <button
@@ -828,7 +828,7 @@ export function AdminAcademicPathScreen() {
               {/* Step 2 Action Bar */}
               <div
                 className="bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0"
-                style={{ padding: '10px 20px' }}
+                style={{ padding: '12px 24px' }}
               >
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300">
                   <Layers size={16} className="text-indigo-600 dark:text-indigo-400" />
@@ -843,9 +843,9 @@ export function AdminAcademicPathScreen() {
                   type="button"
                   onClick={handleAddUnit}
                   className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-                  style={{ padding: '6px 14px' }}
+                  style={{ padding: '7px 16px' }}
                 >
-                  <Plus size={14} />
+                  <Plus size={15} />
                   <span>{language === 'ar' ? 'إضافة وحدة جديدة' : 'Add New Unit'}</span>
                 </button>
               </div>
@@ -864,40 +864,27 @@ export function AdminAcademicPathScreen() {
                   <div
                     key={unit.id}
                     className="bg-slate-50 dark:bg-slate-800/60 rounded-3xl border border-slate-200 dark:border-slate-750 shadow-xs"
-                    style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: '18px' }}
+                    style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}
                   >
-                    {/* Unit Header Row */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 border-b border-slate-200/80 dark:border-slate-700/80 pb-4">
-                      <div className="flex items-center gap-3 flex-1">
-                        <span className="w-9 h-9 rounded-xl bg-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
+                    {/* Unit Header: Top Action Bar */}
+                    <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-700/80 pb-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
                           {uIdx + 1}
                         </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1">
-                          <input
-                            type="text"
-                            value={unit.titleAr}
-                            onChange={(e) => handleUpdateUnit(unit.id, { titleAr: e.target.value })}
-                            placeholder={language === 'ar' ? `اسم الوحدة ${uIdx + 1} بالعربية` : `Unit ${uIdx + 1} Title (AR)`}
-                            className="h-10 px-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                          />
-                          <input
-                            type="text"
-                            value={unit.titleEn}
-                            onChange={(e) => handleUpdateUnit(unit.id, { titleEn: e.target.value })}
-                            placeholder={`Unit ${uIdx + 1} Title (EN)`}
-                            className="h-10 px-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
-                          />
-                        </div>
+                        <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white">
+                          {language === 'ar' ? `الوحدة ${uIdx + 1}` : `Unit ${uIdx + 1}`}
+                        </h4>
                       </div>
 
-                      <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
+                      <div className="flex items-center gap-2.5">
                         <button
                           type="button"
                           onClick={() => handleAddLesson(unit.id)}
                           className="rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 transition-colors cursor-pointer shadow-2xs"
-                          style={{ padding: '8px 14px' }}
+                          style={{ padding: '7px 14px' }}
                         >
-                          <Plus size={15} />
+                          <Plus size={14} />
                           <span>{language === 'ar' ? 'إضافة درس' : 'Add Lesson'}</span>
                         </button>
 
@@ -905,12 +892,42 @@ export function AdminAcademicPathScreen() {
                           <button
                             type="button"
                             onClick={() => handleRemoveUnit(unit.id)}
-                            className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer"
+                            className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer"
                             title={language === 'ar' ? 'حذف الوحدة' : 'Delete Unit'}
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={15} />
                           </button>
                         )}
+                      </div>
+                    </div>
+
+                    {/* Unit Titles Inputs Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">
+                          {language === 'ar' ? 'اسم الوحدة بالعربية *' : 'Unit Title (Arabic) *'}
+                        </label>
+                        <input
+                          type="text"
+                          value={unit.titleAr}
+                          onChange={(e) => handleUpdateUnit(unit.id, { titleAr: e.target.value })}
+                          placeholder={language === 'ar' ? `مثال: الوحدة ${uIdx + 1}: محاور التأسيس` : `Unit ${uIdx + 1} Title (AR)`}
+                          className="w-full h-10 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                          dir="rtl"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">
+                          {language === 'ar' ? 'اسم الوحدة بالإنجليزية:' : 'Unit Title (English):'}
+                        </label>
+                        <input
+                          type="text"
+                          value={unit.titleEn}
+                          onChange={(e) => handleUpdateUnit(unit.id, { titleEn: e.target.value })}
+                          placeholder={`e.g. Unit ${uIdx + 1}: Core Foundations`}
+                          className="w-full h-10 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                          dir="ltr"
+                        />
                       </div>
                     </div>
 
@@ -918,55 +935,72 @@ export function AdminAcademicPathScreen() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-                          {language === 'ar' ? `دروس الوحدة (${unit.lessons.length} دروس)` : `Unit Lessons (${unit.lessons.length} Lessons)`}
+                          {language === 'ar' ? `دروس ومحتويات الوحدة (${unit.lessons.length} دروس)` : `Unit Lessons (${unit.lessons.length} Lessons)`}
                         </span>
                       </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                         {unit.lessons.map((lesson, lIdx) => (
                           <div
                             key={lesson.id}
                             className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-750 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-800 transition-all"
-                            style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '12px' }}
+                            style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}
                           >
-                            {/* Lesson Top Row: Numbers & Titles */}
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex items-center gap-2.5 flex-1">
-                                <span className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                            {/* Lesson Top Bar: Number, Label, and Delete */}
+                            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                              <div className="flex items-center gap-2">
+                                <span className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-bold text-xs flex items-center justify-center shrink-0">
                                   {lIdx + 1}
                                 </span>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1">
-                                  <input
-                                    type="text"
-                                    value={lesson.titleAr}
-                                    onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleAr: e.target.value })}
-                                    placeholder={language === 'ar' ? `عنوان الدرس ${lIdx + 1} (عربي)` : `Lesson ${lIdx + 1} Title (AR)`}
-                                    className="h-9 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                                  />
-                                  <input
-                                    type="text"
-                                    value={lesson.titleEn}
-                                    onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleEn: e.target.value })}
-                                    placeholder={`Lesson ${lIdx + 1} Title (EN)`}
-                                    className="h-9 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
-                                  />
-                                </div>
+                                <span className="font-bold text-xs text-slate-800 dark:text-slate-200">
+                                  {language === 'ar' ? `الدرس رقم ${lIdx + 1}` : `Lesson #${lIdx + 1}`}
+                                </span>
                               </div>
 
                               {unit.lessons.length > 1 && (
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveLesson(unit.id, lesson.id)}
-                                  className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/60 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                                  className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/60 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
                                   title={language === 'ar' ? 'حذف الدرس' : 'Delete Lesson'}
                                 >
-                                  <Trash2 size={14} />
+                                  <Trash2 size={13} />
                                 </button>
                               )}
                             </div>
 
+                            {/* Lesson Titles Row */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                                  {language === 'ar' ? 'عنوان الدرس (عربي) *' : 'Lesson Title (Arabic) *'}
+                                </label>
+                                <input
+                                  type="text"
+                                  value={lesson.titleAr}
+                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleAr: e.target.value })}
+                                  placeholder={language === 'ar' ? `عنوان الدرس ${lIdx + 1}` : `Lesson ${lIdx + 1} Title (AR)`}
+                                  className="w-full h-9 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                  dir="rtl"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                                  {language === 'ar' ? 'عنوان الدرس (إنجليزي):' : 'Lesson Title (English):'}
+                                </label>
+                                <input
+                                  type="text"
+                                  value={lesson.titleEn}
+                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleEn: e.target.value })}
+                                  placeholder={`Lesson ${lIdx + 1} Title (EN)`}
+                                  className="w-full h-9 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                                  dir="ltr"
+                                />
+                              </div>
+                            </div>
+
                             {/* Lesson Summary & Vocabulary inputs */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                               <div>
                                 <label className="block text-[11px] font-bold text-slate-400 mb-1">
                                   {language === 'ar' ? 'ملخص محتوى الدرس:' : 'Lesson Content Summary:'}
@@ -976,7 +1010,7 @@ export function AdminAcademicPathScreen() {
                                   value={lesson.contentSummary}
                                   onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { contentSummary: e.target.value })}
                                   placeholder={language === 'ar' ? 'ملخص ومخرجات الدرس...' : 'Lesson content summary...'}
-                                  className="w-full h-8 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                                  className="w-full h-9 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
                                 />
                               </div>
                               <div>
@@ -988,14 +1022,15 @@ export function AdminAcademicPathScreen() {
                                   value={lesson.vocabString}
                                   onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { vocabString: e.target.value })}
                                   placeholder={language === 'ar' ? 'المفردات (مفصولة بفواصل)' : 'Key Vocabulary (comma-separated)'}
-                                  className="w-full h-8 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                                  className="w-full h-9 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                                  dir="ltr"
                                 />
                               </div>
                             </div>
 
                             {/* Assessment Checkbox */}
-                            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                              <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-bold text-slate-600 dark:text-slate-300">
+                            <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800">
+                              <label className="flex items-center gap-2.5 cursor-pointer select-none text-xs font-bold text-slate-600 dark:text-slate-300">
                                 <input
                                   type="checkbox"
                                   checked={lesson.hasAssessment}
@@ -1016,15 +1051,15 @@ export function AdminAcademicPathScreen() {
               {/* Step 2 Footer */}
               <div
                 className="bg-slate-50 dark:bg-slate-850 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0"
-                style={{ padding: '14px 24px' }}
+                style={{ padding: '16px 26px' }}
               >
                 <button
                   type="button"
                   onClick={() => setModalStep('basic')}
                   className="rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-                  style={{ padding: '8px 18px' }}
+                  style={{ padding: '9px 20px' }}
                 >
-                  {isRTL ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
+                  {isRTL ? <ArrowRight size={15} /> : <ArrowLeft size={15} />}
                   <span>{language === 'ar' ? 'رجوع لتعديل البيانات' : 'Back to Level Info'}</span>
                 </button>
 
@@ -1032,7 +1067,7 @@ export function AdminAcademicPathScreen() {
                   type="button"
                   onClick={handleFinalSaveLevel}
                   className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
-                  style={{ padding: '10px 24px' }}
+                  style={{ padding: '10px 26px' }}
                 >
                   <Check size={16} />
                   <span>{language === 'ar' ? 'حفظ واعتماد المستوى في المنهاج' : 'Save Level to Curriculum'}</span>
