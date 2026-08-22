@@ -40,6 +40,12 @@ export function AdminAcademicPathScreen() {
     (c) => c.levelNumber === selectedLevelNumber && c.language === selectedCurriculumLanguage
   ) || curricula[0];
 
+  const [expandedUnitId, setExpandedUnitId] = useState<string | null>('unit-01');
+
+  const toggleUnit = (unitId: string) => {
+    setExpandedUnitId((prev) => (prev === unitId ? null : unitId));
+  };
+
   const handleCreateLevel = (e: React.FormEvent) => {
     e.preventDefault();
     alert(language === 'ar' ? 'تم إنشاء وحفظ المستوى الجديد بنجاح في المنهاج الأكاديمي!' : 'New level created successfully!');
@@ -220,67 +226,121 @@ export function AdminAcademicPathScreen() {
                 </div>
               </div>
 
-              {/* Units List */}
-              <div className="space-y-6">
-                {activeLevel.units.map((unit) => (
-                  <div
-                    key={unit.id}
-                    className="rounded-[28px] bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 space-y-5 shadow-2xs"
-                    style={{ padding: '28px 32px' }}
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <Layers size={22} className="text-indigo-600 shrink-0" />
-                        <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">
-                          {unit.titleAr} ({unit.titleEn})
-                        </h4>
-                      </div>
-                      <span
-                        className="text-xs font-mono font-bold text-purple-600 bg-white dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0"
-                        style={{ padding: '6px 16px' }}
+              {/* Units List (Accordion Collapsible List) */}
+              <div className="space-y-4">
+                {activeLevel.units.map((unit) => {
+                  const isExpanded = expandedUnitId === unit.id;
+                  return (
+                    <div
+                      key={unit.id}
+                      className={`rounded-[28px] border transition-all shadow-2xs overflow-hidden ${
+                        isExpanded
+                          ? 'bg-slate-50/90 dark:bg-slate-900/80 border-indigo-500/40'
+                          : 'bg-slate-50/50 dark:bg-slate-900/40 border-slate-200/80 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700'
+                      }`}
+                    >
+                      {/* Clickable Unit Header Row */}
+                      <button
+                        type="button"
+                        onClick={() => toggleUnit(unit.id)}
+                        className="w-full flex items-center justify-between gap-4 cursor-pointer text-start transition-colors"
+                        style={{ padding: '24px 30px' }}
                       >
-                        {unit.lessons.length} {language === 'ar' ? 'دروس' : 'lessons'}
-                      </span>
-                    </div>
-
-                    {/* Lessons Tree (Section 16: Greetings, Introducing Yourself, Exercises, Vocabulary) */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 pt-2">
-                      {unit.lessons.map((lesson) => (
-                        <div
-                          key={lesson.id}
-                          className="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-750 space-y-3 shadow-2xs hover:border-indigo-500/50 transition-all"
-                          style={{ padding: '20px 24px' }}
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="font-black text-sm text-slate-900 dark:text-white">
-                              {lesson.titleAr}
-                            </span>
-                            {lesson.hasAssessment && (
-                              <span
-                                className="text-xs font-bold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 shrink-0"
-                                style={{ padding: '4px 12px' }}
-                              >
-                                اختبار مهارة ✓
-                              </span>
-                            )}
+                        <div className="flex items-center gap-3.5">
+                          <div
+                            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-colors shrink-0 ${
+                              isExpanded
+                                ? 'bg-indigo-600 text-white shadow-xs'
+                                : 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400'
+                            }`}
+                          >
+                            <Layers size={20} />
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-normal">{lesson.contentSummary}</p>
-                          <div className="flex flex-wrap gap-1.5 pt-1.5">
-                            {lesson.vocabulary.map((vocab, vIdx) => (
-                              <span
-                                key={vIdx}
-                                className="rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-mono font-medium text-slate-700 dark:text-slate-300"
-                                style={{ padding: '4px 10px' }}
-                              >
-                                {vocab}
-                              </span>
-                            ))}
+                          <div>
+                            <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white leading-snug">
+                              {unit.titleAr}
+                            </h4>
+                            <span className="text-xs text-slate-400 font-mono mt-0.5 block">
+                              {unit.titleEn}
+                            </span>
                           </div>
                         </div>
-                      ))}
+
+                        <div className="flex items-center gap-3.5 shrink-0">
+                          <span
+                            className="text-xs font-mono font-bold text-purple-600 bg-white dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs"
+                            style={{ padding: '6px 16px' }}
+                          >
+                            {unit.lessons.length} {language === 'ar' ? 'دروس' : 'lessons'}
+                          </span>
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform duration-300 ${
+                              isExpanded
+                                ? 'rotate-180 bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600'
+                                : 'bg-slate-200/60 dark:bg-slate-800 text-slate-500'
+                            }`}
+                          >
+                            <ChevronDown size={18} />
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* Collapsible Lessons List */}
+                      {isExpanded && (
+                        <div
+                          className="border-t border-slate-200/60 dark:border-slate-800/80 space-y-3.5 animate-fade-in"
+                          style={{ padding: '24px 30px 28px' }}
+                        >
+                          {unit.lessons.map((lesson, lIdx) => (
+                            <div
+                              key={lesson.id}
+                              className="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-750 space-y-3 shadow-2xs hover:border-indigo-500/40 transition-all"
+                              style={{ padding: '20px 24px' }}
+                            >
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div className="flex items-center gap-3">
+                                  <span className="w-7 h-7 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-black text-xs flex items-center justify-center shrink-0">
+                                    {lIdx + 1}
+                                  </span>
+                                  <span className="font-black text-sm sm:text-base text-slate-900 dark:text-white">
+                                    {lesson.titleAr}
+                                  </span>
+                                </div>
+                                {lesson.hasAssessment && (
+                                  <span
+                                    className="text-xs font-bold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 shrink-0 self-start sm:self-auto"
+                                    style={{ padding: '4px 14px' }}
+                                  >
+                                    اختبار مهارة ✓
+                                  </span>
+                                )}
+                              </div>
+
+                              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-normal">
+                                {lesson.contentSummary}
+                              </p>
+
+                              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/60">
+                                <span className="text-[11px] font-bold text-slate-400">
+                                  {language === 'ar' ? 'المفردات الرئيسية:' : 'Key Vocabulary:'}
+                                </span>
+                                {lesson.vocabulary.map((vocab, vIdx) => (
+                                  <span
+                                    key={vIdx}
+                                    className="rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-mono font-medium text-slate-700 dark:text-slate-300"
+                                    style={{ padding: '4px 10px' }}
+                                  >
+                                    {vocab}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
