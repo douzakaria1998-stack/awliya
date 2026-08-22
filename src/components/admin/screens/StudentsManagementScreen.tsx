@@ -736,33 +736,33 @@ export function StudentsManagementScreen() {
 
                   {/* Mode Toggles */}
                   <div
-                    className="inline-flex items-center gap-2 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-purple-200/60 dark:border-slate-800 shadow-inner shrink-0"
-                    style={{ padding: '6px 8px' }}
+                    className="inline-flex items-center gap-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-purple-200/50 dark:border-slate-800 shadow-inner shrink-0"
+                    style={{ padding: '3px 4px' }}
                   >
                     <button
                       type="button"
                       onClick={() => setParentLinkMode('existing')}
-                      className={`rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                         parentLinkMode === 'existing'
-                          ? 'bg-purple-600 text-white shadow-md scale-[1.02]'
+                          ? 'bg-purple-600 text-white shadow-xs scale-[1.01]'
                           : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
                       }`}
-                      style={{ padding: '10px 20px' }}
+                      style={{ padding: '6px 12px' }}
                     >
-                      <UserCheck size={16} />
+                      <UserCheck size={13} />
                       <span>{language === 'ar' ? 'ولي أمر مسجل' : 'Existing Parent'}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setParentLinkMode('new')}
-                      className={`rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                         parentLinkMode === 'new'
-                          ? 'bg-purple-600 text-white shadow-md scale-[1.02]'
+                          ? 'bg-purple-600 text-white shadow-xs scale-[1.01]'
                           : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
                       }`}
-                      style={{ padding: '10px 20px' }}
+                      style={{ padding: '6px 12px' }}
                     >
-                      <UserPlus size={16} />
+                      <UserPlus size={13} />
                       <span>{language === 'ar' ? 'ولي أمر جديد' : 'New Parent'}</span>
                     </button>
                   </div>
