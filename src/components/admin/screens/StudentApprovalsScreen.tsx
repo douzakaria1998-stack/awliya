@@ -126,7 +126,11 @@ export function StudentApprovalsScreen() {
             return (
               <div
                 key={appr.id}
-                className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all hover:border-slate-300 dark:hover:border-slate-700"
+                className="rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all hover:border-slate-300 dark:hover:border-slate-700"
+                style={{
+                  padding: '26px 32px',
+                  marginBottom: '18px',
+                }}
               >
                 {/* Left info */}
                 <div className="flex items-start sm:items-center gap-4 min-w-0">
@@ -149,17 +153,26 @@ export function StudentApprovalsScreen() {
                       </h3>
 
                       {isPending && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/30">
+                        <span
+                          className="rounded-full text-[11px] font-extrabold bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/30"
+                          style={{ padding: '4px 12px' }}
+                        >
                           قيد المراجعة
                         </span>
                       )}
                       {isApproved && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
+                        <span
+                          className="rounded-full text-[11px] font-extrabold bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30"
+                          style={{ padding: '4px 12px' }}
+                        >
                           تم القبول والتسكين
                         </span>
                       )}
                       {isRejected && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30">
+                        <span
+                          className="rounded-full text-[11px] font-extrabold bg-rose-500/15 text-rose-600 dark:text-rose-300 border border-rose-500/30"
+                          style={{ padding: '4px 12px' }}
+                        >
                           مرفوض
                         </span>
                       )}
@@ -179,7 +192,7 @@ export function StudentApprovalsScreen() {
                     </div>
 
                     {appr.notes && (
-                      <div className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-800 p-2 rounded-xl mt-2">
+                      <div className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-800 p-2.5 rounded-xl mt-2">
                         {appr.notes}
                       </div>
                     )}
@@ -192,7 +205,8 @@ export function StudentApprovalsScreen() {
                     <button
                       type="button"
                       onClick={() => handleOpenApprovalModal(appr)}
-                      className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                      className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                      style={{ padding: '12px 22px' }}
                     >
                       <UserCheck size={16} />
                       <span>فحص واعتماد الطلب</span>
@@ -201,9 +215,10 @@ export function StudentApprovalsScreen() {
                     <button
                       type="button"
                       onClick={() => handleOpenApprovalModal(appr)}
-                      className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-xs transition-all cursor-pointer"
+                      className="rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+                      style={{ padding: '10px 18px' }}
                     >
-                      عرض التفاصيل
+                      مراجعة القرار
                     </button>
                   )}
                 </div>

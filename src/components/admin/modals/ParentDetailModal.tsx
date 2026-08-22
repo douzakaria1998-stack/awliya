@@ -81,15 +81,24 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
               {language === 'ar' ? 'البيانات الشخصية لولي الأمر (Personal Information)' : 'Personal Information'}
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+              <div
+                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                style={{ padding: '20px 24px' }}
+              >
                 <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'رقم الهاتف:' : 'Phone Number:'}</span>
                 <span className="font-mono font-bold text-slate-900 dark:text-white text-sm" dir="ltr">{parent.phone}</span>
               </div>
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+              <div
+                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                style={{ padding: '20px 24px' }}
+              >
                 <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'البريد الإلكتروني:' : 'Email:'}</span>
                 <span className="font-mono font-bold text-slate-900 dark:text-white text-xs truncate block">{parent.email}</span>
               </div>
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+              <div
+                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                style={{ padding: '20px 24px' }}
+              >
                 <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'العنوان السكني:' : 'Address:'}</span>
                 <span className="font-bold text-slate-900 dark:text-white text-xs">{parent.address || 'الجزائر العاصمة'}</span>
               </div>
@@ -107,7 +116,8 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
               <button
                 type="button"
                 onClick={() => setIsLinkingOpen(!isLinkingOpen)}
-                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                style={{ padding: '10px 18px' }}
               >
                 <Plus size={15} />
                 <span>{language === 'ar' ? '+ ربط طالب جديد' : '+ Link Student'}</span>
@@ -116,7 +126,10 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
 
             {/* Link Student Selection Form */}
             {isLinkingOpen && (
-              <div className="p-4 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 space-y-3 animate-fade-in">
+              <div
+                className="rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 space-y-3 animate-fade-in"
+                style={{ padding: '20px 24px' }}
+              >
                 <span className="text-xs font-bold text-purple-950 dark:text-purple-200 block">
                   {language === 'ar' ? 'اختر طالباً من قائمة الطلاب لربطه بحساب ولي الأمر:' : 'Select an existing student to link with this parent account:'}
                 </span>

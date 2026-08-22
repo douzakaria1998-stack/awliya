@@ -104,9 +104,10 @@ export function AdminDashboardScreen() {
               <button
                 type="button"
                 onClick={() => setActiveTab('approvals')}
-                className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-md flex items-center gap-2 cursor-pointer"
+                className="rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs sm:text-sm transition-all shadow-md flex items-center gap-2.5 cursor-pointer leading-normal"
+                style={{ padding: '14px 26px' }}
               >
-                <Clock size={16} />
+                <Clock size={18} className="shrink-0" />
                 <span>{language === 'ar' ? `طلبات التسجيل المعلقة (${pendingCount})` : `Pending Approvals (${pendingCount})`}</span>
               </button>
             )}
@@ -114,9 +115,10 @@ export function AdminDashboardScreen() {
             <button
               type="button"
               onClick={() => setActiveTab('groups')}
-              className="px-5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm transition-all border border-white/20 flex items-center gap-2 cursor-pointer"
+              className="rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm transition-all border border-white/20 flex items-center gap-2.5 cursor-pointer leading-normal"
+              style={{ padding: '14px 26px' }}
             >
-              <School size={16} />
+              <School size={18} className="shrink-0" />
               <span>{language === 'ar' ? 'استعراض الأفواج والحصص' : 'View Groups & Sessions'}</span>
             </button>
           </div>
@@ -137,7 +139,7 @@ export function AdminDashboardScreen() {
           <div
             onClick={() => setActiveTab('students')}
             className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-blue-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '24px 26px' }}
+            style={{ padding: '26px 28px' }}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'إجمالي الطلاب' : 'Total Students'}</span>
@@ -470,46 +472,60 @@ export function AdminDashboardScreen() {
       {fallingBehindStudents.length > 0 && (
         <div
           className="bg-amber-50/70 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700/80 rounded-[28px] shadow-xs"
-          style={{ padding: '28px 32px' }}
+          style={{
+            padding: '32px 36px',
+            marginBottom: '36px',
+          }}
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2.5 text-amber-950 dark:text-amber-200">
               <AlertTriangle size={22} className="text-amber-600 shrink-0" />
               <h4 className="text-base font-black">
                 {language === 'ar' ? 'تنبيه: طلاب بحاجة إلى متابعة واهتمام خاص (Falling Behind)' : 'Students Needing Attention'}
               </h4>
             </div>
-            <span className="text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-200/60 dark:bg-amber-900/60 px-3 py-1 rounded-full font-mono">
+            <span
+              className="text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-200/60 dark:bg-amber-900/60 rounded-full font-mono"
+              style={{ padding: '6px 16px' }}
+            >
               {fallingBehindStudents.length} {language === 'ar' ? 'طلاب' : 'students'}
             </span>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {fallingBehindStudents.map((st) => (
               <div
                 key={st.id}
-                className="bg-white dark:bg-slate-850 p-4 rounded-2xl border border-amber-200 dark:border-amber-800/60 flex items-center justify-between gap-4 flex-wrap shadow-2xs"
+                className="bg-white dark:bg-slate-850 rounded-2xl border border-amber-200 dark:border-amber-800/60 flex items-center justify-between gap-4 flex-wrap shadow-2xs"
+                style={{ padding: '22px 28px' }}
               >
-                <div className="space-y-0.5">
-                  <div className="font-bold text-slate-900 dark:text-white text-sm">
+                <div className="space-y-1.5 min-w-0">
+                  <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-snug">
                     {st.fullNameAr} ({st.fullNameEn})
                   </div>
-                  <div className="text-xs text-slate-400">
+                  <div className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                     {st.groupName} • {language === 'ar' ? 'المعلم:' : 'Teacher:'} {st.teacherName} • {language === 'ar' ? 'ولي الأمر:' : 'Parent:'} {st.parentName} ({st.parentPhone})
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="text-xs font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/60 px-2.5 py-1 rounded-xl">
+                <div className="flex items-center gap-3 shrink-0">
+                  <div
+                    className="text-xs font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/60 rounded-xl"
+                    style={{ padding: '8px 14px' }}
+                  >
                     {language === 'ar' ? 'حضور:' : 'Att:'} {st.attendanceRate}%
                   </div>
-                  <div className="text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-xl">
+                  <div
+                    className="text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/60 rounded-xl"
+                    style={{ padding: '8px 14px' }}
+                  >
                     {language === 'ar' ? 'إنجاز:' : 'Prog:'} {st.overallProgress}%
                   </div>
                   <button
                     type="button"
                     onClick={() => setActiveTab('students')}
-                    className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+                    className="rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+                    style={{ padding: '10px 18px' }}
                   >
                     {language === 'ar' ? 'فتح الملف' : 'Profile'} →
                   </button>

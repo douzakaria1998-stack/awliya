@@ -68,27 +68,45 @@ export function TeacherDetailModal({ teacher, isOpen, onClose }: TeacherDetailMo
               {language === 'ar' ? 'المعلومات الشخصية والمهنية (Personal & Teaching Info)' : 'Teaching Information'}
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+              <div
+                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                style={{ padding: '20px 24px' }}
+              >
                 <span className="text-xs text-slate-400 block mb-1">اسم المستخدم (Username):</span>
                 <span className="font-mono font-bold text-slate-900 dark:text-white text-xs">@{teacher.username}</span>
               </div>
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+              <div
+                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                style={{ padding: '20px 24px' }}
+              >
                 <span className="text-xs text-slate-400 block mb-1">البريد الإلكتروني:</span>
                 <span className="font-mono font-bold text-slate-900 dark:text-white text-xs truncate block">{teacher.email}</span>
               </div>
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+              <div
+                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                style={{ padding: '20px 24px' }}
+              >
                 <span className="text-xs text-slate-400 block mb-1">رقم الهاتف:</span>
                 <span className="font-mono font-bold text-slate-900 dark:text-white text-sm" dir="ltr">{teacher.phone}</span>
               </div>
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+              <div
+                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                style={{ padding: '20px 24px' }}
+              >
                 <span className="text-xs text-slate-400 block mb-1">اللغات المدرسة:</span>
                 <span className="font-bold text-emerald-600 text-xs">{teacher.languagesTaught.join(' & ')}</span>
               </div>
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+              <div
+                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                style={{ padding: '20px 24px' }}
+              >
                 <span className="text-xs text-slate-400 block mb-1">التخصص والخبرة:</span>
                 <span className="font-bold text-slate-900 dark:text-white text-xs">{teacher.experience}</span>
               </div>
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+              <div
+                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                style={{ padding: '20px 24px' }}
+              >
                 <span className="text-xs text-slate-400 block mb-1">الطلاب المباشرين:</span>
                 <span className="font-mono font-bold text-purple-600 text-sm">{totalStudentsCount} طالب</span>
               </div>
@@ -106,7 +124,8 @@ export function TeacherDetailModal({ teacher, isOpen, onClose }: TeacherDetailMo
               {assignedGroups.map((grp) => (
                 <div
                   key={grp.id}
-                  className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4"
+                  className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4"
+                  style={{ padding: '20px 24px' }}
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -121,7 +140,10 @@ export function TeacherDetailModal({ teacher, isOpen, onClose }: TeacherDetailMo
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-mono font-bold text-purple-600 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl">
+                    <span
+                      className="text-xs font-mono font-bold text-purple-600 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
+                      style={{ padding: '6px 14px' }}
+                    >
                       {grp.attendanceRate}% حضور
                     </span>
                     <button
@@ -130,7 +152,8 @@ export function TeacherDetailModal({ teacher, isOpen, onClose }: TeacherDetailMo
                         onClose();
                         setActiveTab('groups');
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition-colors cursor-pointer"
+                      className="rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition-colors cursor-pointer"
+                      style={{ padding: '8px 16px' }}
                     >
                       إدارة الفوج →
                     </button>

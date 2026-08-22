@@ -111,15 +111,24 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
           {activeTab === 'overview' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                <div
+                  className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                  style={{ padding: '20px 24px' }}
+                >
                   <span className="text-xs text-slate-400 block mb-1">المعلم المشرف:</span>
                   <span className="font-bold text-slate-900 dark:text-white text-sm">{group.teacherName}</span>
                 </div>
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                <div
+                  className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                  style={{ padding: '20px 24px' }}
+                >
                   <span className="text-xs text-slate-400 block mb-1">أيام الحصص والتوقيت:</span>
                   <span className="font-bold text-slate-900 dark:text-white text-sm">{group.daysAr} ({group.startTime}–{group.endTime})</span>
                 </div>
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                <div
+                  className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                  style={{ padding: '20px 24px' }}
+                >
                   <span className="text-xs text-slate-400 block mb-1">الطلاب / السعة:</span>
                   <span className="font-mono font-bold text-purple-600 text-sm">{groupStudents.length} / {group.maxCapacity} طلاب</span>
                 </div>
@@ -127,11 +136,17 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
 
               {/* Progress and Attendance Stat Boxes */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/60 space-y-2">
+                <div
+                  className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/60 space-y-2"
+                  style={{ padding: '24px 28px' }}
+                >
                   <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">متوسط نسبة حضور الفوج:</span>
                   <div className="text-3xl font-black font-mono text-emerald-900 dark:text-emerald-200">{group.attendanceRate}%</div>
                 </div>
-                <div className="p-5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/60 space-y-2">
+                <div
+                  className="rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/60 space-y-2"
+                  style={{ padding: '24px 28px' }}
+                >
                   <span className="text-xs font-bold text-blue-800 dark:text-blue-300">متوسط التقدم في المنهاج:</span>
                   <div className="text-3xl font-black font-mono text-blue-900 dark:text-blue-200">{group.averageProgress}%</div>
                 </div>
@@ -145,18 +160,22 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
               <h4 className="text-sm font-black text-slate-900 dark:text-white">
                 {language === 'ar' ? `قائمة الطلاب المسجلين بالفوج (${groupStudents.length})` : `Students Roster (${groupStudents.length})`}
               </h4>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {groupStudents.map((st) => (
                   <div
                     key={st.id}
-                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4"
+                    className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4"
+                    style={{ padding: '18px 24px' }}
                   >
                     <div>
                       <div className="font-bold text-sm text-slate-900 dark:text-white">{st.fullNameAr} ({st.fullNameEn})</div>
                       <div className="text-xs text-slate-400">ولي الأمر: {st.parentName} ({st.parentPhone})</div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="font-mono text-xs font-bold text-emerald-600 bg-white dark:bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-700">
+                      <span
+                        className="font-mono text-xs font-bold text-emerald-600 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700"
+                        style={{ padding: '6px 14px' }}
+                      >
                         {st.attendanceRate}% حضور
                       </span>
                       <span className="font-mono text-xs font-bold text-purple-600 bg-white dark:bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-700">
