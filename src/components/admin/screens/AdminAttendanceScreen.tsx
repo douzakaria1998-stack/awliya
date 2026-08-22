@@ -114,21 +114,34 @@ export function AdminAttendanceScreen() {
   // Local Attendance Sheet State for the Drawer
   const [studentStatusMap, setStudentStatusMap] = useState<Record<string, 'present' | 'late' | 'absent' | 'excused'>>({});
   const [studentNotesMap, setStudentNotesMap] = useState<Record<string, string>>({});
+  const [studentLateTimeMap, setStudentLateTimeMap] = useState<Record<string, string>>({});
+
+  // Lateness Modal State
+  const [lateModalStudent, setLateModalStudent] = useState<(typeof visibleStudents)[0] | null>(null);
+  const [lateMinutesInput, setLateMinutesInput] = useState('15');
+  const [lateCustomNote, setLateCustomNote] = useState('');
 
   // Sync drawer session records to local state
   useEffect(() => {
     if (!activeDrawerGroup) return;
     const initialStatus: Record<string, 'present' | 'late' | 'absent' | 'excused'> = {};
     const initialNotes: Record<string, string> = {};
+    const initialLateTimes: Record<string, string> = {};
 
     drawerStudents.forEach((st) => {
       const existingRec = drawerSession?.records.find((r) => r.studentId === st.id);
       initialStatus[st.id] = existingRec ? existingRec.status : 'present';
       initialNotes[st.id] = existingRec?.note || '';
+      if (existingRec?.status === 'late') {
+        // extract minutes if present in note
+        const match = (existingRec.note || '').match(/(\d+)\s*(min|دقيقة|د)/);
+        initialLateTimes[st.id] = match ? `${match[1]}m` : '15m';
+      }
     });
 
     setStudentStatusMap(initialStatus);
     setStudentNotesMap(initialNotes);
+    setStudentLateTimeMap(initialLateTimes);
   }, [activeDrawerGroup, drawerSession, drawerStudents]);
 
   // Open Drawer Handler
@@ -145,13 +158,17 @@ export function AdminAttendanceScreen() {
   // Close drawer on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isDrawerOpen) {
-        closeAttendanceDrawer();
+      if (e.key === 'Escape') {
+        if (lateModalStudent) {
+          setLateModalStudent(null);
+        } else if (isDrawerOpen) {
+          closeAttendanceDrawer();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDrawerOpen]);
+  }, [isDrawerOpen, lateModalStudent]);
 
   // Date Navigation (Previous Day ← Date → Next Day)
   const handlePrevDay = () => {
@@ -175,7 +192,42 @@ export function AdminAttendanceScreen() {
   };
 
   const handleStatusChange = (studentId: string, status: 'present' | 'late' | 'absent' | 'excused') => {
+    if (status === 'late') {
+      const student = drawerStudents.find((s) => s.id === studentId);
+      if (student) {
+        setLateModalStudent(student);
+        const existingTime = studentLateTimeMap[studentId] || '15';
+        const numOnly = existingTime.replace(/\D/g, '') || '15';
+        setLateMinutesInput(numOnly);
+        setLateCustomNote('');
+        return;
+      }
+    }
     setStudentStatusMap((prev) => ({ ...prev, [studentId]: status }));
+  };
+
+  const handleConfirmLateness = () => {
+    if (!lateModalStudent) return;
+    const mins = lateMinutesInput.trim() || '15';
+    const lateLabel = `${mins}m`;
+
+    setStudentStatusMap((prev) => ({ ...prev, [lateModalStudent.id]: 'late' }));
+    setStudentLateTimeMap((prev) => ({ ...prev, [lateModalStudent.id]: lateLabel }));
+
+    // Auto-update student note
+    const currentNote = studentNotesMap[lateModalStudent.id] || '';
+    let updatedNote = currentNote;
+    if (lateCustomNote.trim()) {
+      updatedNote = language === 'ar'
+        ? `[تأخر ${mins} دقيقة: ${lateCustomNote.trim()}] ${currentNote}`.trim()
+        : `[Late ${mins} min: ${lateCustomNote.trim()}] ${currentNote}`.trim();
+    } else if (!currentNote.includes('min') && !currentNote.includes('دقيقة')) {
+      updatedNote = language === 'ar'
+        ? `[تأخر ${mins} دقيقة] ${currentNote}`.trim()
+        : `[Late ${mins} min] ${currentNote}`.trim();
+    }
+    setStudentNotesMap((prev) => ({ ...prev, [lateModalStudent.id]: updatedNote }));
+    setLateModalStudent(null);
   };
 
   const handleSaveAttendance = () => {
@@ -195,16 +247,18 @@ export function AdminAttendanceScreen() {
     }, 1400);
   };
 
-  // Real-Time Session Statistics for Drawer
+  // Real-Time Session Statistics for Drawer (Excused is counted like Absent)
   const stats = useMemo(() => {
     const total = drawerStudents.length || 1;
     const presentCount = Object.values(studentStatusMap).filter((s) => s === 'present').length;
     const lateCount = Object.values(studentStatusMap).filter((s) => s === 'late').length;
-    const absentCount = Object.values(studentStatusMap).filter((s) => s === 'absent').length;
+    const rawAbsentCount = Object.values(studentStatusMap).filter((s) => s === 'absent').length;
     const excusedCount = Object.values(studentStatusMap).filter((s) => s === 'excused').length;
+    // Excused is counted like Absent as requested
+    const absentCount = rawAbsentCount + excusedCount;
     const percentage = Math.round(((presentCount + lateCount) / total) * 100);
 
-    return { total, presentCount, lateCount, absentCount, excusedCount, percentage };
+    return { total, presentCount, lateCount, absentCount, excusedCount, rawAbsentCount, percentage };
   }, [studentStatusMap, drawerStudents]);
 
   return (
@@ -505,7 +559,7 @@ export function AdminAttendanceScreen() {
                 </button>
               </div>
 
-              {/* Real-time Summary Pills Bar inside Drawer */}
+              {/* Real-time Summary Pills Bar inside Drawer (Excused is counted like Absent) */}
               <div
                 className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-around gap-2"
                 style={{ padding: '16px 24px' }}
@@ -526,13 +580,15 @@ export function AdminAttendanceScreen() {
                 </div>
                 <div className="h-8 w-px bg-slate-200 dark:border-slate-800" />
                 <div className="text-center">
-                  <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 block">{language === 'ar' ? 'غائب (Absent)' : 'Absent'}</span>
+                  <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 block">
+                    {language === 'ar' ? 'غائب (Absent)' : 'Absent'}
+                  </span>
                   <span className="text-base font-black font-mono text-rose-700 dark:text-rose-300">{stats.absentCount}</span>
-                </div>
-                <div className="h-8 w-px bg-slate-200 dark:bg-slate-800" />
-                <div className="text-center">
-                  <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 block">{language === 'ar' ? 'مبرر (Excused)' : 'Excused'}</span>
-                  <span className="text-base font-black font-mono text-blue-700 dark:text-blue-300">{stats.excusedCount}</span>
+                  {stats.excusedCount > 0 && (
+                    <span className="text-[10px] text-blue-500 font-bold block">
+                      ({stats.excusedCount} {language === 'ar' ? 'مبرر' : 'excused'})
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -578,6 +634,8 @@ export function AdminAttendanceScreen() {
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                         {drawerStudents.map((st, idx) => {
                           const currentStatus = studentStatusMap[st.id] || 'present';
+                          const lateTime = studentLateTimeMap[st.id] || '15m';
+
                           return (
                             <tr key={st.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
                               {/* 1. Student Name */}
@@ -620,19 +678,26 @@ export function AdminAttendanceScreen() {
                                     P
                                   </button>
 
-                                  {/* L = Late */}
-                                  <button
-                                    type="button"
-                                    onClick={() => handleStatusChange(st.id, 'late')}
-                                    title="L = Late (متأخر)"
-                                    className={`w-10 h-10 rounded-2xl font-black text-sm flex items-center justify-center transition-all cursor-pointer ${
-                                      currentStatus === 'late'
-                                        ? 'bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-400/40 scale-105'
-                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600'
-                                    }`}
-                                  >
-                                    L
-                                  </button>
+                                  {/* L = Late (With Duration & Click to open modal) */}
+                                  <div className="relative inline-flex flex-col items-center">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleStatusChange(st.id, 'late')}
+                                      title={currentStatus === 'late' ? `Late (${lateTime}) - Click to change` : 'L = Late (متأخر)'}
+                                      className={`w-10 h-10 rounded-2xl font-black text-sm flex items-center justify-center transition-all cursor-pointer ${
+                                        currentStatus === 'late'
+                                          ? 'bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-400/40 scale-105'
+                                          : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600'
+                                      }`}
+                                    >
+                                      L
+                                    </button>
+                                    {currentStatus === 'late' && (
+                                      <span className="absolute -bottom-2 px-1 py-0.2 bg-amber-950 text-amber-300 dark:bg-amber-300 dark:text-slate-950 text-[9px] font-black rounded-md font-mono shadow-xs border border-amber-400/30 whitespace-nowrap">
+                                        {lateTime}
+                                      </span>
+                                    )}
+                                  </div>
 
                                   {/* A = Absent */}
                                   <button
@@ -722,6 +787,119 @@ export function AdminAttendanceScreen() {
                   )}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. Time of Lateness Modal Popup */}
+      {lateModalStudent && (
+        <div className="fixed inset-0 z-60 overflow-hidden flex items-center justify-center p-4 select-none">
+          <div
+            className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity"
+            onClick={() => setLateModalStudent(null)}
+          />
+
+          <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-7 space-y-5 animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black shrink-0 shadow-xs">
+                  <Clock size={20} />
+                </div>
+                <div>
+                  <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">
+                    {language === 'ar' ? 'تحديد مدة التأخير' : language === 'fr' ? 'Durée du retard' : 'Set Lateness Time'}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-bold">
+                    {lateModalStudent.fullNameAr} • {lateModalStudent.fullNameEn}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setLateModalStudent(null)}
+                className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center cursor-pointer transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Presets Grid */}
+            <div>
+              <label className="text-xs font-bold text-slate-400 block mb-2">
+                {language === 'ar' ? 'خيارات سريعة للمدة:' : language === 'fr' ? 'Durées rapides:' : 'Quick Presets:'}
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {['5', '10', '15', '20', '30', '45'].map((mins) => (
+                  <button
+                    key={mins}
+                    type="button"
+                    onClick={() => setLateMinutesInput(mins)}
+                    className={`py-2.5 px-3 rounded-xl font-black text-xs transition-all cursor-pointer border ${
+                      lateMinutesInput === mins
+                        ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-sm scale-102 font-black'
+                        : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-amber-400'
+                    }`}
+                  >
+                    +{mins} {language === 'ar' ? 'دقيقة' : 'min'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Input */}
+            <div>
+              <label className="text-xs font-bold text-slate-400 block mb-1.5">
+                {language === 'ar' ? 'أو أدخل عدد الدقائق يدوياً:' : language === 'fr' ? 'Ou entrez les minutes:' : 'Or enter minutes manually:'}
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  max="180"
+                  value={lateMinutesInput}
+                  onChange={(e) => setLateMinutesInput(e.target.value)}
+                  className="flex-1 h-11 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold font-mono text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 shadow-2xs"
+                />
+                <span className="text-xs font-bold text-slate-500 shrink-0">
+                  {language === 'ar' ? 'دقيقة' : 'minutes'}
+                </span>
+              </div>
+            </div>
+
+            {/* Optional Reason / Note */}
+            <div>
+              <label className="text-xs font-bold text-slate-400 block mb-1.5">
+                {language === 'ar' ? 'سبب التأخير (اختياري):' : language === 'fr' ? 'Motif du retard (optionnel):' : 'Lateness Reason (optional):'}
+              </label>
+              <input
+                type="text"
+                value={lateCustomNote}
+                onChange={(e) => setLateCustomNote(e.target.value)}
+                placeholder={language === 'ar' ? 'مثال: ازدحام مروري، موعد طبي...' : 'e.g. Traffic, doctor appointment...'}
+                className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 shadow-2xs"
+              />
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setLateModalStudent(null)}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer transition-colors"
+              >
+                {language === 'ar' ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmLateness}
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black shadow-md hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5 transition-all"
+              >
+                <Check size={16} />
+                <span>{language === 'ar' ? 'تثبيت التأخير' : 'Confirm Lateness'}</span>
+              </button>
             </div>
           </div>
         </div>
