@@ -325,11 +325,11 @@ export function AdminAttendanceScreen() {
             <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
               <button
                 type="button"
-                onClick={isRTL ? handleNextDay : handlePrevDay}
-                className="w-9 h-9 rounded-xl hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                onClick={handlePrevDay}
+                className="w-9 h-9 rounded-xl hover:bg-white dark:hover:bg-slate-850 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
                 title="Previous Day"
               >
-                <ChevronRight size={18} />
+                <ChevronLeft size={18} />
               </button>
 
               <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-850 rounded-xl border border-slate-200/60 dark:border-slate-750 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white shadow-2xs">
@@ -343,11 +343,11 @@ export function AdminAttendanceScreen() {
 
               <button
                 type="button"
-                onClick={isRTL ? handlePrevDay : handleNextDay}
-                className="w-9 h-9 rounded-xl hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                onClick={handleNextDay}
+                className="w-9 h-9 rounded-xl hover:bg-white dark:hover:bg-slate-850 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
                 title="Next Day"
               >
-                <ChevronLeft size={18} />
+                <ChevronRight size={18} />
               </button>
             </div>
           </div>
