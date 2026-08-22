@@ -855,35 +855,35 @@ export function StudentsManagementScreen() {
                       if (!activeParent) return null;
                       return (
                         <div
-                          className="flex items-center justify-between gap-3 rounded-2xl bg-white/95 dark:bg-slate-850 border border-purple-200/90 dark:border-purple-900/60 shadow-2xs"
-                          style={{ padding: '14px 18px' }}
+                          className="flex items-center justify-between gap-2.5 rounded-xl bg-white/95 dark:bg-slate-850 border border-purple-200/90 dark:border-purple-900/60 shadow-2xs"
+                          style={{ padding: '8px 12px' }}
                         >
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 flex items-center justify-center font-black text-sm shrink-0">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 flex items-center justify-center font-black text-xs shrink-0">
                               {activeParent.fullNameAr.charAt(0)}
                             </div>
                             <div>
-                              <div className="text-xs sm:text-sm font-black text-slate-900 dark:text-white">
-                                {activeParent.fullNameAr} <span className="font-normal text-xs text-slate-500 font-mono">({activeParent.fullNameEn})</span>
+                              <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                                {activeParent.fullNameAr} <span className="font-normal text-[11px] text-slate-500 font-mono">({activeParent.fullNameEn})</span>
                               </div>
-                              <div className="text-xs font-mono text-purple-600 dark:text-purple-400 font-bold mt-1" dir="ltr">
+                              <div className="text-[11px] font-mono text-purple-600 dark:text-purple-400 font-medium" dir="ltr">
                                 📱 {activeParent.phone}
                               </div>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-[11px] font-black px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 flex items-center gap-1">
-                              <Check size={14} />
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 flex items-center gap-1">
+                              <Check size={12} />
                               <span>{language === 'ar' ? 'تم الربط' : 'Linked'}</span>
                             </span>
                             <button
                               type="button"
                               onClick={() => setSelectedParentId('')}
                               title={language === 'ar' ? 'إلغاء الربط' : 'Remove Link'}
-                              className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer border border-rose-200/60 dark:border-rose-900/50 hover:scale-105 active:scale-95"
+                              className="w-6 h-6 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer border border-rose-200/60 dark:border-rose-900/50 hover:scale-105 active:scale-95"
                             >
-                              <X size={15} />
+                              <X size={12} />
                             </button>
                           </div>
                         </div>
