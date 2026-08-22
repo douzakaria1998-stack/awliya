@@ -149,10 +149,10 @@ export function AdminTeachersScreen() {
         style={{ marginBottom: '44px' }}
       >
         <div className="overflow-x-auto">
-          <table className="w-full text-xs sm:text-sm text-right">
+          <table className={`w-full text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
             <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
               <tr>
-                <th className="py-6 px-7 text-right font-extrabold">{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
+                <th className={`py-6 px-7 ${isRTL ? 'text-right' : 'text-left'} font-extrabold`}>{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
                 <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'اسم المستخدم' : 'Username'}</th>
                 <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</th>
                 <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الهاتف' : 'Phone'}</th>

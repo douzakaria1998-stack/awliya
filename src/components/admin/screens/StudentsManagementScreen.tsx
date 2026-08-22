@@ -283,10 +283,10 @@ export function StudentsManagementScreen() {
         style={{ marginBottom: '40px' }}
       >
         <div className="overflow-x-auto">
-          <table className="w-full text-xs sm:text-sm text-right">
+          <table className={`w-full text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
             <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
               <tr>
-                <th className="py-5 px-6 text-right font-extrabold">{language === 'ar' ? 'الطالب' : 'Student'}</th>
+                <th className={`py-5 px-6 ${isRTL ? 'text-right' : 'text-left'} font-extrabold`}>{language === 'ar' ? 'الطالب' : 'Student'}</th>
                 <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'المستوى' : 'Level'}</th>
                 <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الفوج' : 'Group'}</th>
                 <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
