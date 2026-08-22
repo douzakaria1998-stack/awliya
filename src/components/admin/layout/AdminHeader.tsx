@@ -78,23 +78,23 @@ export function AdminHeader({ onOpenMobileMenu }: AdminHeaderProps) {
   };
 
   return (
-    <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 px-6 sm:px-8 flex items-center justify-between sticky top-0 z-20 select-none">
+    <header className="h-20 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 px-6 sm:px-10 flex items-center justify-between sticky top-0 z-20 select-none">
       {/* Section Title */}
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex items-center gap-3.5 min-w-0">
         <button
           type="button"
           onClick={onOpenMobileMenu}
-          className="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+          className="lg:hidden p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
           aria-label="Open Navigation"
         >
-          <Menu size={20} />
+          <Menu size={22} />
         </button>
 
-        <div className="min-w-0">
-          <h1 className="text-sm sm:text-base font-black text-slate-900 dark:text-white truncate">
+        <div className="min-w-0 space-y-0.5">
+          <h1 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white truncate leading-snug">
             {language === 'ar' ? tabTitles[activeTab]?.ar : tabTitles[activeTab]?.en || 'Back Office'}
           </h1>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1.5 truncate">
+          <div className="text-xs text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-2 truncate">
             <span>My School Control Panel</span>
             <span>•</span>
             <span className="text-purple-600 dark:text-purple-400 font-bold">
@@ -105,17 +105,17 @@ export function AdminHeader({ onOpenMobileMenu }: AdminHeaderProps) {
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 sm:gap-4 shrink-0">
         {/* Notifications Bell */}
         <button
           type="button"
           onClick={() => setActiveTab('notifications')}
-          className="relative w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          className="relative w-11 h-11 rounded-2xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 transition-colors cursor-pointer"
           title="Notifications"
         >
-          <Bell size={18} />
+          <Bell size={20} />
           {unreadCount > 0 && (
-            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
+            <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
           )}
         </button>
 
@@ -124,25 +124,26 @@ export function AdminHeader({ onOpenMobileMenu }: AdminHeaderProps) {
           <button
             type="button"
             onClick={() => setIsRolePickerOpen(!isRolePickerOpen)}
-            className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 transition-colors cursor-pointer text-xs font-bold"
+            className="flex items-center gap-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 transition-colors cursor-pointer text-xs font-bold border border-slate-200/60 dark:border-slate-700/60"
+            style={{ padding: '8px 16px' }}
           >
-            <div className={`w-6 h-6 rounded-full ${roleLabels[currentRole].color} text-white flex items-center justify-center font-bold text-[10px]`}>
+            <div className={`w-8 h-8 rounded-xl ${roleLabels[currentRole].color} text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs`}>
               {currentAdmin.fullNameAr[0]}
             </div>
-            <span className="hidden sm:inline text-slate-800 dark:text-slate-200 truncate max-w-[130px]">
-              {currentAdmin.fullNameAr.split(' ')[0]}
+            <span className="hidden sm:inline text-slate-800 dark:text-slate-200 font-bold text-xs sm:text-sm truncate max-w-[160px]">
+              {currentAdmin.fullNameAr}
             </span>
-            <ChevronDown size={14} className="text-slate-400" />
+            <ChevronDown size={16} className="text-slate-400 shrink-0" />
           </button>
 
           {isRolePickerOpen && (
             <div
-              className={`absolute top-full mt-2 w-64 bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-xl rounded-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 ${
+              className={`absolute top-full mt-2 w-72 bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-2xl p-2.5 z-50 animate-in fade-in slide-in-from-top-2 ${
                 isRTL ? 'left-0' : 'right-0'
               }`}
             >
-              <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-700/60 mb-1">
-                <span className="text-[11px] font-bold text-slate-400 block">تبديل الحساب والدور:</span>
+              <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-700/60 mb-2">
+                <span className="text-xs font-bold text-slate-400 block">تبديل الحساب والدور:</span>
               </div>
 
               <div className="space-y-1">
@@ -154,24 +155,24 @@ export function AdminHeader({ onOpenMobileMenu }: AdminHeaderProps) {
                       switchRole(user.role, user.id);
                       setIsRolePickerOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                       currentAdmin.id === user.id
                         ? 'bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400'
                         : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] shrink-0 font-black">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs shrink-0 font-black text-slate-800 dark:text-white">
                         {user.fullNameAr[0]}
                       </div>
                       <div className="min-w-0 text-right">
-                        <div className="truncate text-slate-900 dark:text-white font-bold">{user.fullNameAr}</div>
-                        <div className="text-[10px] text-slate-400 font-normal truncate">
+                        <div className="truncate text-slate-900 dark:text-white font-bold text-xs">{user.fullNameAr}</div>
+                        <div className="text-[11px] text-slate-400 font-normal truncate">
                           {user.role === 'super_admin' ? 'Super Admin' : user.role === 'administrator' ? 'Admin' : 'Teacher'}
                         </div>
                       </div>
                     </div>
-                    {currentAdmin.id === user.id && <Check size={14} className="text-purple-600 shrink-0" />}
+                    {currentAdmin.id === user.id && <Check size={16} className="text-purple-600 shrink-0" />}
                   </button>
                 ))}
               </div>
@@ -183,10 +184,10 @@ export function AdminHeader({ onOpenMobileMenu }: AdminHeaderProps) {
         <button
           type="button"
           onClick={toggleDarkMode}
-          className="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          className="w-11 h-11 rounded-2xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 transition-colors cursor-pointer"
           title="Toggle Theme"
         >
-          {isDarkMode ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} />}
+          {isDarkMode ? <Sun size={20} className="text-amber-400" /> : <Moon size={20} />}
         </button>
       </div>
     </header>
