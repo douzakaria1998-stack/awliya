@@ -277,29 +277,33 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
 
           {/* TAB 4: Homework */}
           {activeTab === 'homework' && (
-            <div className="space-y-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <h4 className="text-sm font-black text-slate-900 dark:text-white">
                 {language === 'ar' ? 'سجل الواجبات والتسليمات' : 'Homework & Submissions'}
               </h4>
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {studentHomework.map((hw) => {
                   const myEval = hw.evaluations.find((e) => e.studentId === student.id);
                   return (
                     <div
                       key={hw.id}
-                      className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-2"
-                      style={{ padding: '20px 24px' }}
+                      className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                      style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: '10px' }}
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-sm text-slate-900 dark:text-white">{hw.assignmentNameAr}</span>
-                        <span className="font-mono text-xs font-bold text-purple-600">
+                        <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">
                           {myEval?.score !== undefined ? `${myEval.score} / ${hw.totalScore}` : 'قيد التصحيح'}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{hw.descriptionAr}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{hw.descriptionAr}</p>
                       {myEval?.teacherComment && (
-                        <div className="text-xs font-medium text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 p-2.5 rounded-xl border border-amber-200/50">
-                          ملاحظة المعلم: "{myEval.teacherComment}"
+                        <div
+                          className="text-xs font-medium text-amber-800 dark:text-amber-300 bg-amber-50/90 dark:bg-amber-950/40 rounded-xl border border-amber-200/60 dark:border-amber-900/40"
+                          style={{ padding: '10px 16px', marginTop: '4px' }}
+                        >
+                          <span className="font-bold">{language === 'ar' ? 'ملاحظة المعلم: ' : 'Teacher Note: '}</span>
+                          <span>"{myEval.teacherComment}"</span>
                         </div>
                       )}
                     </div>
