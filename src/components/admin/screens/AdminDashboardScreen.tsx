@@ -273,35 +273,38 @@ export function AdminDashboardScreen() {
       </div>
 
       {/* 3. Middle Section: Student Progress by Level + Attendance Breakdown (Section 39) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ marginBottom: '36px' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ marginBottom: '48px' }}>
         {/* Student Progress By Level */}
         <div
-          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs flex flex-col justify-between"
-          style={{ padding: '34px 38px' }}
+          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs flex flex-col justify-between"
+          style={{ padding: '44px 48px' }}
         >
           <div>
-            <div className="flex items-center justify-between mb-7">
-              <h4 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2.5">
-                <TrendingUp size={20} className="text-indigo-600" />
+            <div
+              className="flex items-center justify-between gap-4 flex-wrap"
+              style={{ marginBottom: '32px' }}
+            >
+              <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                <TrendingUp size={24} className="text-indigo-600 shrink-0" />
                 <span>{language === 'ar' ? 'نسبة الإنجاز الأكاديمي حسب المستويات' : 'Student Progress by Level'}</span>
               </h4>
               <button
                 type="button"
                 onClick={() => setActiveTab('academic')}
-                className="text-xs font-bold text-indigo-600 hover:underline cursor-pointer"
+                className="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
               >
                 {language === 'ar' ? 'عرض المسار' : 'View Path'} →
               </button>
             </div>
 
-            <div className="space-y-6 sm:space-y-7">
+            <div className="space-y-7">
               {levelProgressData.map((item) => (
-                <div key={item.level} className="space-y-2.5">
+                <div key={item.level} className="space-y-3">
                   <div className="flex items-center justify-between text-xs sm:text-sm font-bold">
-                    <span className="text-slate-700 dark:text-slate-200 font-mono">
+                    <span className="text-slate-700 dark:text-slate-200 font-mono text-sm sm:text-base">
                       {item.level} — {language === 'ar' ? item.nameAr : item.nameEn} ({item.count} {language === 'ar' ? 'طلاب' : 'students'})
                     </span>
-                    <span className="font-mono font-black text-indigo-600 text-sm">{item.progress}%</span>
+                    <span className="font-mono font-black text-indigo-600 text-sm sm:text-base">{item.progress}%</span>
                   </div>
                   <div className="w-full h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200/40 dark:border-slate-700/40">
                     <div
@@ -317,59 +320,81 @@ export function AdminDashboardScreen() {
 
         {/* Attendance Breakdown (Today, Yesterday, This Week) */}
         <div
-          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs flex flex-col justify-between"
-          style={{ padding: '34px 38px' }}
+          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs flex flex-col justify-between"
+          style={{ padding: '44px 48px' }}
         >
           <div>
-            <div className="flex items-center justify-between mb-7">
-              <h4 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2.5">
-                <CalendarCheck2 size={20} className="text-emerald-600" />
+            <div
+              className="flex items-center justify-between gap-4 flex-wrap"
+              style={{ marginBottom: '32px' }}
+            >
+              <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                <CalendarCheck2 size={24} className="text-emerald-600 shrink-0" />
                 <span>{language === 'ar' ? 'مؤشرات الحضور الأسبوعي' : 'Attendance Overview'}</span>
               </h4>
               <button
                 type="button"
                 onClick={() => setActiveTab('attendance')}
-                className="text-xs font-bold text-emerald-600 hover:underline cursor-pointer"
+                className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
               >
                 {language === 'ar' ? 'دفتر الحضور' : 'Attendance Sheet'} →
               </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 rounded-2xl p-4 text-center">
-                <span className="text-xs text-emerald-700 dark:text-emerald-300 font-bold block">
+            <div className="grid grid-cols-3 gap-4" style={{ marginBottom: '32px' }}>
+              <div
+                className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 rounded-2xl text-center flex flex-col justify-center"
+                style={{ padding: '24px 18px' }}
+              >
+                <span className="text-xs sm:text-sm text-emerald-700 dark:text-emerald-300 font-bold block mb-2">
                   {language === 'ar' ? 'اليوم (Today)' : 'Today'}
                 </span>
-                <span className="text-2xl font-black text-emerald-800 dark:text-emerald-200 font-mono mt-1 block">
+                <span className="text-3xl font-black text-emerald-800 dark:text-emerald-200 font-mono block">
                   94%
                 </span>
               </div>
-              <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/40 rounded-2xl p-4 text-center">
-                <span className="text-xs text-blue-700 dark:text-blue-300 font-bold block">
+              <div
+                className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/40 rounded-2xl text-center flex flex-col justify-center"
+                style={{ padding: '24px 18px' }}
+              >
+                <span className="text-xs sm:text-sm text-blue-700 dark:text-blue-300 font-bold block mb-2">
                   {language === 'ar' ? 'أمس (Yesterday)' : 'Yesterday'}
                 </span>
-                <span className="text-2xl font-black text-blue-800 dark:text-blue-200 font-mono mt-1 block">
+                <span className="text-3xl font-black text-blue-800 dark:text-blue-200 font-mono block">
                   91%
                 </span>
               </div>
-              <div className="bg-purple-50 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-800/40 rounded-2xl p-4 text-center">
-                <span className="text-xs text-purple-700 dark:text-purple-300 font-bold block">
+              <div
+                className="bg-purple-50 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-800/40 rounded-2xl text-center flex flex-col justify-center"
+                style={{ padding: '24px 18px' }}
+              >
+                <span className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 font-bold block mb-2">
                   {language === 'ar' ? 'هذا الأسبوع' : 'This Week'}
                 </span>
-                <span className="text-2xl font-black text-purple-800 dark:text-purple-200 font-mono mt-1 block">
+                <span className="text-3xl font-black text-purple-800 dark:text-purple-200 font-mono block">
                   92%
                 </span>
               </div>
             </div>
 
-            <div className="space-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-                <span>{language === 'ar' ? 'إجمالي الحصص المنجزة هذا الأسبوع:' : 'Sessions Completed This Week:'}</span>
-                <span className="font-mono font-bold text-slate-900 dark:text-white">18 حصة</span>
+            <div className="space-y-4 text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400">
+              <div
+                className="flex items-center justify-between rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800"
+                style={{ padding: '18px 24px' }}
+              >
+                <span className="text-slate-700 dark:text-slate-200 font-bold">
+                  {language === 'ar' ? 'إجمالي الحصص المنجزة هذا الأسبوع:' : 'Sessions Completed This Week:'}
+                </span>
+                <span className="font-mono font-black text-slate-900 dark:text-white text-base">18 حصة</span>
               </div>
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-                <span>{language === 'ar' ? 'عدد حالات الغياب المبرر:' : 'Excused Absences:'}</span>
-                <span className="font-mono font-bold text-blue-600">2 حالات</span>
+              <div
+                className="flex items-center justify-between rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800"
+                style={{ padding: '18px 24px' }}
+              >
+                <span className="text-slate-700 dark:text-slate-200 font-bold">
+                  {language === 'ar' ? 'عدد حالات الغياب المبرر:' : 'Excused Absences:'}
+                </span>
+                <span className="font-mono font-black text-blue-600 dark:text-blue-400 text-base">2 حالات</span>
               </div>
             </div>
           </div>
