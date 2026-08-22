@@ -735,29 +735,34 @@ export function StudentsManagementScreen() {
                   </div>
 
                   {/* Mode Toggles */}
-                  <div className="inline-flex items-center gap-1.5 rounded-2xl bg-slate-100 dark:bg-slate-900 p-1.5 border border-purple-200/50 dark:border-slate-800 shadow-inner shrink-0">
+                  <div
+                    className="inline-flex items-center gap-2 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-purple-200/60 dark:border-slate-800 shadow-inner shrink-0"
+                    style={{ padding: '6px 8px' }}
+                  >
                     <button
                       type="button"
                       onClick={() => setParentLinkMode('existing')}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                      className={`rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
                         parentLinkMode === 'existing'
-                          ? 'bg-purple-600 text-white shadow-sm scale-[1.02]'
-                          : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                          ? 'bg-purple-600 text-white shadow-md scale-[1.02]'
+                          : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
                       }`}
+                      style={{ padding: '10px 20px' }}
                     >
-                      <UserCheck size={14} />
+                      <UserCheck size={16} />
                       <span>{language === 'ar' ? 'ولي أمر مسجل' : 'Existing Parent'}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setParentLinkMode('new')}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                      className={`rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
                         parentLinkMode === 'new'
-                          ? 'bg-purple-600 text-white shadow-sm scale-[1.02]'
-                          : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                          ? 'bg-purple-600 text-white shadow-md scale-[1.02]'
+                          : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
                       }`}
+                      style={{ padding: '10px 20px' }}
                     >
-                      <UserPlus size={14} />
+                      <UserPlus size={16} />
                       <span>{language === 'ar' ? 'ولي أمر جديد' : 'New Parent'}</span>
                     </button>
                   </div>
