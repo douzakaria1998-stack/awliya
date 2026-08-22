@@ -852,47 +852,52 @@ export function AdminAcademicPathScreen() {
 
               {/* Step 2 Scrollable Units and Lessons List */}
               <div
-                className="overflow-y-auto flex-1 space-y-5"
-                style={{ padding: '20px 24px' }}
+                className="overflow-y-auto flex-1"
+                style={{
+                  padding: '24px 28px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '24px',
+                }}
               >
                 {unitsDraft.map((unit, uIdx) => (
                   <div
                     key={unit.id}
-                    className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-750 overflow-hidden shadow-2xs"
-                    style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '14px' }}
+                    className="bg-slate-50 dark:bg-slate-800/60 rounded-3xl border border-slate-200 dark:border-slate-750 shadow-xs"
+                    style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: '18px' }}
                   >
-                    {/* Unit Header Inputs */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-700/80 pb-3.5">
-                      <div className="flex items-center gap-2.5 flex-1">
-                        <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                    {/* Unit Header Row */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 border-b border-slate-200/80 dark:border-slate-700/80 pb-4">
+                      <div className="flex items-center gap-3 flex-1">
+                        <span className="w-9 h-9 rounded-xl bg-indigo-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
                           {uIdx + 1}
                         </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1">
                           <input
                             type="text"
                             value={unit.titleAr}
                             onChange={(e) => handleUpdateUnit(unit.id, { titleAr: e.target.value })}
                             placeholder={language === 'ar' ? `اسم الوحدة ${uIdx + 1} بالعربية` : `Unit ${uIdx + 1} Title (AR)`}
-                            className="h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                            className="h-10 px-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
                           />
                           <input
                             type="text"
                             value={unit.titleEn}
                             onChange={(e) => handleUpdateUnit(unit.id, { titleEn: e.target.value })}
                             placeholder={`Unit ${uIdx + 1} Title (EN)`}
-                            className="h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500"
+                            className="h-10 px-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
                           />
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                      <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
                         <button
                           type="button"
                           onClick={() => handleAddLesson(unit.id)}
-                          className="rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 font-bold text-[11px] flex items-center gap-1 border border-indigo-200 dark:border-indigo-800 transition-colors cursor-pointer"
-                          style={{ padding: '5px 10px' }}
+                          className="rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 transition-colors cursor-pointer shadow-2xs"
+                          style={{ padding: '8px 14px' }}
                         >
-                          <Plus size={13} />
+                          <Plus size={15} />
                           <span>{language === 'ar' ? 'إضافة درس' : 'Add Lesson'}</span>
                         </button>
 
@@ -900,92 +905,109 @@ export function AdminAcademicPathScreen() {
                           <button
                             type="button"
                             onClick={() => handleRemoveUnit(unit.id)}
-                            className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer"
+                            className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer"
                             title={language === 'ar' ? 'حذف الوحدة' : 'Delete Unit'}
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={16} />
                           </button>
                         )}
                       </div>
                     </div>
 
                     {/* Lessons in this Unit */}
-                    <div className="space-y-3">
-                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                        {language === 'ar' ? `دروس الوحدة (${unit.lessons.length} دروس)` : `Unit Lessons (${unit.lessons.length})`}
-                      </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
+                          {language === 'ar' ? `دروس الوحدة (${unit.lessons.length} دروس)` : `Unit Lessons (${unit.lessons.length} Lessons)`}
+                        </span>
+                      </div>
 
-                      {unit.lessons.map((lesson, lIdx) => (
-                        <div
-                          key={lesson.id}
-                          className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-750 p-3 space-y-2.5 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-800 transition-colors"
-                        >
-                          {/* Lesson Top Row: Numbers & Titles */}
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 flex-1">
-                              <span className="w-6 h-6 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-bold text-[11px] flex items-center justify-center shrink-0">
-                                {lIdx + 1}
-                              </span>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {unit.lessons.map((lesson, lIdx) => (
+                          <div
+                            key={lesson.id}
+                            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-750 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-800 transition-all"
+                            style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '12px' }}
+                          >
+                            {/* Lesson Top Row: Numbers & Titles */}
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2.5 flex-1">
+                                <span className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                                  {lIdx + 1}
+                                </span>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1">
+                                  <input
+                                    type="text"
+                                    value={lesson.titleAr}
+                                    onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleAr: e.target.value })}
+                                    placeholder={language === 'ar' ? `عنوان الدرس ${lIdx + 1} (عربي)` : `Lesson ${lIdx + 1} Title (AR)`}
+                                    className="h-9 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={lesson.titleEn}
+                                    onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleEn: e.target.value })}
+                                    placeholder={`Lesson ${lIdx + 1} Title (EN)`}
+                                    className="h-9 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                                  />
+                                </div>
+                              </div>
+
+                              {unit.lessons.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveLesson(unit.id, lesson.id)}
+                                  className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/60 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                                  title={language === 'ar' ? 'حذف الدرس' : 'Delete Lesson'}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Lesson Summary & Vocabulary inputs */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                              <div>
+                                <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                                  {language === 'ar' ? 'ملخص محتوى الدرس:' : 'Lesson Content Summary:'}
+                                </label>
                                 <input
                                   type="text"
-                                  value={lesson.titleAr}
-                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleAr: e.target.value })}
-                                  placeholder={language === 'ar' ? `عنوان الدرس ${lIdx + 1} (عربي)` : `Lesson ${lIdx + 1} Title (AR)`}
-                                  className="h-8 px-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                                  value={lesson.contentSummary}
+                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { contentSummary: e.target.value })}
+                                  placeholder={language === 'ar' ? 'ملخص ومخرجات الدرس...' : 'Lesson content summary...'}
+                                  className="w-full h-8 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
                                 />
+                              </div>
+                              <div>
+                                <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                                  {language === 'ar' ? 'المفردات المفتاحية:' : 'Key Vocabulary (comma-separated):'}
+                                </label>
                                 <input
                                   type="text"
-                                  value={lesson.titleEn}
-                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleEn: e.target.value })}
-                                  placeholder={`Lesson ${lIdx + 1} Title (EN)`}
-                                  className="h-8 px-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500"
+                                  value={lesson.vocabString}
+                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { vocabString: e.target.value })}
+                                  placeholder={language === 'ar' ? 'المفردات (مفصولة بفواصل)' : 'Key Vocabulary (comma-separated)'}
+                                  className="w-full h-8 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
                                 />
                               </div>
                             </div>
 
-                            {unit.lessons.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveLesson(unit.id, lesson.id)}
-                                className="w-6 h-6 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                                title={language === 'ar' ? 'حذف الدرس' : 'Delete Lesson'}
-                              >
-                                <Trash2 size={12} />
-                              </button>
-                            )}
+                            {/* Assessment Checkbox */}
+                            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                              <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-bold text-slate-600 dark:text-slate-300">
+                                <input
+                                  type="checkbox"
+                                  checked={lesson.hasAssessment}
+                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { hasAssessment: e.target.checked })}
+                                  className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                />
+                                <span>{language === 'ar' ? 'يتضمن اختبار كفاءة وتقييم مهارة ✓' : 'Includes skill assessment checkpoint ✓'}</span>
+                              </label>
+                            </div>
                           </div>
-
-                          {/* Lesson Summary & Vocabulary inputs */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input
-                              type="text"
-                              value={lesson.contentSummary}
-                              onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { contentSummary: e.target.value })}
-                              placeholder={language === 'ar' ? 'ملخص ومخرجات الدرس...' : 'Lesson content summary...'}
-                              className="h-7 px-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[11px] text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500"
-                            />
-                            <input
-                              type="text"
-                              value={lesson.vocabString}
-                              onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { vocabString: e.target.value })}
-                              placeholder={language === 'ar' ? 'المفردات (مفصولة بفواصل)' : 'Key Vocabulary (comma-separated)'}
-                              className="h-7 px-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[11px] font-mono text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500"
-                            />
-                          </div>
-
-                          {/* Assessment Checkbox */}
-                          <label className="flex items-center gap-2 cursor-pointer select-none text-[11px] font-bold text-slate-600 dark:text-slate-300">
-                            <input
-                              type="checkbox"
-                              checked={lesson.hasAssessment}
-                              onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { hasAssessment: e.target.checked })}
-                              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                            />
-                            <span>{language === 'ar' ? 'يتضمن اختبار كفاءة وتقييم مهارة ✓' : 'Includes skill assessment checkpoint ✓'}</span>
-                          </label>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}
