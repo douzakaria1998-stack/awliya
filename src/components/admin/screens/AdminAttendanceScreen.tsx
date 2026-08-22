@@ -756,7 +756,8 @@ export function AdminAttendanceScreen() {
                                   value={studentNotesMap[st.id] || ''}
                                   onChange={(e) => setStudentNotesMap({ ...studentNotesMap, [st.id]: e.target.value })}
                                   placeholder={language === 'ar' ? 'ملاحظة...' : 'Session note...'}
-                                  className="w-full min-w-[140px] h-9 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-xl text-xs text-slate-900 dark:text-white shadow-2xs focus:outline-none focus:border-indigo-500 transition-colors"
+                                  className="w-full min-w-[140px] h-9 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-xl text-xs text-slate-900 dark:text-white shadow-2xs focus:outline-none focus:border-indigo-500 transition-colors"
+                                  style={{ paddingLeft: '14px', paddingRight: '14px' }}
                                 />
                               </td>
                             </tr>
