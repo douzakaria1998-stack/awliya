@@ -33,6 +33,53 @@ export function AdminRolesScreen() {
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [modalStep, setModalStep] = useState<1 | 2>(1);
 
+  // Available Modules & Permissions list
+  const availablePermissionsList = [
+    { id: 'dashboard', labelAr: 'لوحة المؤشرات والتحليلات', labelEn: 'Dashboard & Analytics' },
+    { id: 'students', labelAr: 'إدارة الطلاب والتسجيل', labelEn: 'Students & Registration' },
+    { id: 'parents', labelAr: 'أولياء الأمور والتواصل', labelEn: 'Parents & Contact' },
+    { id: 'teachers', labelAr: 'هيئة التدريس والمعلمين', labelEn: 'Teachers & Staff' },
+    { id: 'groups', labelAr: 'الأفواج والمجموعات', labelEn: 'Groups & Schedules' },
+    { id: 'academic', labelAr: 'المسار والمنهج التعليمي', labelEn: 'Academic Path & CEFR' },
+    { id: 'attendance', labelAr: 'رصد الحضور والغياب', labelEn: 'Attendance Sessions' },
+    { id: 'performance', labelAr: 'الواجبات والأداء المنزلي', labelEn: 'Homework & Performance' },
+    { id: 'assessments', labelAr: 'تقييم المهارات والاختبارات', labelEn: 'Skills & Assessments' },
+    { id: 'admin_roles', labelAr: 'إدارة الصلاحيات والأمان', labelEn: 'Security & Roles' },
+    { id: 'system_settings', labelAr: 'إعدادات المنظومة والشهادات', labelEn: 'System Settings' },
+  ];
+
+  const defaultRolePermissions: Record<AdminRole, string[]> = {
+    super_admin: [
+      'dashboard',
+      'students',
+      'parents',
+      'teachers',
+      'groups',
+      'academic',
+      'attendance',
+      'performance',
+      'assessments',
+      'admin_roles',
+      'system_settings',
+    ],
+    administrator: [
+      'dashboard',
+      'students',
+      'parents',
+      'groups',
+      'academic',
+      'attendance',
+      'performance',
+      'assessments',
+    ],
+    teacher: [
+      'groups',
+      'attendance',
+      'performance',
+      'assessments',
+    ],
+  };
+
   // New User Form State
   const [newNameAr, setNewNameAr] = useState('');
   const [newNameEn, setNewNameEn] = useState('');
@@ -41,11 +88,32 @@ export function AdminRolesScreen() {
   const [newPhone, setNewPhone] = useState('');
   const [newRole, setNewRole] = useState<AdminRole>('administrator');
   const [newDept, setNewDept] = useState('إدارة شؤون التسجيل');
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>(defaultRolePermissions['administrator']);
+
+  const handleSelectRole = (role: AdminRole) => {
+    setNewRole(role);
+    setSelectedPermissions(defaultRolePermissions[role] || []);
+  };
+
+  const handleTogglePermission = (permId: string) => {
+    setSelectedPermissions((prev) =>
+      prev.includes(permId) ? prev.filter((p) => p !== permId) : [...prev, permId]
+    );
+  };
+
+  const handleSelectAllPermissions = () => {
+    setSelectedPermissions(availablePermissionsList.map((p) => p.id));
+  };
+
+  const handleClearAllPermissions = () => {
+    setSelectedPermissions([]);
+  };
 
   const currentRoleConfig = rolePermissions.find((r) => r.roleId === selectedRoleId) || rolePermissions[0];
 
   const handleOpenAddUser = () => {
     setModalStep(1);
+    setSelectedPermissions(defaultRolePermissions['administrator']);
     setIsAddUserOpen(true);
   };
 
@@ -423,7 +491,7 @@ export function AdminRolesScreen() {
                   <div className="grid grid-cols-1 gap-3">
                     {/* Option 1: Administrator */}
                     <div
-                      onClick={() => setNewRole('administrator')}
+                      onClick={() => handleSelectRole('administrator')}
                       className={`rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
                         newRole === 'administrator'
                           ? 'bg-blue-50/90 dark:bg-blue-950/50 border-blue-500 ring-2 ring-blue-500/20 shadow-xs'
@@ -453,7 +521,7 @@ export function AdminRolesScreen() {
 
                     {/* Option 2: Super Admin */}
                     <div
-                      onClick={() => setNewRole('super_admin')}
+                      onClick={() => handleSelectRole('super_admin')}
                       className={`rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
                         newRole === 'super_admin'
                           ? 'bg-purple-50/90 dark:bg-purple-950/50 border-purple-500 ring-2 ring-purple-500/20 shadow-xs'
@@ -486,7 +554,7 @@ export function AdminRolesScreen() {
 
                     {/* Option 3: Teacher */}
                     <div
-                      onClick={() => setNewRole('teacher')}
+                      onClick={() => handleSelectRole('teacher')}
                       className={`rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
                         newRole === 'teacher'
                           ? 'bg-emerald-50/90 dark:bg-emerald-950/50 border-emerald-500 ring-2 ring-emerald-500/20 shadow-xs'
@@ -516,30 +584,61 @@ export function AdminRolesScreen() {
                   </div>
                 </div>
 
-                {/* Permissions Preview Tag Cloud */}
+                {/* Interactive Selectable Permissions Box */}
                 <div
                   className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80"
-                  style={{ padding: '14px 18px' }}
+                  style={{ padding: '16px 20px' }}
                 >
-                  <div className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1.5">
-                    <Sparkles size={14} className="text-purple-600" />
-                    <span>الصلاحيات الممنوحة تلقائياً لهذا الدور:</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {(newRole === 'super_admin'
-                      ? ['كافة الوحدات بدون قيود', 'إدارة المستخدمين والأمان', 'إعدادات المنظومة والشهادات', 'الطلاب والأولياء والمعلمين', 'الأفواج والمنهج والحضور', 'الواجبات والتقييمات']
-                      : newRole === 'administrator'
-                      ? ['إدارة الطلاب', 'إدارة أولياء الأمور', 'إدارة الأفواج', 'رصد وتعديل الحضور', 'لوحة المؤشرات العامة', 'متابعة الواجبات والأداء']
-                      : ['أفواجه المخصصة فقط', 'رصد حضور حصصه', 'تقييم أداء طلابه', 'إنشاء وتصحيح الواجبات', 'لوحة المعلم الخاصة']
-                    ).map((perm, i) => (
-                      <span
-                        key={i}
-                        className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-2xs"
-                        style={{ padding: '5px 12px' }}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                    <div className="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <Sparkles size={14} className="text-purple-600" />
+                      <span>تخصيص وتحديد الصلاحيات الممنوحة (انقر للتحديد أو الإلغاء):</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleSelectAllPermissions}
+                        className="text-[11px] text-purple-600 hover:text-purple-700 dark:text-purple-400 font-bold hover:underline cursor-pointer"
                       >
-                        ✓ {perm}
-                      </span>
-                    ))}
+                        تحديد الكل
+                      </button>
+                      <span className="text-slate-300 dark:text-slate-600">|</span>
+                      <button
+                        type="button"
+                        onClick={handleClearAllPermissions}
+                        className="text-[11px] text-slate-400 hover:text-rose-500 font-bold hover:underline cursor-pointer"
+                      >
+                        إلغاء الكل
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {availablePermissionsList.map((perm) => {
+                      const isSelected = selectedPermissions.includes(perm.id);
+                      return (
+                        <button
+                          key={perm.id}
+                          type="button"
+                          onClick={() => handleTogglePermission(perm.id)}
+                          className={`rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer select-none hover:scale-105 active:scale-95 ${
+                            isSelected
+                              ? 'bg-purple-600 text-white border border-purple-500 shadow-2xs font-black'
+                              : 'bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                          }`}
+                          style={{ padding: '7px 14px' }}
+                        >
+                          <div
+                            className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 ${
+                              isSelected ? 'bg-white/25 text-white' : 'border border-slate-300 dark:border-slate-600'
+                            }`}
+                          >
+                            {isSelected && <Check size={10} className="stroke-[3]" />}
+                          </div>
+                          <span>{language === 'ar' ? perm.labelAr : perm.labelEn}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
