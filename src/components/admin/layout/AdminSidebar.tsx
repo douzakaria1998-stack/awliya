@@ -38,18 +38,21 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
     super_admin: {
       labelAr: 'المدير العام التنفيذي',
       labelEn: 'Super Administrator',
+      labelFr: 'Super Administrateur',
       badgeClass: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
       dotClass: 'bg-purple-400',
     },
     administrator: {
       labelAr: 'مدير العمليات والشؤون',
       labelEn: 'Academic Operations Admin',
+      labelFr: 'Administrateur Académique',
       badgeClass: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
       dotClass: 'bg-blue-400',
     },
     teacher: {
       labelAr: 'هيئة التدريس (Teacher)',
       labelEn: 'Teacher / Instructor',
+      labelFr: 'Enseignant / Formateur',
       badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
       dotClass: 'bg-emerald-400',
     },
@@ -59,10 +62,12 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
   const navigationCategories: {
     titleAr: string;
     titleEn: string;
+    titleFr: string;
     items: {
       key: AdminTabKey;
       labelAr: string;
       labelEn: string;
+      labelFr: string;
       icon: any;
       allowedRoles: AdminRole[];
       badgeCount?: number;
@@ -71,11 +76,13 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
     {
       titleAr: 'الإدارة والتشغيل (Management)',
       titleEn: 'MANAGEMENT',
+      titleFr: 'GESTION',
       items: [
         {
           key: 'overview',
           labelAr: 'لوحة القيادة (Dashboard)',
           labelEn: 'Dashboard',
+          labelFr: 'Tableau de bord',
           icon: LayoutDashboard,
           allowedRoles: ['super_admin', 'administrator', 'teacher'],
         },
@@ -83,6 +90,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           key: 'students',
           labelAr: 'الطلاب (Students)',
           labelEn: 'Students',
+          labelFr: 'Élèves',
           icon: Users,
           allowedRoles: ['super_admin', 'administrator', 'teacher'],
         },
@@ -90,6 +98,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           key: 'parents',
           labelAr: 'أولياء الأمور (Parents)',
           labelEn: 'Parents',
+          labelFr: 'Parents',
           icon: UserCheck,
           allowedRoles: ['super_admin', 'administrator'],
         },
@@ -97,6 +106,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           key: 'teachers',
           labelAr: 'المعلمين (Teachers)',
           labelEn: 'Teachers',
+          labelFr: 'Enseignants',
           icon: GraduationCap,
           allowedRoles: ['super_admin', 'administrator'],
         },
@@ -104,6 +114,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           key: 'groups',
           labelAr: 'الأفواج والحصص (Groups)',
           labelEn: 'Groups',
+          labelFr: 'Groupes & Classes',
           icon: School,
           allowedRoles: ['super_admin', 'administrator', 'teacher'],
         },
@@ -112,11 +123,13 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
     {
       titleAr: 'الشؤون الأكاديمية (Academic)',
       titleEn: 'ACADEMIC',
+      titleFr: 'ACADÉMIQUE',
       items: [
         {
           key: 'academic',
           labelAr: 'المسار الأكاديمي (Path)',
           labelEn: 'Academic Path',
+          labelFr: 'Parcours Académique',
           icon: BookOpen,
           allowedRoles: ['super_admin', 'administrator', 'teacher'],
         },
@@ -124,6 +137,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           key: 'attendance',
           labelAr: 'الحضور والغياب (Attendance)',
           labelEn: 'Attendance',
+          labelFr: 'Présence',
           icon: CalendarCheck2,
           allowedRoles: ['super_admin', 'administrator', 'teacher'],
         },
@@ -131,6 +145,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           key: 'performance',
           labelAr: 'الأداء والتقييمات (Performance)',
           labelEn: 'Performance',
+          labelFr: 'Performance & Notes',
           icon: Award,
           allowedRoles: ['super_admin', 'administrator', 'teacher'],
         },
@@ -139,11 +154,13 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
     {
       titleAr: 'الإدارة العامة والرقابة (Admin)',
       titleEn: 'ADMINISTRATION',
+      titleFr: 'ADMINISTRATION',
       items: [
         {
           key: 'roles',
           labelAr: 'الصلاحيات (Admin Roles)',
           labelEn: 'Admin Roles',
+          labelFr: 'Rôles & Permissions',
           icon: ShieldCheck,
           allowedRoles: ['super_admin'],
         },
@@ -151,6 +168,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           key: 'notifications',
           labelAr: 'الإشعارات (Notifications)',
           labelEn: 'Notifications',
+          labelFr: 'Notifications',
           icon: Bell,
           allowedRoles: ['super_admin', 'administrator', 'teacher'],
           badgeCount: unreadNotifsCount > 0 ? unreadNotifsCount : undefined,
@@ -159,6 +177,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           key: 'audit',
           labelAr: 'سجل العمليات (Audit Logs)',
           labelEn: 'Audit Logs',
+          labelFr: 'Journal d\'audit',
           icon: History,
           allowedRoles: ['super_admin'],
         },
@@ -166,6 +185,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           key: 'settings',
           labelAr: 'إعدادات المنظومة (Settings)',
           labelEn: 'Settings',
+          labelFr: 'Paramètres',
           icon: Settings,
           allowedRoles: ['super_admin', 'administrator'],
         },
@@ -201,7 +221,9 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                 Back Office
               </span>
             </div>
-            <div className="text-[11px] text-slate-400 font-medium">لوحة التحكم والمتابعة</div>
+            <div className="text-[11px] text-slate-400 font-medium">
+              {language === 'ar' ? 'لوحة التحكم والمتابعة' : language === 'fr' ? 'Panneau de Contrôle & Suivi' : 'Control & Analytics Panel'}
+            </div>
           </div>
         </div>
 
@@ -224,7 +246,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className={`w-2 h-2 rounded-full ${roleConfig[currentRole].dotClass}`} />
                 <span className="text-[11px] font-bold text-slate-300 truncate">
-                  {roleConfig[currentRole].labelAr}
+                  {language === 'ar' ? roleConfig[currentRole].labelAr : language === 'fr' ? roleConfig[currentRole].labelFr : roleConfig[currentRole].labelEn}
                 </span>
               </div>
             </div>
@@ -232,7 +254,9 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
 
           {/* Quick Interactive Role Switcher Pill */}
           <div className="mt-3 pt-2.5 border-t border-slate-700/70 flex items-center justify-between text-[11px]">
-            <span className="text-slate-400 font-bold">معاينة دور:</span>
+            <span className="text-slate-400 font-bold">
+              {language === 'ar' ? 'معاينة دور:' : language === 'fr' ? 'Tester un rôle:' : 'Preview role:'}
+            </span>
             <div className="flex gap-1">
               <button
                 type="button"
@@ -277,7 +301,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
             return (
               <div key={catIdx}>
                 <div className="px-3 text-[11px] font-black text-slate-400/80 uppercase tracking-wider mb-2.5">
-                  {language === 'ar' ? cat.titleAr : cat.titleEn}
+                  {language === 'ar' ? cat.titleAr : language === 'fr' ? cat.titleFr : cat.titleEn}
                 </div>
 
                 <div className="space-y-2">
@@ -301,7 +325,9 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                       >
                         <div className="flex items-center gap-3.5 min-w-0">
                           <Icon size={20} className={isActive ? 'text-white shrink-0' : 'text-slate-400 shrink-0'} />
-                          <span className="truncate">{language === 'ar' ? item.labelAr : item.labelEn}</span>
+                          <span className="truncate">
+                            {language === 'ar' ? item.labelAr : language === 'fr' ? item.labelFr : item.labelEn}
+                          </span>
                         </div>
 
                         {item.badgeCount !== undefined && item.badgeCount > 0 && (
@@ -327,7 +353,9 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
         >
           <div className="flex items-center gap-2">
             <School size={16} className="text-purple-400" />
-            <span>بوابة أولياء الأمور</span>
+            <span>
+              {language === 'ar' ? 'بوابة أولياء الأمور' : language === 'fr' ? 'Portail Parents' : 'Parent Portal'}
+            </span>
           </div>
           <ExternalLink size={14} className="text-slate-500" />
         </Link>
