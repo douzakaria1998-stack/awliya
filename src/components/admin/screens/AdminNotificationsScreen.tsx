@@ -37,9 +37,12 @@ export function AdminNotificationsScreen() {
   };
 
   return (
-    <div className={`w-full pb-10 space-y-6 select-none ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        style={{ marginBottom: '28px' }}
+      >
         <div>
           <span className="text-xs sm:text-sm font-bold text-slate-400">
             {language === 'ar' ? 'مركز التنبيهات وإشعارات المنصة' : 'Notification Center'}
@@ -60,16 +63,17 @@ export function AdminNotificationsScreen() {
       </div>
 
       {/* Notifications List (Section 37-A) */}
-      <div className="space-y-3">
+      <div className="space-y-4" style={{ marginBottom: '32px' }}>
         {notifications.map((notif) => (
           <div
             key={notif.id}
             onClick={() => markNotificationRead(notif.id)}
-            className={`p-5 rounded-[24px] border transition-all cursor-pointer flex items-start justify-between gap-4 ${
+            className={`rounded-[24px] border transition-all cursor-pointer flex items-start justify-between gap-4 ${
               !notif.isRead
                 ? 'bg-purple-50/60 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800/60 shadow-2xs'
                 : 'bg-white dark:bg-slate-850 border-slate-200/80 dark:border-slate-800'
             }`}
+            style={{ padding: '24px 28px' }}
           >
             <div className="flex items-start gap-3.5">
               <div className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center shrink-0 shadow-2xs">

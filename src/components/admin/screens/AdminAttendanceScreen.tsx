@@ -95,9 +95,12 @@ export function AdminAttendanceScreen() {
   }, [studentStatusMap, groupStudents]);
 
   return (
-    <div className={`w-full pb-10 space-y-6 select-none ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        style={{ marginBottom: '28px' }}
+      >
         <div>
           <span className="text-xs sm:text-sm font-bold text-slate-400">
             {language === 'ar' ? 'رصد ومتابعة الحضور والغياب اليومي' : 'Attendance Recording & Analytics'}
@@ -130,7 +133,10 @@ export function AdminAttendanceScreen() {
       {/* Attendance Flow: Group Selector & Date Navigation Bar (Section 19, 20) */}
       <div
         className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs flex flex-col lg:flex-row items-center justify-between gap-4"
-        style={{ padding: '22px 28px' }}
+        style={{
+          padding: '26px 32px',
+          marginBottom: '28px',
+        }}
       >
         {/* 1. Group Selector */}
         <div className="flex items-center gap-3 w-full lg:w-auto">
@@ -186,35 +192,53 @@ export function AdminAttendanceScreen() {
       </div>
 
       {/* Real-time Session Statistics Bar (Section 21) */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 text-center space-y-1 shadow-2xs">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4" style={{ marginBottom: '32px' }}>
+        <div
+          className="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 text-center space-y-1 shadow-2xs"
+          style={{ padding: '20px 24px' }}
+        >
           <span className="text-[11px] font-bold text-slate-400 block">{language === 'ar' ? 'نسبة حضور الجلسة' : 'Attendance Rate'}</span>
           <span className="text-2xl font-black font-mono text-emerald-600">{stats.percentage}%</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-center space-y-1 shadow-2xs">
+        <div
+          className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-center space-y-1 shadow-2xs"
+          style={{ padding: '20px 24px' }}
+        >
           <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 block">{language === 'ar' ? 'حاضر (Present)' : 'Present'}</span>
           <span className="text-2xl font-black font-mono text-emerald-800 dark:text-emerald-200">{stats.presentCount}</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-center space-y-1 shadow-2xs">
+        <div
+          className="rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-center space-y-1 shadow-2xs"
+          style={{ padding: '20px 24px' }}
+        >
           <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 block">{language === 'ar' ? 'متأخر (Late)' : 'Late'}</span>
           <span className="text-2xl font-black font-mono text-amber-800 dark:text-amber-200">{stats.lateCount}</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-center space-y-1 shadow-2xs">
+        <div
+          className="rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-center space-y-1 shadow-2xs"
+          style={{ padding: '20px 24px' }}
+        >
           <span className="text-[11px] font-bold text-rose-700 dark:text-rose-300 block">{language === 'ar' ? 'غائب (Absent)' : 'Absent'}</span>
           <span className="text-2xl font-black font-mono text-rose-800 dark:text-rose-200">{stats.absentCount}</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-center space-y-1 shadow-2xs">
+        <div
+          className="rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-center space-y-1 shadow-2xs"
+          style={{ padding: '20px 24px' }}
+        >
           <span className="text-[11px] font-bold text-blue-700 dark:text-blue-300 block">{language === 'ar' ? 'غياب مبرر (Excused)' : 'Excused'}</span>
           <span className="text-2xl font-black font-mono text-blue-800 dark:text-blue-200">{stats.excusedCount}</span>
         </div>
       </div>
 
       {/* Interactive Attendance Sheet (Section 19 in PDF: Student, Present, Late, Absent, Excused) */}
-      <div className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs overflow-hidden">
+      <div
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs overflow-hidden"
+        style={{ marginBottom: '32px' }}
+      >
         <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
             <CalendarCheck2 size={18} className="text-emerald-600" />

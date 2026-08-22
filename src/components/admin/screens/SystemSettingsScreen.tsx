@@ -43,9 +43,12 @@ export function SystemSettingsScreen() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="w-full max-w-5xl select-none">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        style={{ marginBottom: '28px' }}
+      >
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
             إعدادات الأكاديمية والشهادات
@@ -63,9 +66,15 @@ export function SystemSettingsScreen() {
         )}
       </div>
 
-      <form onSubmit={handleSave} className="space-y-6">
+      <form onSubmit={handleSave}>
         {/* Card 1: Academy Profile */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-4">
+        <div
+          className="rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-4"
+          style={{
+            padding: '32px 36px',
+            marginBottom: '32px',
+          }}
+        >
           <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
             <School size={20} className="text-rose-500" />
             <h3 className="font-black text-base text-slate-900 dark:text-white">بيانات الأكاديمية الرسمية</h3>
@@ -111,7 +120,13 @@ export function SystemSettingsScreen() {
         </div>
 
         {/* Card 2: Certificate Design Preview & Actions */}
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-4">
+        <div
+          className="rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-4"
+          style={{
+            padding: '32px 36px',
+            marginBottom: '32px',
+          }}
+        >
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
             <div className="flex items-center gap-3">
               <Award size={20} className="text-amber-500" />
@@ -142,10 +157,10 @@ export function SystemSettingsScreen() {
         </div>
 
         {/* Save Button */}
-        <div className="flex justify-end">
+        <div className="flex justify-end pt-2">
           <button
             type="submit"
-            className="px-8 py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-sm shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+            className="px-8 py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-sm shadow-lg transition-all flex items-center gap-2 cursor-pointer"
           >
             <Save size={16} />
             <span>حفظ التغييرات</span>

@@ -64,11 +64,14 @@ export function AdminDashboardScreen() {
   ];
 
   return (
-    <div className={`w-full pb-10 space-y-8 select-none ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* 1. Welcome Banner */}
       <div
         className="rounded-[32px] bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white shadow-xl border border-purple-900/50 relative overflow-hidden"
-        style={{ padding: '36px 40px' }}
+        style={{
+          padding: '36px 40px',
+          marginBottom: '36px',
+        }}
       >
         <div className="relative z-10 space-y-4">
           <div className="flex items-center gap-2">
@@ -121,7 +124,7 @@ export function AdminDashboardScreen() {
       </div>
 
       {/* 2. Top 8 KPI Statistics Cards (Section 4, 39) */}
-      <div>
+      <div style={{ marginBottom: '36px' }}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
             <Activity size={20} className="text-purple-600 dark:text-purple-400" />
@@ -129,12 +132,12 @@ export function AdminDashboardScreen() {
           </h3>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
           {/* Total Students */}
           <div
             onClick={() => setActiveTab('students')}
             className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-blue-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '20px 24px' }}
+            style={{ padding: '24px 26px' }}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'إجمالي الطلاب' : 'Total Students'}</span>
@@ -154,7 +157,7 @@ export function AdminDashboardScreen() {
           <div
             onClick={() => setActiveTab('parents')}
             className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-purple-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '20px 24px' }}
+            style={{ padding: '24px 26px' }}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'أولياء الأمور' : 'Total Parents'}</span>
@@ -174,7 +177,7 @@ export function AdminDashboardScreen() {
           <div
             onClick={() => setActiveTab('teachers')}
             className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-emerald-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '20px 24px' }}
+            style={{ padding: '24px 26px' }}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'هيئة التدريس' : 'Total Teachers'}</span>
@@ -194,7 +197,7 @@ export function AdminDashboardScreen() {
           <div
             onClick={() => setActiveTab('groups')}
             className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-amber-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '20px 24px' }}
+            style={{ padding: '24px 26px' }}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'الأفواج النشطة' : 'Active Groups'}</span>
@@ -214,7 +217,7 @@ export function AdminDashboardScreen() {
           <div
             onClick={() => setActiveTab('attendance')}
             className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-teal-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '20px 24px' }}
+            style={{ padding: '24px 26px' }}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'نسبة الانضباط والحضور' : 'Attendance Rate'}</span>
@@ -234,7 +237,7 @@ export function AdminDashboardScreen() {
           <div
             onClick={() => setActiveTab('performance')}
             className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-rose-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '20px 24px' }}
+            style={{ padding: '24px 26px' }}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'المعدل العام للأداء' : 'Average Performance'}</span>
@@ -254,7 +257,7 @@ export function AdminDashboardScreen() {
           <div
             onClick={() => setActiveTab('students')}
             className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-indigo-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '20px 24px' }}
+            style={{ padding: '24px 26px' }}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'مسار الإنجليزية' : 'English Track'}</span>
@@ -274,7 +277,7 @@ export function AdminDashboardScreen() {
           <div
             onClick={() => setActiveTab('students')}
             className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-violet-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '20px 24px' }}
+            style={{ padding: '24px 26px' }}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'مسار الفرنسية' : 'French Track'}</span>
@@ -293,11 +296,11 @@ export function AdminDashboardScreen() {
       </div>
 
       {/* 3. Middle Section: Student Progress by Level + Attendance Breakdown (Section 39) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ marginBottom: '36px' }}>
         {/* Student Progress By Level */}
         <div
           className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs flex flex-col justify-between"
-          style={{ padding: '28px 32px' }}
+          style={{ padding: '32px 36px' }}
         >
           <div>
             <div className="flex items-center justify-between mb-5">
@@ -338,7 +341,7 @@ export function AdminDashboardScreen() {
         {/* Attendance Breakdown (Today, Yesterday, This Week) */}
         <div
           className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs flex flex-col justify-between"
-          style={{ padding: '28px 32px' }}
+          style={{ padding: '32px 36px' }}
         >
           <div>
             <div className="flex items-center justify-between mb-5">
@@ -399,7 +402,10 @@ export function AdminDashboardScreen() {
       {/* 4. Groups Performance Matrix (Section 4, 39) */}
       <div
         className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs"
-        style={{ padding: '28px 32px' }}
+        style={{
+          padding: '32px 36px',
+          marginBottom: '36px',
+        }}
       >
         <div className="flex items-center justify-between mb-5">
           <h4 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">

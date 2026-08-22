@@ -145,9 +145,12 @@ export function AdminPerformanceScreen() {
   };
 
   return (
-    <div className={`w-full pb-10 space-y-6 select-none ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        style={{ marginBottom: '28px' }}
+      >
         <div>
           <span className="text-xs sm:text-sm font-bold text-slate-400">
             {language === 'ar' ? 'التقييم الأكاديمي والواجبات والتوجيه التربوي' : 'Performance, Assessments & Feedback'}
@@ -193,7 +196,10 @@ export function AdminPerformanceScreen() {
       </div>
 
       {/* 3-Part Navigation Bar (Section 22 in PDF: 1. Homework, 2. Assessments, 3. Teacher Feedback) */}
-      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+      <div
+        className="flex items-center gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs"
+        style={{ marginBottom: '32px' }}
+      >
         <button
           type="button"
           onClick={() => setActiveSubTab('homework')}

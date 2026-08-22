@@ -19,9 +19,9 @@ export function AdminAuditLogsScreen() {
   const { isRTL, language } = useLanguage();
 
   return (
-    <div className={`w-full pb-10 space-y-6 select-none ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header */}
-      <div>
+      <div style={{ marginBottom: '28px' }}>
         <span className="text-xs sm:text-sm font-bold text-slate-400">
           {language === 'ar' ? 'سجل الرقابة والعمليات الإدارية' : 'Audit Trail & Compliance Logs'}
         </span>
@@ -31,7 +31,10 @@ export function AdminAuditLogsScreen() {
       </div>
 
       {/* Audit Log Table (Section 37-D in PDF: Who, What, When, Previous value, New value) */}
-      <div className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs overflow-hidden">
+      <div
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs overflow-hidden"
+        style={{ marginBottom: '32px' }}
+      >
         <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
             <History size={18} className="text-purple-600" />

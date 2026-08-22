@@ -72,9 +72,12 @@ export function AdminRolesScreen() {
   }
 
   return (
-    <div className={`w-full pb-10 space-y-6 select-none ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        style={{ marginBottom: '28px' }}
+      >
         <div>
           <span className="text-xs sm:text-sm font-bold text-slate-400">
             {language === 'ar' ? 'الأمان والصلاحيات الإدارية المتقدمة' : 'Security & Access Control'}
@@ -95,7 +98,10 @@ export function AdminRolesScreen() {
       </div>
 
       {/* Admin Users Roster Table */}
-      <div className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs overflow-hidden">
+      <div
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs overflow-hidden"
+        style={{ marginBottom: '36px' }}
+      >
         <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <h4 className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
             <ShieldCheck size={18} className="text-purple-600" />

@@ -115,11 +115,14 @@ export function AdminShell() {
         <AdminHeader onOpenMobileMenu={() => setIsMobileMenuOpen(true)} />
 
         <main
-          className="w-full pb-28 md:pb-16"
+          className="w-full"
           style={{
-            paddingTop: '32px',
-            paddingRight: '36px',
-            paddingLeft: '36px',
+            paddingTop: '36px',
+            paddingRight: '44px',
+            paddingLeft: '44px',
+            paddingBottom: '80px',
+            maxWidth: '1650px',
+            margin: '0 auto',
           }}
         >
           {renderActiveScreen()}

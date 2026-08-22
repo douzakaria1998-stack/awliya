@@ -62,9 +62,12 @@ export function StudentApprovalsScreen() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full select-none">
       {/* Header & Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        style={{ marginBottom: '28px' }}
+      >
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
             طلبات تسجيل وقبول الطلاب الجدد
@@ -97,7 +100,7 @@ export function StudentApprovalsScreen() {
       </div>
 
       {/* Search Bar */}
-      <div className="relative">
+      <div className="relative" style={{ marginBottom: '32px' }}>
         <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" />
         <input
           type="text"

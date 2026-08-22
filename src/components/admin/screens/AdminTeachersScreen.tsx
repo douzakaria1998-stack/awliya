@@ -83,9 +83,12 @@ export function AdminTeachersScreen() {
   };
 
   return (
-    <div className={`w-full pb-10 space-y-6 select-none ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        style={{ marginBottom: '28px' }}
+      >
         <div>
           <span className="text-xs sm:text-sm font-bold text-slate-400">
             {language === 'ar' ? 'هيئة التدريس والمشرفين الأكاديميين' : 'Faculty & Teaching Staff'}
@@ -108,7 +111,10 @@ export function AdminTeachersScreen() {
       {/* Search Bar */}
       <div
         className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs flex items-center justify-between gap-3"
-        style={{ padding: '20px 24px' }}
+        style={{
+          padding: '24px 30px',
+          marginBottom: '32px',
+        }}
       >
         <div className="relative flex-1">
           <input
@@ -134,7 +140,10 @@ export function AdminTeachersScreen() {
       </div>
 
       {/* Teachers Table (Section 10) */}
-      <div className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs overflow-hidden">
+      <div
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs overflow-hidden"
+        style={{ marginBottom: '32px' }}
+      >
         <div className="overflow-x-auto">
           <table className="w-full text-xs sm:text-sm text-right">
             <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-400 font-bold">

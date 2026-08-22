@@ -47,9 +47,12 @@ export function AdminAcademicPathScreen() {
   };
 
   return (
-    <div className={`w-full pb-10 space-y-6 select-none ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        style={{ marginBottom: '28px' }}
+      >
         <div>
           <span className="text-xs sm:text-sm font-bold text-slate-400">
             {language === 'ar' ? 'المناهج وخارطة الكفاءات اللغوية' : 'Curriculum & CEFR Framework'}
@@ -73,7 +76,10 @@ export function AdminAcademicPathScreen() {
       </div>
 
       {/* Main Two Tabs Bar (Section 17) */}
-      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+      <div
+        className="flex items-center gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs"
+        style={{ marginBottom: '32px' }}
+      >
         <button
           type="button"
           onClick={() => setActiveTab('curriculum')}
@@ -107,7 +113,10 @@ export function AdminAcademicPathScreen() {
           {/* Language Selector (English / French) */}
           <div
             className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs flex items-center justify-between gap-4"
-            style={{ padding: '20px 28px' }}
+            style={{
+              padding: '24px 30px',
+              marginBottom: '28px',
+            }}
           >
             <div className="flex items-center gap-2.5">
               <Languages size={20} className="text-indigo-600" />

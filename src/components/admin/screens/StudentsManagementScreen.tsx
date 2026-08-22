@@ -95,9 +95,12 @@ export function StudentsManagementScreen() {
   };
 
   return (
-    <div className={`w-full pb-10 space-y-6 select-none ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header & Export Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        style={{ marginBottom: '28px' }}
+      >
         <div>
           <span className="text-xs sm:text-sm font-bold text-slate-400">
             {language === 'ar' ? 'إدارة الشؤون الأكاديمية والطلاب' : 'Student Information System'}
@@ -109,11 +112,11 @@ export function StudentsManagementScreen() {
 
         {/* Export & Actions */}
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center rounded-2xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 p-1 shadow-2xs">
+          <div className="flex items-center rounded-2xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 p-1.5 shadow-2xs">
             <button
               type="button"
               onClick={() => handleExport('excel')}
-              className="px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors"
+              className="px-3.5 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors"
               title="Export to Excel"
             >
               <FileSpreadsheet size={15} className="text-emerald-600" />
@@ -122,7 +125,7 @@ export function StudentsManagementScreen() {
             <button
               type="button"
               onClick={() => handleExport('csv')}
-              className="px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors"
+              className="px-3.5 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors"
               title="Export to CSV"
             >
               <FileText size={15} className="text-blue-600" />
@@ -131,7 +134,7 @@ export function StudentsManagementScreen() {
             <button
               type="button"
               onClick={() => handleExport('pdf')}
-              className="px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors"
+              className="px-3.5 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors"
               title="Export to PDF"
             >
               <Download size={15} className="text-rose-600" />
@@ -144,7 +147,10 @@ export function StudentsManagementScreen() {
       {/* Search & Comprehensive Multi-Filters (Section 25) */}
       <div
         className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs space-y-4"
-        style={{ padding: '24px 28px' }}
+        style={{
+          padding: '28px 32px',
+          marginBottom: '32px',
+        }}
       >
         <div className="flex flex-col lg:flex-row gap-3 items-center justify-between">
           {/* Search Input */}
