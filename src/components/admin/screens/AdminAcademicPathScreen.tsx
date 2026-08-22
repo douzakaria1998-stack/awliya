@@ -1392,7 +1392,7 @@ export function AdminAcademicPathScreen() {
                     <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-400 font-bold text-[11px]">
                       <tr>
                         <th
-                          className={`font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
+                          className={`font-extrabold w-[32%] ${isRTL ? 'text-right' : 'text-left'}`}
                           style={{
                             paddingTop: '16px',
                             paddingBottom: '16px',
@@ -1402,19 +1402,17 @@ export function AdminAcademicPathScreen() {
                         >
                           {language === 'ar' ? 'اسم الطالب (Student)' : 'Student'}
                         </th>
-                        <th className="py-4 px-8 font-extrabold text-center">
+                        <th className="py-4 px-8 font-extrabold text-center w-[28%]">
                           {language === 'ar' ? 'التقدم الإجمالي (Overall Progress)' : 'Overall Progress'}
                         </th>
-                        <th
-                          className={`py-4 px-8 font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
-                        >
+                        <th className="py-4 px-6 font-extrabold text-center w-[16%]">
                           {language === 'ar' ? 'الوحدة الحالية (Current Unit)' : 'Current Unit'}
                         </th>
-                        <th className="py-4 px-8 font-extrabold text-center">
+                        <th className="py-4 px-6 font-extrabold text-center w-[12%]">
                           {language === 'ar' ? 'الحالة (Status)' : 'Status'}
                         </th>
                         <th
-                          className="font-extrabold text-center"
+                          className="font-extrabold text-center w-[12%]"
                           style={{
                             paddingTop: '16px',
                             paddingBottom: '16px',
@@ -1469,8 +1467,8 @@ export function AdminAcademicPathScreen() {
                               </div>
                             </td>
 
-                            <td className="py-4.5 px-8 text-center">
-                              <div className="flex items-center justify-center gap-3.5 min-w-[160px]">
+                            <td className="py-4.5 px-8">
+                              <div className="flex items-center justify-center gap-3.5 w-full max-w-[200px] mx-auto">
                                 <div className="flex-1 h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                                   <div
                                     className="h-full rounded-full transition-all duration-500"
@@ -1481,21 +1479,21 @@ export function AdminAcademicPathScreen() {
                                     }}
                                   />
                                 </div>
-                                <span className="font-mono font-black text-xs text-slate-900 dark:text-white shrink-0 min-w-[36px]">
+                                <span className="font-mono font-black text-xs text-slate-900 dark:text-white shrink-0 min-w-[38px] text-right">
                                   {progress}%
                                 </span>
                               </div>
                             </td>
 
-                            <td className="py-4.5 px-8 font-bold text-slate-700 dark:text-slate-300 text-xs">
-                              {language === 'ar'
-                                ? `الوحدة ${currentUnitNumber}: المحور التعليمي ${currentUnitNumber}`
-                                : `Unit ${currentUnitNumber}`}
+                            <td className="py-4.5 px-6 text-center">
+                              <span className="inline-flex items-center justify-center px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs">
+                                {language === 'ar' ? `الوحدة ${currentUnitNumber}` : `Unit ${currentUnitNumber}`}
+                              </span>
                             </td>
 
-                            <td className="py-4.5 px-8 text-center">
+                            <td className="py-4.5 px-6 text-center">
                               <span
-                                className={`px-3 py-1 rounded-full font-bold text-[11px] border ${
+                                className={`inline-flex items-center justify-center px-3 py-1 rounded-full font-bold text-[11px] border ${
                                   progress === 100
                                     ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-800/80'
                                     : progress > 0
