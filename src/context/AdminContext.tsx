@@ -10,6 +10,7 @@ import {
   AdminTeacher,
   AdminGroup,
   CurriculumLevel,
+  LessonProgressStatus,
   AttendanceSession,
   AdminHomeworkAssignment,
   AdminAssessmentRecord,
@@ -93,6 +94,14 @@ interface AdminContextType {
   reorderCurriculumLevels: (language: 'English' | 'French', newOrderedLevels: CurriculumLevel[]) => void;
   deleteCurriculumLevel: (levelNumber: number, language: 'English' | 'French') => void;
 
+  lessonProgressRecords: Record<string, LessonProgressStatus>;
+  updateLessonProgress: (
+    studentId: string,
+    lessonId: string,
+    status: LessonProgressStatus,
+    levelNumber?: number
+  ) => void;
+
   recordAttendance: (sessionId: string, records: { studentId: string; status: 'present' | 'late' | 'absent' | 'excused'; note?: string }[]) => void;
   
   createHomework: (hwData: Partial<AdminHomeworkAssignment>) => void;
@@ -132,6 +141,7 @@ const ADMIN_STORAGE_KEYS = {
   AUDIT_LOGS: 'myschool_admin_audit_logs_v2',
   NOTIFICATIONS: 'myschool_admin_notifications_v2',
   APPROVALS: 'myschool_admin_approvals_v2',
+  LESSON_PROGRESS: 'myschool_admin_lesson_progress_v2',
 };
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
@@ -146,6 +156,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [teachers, setTeachers] = useState<AdminTeacher[]>(mockAdminTeachers);
   const [groups, setGroups] = useState<AdminGroup[]>(mockAdminGroups);
   const [curricula, setCurricula] = useState<CurriculumLevel[]>(mockCurricula);
+  const [lessonProgressRecords, setLessonProgressRecords] = useState<Record<string, LessonProgressStatus>>({});
   const [attendanceSessions, setAttendanceSessions] = useState<AttendanceSession[]>(mockAttendanceSessions);
   const [homeworkList, setHomeworkList] = useState<AdminHomeworkAssignment[]>(mockAdminHomework);
   const [assessments, setAssessments] = useState<AdminAssessmentRecord[]>(mockAdminAssessments);
@@ -177,6 +188,35 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
     const sCurricula = getItem<CurriculumLevel[]>(ADMIN_STORAGE_KEYS.CURRICULA);
     if (sCurricula?.length) setCurricula(sCurricula);
+
+    const sProgress = getItem<Record<string, LessonProgressStatus>>(ADMIN_STORAGE_KEYS.LESSON_PROGRESS);
+    if (sProgress && Object.keys(sProgress).length) {
+      setLessonProgressRecords(sProgress);
+    } else {
+      // Seed realistic initial lesson progress for mock students based on their overall progress
+      const initialMap: Record<string, LessonProgressStatus> = {};
+      mockAdminStudents.forEach((st) => {
+        const studentLevel = mockCurricula.find(
+          (c) => (c.levelNumber === st.currentLevel || c.cefrCode === st.cefrLevel) && c.language === (st.language === 'French' ? 'French' : 'English')
+        ) || mockCurricula[0];
+
+        if (studentLevel) {
+          const allLessons = studentLevel.units.flatMap((u) => u.lessons);
+          const completedCount = Math.round((st.overallProgress / 100) * allLessons.length);
+          allLessons.forEach((l, idx) => {
+            if (idx < completedCount) {
+              initialMap[`${st.id}_${l.id}`] = 'completed';
+            } else if (idx === completedCount && st.overallProgress < 100) {
+              initialMap[`${st.id}_${l.id}`] = 'in_progress';
+            } else {
+              initialMap[`${st.id}_${l.id}`] = 'not_started';
+            }
+          });
+        }
+      });
+      setLessonProgressRecords(initialMap);
+      setItem(ADMIN_STORAGE_KEYS.LESSON_PROGRESS, initialMap);
+    }
 
     const sAttendance = getItem<AttendanceSession[]>(ADMIN_STORAGE_KEYS.ATTENDANCE);
     if (sAttendance?.length) setAttendanceSessions(sAttendance);
@@ -735,6 +775,83 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     [logAudit]
   );
 
+  const updateLessonProgress = useCallback(
+    (
+      studentId: string,
+      lessonId: string,
+      status: LessonProgressStatus,
+      levelNumber?: number
+    ) => {
+      setLessonProgressRecords((prev) => {
+        const key = `${studentId}_${lessonId}`;
+        const updated = { ...prev, [key]: status };
+        setItem(ADMIN_STORAGE_KEYS.LESSON_PROGRESS, updated);
+
+        // Recalculate student progress
+        setStudents((prevStudents) => {
+          const student = prevStudents.find((s) => s.id === studentId);
+          if (!student) return prevStudents;
+
+          const studentLevelNum = levelNumber || student.currentLevel || 1;
+          const studentCurriculum =
+            curricula.find(
+              (c) =>
+                (c.levelNumber === studentLevelNum || c.cefrCode === student.cefrLevel) &&
+                c.language === (student.language === 'French' ? 'French' : 'English')
+            ) || curricula[0];
+
+          const allLessons = studentCurriculum ? studentCurriculum.units.flatMap((u) => u.lessons) : [];
+          const totalLessons = allLessons.length || 1;
+
+          const completedCount = allLessons.filter((l) =>
+            l.id === lessonId ? status === 'completed' : updated[`${studentId}_${l.id}`] === 'completed'
+          ).length;
+
+          const newProgress = Math.round((completedCount / totalLessons) * 100);
+
+          const updatedStudents = prevStudents.map((s) =>
+            s.id === studentId
+              ? {
+                  ...s,
+                  overallProgress: newProgress,
+                  completedLessonsCount: completedCount,
+                  totalLessonsCount: totalLessons,
+                }
+              : s
+          );
+          setItem(ADMIN_STORAGE_KEYS.STUDENTS, updatedStudents);
+
+          // Update Group Average Progress
+          if (student.groupId) {
+            setGroups((prevGroups) => {
+              const groupStudents = updatedStudents.filter((s) => s.groupId === student.groupId);
+              if (groupStudents.length === 0) return prevGroups;
+              const avg = Math.round(
+                groupStudents.reduce((acc, st) => acc + (st.overallProgress || 0), 0) / groupStudents.length
+              );
+              const updatedGroups = prevGroups.map((g) =>
+                g.id === student.groupId ? { ...g, averageProgress: avg } : g
+              );
+              setItem(ADMIN_STORAGE_KEYS.GROUPS, updatedGroups);
+              return updatedGroups;
+            });
+          }
+
+          return updatedStudents;
+        });
+
+        return updated;
+      });
+
+      logAudit(
+        `تحديث حالة الدرس للطالب (${studentId}): ${status}`,
+        `Updated student (${studentId}) lesson (${lessonId}) status to ${status}`,
+        'curriculum'
+      );
+    },
+    [curricula, logAudit]
+  );
+
   // ==========================================
   // Attendance Actions
   // ==========================================
@@ -1115,6 +1232,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         updateCurriculumLevel,
         reorderCurriculumLevels,
         deleteCurriculumLevel,
+        lessonProgressRecords,
+        updateLessonProgress,
         recordAttendance,
         createHomework,
         evaluateHomework,

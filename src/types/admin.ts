@@ -176,6 +176,21 @@ export interface CurriculumLevel {
   units: CurriculumUnit[];
 }
 
+// Student Academic Lesson Progress (Back Office Spec)
+export type LessonProgressStatus = 'not_started' | 'in_progress' | 'completed';
+
+export interface StudentLessonProgress {
+  studentId: string;
+  groupId: string;
+  levelNumber: number;
+  unitId: string;
+  lessonId: string;
+  status: LessonProgressStatus;
+  completedAt?: string;
+  lastUpdatedBy?: string;
+  lastUpdatedAt?: string;
+}
+
 // Attendance Record
 export interface AttendanceStudentEntry {
   studentId: string;

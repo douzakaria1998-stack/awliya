@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   BookOpen,
   Settings,
@@ -21,26 +21,56 @@ import {
   ArrowRight,
   ArrowLeft,
   Check,
+  Users,
+  Search,
+  GraduationCap,
+  Clock,
+  ArrowUpRight,
+  Calendar,
+  Circle,
+  CircleDot,
+  CheckCircle,
+  Eye,
+  Award,
+  Download,
+  School,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { CurriculumLevel } from '@/types/admin';
+import { CurriculumLevel, LessonProgressStatus } from '@/types/admin';
 
 export function AdminAcademicPathScreen() {
   const {
     curricula,
     visibleStudents,
+    students,
+    visibleGroups,
+    groups,
     currentRole,
     addCurriculumLevel,
     updateCurriculumLevel,
     reorderCurriculumLevels,
     deleteCurriculumLevel,
+    lessonProgressRecords,
+    updateLessonProgress,
   } = useAdmin();
   const { isRTL, language } = useLanguage();
 
   const [activeTab, setActiveTab] = useState<'curriculum' | 'student_progress'>('curriculum');
   const [selectedCurriculumLanguage, setSelectedCurriculumLanguage] = useState<'English' | 'French'>('English');
   const [selectedLevelNumber, setSelectedLevelNumber] = useState(1);
+
+  // Tab 2: Student Progress Hierarchical View State (Groups -> Group Detail -> Student Detail)
+  const [progressViewMode, setProgressViewMode] = useState<'groups' | 'group_detail' | 'student_detail'>('groups');
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+
+  // Tab 2 Filters
+  const [groupSearchQuery, setGroupSearchQuery] = useState('');
+  const [groupLanguageFilter, setGroupLanguageFilter] = useState<'all' | 'English' | 'French'>('all');
+  const [groupLevelFilter, setGroupLevelFilter] = useState<string>('all');
+  const [studentSearchQuery, setStudentSearchQuery] = useState('');
+  const [studentStatusFilter, setStudentStatusFilter] = useState<'all' | 'in_progress' | 'completed' | 'not_started'>('all');
 
   // Create / Edit Level Modal State
   const [isAddLevelOpen, setIsAddLevelOpen] = useState(false);
@@ -91,6 +121,107 @@ export function AdminAcademicPathScreen() {
 
   const toggleUnit = (unitId: string) => {
     setExpandedUnitId((prev) => (prev === unitId ? null : unitId));
+  };
+
+  // Tab 2: Derived Data & Helpers
+  const activeProgressGroup = useMemo(() => {
+    if (!selectedGroupId) return null;
+    return groups.find((g) => g.id === selectedGroupId) || null;
+  }, [groups, selectedGroupId]);
+
+  const groupStudentsList = useMemo(() => {
+    if (!activeProgressGroup) return [];
+    return visibleStudents.filter((st) => st.groupId === activeProgressGroup.id);
+  }, [activeProgressGroup, visibleStudents]);
+
+  const activeProgressStudent = useMemo(() => {
+    if (!selectedStudentId) return null;
+    return students.find((st) => st.id === selectedStudentId) || null;
+  }, [students, selectedStudentId]);
+
+  const studentCurriculumLevel = useMemo(() => {
+    if (!activeProgressStudent) return null;
+    return (
+      curricula.find(
+        (c) =>
+          (c.levelNumber === activeProgressStudent.currentLevel || c.cefrCode === activeProgressStudent.cefrLevel) &&
+          c.language === (activeProgressStudent.language === 'French' ? 'French' : 'English')
+      ) ||
+      curricula.find((c) => c.language === (activeProgressStudent.language === 'French' ? 'French' : 'English')) ||
+      curricula[0]
+    );
+  }, [activeProgressStudent, curricula]);
+
+  // Filtered Groups for Level 1
+  const filteredProgressGroups = useMemo(() => {
+    return visibleGroups.filter((grp) => {
+      const matchesSearch =
+        !groupSearchQuery ||
+        grp.name.toLowerCase().includes(groupSearchQuery.toLowerCase()) ||
+        grp.code.toLowerCase().includes(groupSearchQuery.toLowerCase()) ||
+        grp.teacherName.toLowerCase().includes(groupSearchQuery.toLowerCase());
+
+      const matchesLang =
+        groupLanguageFilter === 'all' ||
+        (groupLanguageFilter === 'English' && grp.language !== 'French') ||
+        (groupLanguageFilter === 'French' && grp.language === 'French');
+
+      const matchesLevel = groupLevelFilter === 'all' || grp.level === groupLevelFilter;
+
+      return matchesSearch && matchesLang && matchesLevel;
+    });
+  }, [visibleGroups, groupSearchQuery, groupLanguageFilter, groupLevelFilter]);
+
+  // Filtered Students for Level 2 (Group Detail)
+  const filteredGroupStudents = useMemo(() => {
+    return groupStudentsList.filter((st) => {
+      const matchesSearch =
+        !studentSearchQuery ||
+        st.fullNameAr.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
+        st.fullNameEn.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
+        st.id.toLowerCase().includes(studentSearchQuery.toLowerCase());
+
+      const matchesStatus =
+        studentStatusFilter === 'all' ||
+        (studentStatusFilter === 'completed' && st.overallProgress === 100) ||
+        (studentStatusFilter === 'in_progress' && st.overallProgress > 0 && st.overallProgress < 100) ||
+        (studentStatusFilter === 'not_started' && st.overallProgress === 0);
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [groupStudentsList, studentSearchQuery, studentStatusFilter]);
+
+  // Handlers for Tab 2 navigation
+  const handleOpenGroupDetail = (groupId: string) => {
+    setSelectedGroupId(groupId);
+    setProgressViewMode('group_detail');
+    setStudentSearchQuery('');
+    setStudentStatusFilter('all');
+  };
+
+  const handleOpenStudentDetail = (studentId: string) => {
+    setSelectedStudentId(studentId);
+    setProgressViewMode('student_detail');
+  };
+
+  const handleBackToGroups = () => {
+    setSelectedGroupId(null);
+    setSelectedStudentId(null);
+    setProgressViewMode('groups');
+  };
+
+  const handleBackToGroupDetail = () => {
+    setSelectedStudentId(null);
+    setProgressViewMode('group_detail');
+  };
+
+  const handleMarkUnitComplete = (unitId: string) => {
+    if (!activeProgressStudent || !studentCurriculumLevel) return;
+    const targetUnit = studentCurriculumLevel.units.find((u) => u.id === unitId);
+    if (!targetUnit) return;
+    targetUnit.lessons.forEach((l) => {
+      updateLessonProgress(activeProgressStudent.id, l.id, 'completed', studentCurriculumLevel.levelNumber);
+    });
   };
 
   // Open modal in Create mode
@@ -762,105 +893,944 @@ export function AdminAcademicPathScreen() {
         </div>
       )}
 
-      {/* TAB 2: Student Progress Matrix (Section 17-Tab 2 & Section 18) */}
+      {/* TAB 2: Student Progress (Back Office Spec: Groups -> Students -> Academic Progress) */}
       {activeTab === 'student_progress' && (
-        <div
-          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs space-y-4 overflow-hidden"
-          style={{ marginBottom: '32px' }}
-        >
-          <div
-            className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800"
-            style={{ padding: '16px 22px' }}
-          >
-            <div>
-              <h3 className="font-bold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                <TrendingUp size={18} className="text-indigo-600 dark:text-indigo-400" />
-                <span>{language === 'ar' ? 'مصفوفة إنجاز الوحدات للطلاب (Curriculum Progress Matrix)' : 'Student Progress Matrix'}</span>
-              </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {currentRole === 'teacher'
-                  ? 'عرض تقدم طلاب الأفواج المسندة إليك فقط (Sarah Benali)'
-                  : 'متابعة شاملة لتقدم جميع الطلاب عبر الوحدات التعليمية'}
-              </p>
-            </div>
-          </div>
+        <div className="space-y-6 animate-fade-in" style={{ marginBottom: '40px' }}>
+          {/* LEVEL 1: Groups List Page */}
+          {progressViewMode === 'groups' && (
+            <div className="space-y-6">
+              {/* KPI Summary Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div
+                  className="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between"
+                  style={{ padding: '16px 20px' }}
+                >
+                  <div>
+                    <span className="text-xs font-bold text-slate-400 block">
+                      {language === 'ar' ? 'إجمالي الأفواج الدراسية' : 'Total Groups'}
+                    </span>
+                    <span className="text-2xl font-black font-mono text-slate-900 dark:text-white mt-1 block">
+                      {visibleGroups.length}
+                    </span>
+                    <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-bold mt-0.5 block">
+                      {currentRole === 'teacher'
+                        ? language === 'ar' ? 'أفواجك المسندة فقط' : 'Your assigned groups'
+                        : language === 'ar' ? 'جميع الأفواج في المنظومة' : 'All platform groups'}
+                    </span>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black shrink-0">
+                    <School size={22} />
+                  </div>
+                </div>
 
-          <div className="overflow-x-auto">
-            <table className={`w-full text-xs ${isRTL ? 'text-right' : 'text-left'}`}>
-              <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-400 font-bold">
-                <tr>
-                  <th
-                    className={`font-extrabold text-xs ${isRTL ? 'text-right' : 'text-left'}`}
+                <div
+                  className="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between"
+                  style={{ padding: '16px 20px' }}
+                >
+                  <div>
+                    <span className="text-xs font-bold text-slate-400 block">
+                      {language === 'ar' ? 'إجمالي الطلاب المتابعين' : 'Total Students'}
+                    </span>
+                    <span className="text-2xl font-black font-mono text-slate-900 dark:text-white mt-1 block">
+                      {visibleStudents.length}
+                    </span>
+                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-0.5 block">
+                      {language === 'ar' ? 'مسجلون ونشطون' : 'Active & Enrolled'}
+                    </span>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black shrink-0">
+                    <Users size={22} />
+                  </div>
+                </div>
+
+                <div
+                  className="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between"
+                  style={{ padding: '16px 20px' }}
+                >
+                  <div>
+                    <span className="text-xs font-bold text-slate-400 block">
+                      {language === 'ar' ? 'متوسط التقدم العام' : 'Overall Avg Progress'}
+                    </span>
+                    <span className="text-2xl font-black font-mono text-indigo-600 dark:text-indigo-400 mt-1 block">
+                      {visibleStudents.length
+                        ? Math.round(
+                            visibleStudents.reduce((acc, st) => acc + (st.overallProgress || 0), 0) /
+                              visibleStudents.length
+                          )
+                        : 0}
+                      %
+                    </span>
+                    <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
+                      {language === 'ar' ? 'محسوب من إنجاز الدروس' : 'Calculated from lessons'}
+                    </span>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black shrink-0">
+                    <TrendingUp size={22} />
+                  </div>
+                </div>
+
+                <div
+                  className="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between"
+                  style={{ padding: '16px 20px' }}
+                >
+                  <div>
+                    <span className="text-xs font-bold text-slate-400 block">
+                      {language === 'ar' ? 'المستويات الأكاديمية' : 'Curriculum Levels'}
+                    </span>
+                    <span className="text-2xl font-black font-mono text-purple-600 dark:text-purple-400 mt-1 block">
+                      {curricula.length}
+                    </span>
+                    <span className="text-[11px] text-purple-600 dark:text-purple-400 font-bold mt-0.5 block">
+                      A1, A2, B1, B2, C1
+                    </span>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black shrink-0">
+                    <Award size={22} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Filter & Search Bar */}
+              <div
+                className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"
+                style={{ padding: '16px 22px' }}
+              >
+                {/* Search Box */}
+                <div className="relative flex-1 min-w-[240px]">
+                  <Search
+                    size={16}
+                    className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${
+                      isRTL ? 'right-3.5' : 'left-3.5'
+                    }`}
+                  />
+                  <input
+                    type="text"
+                    value={groupSearchQuery}
+                    onChange={(e) => setGroupSearchQuery(e.target.value)}
+                    placeholder={
+                      language === 'ar'
+                        ? 'بحث باسم الفوج أو المعلم...'
+                        : 'Search by group or teacher name...'
+                    }
+                    className="w-full h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors"
                     style={{
-                      paddingTop: '14px',
-                      paddingBottom: '14px',
-                      paddingLeft: isRTL ? '20px' : '28px',
-                      paddingRight: isRTL ? '28px' : '20px',
+                      paddingRight: isRTL ? '38px' : '16px',
+                      paddingLeft: isRTL ? '16px' : '38px',
                     }}
-                  >
-                    {language === 'ar' ? 'اسم الطالب' : 'Student'}
-                  </th>
-                  <th className="py-3.5 px-4 text-center font-extrabold">{language === 'ar' ? 'الفوج' : 'Group'}</th>
-                  <th className="py-3.5 px-4 text-center font-extrabold">Unit 1 (الوحدة 1)</th>
-                  <th className="py-3.5 px-4 text-center font-extrabold">Unit 2 (الوحدة 2)</th>
-                  <th className="py-3.5 px-4 text-center font-extrabold">Unit 3 (الوحدة 3)</th>
-                  <th
-                    className="font-extrabold text-center text-xs"
-                    style={{
-                      paddingTop: '14px',
-                      paddingBottom: '14px',
-                      paddingRight: isRTL ? '28px' : '20px',
-                      paddingLeft: isRTL ? '20px' : '28px',
-                    }}
-                  >
-                    {language === 'ar' ? 'المعدل الإجمالي' : 'Overall'}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {visibleStudents.map((st) => (
-                  <tr key={st.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                    <td
-                      className="py-3.5 font-bold text-slate-900 dark:text-white"
-                      style={{
-                        paddingLeft: isRTL ? '20px' : '28px',
-                        paddingRight: isRTL ? '28px' : '20px',
-                      }}
+                  />
+                </div>
+
+                {/* Filter Controls */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {/* Language Filter */}
+                  <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => setGroupLanguageFilter('all')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        groupLanguageFilter === 'all'
+                          ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs'
+                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                     >
-                      <div className="font-bold text-xs sm:text-sm">{st.fullNameAr}</div>
-                      <div className="text-[11px] text-slate-400 font-mono mt-0.5">{st.fullNameEn}</div>
-                    </td>
-                    <td className="py-3.5 px-4 text-center font-medium text-slate-600 dark:text-slate-400 text-xs">
-                      {st.groupName.split('(')[0].trim()}
-                    </td>
-                    <td className="py-3.5 px-4 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm">
-                      {st.overallProgress >= 70 ? '100%' : '80%'}
-                    </td>
-                    <td className="py-3.5 px-4 text-center font-mono font-bold text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm">
-                      {st.overallProgress >= 80 ? '100%' : st.overallProgress >= 60 ? '80%' : '50%'}
-                    </td>
-                    <td className="py-3.5 px-4 text-center font-mono font-bold text-purple-600 dark:text-purple-400 text-xs sm:text-sm">
-                      {st.overallProgress >= 90 ? '70%' : '50%'}
-                    </td>
-                    <td
-                      className="py-3.5 text-center"
-                      style={{
-                        paddingRight: isRTL ? '28px' : '20px',
-                        paddingLeft: isRTL ? '20px' : '28px',
-                      }}
+                      {language === 'ar' ? 'الكل' : 'All'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setGroupLanguageFilter('English')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        groupLanguageFilter === 'English'
+                          ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-2xs'
+                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                      }`}
                     >
-                      <span
-                        className="rounded-lg bg-purple-50 dark:bg-purple-950/60 font-mono font-black text-purple-600 dark:text-purple-300 text-xs"
-                        style={{ padding: '4px 10px' }}
-                      >
-                        {st.overallProgress}%
+                      🇬🇧 English
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setGroupLanguageFilter('French')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        groupLanguageFilter === 'French'
+                          ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-2xs'
+                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      🇫🇷 French
+                    </button>
+                  </div>
+
+                  {/* Level Code Filter */}
+                  <select
+                    value={groupLevelFilter}
+                    onChange={(e) => setGroupLevelFilter(e.target.value)}
+                    className="h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500 cursor-pointer"
+                  >
+                    <option value="all">{language === 'ar' ? 'جميع المستويات' : 'All Levels'}</option>
+                    <option value="A1">A1 — Breakthrough</option>
+                    <option value="A2">A2 — Waystage</option>
+                    <option value="B1">B1 — Threshold</option>
+                    <option value="B2">B2 — Vantage</option>
+                    <option value="C1">C1 — Proficiency</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Section 2: Groups Table (Groups Page) */}
+              <div className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
+                <div
+                  className="border-b border-slate-100 dark:border-slate-800 flex items-center justify-between"
+                  style={{ padding: '18px 24px' }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black shrink-0">
+                      <Layers size={18} />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">
+                        {language === 'ar' ? 'قائمة الأفواج الدراسية' : 'Academic Groups Directory'}
+                      </h3>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {language === 'ar'
+                          ? 'اختر أي فوج لعرض قائمة الطلاب ومتابعة تقدمهم عبر الوحدات والدروس'
+                          : 'Select any group to view student list and track units/lessons progress'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className="text-xs font-bold text-slate-400 font-mono">
+                    {filteredProgressGroups.length} {language === 'ar' ? 'أفواج' : 'Groups'}
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className={`w-full text-xs ${isRTL ? 'text-right' : 'text-left'}`}>
+                    <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-400 font-bold text-[11px]">
+                      <tr>
+                        <th
+                          className={`font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
+                          style={{
+                            paddingTop: '14px',
+                            paddingBottom: '14px',
+                            paddingLeft: isRTL ? '20px' : '26px',
+                            paddingRight: isRTL ? '26px' : '20px',
+                          }}
+                        >
+                          {language === 'ar' ? 'الفوج (Group)' : 'Group'}
+                        </th>
+                        <th className="py-3.5 px-4 font-extrabold text-center">
+                          {language === 'ar' ? 'اللغة (Language)' : 'Language'}
+                        </th>
+                        <th className="py-3.5 px-4 font-extrabold text-center">
+                          {language === 'ar' ? 'المستوى (Level)' : 'Level'}
+                        </th>
+                        <th
+                          className={`py-3.5 px-4 font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
+                        >
+                          {language === 'ar' ? 'المعلم (Teacher)' : 'Teacher'}
+                        </th>
+                        <th className="py-3.5 px-4 font-extrabold text-center">
+                          {language === 'ar' ? 'الطلاب (Students)' : 'Students'}
+                        </th>
+                        <th className="py-3.5 px-6 font-extrabold text-center">
+                          {language === 'ar' ? 'متوسط التقدم (Progress)' : 'Progress'}
+                        </th>
+                        <th
+                          className="font-extrabold text-center"
+                          style={{
+                            paddingTop: '14px',
+                            paddingBottom: '14px',
+                            paddingRight: isRTL ? '26px' : '20px',
+                            paddingLeft: isRTL ? '20px' : '26px',
+                          }}
+                        >
+                          {language === 'ar' ? 'الإجراء' : 'Action'}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {filteredProgressGroups.map((grp) => {
+                        const studentCount = grp.studentIds?.length || 0;
+                        const groupProgress = grp.averageProgress || 0;
+                        const levelColor =
+                          grp.level === 'A1'
+                            ? '#3B82F6'
+                            : grp.level === 'A2'
+                            ? '#8B5CF6'
+                            : grp.level === 'B1'
+                            ? '#10B981'
+                            : grp.level === 'B2'
+                            ? '#F59E0B'
+                            : '#EC4899';
+
+                        return (
+                          <tr
+                            key={grp.id}
+                            onClick={() => handleOpenGroupDetail(grp.id)}
+                            className="hover:bg-indigo-50/40 dark:hover:bg-indigo-950/20 transition-colors cursor-pointer group"
+                          >
+                            <td
+                              className="py-4 font-bold text-slate-900 dark:text-white"
+                              style={{
+                                paddingLeft: isRTL ? '20px' : '26px',
+                                paddingRight: isRTL ? '26px' : '20px',
+                              }}
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-black text-xs flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                  {grp.level}
+                                </span>
+                                <div>
+                                  <span className="font-black text-xs sm:text-sm text-slate-900 dark:text-white block group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                    {grp.name}
+                                  </span>
+                                  <span className="text-[11px] text-slate-400 font-mono mt-0.5 block">
+                                    {grp.code}
+                                  </span>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="py-4 px-4 text-center font-bold text-slate-600 dark:text-slate-300 text-xs">
+                              {grp.language === 'French' ? '🇫🇷 French' : '🇬🇧 English'}
+                            </td>
+
+                            <td className="py-4 px-4 text-center">
+                              <span
+                                className="px-2.5 py-1 rounded-lg text-white font-mono font-bold text-xs shadow-2xs"
+                                style={{ backgroundColor: levelColor }}
+                              >
+                                {grp.level}
+                              </span>
+                            </td>
+
+                            <td className="py-4 px-4 font-bold text-slate-700 dark:text-slate-300 text-xs">
+                              {grp.teacherName}
+                            </td>
+
+                            <td className="py-4 px-4 text-center font-mono font-bold text-slate-900 dark:text-white text-xs">
+                              <span className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
+                                {studentCount} {language === 'ar' ? 'طالب' : 'students'}
+                              </span>
+                            </td>
+
+                            <td className="py-4 px-6 text-center">
+                              <div className="flex items-center justify-center gap-3 min-w-[130px]">
+                                <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                  <div
+                                    className="h-full rounded-full transition-all duration-500"
+                                    style={{
+                                      width: `${groupProgress}%`,
+                                      backgroundColor:
+                                        groupProgress >= 80
+                                          ? '#10B981'
+                                          : groupProgress >= 50
+                                          ? '#3B82F6'
+                                          : '#F59E0B',
+                                    }}
+                                  />
+                                </div>
+                                <span className="font-mono font-black text-xs text-slate-900 dark:text-white shrink-0">
+                                  {groupProgress}%
+                                </span>
+                              </div>
+                            </td>
+
+                            <td
+                              className="py-4 text-center"
+                              style={{
+                                paddingRight: isRTL ? '26px' : '20px',
+                                paddingLeft: isRTL ? '20px' : '26px',
+                              }}
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenGroupDetail(grp.id);
+                                }}
+                                className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center gap-1.5 border border-indigo-200/60 dark:border-indigo-800/60 transition-all cursor-pointer shadow-2xs mx-auto"
+                              >
+                                <span>{language === 'ar' ? 'عرض الفوج' : 'View Group'}</span>
+                                {isRTL ? <ArrowLeft size={14} /> : <ArrowRight size={14} />}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* LEVEL 2: Group Detail Page */}
+          {progressViewMode === 'group_detail' && activeProgressGroup && (
+            <div className="space-y-6">
+              {/* Back Button & Group Header */}
+              <div className="flex flex-col gap-4">
+                <button
+                  type="button"
+                  onClick={handleBackToGroups}
+                  className="self-start flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+                  style={{ padding: '8px 16px' }}
+                >
+                  {isRTL ? <ArrowRight size={15} /> : <ArrowLeft size={15} />}
+                  <span>{language === 'ar' ? 'العودة لقائمة الأفواج' : 'Back to Groups'}</span>
+                </button>
+
+                {/* Group Summary Card */}
+                <div
+                  className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6"
+                  style={{ padding: '24px 28px' }}
+                >
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="px-3 py-1 rounded-xl bg-indigo-600 text-white font-mono font-black text-xs shadow-xs">
+                        {activeProgressGroup.level}
                       </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      <h3 className="font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
+                        {activeProgressGroup.name}
+                      </h3>
+                      <span className="text-xs text-slate-400 font-mono font-medium">
+                        ({activeProgressGroup.code})
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-500 dark:text-slate-400 pt-1">
+                      <span className="flex items-center gap-1.5">
+                        <Languages size={15} className="text-indigo-500" />
+                        {activeProgressGroup.language === 'French' ? 'اللغة الفرنسية (DELF)' : 'اللغة الإنجليزية (CEFR)'}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1.5">
+                        <GraduationCap size={15} className="text-purple-500" />
+                        {language === 'ar' ? `المعلم: ${activeProgressGroup.teacherName}` : `Teacher: ${activeProgressGroup.teacherName}`}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1.5">
+                        <Users size={15} className="text-emerald-500" />
+                        {groupStudentsList.length} {language === 'ar' ? 'طلاب مسجلين' : 'Students'}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1.5">
+                        <Clock size={15} className="text-amber-500" />
+                        {activeProgressGroup.daysAr} ({activeProgressGroup.startTime} - {activeProgressGroup.endTime})
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Group Average Progress Metric */}
+                  <div
+                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center gap-4 shrink-0 shadow-2xs"
+                    style={{ padding: '14px 20px' }}
+                  >
+                    <div>
+                      <span className="text-[11px] font-bold text-slate-400 block">
+                        {language === 'ar' ? 'متوسط تقدم الفوج' : 'Average Group Progress'}
+                      </span>
+                      <span className="text-2xl font-black font-mono text-indigo-600 dark:text-indigo-400 block mt-0.5">
+                        {activeProgressGroup.averageProgress || 0}%
+                      </span>
+                    </div>
+                    <div className="w-12 h-12 rounded-full border-4 border-indigo-500/20 border-t-indigo-600 flex items-center justify-center font-bold text-xs font-mono">
+                      {activeProgressGroup.averageProgress || 0}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Students Table (Group Detail) */}
+              <div className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
+                <div
+                  className="border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  style={{ padding: '18px 24px' }}
+                >
+                  <div>
+                    <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">
+                      {language === 'ar' ? 'طلاب الفوج والمسار الأكاديمي' : 'Students in Group & Academic Status'}
+                    </h4>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {language === 'ar'
+                        ? 'انقر على زر "عرض" لفتح تفاصيل تقدم الطالب عبر الوحدات والدروس'
+                        : 'Click "View" to open student units & lessons academic path'}
+                    </p>
+                  </div>
+
+                  {/* Search Student Box */}
+                  <div className="relative min-w-[220px]">
+                    <Search
+                      size={15}
+                      className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${
+                        isRTL ? 'right-3' : 'left-3'
+                      }`}
+                    />
+                    <input
+                      type="text"
+                      value={studentSearchQuery}
+                      onChange={(e) => setStudentSearchQuery(e.target.value)}
+                      placeholder={language === 'ar' ? 'بحث عن طالب...' : 'Search student...'}
+                      className="w-full h-9 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+                      style={{
+                        paddingRight: isRTL ? '34px' : '14px',
+                        paddingLeft: isRTL ? '14px' : '34px',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className={`w-full text-xs ${isRTL ? 'text-right' : 'text-left'}`}>
+                    <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-400 font-bold text-[11px]">
+                      <tr>
+                        <th
+                          className={`font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
+                          style={{
+                            paddingTop: '14px',
+                            paddingBottom: '14px',
+                            paddingLeft: isRTL ? '20px' : '26px',
+                            paddingRight: isRTL ? '26px' : '20px',
+                          }}
+                        >
+                          {language === 'ar' ? 'اسم الطالب (Student)' : 'Student'}
+                        </th>
+                        <th className="py-3.5 px-6 font-extrabold text-center">
+                          {language === 'ar' ? 'التقدم الإجمالي (Overall Progress)' : 'Overall Progress'}
+                        </th>
+                        <th
+                          className={`py-3.5 px-4 font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
+                        >
+                          {language === 'ar' ? 'الوحدة الحالية (Current Unit)' : 'Current Unit'}
+                        </th>
+                        <th className="py-3.5 px-4 font-extrabold text-center">
+                          {language === 'ar' ? 'الحالة (Status)' : 'Status'}
+                        </th>
+                        <th
+                          className="font-extrabold text-center"
+                          style={{
+                            paddingTop: '14px',
+                            paddingBottom: '14px',
+                            paddingRight: isRTL ? '26px' : '20px',
+                            paddingLeft: isRTL ? '20px' : '26px',
+                          }}
+                        >
+                          {language === 'ar' ? 'الإجراء (Action)' : 'Action'}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {filteredGroupStudents.map((st) => {
+                        const progress = st.overallProgress || 0;
+                        const statusLabel =
+                          progress === 100
+                            ? language === 'ar' ? 'مكتمل' : 'Completed'
+                            : progress > 0
+                            ? language === 'ar' ? 'قيد التقدم' : 'In Progress'
+                            : language === 'ar' ? 'لم يبدأ' : 'Not Started';
+
+                        const currentUnitNumber = Math.min(
+                          Math.floor((progress / 100) * 3) + 1,
+                          3
+                        );
+
+                        return (
+                          <tr
+                            key={st.id}
+                            onClick={() => handleOpenStudentDetail(st.id)}
+                            className="hover:bg-indigo-50/40 dark:hover:bg-indigo-950/20 transition-colors cursor-pointer group"
+                          >
+                            <td
+                              className="py-4 font-bold text-slate-900 dark:text-white"
+                              style={{
+                                paddingLeft: isRTL ? '20px' : '26px',
+                                paddingRight: isRTL ? '26px' : '20px',
+                              }}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                                  {st.fullNameAr.slice(0, 1)}
+                                </div>
+                                <div>
+                                  <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white block group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                    {st.fullNameAr}
+                                  </span>
+                                  <span className="text-[11px] text-slate-400 font-mono mt-0.5 block">
+                                    {st.fullNameEn} • {st.id}
+                                  </span>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="py-4 px-6 text-center">
+                              <div className="flex items-center justify-center gap-3 min-w-[130px]">
+                                <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                  <div
+                                    className="h-full rounded-full transition-all duration-500"
+                                    style={{
+                                      width: `${progress}%`,
+                                      backgroundColor:
+                                        progress >= 80 ? '#10B981' : progress >= 50 ? '#3B82F6' : '#F59E0B',
+                                    }}
+                                  />
+                                </div>
+                                <span className="font-mono font-black text-xs text-slate-900 dark:text-white shrink-0">
+                                  {progress}%
+                                </span>
+                              </div>
+                            </td>
+
+                            <td className="py-4 px-4 font-bold text-slate-700 dark:text-slate-300 text-xs">
+                              {language === 'ar'
+                                ? `الوحدة ${currentUnitNumber}: المحور التعليمي ${currentUnitNumber}`
+                                : `Unit ${currentUnitNumber}`}
+                            </td>
+
+                            <td className="py-4 px-4 text-center">
+                              <span
+                                className={`px-2.5 py-1 rounded-full font-bold text-[11px] border ${
+                                  progress === 100
+                                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-800/80'
+                                    : progress > 0
+                                    ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border-indigo-200/80 dark:border-indigo-800/80'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                                }`}
+                              >
+                                {statusLabel}
+                              </span>
+                            </td>
+
+                            <td
+                              className="py-4 text-center"
+                              style={{
+                                paddingRight: isRTL ? '26px' : '20px',
+                                paddingLeft: isRTL ? '20px' : '26px',
+                              }}
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenStudentDetail(st.id);
+                                }}
+                                className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer mx-auto"
+                              >
+                                <Eye size={14} />
+                                <span>{language === 'ar' ? 'عرض التقدم' : 'View'}</span>
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* LEVEL 3: Student Academic Progress Detail */}
+          {progressViewMode === 'student_detail' && activeProgressStudent && studentCurriculumLevel && (
+            <div className="space-y-6">
+              {/* Back Button & Student Header (Section 4 of PDF) */}
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                  <button
+                    type="button"
+                    onClick={handleBackToGroups}
+                    className="hover:text-indigo-600 cursor-pointer transition-colors"
+                  >
+                    {language === 'ar' ? 'الأفواج' : 'Groups'}
+                  </button>
+                  <span>/</span>
+                  <button
+                    type="button"
+                    onClick={handleBackToGroupDetail}
+                    className="hover:text-indigo-600 cursor-pointer transition-colors"
+                  >
+                    {activeProgressGroup?.name || activeProgressStudent.groupName}
+                  </button>
+                  <span>/</span>
+                  <span className="text-slate-900 dark:text-white">
+                    {activeProgressStudent.fullNameAr}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={handleBackToGroupDetail}
+                    className="flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+                    style={{ padding: '8px 16px' }}
+                  >
+                    {isRTL ? <ArrowRight size={15} /> : <ArrowLeft size={15} />}
+                    <span>{language === 'ar' ? 'العودة للفوج' : 'Back to Group'}</span>
+                  </button>
+                </div>
+
+                {/* Student Profile & Progress Banner */}
+                <div
+                  className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6"
+                  style={{ padding: '24px 28px' }}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shrink-0 shadow-md">
+                      {activeProgressStudent.fullNameAr.slice(0, 1)}
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <h3 className="font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
+                          {activeProgressStudent.fullNameAr}
+                        </h3>
+                        <span
+                          className="px-2.5 py-0.5 rounded-lg text-white font-mono font-bold text-xs shadow-2xs"
+                          style={{ backgroundColor: studentCurriculumLevel.color }}
+                        >
+                          {studentCurriculumLevel.cefrCode} — {studentCurriculumLevel.language}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 font-medium mt-1">
+                        {language === 'ar' ? `المعلم المسؤول: ${activeProgressStudent.teacherName}` : `Teacher: ${activeProgressStudent.teacherName}`} • {activeProgressStudent.groupName}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Calculated Overall Progress Card */}
+                  <div
+                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center gap-4 shrink-0 shadow-2xs"
+                    style={{ padding: '16px 22px' }}
+                  >
+                    <div>
+                      <span className="text-[11px] font-bold text-slate-400 block">
+                        {language === 'ar' ? 'التقدم الأكاديمي الإجمالي' : 'Overall Progress'}
+                      </span>
+                      <span className="text-2xl sm:text-3xl font-black font-mono text-indigo-600 dark:text-indigo-400 block mt-0.5">
+                        {activeProgressStudent.overallProgress || 0}%
+                      </span>
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block mt-0.5">
+                        {language === 'ar' ? 'محتسب تلقائياً من الدروس المنجزة ✓' : 'Auto-calculated from lessons ✓'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 4, 5, 6: Units & Lessons Breakdown with 3 Interactive States */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                    <BookOpen size={18} className="text-indigo-600 dark:text-indigo-400" />
+                    <span>{language === 'ar' ? 'تفاصيل الوحدات والدروس ومستويات الإنجاز' : 'Curriculum Units & Lessons Progress'}</span>
+                  </h4>
+                  <span className="text-xs font-bold text-slate-400 font-mono">
+                    {studentCurriculumLevel.units.length} {language === 'ar' ? 'وحدات' : 'Units'}
+                  </span>
+                </div>
+
+                {studentCurriculumLevel.units.map((unit, uIdx) => {
+                  const totalLessons = unit.lessons.length || 1;
+                  const completedLessons = unit.lessons.filter(
+                    (l) => (lessonProgressRecords[`${activeProgressStudent.id}_${l.id}`] || 'not_started') === 'completed'
+                  ).length;
+                  const inProgressLessons = unit.lessons.filter(
+                    (l) => (lessonProgressRecords[`${activeProgressStudent.id}_${l.id}`] || 'not_started') === 'in_progress'
+                  ).length;
+
+                  // Unit Progress Formula: Completed Lessons ÷ Total Lessons × 100
+                  const unitPercentage = Math.round((completedLessons / totalLessons) * 100);
+
+                  const isUnitCompleted = unitPercentage === 100;
+                  const isUnitInProgress = completedLessons > 0 || inProgressLessons > 0;
+
+                  return (
+                    <div
+                      key={unit.id}
+                      className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden"
+                    >
+                      {/* Unit Header Bar */}
+                      <div
+                        className="bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                        style={{ padding: '18px 24px' }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
+                            {uIdx + 1}
+                          </span>
+                          <div>
+                            <div className="flex items-center gap-2.5">
+                              <h5 className="font-black text-sm sm:text-base text-slate-900 dark:text-white">
+                                {unit.titleAr}
+                              </h5>
+                              <span className="text-xs text-slate-400 font-mono font-medium">
+                                ({unit.titleEn})
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-slate-400 font-bold block mt-0.5">
+                              {completedLessons} {language === 'ar' ? 'من' : 'of'} {totalLessons} {language === 'ar' ? 'دروس مكتملة' : 'lessons completed'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 shrink-0">
+                          {/* Unit Progress Badge */}
+                          <span
+                            className={`px-3 py-1 rounded-full font-mono font-black text-xs border flex items-center gap-1.5 ${
+                              isUnitCompleted
+                                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-800/80'
+                                : isUnitInProgress
+                                ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border-indigo-200/80 dark:border-indigo-800/80'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
+                            }`}
+                          >
+                            <span>{unitPercentage}%</span>
+                            <span>{isUnitCompleted ? '✓' : isUnitInProgress ? '●' : '■'}</span>
+                          </span>
+
+                          {/* Mark Unit All Complete Button */}
+                          {!isUnitCompleted && (
+                            <button
+                              type="button"
+                              onClick={() => handleMarkUnitComplete(unit.id)}
+                              className="px-3 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center gap-1 border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer"
+                              title={language === 'ar' ? 'تعليم جميع دروس الوحدة كمكتملة' : 'Mark all unit lessons completed'}
+                            >
+                              <CheckCircle2 size={13} />
+                              <span>{language === 'ar' ? 'إتمام الوحدة' : 'Complete All'}</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Lessons List inside Unit */}
+                      <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                        {unit.lessons.map((lesson, lIdx) => {
+                          const currentStatus =
+                            lessonProgressRecords[`${activeProgressStudent.id}_${lesson.id}`] || 'not_started';
+
+                          return (
+                            <div
+                              key={lesson.id}
+                              className="flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-900/30"
+                              style={{ padding: '16px 24px' }}
+                            >
+                              {/* Left: Lesson Info */}
+                              <div className="space-y-1.5 flex-1">
+                                <div className="flex items-center gap-2.5">
+                                  <span className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-bold text-[11px] flex items-center justify-center shrink-0">
+                                    {lIdx + 1}
+                                  </span>
+                                  <h6 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
+                                    {lesson.titleAr}
+                                  </h6>
+                                  <span className="text-xs text-slate-400 font-mono">
+                                    ({lesson.titleEn})
+                                  </span>
+
+                                  {lesson.hasAssessment && (
+                                    <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 font-bold text-[10px] border border-amber-200/80 dark:border-amber-800/80">
+                                      {language === 'ar' ? 'اختبار مهارة ✓' : 'Assessment'}
+                                    </span>
+                                  )}
+                                </div>
+
+                                <p className="text-xs text-slate-400 leading-relaxed">
+                                  {lesson.contentSummary}
+                                </p>
+
+                                {lesson.vocabulary?.length > 0 && (
+                                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                    <span className="text-[10px] font-bold text-slate-400">
+                                      {language === 'ar' ? 'المفردات:' : 'Vocab:'}
+                                    </span>
+                                    {lesson.vocabulary.map((vocab, vIdx) => (
+                                      <span
+                                        key={vIdx}
+                                        className="rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] font-mono text-slate-600 dark:text-slate-300"
+                                        style={{ padding: '1px 6px' }}
+                                      >
+                                        {vocab}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Right: Interactive 3-State Toggle (Section 5 of PDF) */}
+                              <div
+                                className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shrink-0 self-start md:self-center shadow-2xs"
+                              >
+                                {/* 1. Not Started */}
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    updateLessonProgress(
+                                      activeProgressStudent.id,
+                                      lesson.id,
+                                      'not_started',
+                                      studentCurriculumLevel.levelNumber
+                                    )
+                                  }
+                                  className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                                    currentStatus === 'not_started'
+                                      ? 'bg-white dark:bg-slate-750 text-slate-700 dark:text-slate-200 shadow-xs ring-1 ring-slate-300 dark:ring-slate-600'
+                                      : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                                  }`}
+                                >
+                                  <Circle size={12} />
+                                  <span>{language === 'ar' ? 'لم يبدأ' : 'Not Started'}</span>
+                                </button>
+
+                                {/* 2. In Progress */}
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    updateLessonProgress(
+                                      activeProgressStudent.id,
+                                      lesson.id,
+                                      'in_progress',
+                                      studentCurriculumLevel.levelNumber
+                                    )
+                                  }
+                                  className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                                    currentStatus === 'in_progress'
+                                      ? 'bg-amber-500 text-white shadow-xs ring-2 ring-amber-400/40'
+                                      : 'text-slate-400 hover:text-amber-600'
+                                  }`}
+                                >
+                                  <CircleDot size={12} />
+                                  <span>{language === 'ar' ? 'قيد التقدم' : 'In Progress'}</span>
+                                </button>
+
+                                {/* 3. Completed */}
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    updateLessonProgress(
+                                      activeProgressStudent.id,
+                                      lesson.id,
+                                      'completed',
+                                      studentCurriculumLevel.levelNumber
+                                    )
+                                  }
+                                  className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                                    currentStatus === 'completed'
+                                      ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-400/40'
+                                      : 'text-slate-400 hover:text-emerald-600'
+                                  }`}
+                                >
+                                  <CheckCircle size={12} />
+                                  <span>{language === 'ar' ? 'مكتمل ✓' : 'Completed'}</span>
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
