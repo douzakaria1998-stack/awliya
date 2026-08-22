@@ -450,8 +450,8 @@ export function StudentsManagementScreen() {
                         paddingRight: isRTL ? '28px' : '20px',
                       }}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 flex items-center justify-center font-black text-xs shrink-0">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 flex items-center justify-center font-black text-[11px] shrink-0">
                           {st.fullNameAr[0]}
                         </div>
                         <div>
