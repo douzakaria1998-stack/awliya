@@ -448,31 +448,31 @@ export function AdminDashboardScreen() {
         <div
           className="bg-amber-50/70 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700/80 rounded-[28px] shadow-xs"
           style={{
-            padding: '32px 36px',
-            marginBottom: '36px',
+            padding: '36px 40px',
+            marginBottom: '40px',
           }}
         >
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-2.5 text-amber-950 dark:text-amber-200">
-              <AlertTriangle size={22} className="text-amber-600 shrink-0" />
-              <h4 className="text-base font-black">
+          <div className="flex items-center justify-between mb-7 sm:mb-8">
+            <div className="flex items-center gap-3 text-amber-950 dark:text-amber-200">
+              <AlertTriangle size={24} className="text-amber-600 shrink-0" />
+              <h4 className="text-base sm:text-lg font-black leading-normal">
                 {language === 'ar' ? 'تنبيه: طلاب بحاجة إلى متابعة واهتمام خاص (Falling Behind)' : 'Students Needing Attention'}
               </h4>
             </div>
             <span
-              className="text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-200/60 dark:bg-amber-900/60 rounded-full font-mono"
-              style={{ padding: '6px 16px' }}
+              className="text-xs font-bold text-amber-800 dark:text-amber-200 bg-amber-200/70 dark:bg-amber-900/70 border border-amber-300/80 dark:border-amber-700/80 rounded-full font-mono shrink-0 leading-normal"
+              style={{ padding: '8px 20px' }}
             >
               {fallingBehindStudents.length} {language === 'ar' ? 'طلاب' : 'students'}
             </span>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 sm:space-y-5">
             {fallingBehindStudents.map((st) => (
               <div
                 key={st.id}
                 className="bg-white dark:bg-slate-850 rounded-2xl border border-amber-200 dark:border-amber-800/60 flex items-center justify-between gap-4 flex-wrap shadow-2xs"
-                style={{ padding: '22px 28px' }}
+                style={{ padding: '24px 30px' }}
               >
                 <div className="space-y-1.5 min-w-0">
                   <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-snug">
