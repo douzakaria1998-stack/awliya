@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Settings,
   School,
@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { downloadCertificateHTML } from '@/lib/certificateGenerator';
 
+const SETTINGS_STORAGE_KEY = 'myschool_system_settings';
+
 export function SystemSettingsScreen() {
   const [academyName, setAcademyName] = useState('My School');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -27,6 +29,23 @@ export function SystemSettingsScreen() {
   const [academyPhone, setAcademyPhone] = useState('+213 770 299 292 \\ +213 770 958 887');
   const [saveToast, setSaveToast] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load persisted settings on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.academyName) setAcademyName(parsed.academyName);
+        if (parsed.logoUrl) setLogoUrl(parsed.logoUrl);
+        if (parsed.logoFileName) setLogoFileName(parsed.logoFileName);
+        if (parsed.academyAddress) setAcademyAddress(parsed.academyAddress);
+        if (parsed.academyPhone) setAcademyPhone(parsed.academyPhone);
+      }
+    } catch (e) {
+      console.error('Failed to load system settings from localStorage', e);
+    }
+  }, []);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,8 +69,30 @@ export function SystemSettingsScreen() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+
+    try {
+      const payload = {
+        academyName: academyName.trim() || 'My School',
+        logoUrl: logoUrl,
+        logoFileName: logoFileName,
+        academyAddress: academyAddress.trim(),
+        academyPhone: academyPhone.trim(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // 1. Persist to localStorage
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(payload));
+
+      // 2. Dispatch custom event across application
+      window.dispatchEvent(
+        new CustomEvent('myschool_settings_updated', { detail: payload })
+      );
+    } catch (e) {
+      console.error('Failed to save system settings to localStorage', e);
+    }
+
     setSaveToast(true);
-    setTimeout(() => setSaveToast(false), 3000);
+    setTimeout(() => setSaveToast(false), 3500);
   };
 
   const handleTestCertificate = () => {
