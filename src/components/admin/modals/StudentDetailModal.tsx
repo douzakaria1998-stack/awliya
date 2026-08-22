@@ -366,45 +366,53 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
 
           {/* TAB 6: Teacher Feedback */}
           {activeTab === 'feedback' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
               <h4 className="text-sm font-black text-slate-900 dark:text-white">
                 {language === 'ar' ? 'التوجيهات التربوية والتواصل مع ولي الأمر' : 'Teacher Guidance & Parent Feedback'}
               </h4>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {studentFeedback.map((fb) => (
                   <div
                     key={fb.id}
-                    className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-4"
-                    style={{ padding: '20px 24px' }}
+                    className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                    style={{ padding: '22px 26px', display: 'flex', flexDirection: 'column', gap: '16px' }}
                   >
-                    <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700/60 pb-3">
+                    <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700/60 pb-3.5">
                       <span className="font-bold text-sm text-slate-900 dark:text-white">{fb.teacherName}</span>
                       <span className="text-xs text-slate-400 font-mono">{fb.date}</span>
                     </div>
 
-                    <div className="space-y-2 text-xs sm:text-sm">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }} className="text-xs sm:text-sm">
                       <div>
-                        <span className="font-bold text-emerald-600 block">نقاط القوة:</span>
-                        <p className="text-slate-700 dark:text-slate-300">{fb.teacherFeedback.strengths.join(' • ')}</p>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400 block mb-1">
+                          {language === 'ar' ? 'نقاط القوة:' : 'Strengths:'}
+                        </span>
+                        <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{fb.teacherFeedback.strengths.join(' • ')}</p>
                       </div>
                       <div>
-                        <span className="font-bold text-amber-600 block">مجالات التطوير:</span>
-                        <p className="text-slate-700 dark:text-slate-300">{fb.teacherFeedback.needsImprovement.join(' • ')}</p>
+                        <span className="font-bold text-amber-600 dark:text-amber-400 block mb-1">
+                          {language === 'ar' ? 'مجالات التطوير:' : 'Areas for Improvement:'}
+                        </span>
+                        <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{fb.teacherFeedback.needsImprovement.join(' • ')}</p>
                       </div>
                       <div>
-                        <span className="font-bold text-indigo-600 block">التوصية للمنزل:</span>
-                        <p className="text-slate-700 dark:text-slate-300">"{fb.teacherFeedback.recommendations}"</p>
+                        <span className="font-bold text-indigo-600 dark:text-indigo-400 block mb-1">
+                          {language === 'ar' ? 'التوصية للمنزل:' : 'Home Recommendation:'}
+                        </span>
+                        <p className="text-slate-700 dark:text-slate-300 leading-relaxed">"{fb.teacherFeedback.recommendations}"</p>
                       </div>
                     </div>
 
                     {fb.parentFeedback && (
                       <div
-                        className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 text-xs sm:text-sm"
-                        style={{ padding: '12px 16px' }}
+                        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/80 text-xs sm:text-sm shadow-2xs"
+                        style={{ padding: '14px 18px', marginTop: '6px' }}
                       >
-                        <span className="font-bold text-purple-600 block mb-1">رد ولي الأمر:</span>
-                        <p className="text-slate-800 dark:text-slate-200 font-medium">"{fb.parentFeedback.message}"</p>
+                        <span className="font-bold text-purple-600 dark:text-purple-400 block mb-1.5">
+                          {language === 'ar' ? 'رد ولي الأمر:' : 'Parent Reply:'}
+                        </span>
+                        <p className="text-slate-800 dark:text-slate-200 font-medium leading-relaxed">"{fb.parentFeedback.message}"</p>
                       </div>
                     )}
                   </div>
