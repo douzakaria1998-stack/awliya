@@ -137,10 +137,10 @@ export function AdminGroupsScreen() {
 
       {/* Search Bar */}
       <div
-        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs flex items-center justify-between gap-4"
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs flex items-center justify-between gap-4"
         style={{
-          padding: '36px 40px',
-          marginBottom: '36px',
+          padding: '14px 20px',
+          marginBottom: '20px',
         }}
       >
         <div className="relative flex-1">
@@ -149,17 +149,17 @@ export function AdminGroupsScreen() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={language === 'ar' ? 'بحث باسم الفوج، الكود، المعلم، أو اللغة...' : 'Search group by name, code, teacher...'}
-            className="w-full h-12 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-medium focus:outline-none focus:border-amber-500 transition-colors shadow-2xs"
+            className="w-full h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-amber-500 transition-colors shadow-2xs"
             style={{
-              paddingLeft: isRTL ? '20px' : '50px',
-              paddingRight: isRTL ? '50px' : '20px',
+              paddingLeft: isRTL ? '16px' : '42px',
+              paddingRight: isRTL ? '42px' : '16px',
               textAlign: isRTL ? 'right' : 'left',
             }}
           />
           <Search
-            size={20}
+            size={16}
             className={`absolute top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none ${
-              isRTL ? 'right-4' : 'left-4'
+              isRTL ? 'right-3.5' : 'left-3.5'
             }`}
           />
         </div>
@@ -179,29 +179,29 @@ export function AdminGroupsScreen() {
             <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
               <tr>
                 <th
-                  className={`font-extrabold text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`font-extrabold text-xs ${isRTL ? 'text-right' : 'text-left'}`}
                   style={{
-                    paddingTop: '26px',
-                    paddingBottom: '26px',
-                    paddingLeft: isRTL ? '24px' : '40px',
-                    paddingRight: isRTL ? '40px' : '24px',
+                    paddingTop: '14px',
+                    paddingBottom: '14px',
+                    paddingLeft: isRTL ? '20px' : '28px',
+                    paddingRight: isRTL ? '28px' : '20px',
                   }}
                 >
                   {language === 'ar' ? 'الفوج والكود' : 'Group Code & Name'}
                 </th>
-                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'اللغة والمستوى' : 'Language & Level'}</th>
-                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'المعلم المشرف' : 'Assigned Teacher'}</th>
-                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'الأيام والتوقيت' : 'Schedule'}</th>
-                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'الطلاب / السعة' : 'Capacity'}</th>
-                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
-                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'اللغة والمستوى' : 'Language & Level'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'المعلم المشرف' : 'Assigned Teacher'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الأيام والتوقيت' : 'Schedule'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الطلاب / السعة' : 'Capacity'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
                 <th
-                  className="font-extrabold text-center"
+                  className="font-extrabold text-center text-xs"
                   style={{
-                    paddingTop: '26px',
-                    paddingBottom: '26px',
-                    paddingRight: isRTL ? '40px' : '24px',
-                    paddingLeft: isRTL ? '24px' : '40px',
+                    paddingTop: '14px',
+                    paddingBottom: '14px',
+                    paddingRight: isRTL ? '28px' : '20px',
+                    paddingLeft: isRTL ? '20px' : '28px',
                   }}
                 >
                   {language === 'ar' ? 'الإجراءات' : 'Actions'}
@@ -216,70 +216,70 @@ export function AdminGroupsScreen() {
                   onClick={() => handleOpenGroup(grp)}
                 >
                   <td
-                    className="py-8"
+                    className="py-3.5"
                     style={{
-                      paddingLeft: isRTL ? '24px' : '40px',
-                      paddingRight: isRTL ? '40px' : '24px',
+                      paddingLeft: isRTL ? '20px' : '28px',
+                      paddingRight: isRTL ? '28px' : '20px',
                     }}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center font-black text-xs shrink-0 font-mono shadow-xs">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black text-[10px] shrink-0 font-mono shadow-xs">
                         {grp.code}
                       </div>
                       <div>
-                        <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-snug">{grp.name}</div>
-                        <div className="text-xs text-slate-400 mt-1">{grp.language} Track</div>
+                        <div className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm leading-snug">{grp.name}</div>
+                        <div className="text-[11px] text-slate-400 font-medium mt-0.5">{grp.language} Track</div>
                       </div>
                     </div>
                   </td>
 
-                  <td className="py-8 px-6 text-center">
+                  <td className="py-3.5 px-4 text-center">
                     <span
-                      className="rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs"
-                      style={{ padding: '8px 16px' }}
+                      className="rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs"
+                      style={{ padding: '4px 10px' }}
                     >
                       {grp.level}
                     </span>
                   </td>
 
-                  <td className="py-8 px-6 text-center font-bold text-slate-700 dark:text-slate-300 text-xs sm:text-sm">
+                  <td className="py-3.5 px-4 text-center font-bold text-slate-700 dark:text-slate-300 text-xs">
                     {grp.teacherName}
                   </td>
 
-                  <td className="py-8 px-6 text-center text-xs sm:text-sm">
-                    <div className="font-black text-slate-900 dark:text-white text-sm tracking-wide">
+                  <td className="py-3.5 px-4 text-center text-xs">
+                    <div className="font-bold text-slate-900 dark:text-white tracking-wide">
                       {getDaysAbbreviation(grp.daysAr)}
                     </div>
-                    <div className="font-mono text-slate-400 text-xs mt-1">{grp.startTime}–{grp.endTime}</div>
+                    <div className="font-mono text-slate-400 text-[11px] mt-0.5">{grp.startTime}–{grp.endTime}</div>
                   </td>
 
-                  <td className="py-8 px-6 text-center font-mono font-bold text-purple-600 text-xs sm:text-sm">
+                  <td className="py-3.5 px-4 text-center font-mono font-bold text-purple-600 dark:text-purple-400 text-xs">
                     {grp.studentIds.length} / {grp.maxCapacity}
                   </td>
 
-                  <td className="py-8 px-6 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-sm sm:text-base">
+                  <td className="py-3.5 px-4 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm">
                     {grp.attendanceRate}%
                   </td>
 
-                  <td className="py-8 px-6 text-center font-mono font-black text-blue-600 dark:text-blue-400 text-sm sm:text-base">
+                  <td className="py-3.5 px-4 text-center font-mono font-black text-blue-600 dark:text-blue-400 text-xs sm:text-sm">
                     {grp.averageProgress}%
                   </td>
 
                   <td
-                    className="py-8 text-center"
+                    className="py-3.5 text-center"
                     style={{
-                      paddingRight: isRTL ? '40px' : '24px',
-                      paddingLeft: isRTL ? '24px' : '40px',
+                      paddingRight: isRTL ? '28px' : '20px',
+                      paddingLeft: isRTL ? '20px' : '28px',
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <button
                       type="button"
                       onClick={() => handleOpenGroup(grp)}
-                      className="rounded-2xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-xs transition-colors cursor-pointer"
-                      style={{ padding: '10px 22px' }}
+                      className="rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold text-xs transition-colors cursor-pointer"
+                      style={{ padding: '6px 14px' }}
                     >
-                      {language === 'ar' ? 'الملف الشامل' : 'Group Hub'} →
+                      {language === 'ar' ? 'عرض الفوج' : 'View Group'} →
                     </button>
                   </td>
                 </tr>
