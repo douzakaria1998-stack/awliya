@@ -205,14 +205,14 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
       <div className="flex flex-col overflow-y-auto flex-1 pb-4">
         {/* 1. Brand Header */}
         <div
-          className="h-16 border-b border-slate-800 flex items-center gap-3 shrink-0"
+          className="h-20 border-b border-slate-800 flex items-center gap-3 shrink-0"
           style={{
-            paddingRight: isRTL ? '28px' : '20px',
-            paddingLeft: isRTL ? '20px' : '28px',
+            paddingRight: isRTL ? '24px' : '16px',
+            paddingLeft: isRTL ? '16px' : '24px',
           }}
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-md shrink-0">
-            <School size={20} />
+          <div className="h-11 px-2.5 py-1 rounded-xl bg-white flex items-center justify-center shadow-xs shrink-0">
+            <img src="/myschool-logo.png" alt="My School" className="h-8 w-auto object-contain" />
           </div>
           <div className="min-w-0">
             <div className="font-black text-sm text-white flex items-center gap-1.5">

@@ -23,8 +23,8 @@ const SETTINGS_STORAGE_KEY = 'myschool_system_settings';
 
 export function SystemSettingsScreen() {
   const [academyName, setAcademyName] = useState('My School');
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [logoFileName, setLogoFileName] = useState<string>('');
+  const [logoUrl, setLogoUrl] = useState<string | null>('/myschool-logo.png');
+  const [logoFileName, setLogoFileName] = useState<string>('myschool-logo.png');
   const [academyAddress, setAcademyAddress] = useState('Errimal Street, El Oued, Algeria.');
   const [academyPhone, setAcademyPhone] = useState('+213 770 299 292 \\ +213 770 958 887');
   const [saveToast, setSaveToast] = useState(false);

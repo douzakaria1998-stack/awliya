@@ -68,19 +68,16 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       suppressHydrationWarning
     >
       <div>
-        {/* 1. Brand Header: Exact height 64px (h-16) with generous 32px right padding */}
+        {/* 1. Brand Header: Exact height with comfortable padding */}
         <div
-          className="h-16 border-b border-slate-200/80 dark:border-slate-800 flex items-center gap-3"
+          className="h-20 border-b border-slate-200/80 dark:border-slate-800 flex items-center gap-3 shrink-0"
           style={{
-            paddingRight: isRTL ? '32px' : '20px',
-            paddingLeft: isRTL ? '20px' : '32px',
+            paddingRight: isRTL ? '28px' : '18px',
+            paddingLeft: isRTL ? '18px' : '28px',
           }}
         >
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-xs shrink-0"
-            style={{ backgroundColor: theme.primary }}
-          >
-            و
+          <div className="h-11 px-2 py-1 rounded-xl bg-white border border-slate-200/80 dark:border-slate-700 flex items-center justify-center shadow-2xs shrink-0">
+            <img src="/myschool-logo.png" alt="My School" className="h-8 w-auto object-contain" />
           </div>
           <div className="min-w-0">
             <h1 className="text-base font-black text-slate-900 dark:text-white tracking-tight leading-tight truncate">

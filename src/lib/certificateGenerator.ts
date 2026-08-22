@@ -206,28 +206,16 @@ export function downloadCertificateHTML(
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
+      gap: 6px;
     }
 
-    .badge-my {
-      background: #ea580c;
-      color: #ffffff;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: 19px;
-      padding: 4px 13px;
-      border-radius: 9999px;
-      box-shadow: 0 3px 8px rgba(234, 88, 12, 0.35);
-      letter-spacing: -0.5px;
-    }
-
-    .text-school {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 800;
-      font-size: 23px;
-      color: #3b1442;
-      letter-spacing: -0.5px;
-      margin-left: 2px;
+    .cert-logo-img {
+      height: 56px;
+      width: auto;
+      max-width: 240px;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 2px 4px rgba(234, 88, 12, 0.2));
     }
 
     /* Titles */
@@ -514,12 +502,11 @@ export function downloadCertificateHTML(
     <div class="cert-card">
       <!-- Top / Center Content -->
       <div>
-        <!-- 1. Header: Logo & Accent Triangles -->
+        <!-- 1. Header: Official Logo & Accent Triangles -->
         <div class="logo-row">
           <div class="accent-triangle-left"></div>
           <div class="brand-logo">
-            <span class="badge-my">My</span>
-            <span class="text-school">School</span>
+            <img src="/myschool-logo.png" alt="My School Logo" class="cert-logo-img" />
           </div>
           <div class="accent-triangle-right"></div>
         </div>
@@ -555,7 +542,10 @@ export function downloadCertificateHTML(
       <!-- 7. Footer: School Info & Authentic Signature -->
       <div class="footer-row">
         <div class="footer-left">
-          <div class="footer-left-school">My School</div>
+          <div class="footer-left-school" style="display: flex; align-items: center; gap: 8px;">
+            <img src="/myschool-logo.png" alt="My School" style="height: 22px; width: auto; object-fit: contain;" />
+            <span>My School</span>
+          </div>
           <div class="footer-left-address">Errimal Street, El Oued, Algeria.</div>
           <div class="footer-left-tel">Tel: +213 770 299 292 \\ +213 770 958 887</div>
         </div>
