@@ -93,10 +93,11 @@ export function AdminParentsScreen() {
         <button
           type="button"
           onClick={() => setIsAddParentOpen(true)}
-          className="px-5 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+          className="rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+          style={{ padding: '14px 28px' }}
         >
-          <Plus size={16} />
-          <span>{language === 'ar' ? '+ إضافة ولي أمر جديد' : '+ Add New Parent'}</span>
+          <Plus size={18} />
+          <span>{language === 'ar' ? 'إضافة ولي أمر جديد' : 'Add New Parent'}</span>
         </button>
       </div>
 

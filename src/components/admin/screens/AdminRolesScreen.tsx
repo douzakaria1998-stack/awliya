@@ -90,10 +90,11 @@ export function AdminRolesScreen() {
         <button
           type="button"
           onClick={() => setIsAddUserOpen(true)}
-          className="px-5 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+          className="rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+          style={{ padding: '14px 28px' }}
         >
-          <UserPlus size={16} />
-          <span>{language === 'ar' ? '+ إضافة حساب إداري جديد' : '+ Add Admin Account'}</span>
+          <UserPlus size={18} />
+          <span>{language === 'ar' ? 'إضافة حساب إداري جديد' : 'Add Admin Account'}</span>
         </button>
       </div>
 

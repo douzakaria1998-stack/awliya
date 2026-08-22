@@ -101,10 +101,11 @@ export function AdminGroupsScreen() {
         <button
           type="button"
           onClick={() => setIsAddGroupOpen(true)}
-          className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+          className="rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+          style={{ padding: '14px 28px' }}
         >
-          <Plus size={16} />
-          <span>{language === 'ar' ? '+ إنشاء فوج دراسي جديد' : '+ Create New Group'}</span>
+          <Plus size={18} />
+          <span>{language === 'ar' ? 'إنشاء فوج دراسي جديد' : 'Create New Group'}</span>
         </button>
       </div>
 

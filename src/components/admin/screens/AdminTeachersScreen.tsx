@@ -101,10 +101,11 @@ export function AdminTeachersScreen() {
         <button
           type="button"
           onClick={() => setIsAddTeacherOpen(true)}
-          className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+          className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+          style={{ padding: '14px 28px' }}
         >
-          <Plus size={16} />
-          <span>{language === 'ar' ? '+ إنشاء حساب معلم جديد' : '+ Create Teacher Account'}</span>
+          <Plus size={18} />
+          <span>{language === 'ar' ? 'إنشاء حساب معلم جديد' : 'Create Teacher Account'}</span>
         </button>
       </div>
 
