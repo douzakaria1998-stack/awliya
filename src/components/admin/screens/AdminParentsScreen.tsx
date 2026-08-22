@@ -147,14 +147,12 @@ export function AdminParentsScreen() {
                 <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'رقم الهاتف' : 'Phone'}</th>
                 <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</th>
                 <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'عدد الأبناء' : 'Children'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الأبناء المربوطين' : 'Linked Students'}</th>
                 <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الحالة' : 'Status'}</th>
                 <th className="py-5 px-6 text-center font-extrabold">{language === 'ar' ? 'الإجراءات' : 'Actions'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredParents.map((par) => {
-                const linkedStudents = students.filter((s) => par.linkedStudentIds.includes(s.id));
                 return (
                   <tr
                     key={par.id}
@@ -181,22 +179,8 @@ export function AdminParentsScreen() {
                       {par.email}
                     </td>
 
-                    <td className="py-6 px-4 text-center font-mono font-black text-purple-600 text-sm">
+                    <td className="py-6 px-4 text-center font-mono font-black text-purple-600 text-sm sm:text-base">
                       {par.linkedStudentIds.length} {language === 'ar' ? 'أبناء' : 'children'}
-                    </td>
-
-                    <td className="py-6 px-4 text-center">
-                      <div className="flex items-center justify-center gap-2 flex-wrap">
-                        {linkedStudents.map((st) => (
-                          <span
-                            key={st.id}
-                            className="rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60"
-                            style={{ padding: '4px 10px' }}
-                          >
-                            {st.fullNameAr} ({st.cefrLevel})
-                          </span>
-                        ))}
-                      </div>
                     </td>
 
                     <td className="py-6 px-4 text-center">
