@@ -895,15 +895,15 @@ export function AdminAcademicPathScreen() {
 
       {/* TAB 2: Student Progress (Back Office Spec: Groups -> Students -> Academic Progress) */}
       {activeTab === 'student_progress' && (
-        <div className="space-y-6 animate-fade-in" style={{ marginBottom: '40px' }}>
+        <div className="animate-fade-in" style={{ marginBottom: '48px' }}>
           {/* LEVEL 1: Groups List Page */}
           {progressViewMode === 'groups' && (
-            <div className="space-y-6">
-              {/* KPI Summary Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+              {/* Container 1: KPI Summary Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <div
                   className="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between"
-                  style={{ padding: '16px 20px' }}
+                  style={{ padding: '18px 22px' }}
                 >
                   <div>
                     <span className="text-xs font-bold text-slate-400 block">
@@ -925,7 +925,7 @@ export function AdminAcademicPathScreen() {
 
                 <div
                   className="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between"
-                  style={{ padding: '16px 20px' }}
+                  style={{ padding: '18px 22px' }}
                 >
                   <div>
                     <span className="text-xs font-bold text-slate-400 block">
@@ -945,7 +945,7 @@ export function AdminAcademicPathScreen() {
 
                 <div
                   className="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between"
-                  style={{ padding: '16px 20px' }}
+                  style={{ padding: '18px 22px' }}
                 >
                   <div>
                     <span className="text-xs font-bold text-slate-400 block">
@@ -971,7 +971,7 @@ export function AdminAcademicPathScreen() {
 
                 <div
                   className="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between"
-                  style={{ padding: '16px 20px' }}
+                  style={{ padding: '18px 22px' }}
                 >
                   <div>
                     <span className="text-xs font-bold text-slate-400 block">
@@ -990,10 +990,10 @@ export function AdminAcademicPathScreen() {
                 </div>
               </div>
 
-              {/* Filter & Search Bar */}
+              {/* Container 2: Filter & Search Bar */}
               <div
                 className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"
-                style={{ padding: '16px 22px' }}
+                style={{ padding: '18px 24px' }}
               >
                 {/* Search Box */}
                 <div className="relative flex-1 min-w-[240px]">
@@ -1075,11 +1075,11 @@ export function AdminAcademicPathScreen() {
                 </div>
               </div>
 
-              {/* Section 2: Groups Table (Groups Page) */}
+              {/* Container 3: Section 2: Groups Table (Groups Page) */}
               <div className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
                 <div
                   className="border-b border-slate-100 dark:border-slate-800 flex items-center justify-between"
-                  style={{ padding: '18px 24px' }}
+                  style={{ padding: '20px 26px' }}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black shrink-0">
@@ -1109,36 +1109,36 @@ export function AdminAcademicPathScreen() {
                         <th
                           className={`font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
                           style={{
-                            paddingTop: '14px',
-                            paddingBottom: '14px',
+                            paddingTop: '16px',
+                            paddingBottom: '16px',
                             paddingLeft: isRTL ? '20px' : '26px',
                             paddingRight: isRTL ? '26px' : '20px',
                           }}
                         >
                           {language === 'ar' ? 'الفوج (Group)' : 'Group'}
                         </th>
-                        <th className="py-3.5 px-4 font-extrabold text-center">
+                        <th className="py-4 px-6 font-extrabold text-center">
                           {language === 'ar' ? 'اللغة (Language)' : 'Language'}
                         </th>
-                        <th className="py-3.5 px-4 font-extrabold text-center">
+                        <th className="py-4 px-6 font-extrabold text-center">
                           {language === 'ar' ? 'المستوى (Level)' : 'Level'}
                         </th>
                         <th
-                          className={`py-3.5 px-4 font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
+                          className={`py-4 px-6 font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
                         >
                           {language === 'ar' ? 'المعلم (Teacher)' : 'Teacher'}
                         </th>
-                        <th className="py-3.5 px-4 font-extrabold text-center">
+                        <th className="py-4 px-6 font-extrabold text-center">
                           {language === 'ar' ? 'الطلاب (Students)' : 'Students'}
                         </th>
-                        <th className="py-3.5 px-6 font-extrabold text-center">
+                        <th className="py-4 px-8 font-extrabold text-center">
                           {language === 'ar' ? 'متوسط التقدم (Progress)' : 'Progress'}
                         </th>
                         <th
                           className="font-extrabold text-center"
                           style={{
-                            paddingTop: '14px',
-                            paddingBottom: '14px',
+                            paddingTop: '16px',
+                            paddingBottom: '16px',
                             paddingRight: isRTL ? '26px' : '20px',
                             paddingLeft: isRTL ? '20px' : '26px',
                           }}
@@ -1190,32 +1190,40 @@ export function AdminAcademicPathScreen() {
                               </div>
                             </td>
 
-                            <td className="py-4 px-4 text-center font-bold text-slate-600 dark:text-slate-300 text-xs">
-                              {grp.language === 'French' ? '🇫🇷 French' : '🇬🇧 English'}
+                            <td className="py-4 px-6 text-center font-bold text-slate-600 dark:text-slate-300 text-xs">
+                              <span className="inline-flex items-center gap-1.5">
+                                <span>{grp.language === 'French' ? '🇫🇷' : '🇬🇧'}</span>
+                                <span>{grp.language === 'French' ? 'French' : 'English'}</span>
+                              </span>
                             </td>
 
-                            <td className="py-4 px-4 text-center">
+                            <td className="py-4 px-6 text-center">
                               <span
-                                className="px-2.5 py-1 rounded-lg text-white font-mono font-bold text-xs shadow-2xs"
+                                className="inline-flex items-center justify-center px-3 py-1 rounded-lg text-white font-mono font-bold text-xs shadow-2xs"
                                 style={{ backgroundColor: levelColor }}
                               >
                                 {grp.level}
                               </span>
                             </td>
 
-                            <td className="py-4 px-4 font-bold text-slate-700 dark:text-slate-300 text-xs">
-                              {grp.teacherName}
+                            <td className="py-4 px-6 font-bold text-slate-700 dark:text-slate-300 text-xs">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 font-bold text-[10px] shrink-0">
+                                  {grp.teacherName.slice(0, 1)}
+                                </div>
+                                <span className="whitespace-nowrap">{grp.teacherName}</span>
+                              </div>
                             </td>
 
-                            <td className="py-4 px-4 text-center font-mono font-bold text-slate-900 dark:text-white text-xs">
-                              <span className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
-                                {studentCount} {language === 'ar' ? 'طالب' : 'students'}
+                            <td className="py-4 px-6 text-center font-mono font-bold text-slate-900 dark:text-white text-xs">
+                              <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
+                                {studentCount} {language === 'ar' ? 'طلاب' : 'students'}
                               </span>
                             </td>
 
-                            <td className="py-4 px-6 text-center">
-                              <div className="flex items-center justify-center gap-3 min-w-[130px]">
-                                <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                            <td className="py-4 px-8 text-center">
+                              <div className="flex items-center justify-center gap-3 min-w-[140px]">
+                                <div className="flex-1 h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                                   <div
                                     className="h-full rounded-full transition-all duration-500"
                                     style={{
@@ -1248,7 +1256,7 @@ export function AdminAcademicPathScreen() {
                                   e.stopPropagation();
                                   handleOpenGroupDetail(grp.id);
                                 }}
-                                className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center gap-1.5 border border-indigo-200/60 dark:border-indigo-800/60 transition-all cursor-pointer shadow-2xs mx-auto"
+                                className="px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center gap-1.5 border border-indigo-200/60 dark:border-indigo-800/60 transition-all cursor-pointer shadow-2xs mx-auto"
                               >
                                 <span>{language === 'ar' ? 'عرض الفوج' : 'View Group'}</span>
                                 {isRTL ? <ArrowLeft size={14} /> : <ArrowRight size={14} />}
@@ -1266,14 +1274,14 @@ export function AdminAcademicPathScreen() {
 
           {/* LEVEL 2: Group Detail Page */}
           {progressViewMode === 'group_detail' && activeProgressGroup && (
-            <div className="space-y-6">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
               {/* Back Button & Group Header */}
               <div className="flex flex-col gap-4">
                 <button
                   type="button"
                   onClick={handleBackToGroups}
-                  className="self-start flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
-                  style={{ padding: '8px 16px' }}
+                  className="self-start flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer shadow-2xs"
+                  style={{ padding: '9px 18px' }}
                 >
                   {isRTL ? <ArrowRight size={15} /> : <ArrowLeft size={15} />}
                   <span>{language === 'ar' ? 'العودة لقائمة الأفواج' : 'Back to Groups'}</span>
@@ -1282,11 +1290,11 @@ export function AdminAcademicPathScreen() {
                 {/* Group Summary Card */}
                 <div
                   className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6"
-                  style={{ padding: '24px 28px' }}
+                  style={{ padding: '26px 30px' }}
                 >
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="px-3 py-1 rounded-xl bg-indigo-600 text-white font-mono font-black text-xs shadow-xs">
+                      <span className="px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white font-mono font-black text-xs shadow-xs">
                         {activeProgressGroup.level}
                       </span>
                       <h3 className="font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
@@ -1297,7 +1305,7 @@ export function AdminAcademicPathScreen() {
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-500 dark:text-slate-400 pt-1">
+                    <div className="flex flex-wrap items-center gap-5 text-xs font-bold text-slate-500 dark:text-slate-400 pt-1">
                       <span className="flex items-center gap-1.5">
                         <Languages size={15} className="text-indigo-500" />
                         {activeProgressGroup.language === 'French' ? 'اللغة الفرنسية (DELF)' : 'اللغة الإنجليزية (CEFR)'}
@@ -1323,7 +1331,7 @@ export function AdminAcademicPathScreen() {
                   {/* Group Average Progress Metric */}
                   <div
                     className="bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center gap-4 shrink-0 shadow-2xs"
-                    style={{ padding: '14px 20px' }}
+                    style={{ padding: '16px 24px' }}
                   >
                     <div>
                       <span className="text-[11px] font-bold text-slate-400 block">
@@ -1333,7 +1341,7 @@ export function AdminAcademicPathScreen() {
                         {activeProgressGroup.averageProgress || 0}%
                       </span>
                     </div>
-                    <div className="w-12 h-12 rounded-full border-4 border-indigo-500/20 border-t-indigo-600 flex items-center justify-center font-bold text-xs font-mono">
+                    <div className="w-13 h-13 rounded-full border-4 border-indigo-500/20 border-t-indigo-600 flex items-center justify-center font-bold text-xs font-mono">
                       {activeProgressGroup.averageProgress || 0}%
                     </div>
                   </div>
@@ -1344,7 +1352,7 @@ export function AdminAcademicPathScreen() {
               <div className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden">
                 <div
                   className="border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                  style={{ padding: '18px 24px' }}
+                  style={{ padding: '20px 28px' }}
                 >
                   <div>
                     <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">
@@ -1358,11 +1366,11 @@ export function AdminAcademicPathScreen() {
                   </div>
 
                   {/* Search Student Box */}
-                  <div className="relative min-w-[220px]">
+                  <div className="relative min-w-[240px]">
                     <Search
                       size={15}
                       className={`absolute top-1/2 -translate-y-1/2 text-slate-400 ${
-                        isRTL ? 'right-3' : 'left-3'
+                        isRTL ? 'right-3.5' : 'left-3.5'
                       }`}
                     />
                     <input
@@ -1370,10 +1378,10 @@ export function AdminAcademicPathScreen() {
                       value={studentSearchQuery}
                       onChange={(e) => setStudentSearchQuery(e.target.value)}
                       placeholder={language === 'ar' ? 'بحث عن طالب...' : 'Search student...'}
-                      className="w-full h-9 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+                      className="w-full h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-medium focus:outline-none focus:border-indigo-500 transition-colors"
                       style={{
-                        paddingRight: isRTL ? '34px' : '14px',
-                        paddingLeft: isRTL ? '14px' : '34px',
+                        paddingRight: isRTL ? '36px' : '16px',
+                        paddingLeft: isRTL ? '16px' : '36px',
                       }}
                     />
                   </div>
@@ -1386,32 +1394,32 @@ export function AdminAcademicPathScreen() {
                         <th
                           className={`font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
                           style={{
-                            paddingTop: '14px',
-                            paddingBottom: '14px',
-                            paddingLeft: isRTL ? '20px' : '26px',
-                            paddingRight: isRTL ? '26px' : '20px',
+                            paddingTop: '16px',
+                            paddingBottom: '16px',
+                            paddingLeft: isRTL ? '20px' : '28px',
+                            paddingRight: isRTL ? '28px' : '20px',
                           }}
                         >
                           {language === 'ar' ? 'اسم الطالب (Student)' : 'Student'}
                         </th>
-                        <th className="py-3.5 px-6 font-extrabold text-center">
+                        <th className="py-4 px-8 font-extrabold text-center">
                           {language === 'ar' ? 'التقدم الإجمالي (Overall Progress)' : 'Overall Progress'}
                         </th>
                         <th
-                          className={`py-3.5 px-4 font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
+                          className={`py-4 px-6 font-extrabold ${isRTL ? 'text-right' : 'text-left'}`}
                         >
                           {language === 'ar' ? 'الوحدة الحالية (Current Unit)' : 'Current Unit'}
                         </th>
-                        <th className="py-3.5 px-4 font-extrabold text-center">
+                        <th className="py-4 px-6 font-extrabold text-center">
                           {language === 'ar' ? 'الحالة (Status)' : 'Status'}
                         </th>
                         <th
                           className="font-extrabold text-center"
                           style={{
-                            paddingTop: '14px',
-                            paddingBottom: '14px',
-                            paddingRight: isRTL ? '26px' : '20px',
-                            paddingLeft: isRTL ? '20px' : '26px',
+                            paddingTop: '16px',
+                            paddingBottom: '16px',
+                            paddingRight: isRTL ? '28px' : '20px',
+                            paddingLeft: isRTL ? '20px' : '28px',
                           }}
                         >
                           {language === 'ar' ? 'الإجراء (Action)' : 'Action'}
@@ -1440,14 +1448,14 @@ export function AdminAcademicPathScreen() {
                             className="hover:bg-indigo-50/40 dark:hover:bg-indigo-950/20 transition-colors cursor-pointer group"
                           >
                             <td
-                              className="py-4 font-bold text-slate-900 dark:text-white"
+                              className="py-4.5 font-bold text-slate-900 dark:text-white"
                               style={{
-                                paddingLeft: isRTL ? '20px' : '26px',
-                                paddingRight: isRTL ? '26px' : '20px',
+                                paddingLeft: isRTL ? '20px' : '28px',
+                                paddingRight: isRTL ? '28px' : '20px',
                               }}
                             >
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
                                   {st.fullNameAr.slice(0, 1)}
                                 </div>
                                 <div>
@@ -1461,9 +1469,9 @@ export function AdminAcademicPathScreen() {
                               </div>
                             </td>
 
-                            <td className="py-4 px-6 text-center">
-                              <div className="flex items-center justify-center gap-3 min-w-[130px]">
-                                <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                            <td className="py-4.5 px-8 text-center">
+                              <div className="flex items-center justify-center gap-3 min-w-[140px]">
+                                <div className="flex-1 h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                                   <div
                                     className="h-full rounded-full transition-all duration-500"
                                     style={{
@@ -1479,15 +1487,15 @@ export function AdminAcademicPathScreen() {
                               </div>
                             </td>
 
-                            <td className="py-4 px-4 font-bold text-slate-700 dark:text-slate-300 text-xs">
+                            <td className="py-4.5 px-6 font-bold text-slate-700 dark:text-slate-300 text-xs">
                               {language === 'ar'
                                 ? `الوحدة ${currentUnitNumber}: المحور التعليمي ${currentUnitNumber}`
                                 : `Unit ${currentUnitNumber}`}
                             </td>
 
-                            <td className="py-4 px-4 text-center">
+                            <td className="py-4.5 px-6 text-center">
                               <span
-                                className={`px-2.5 py-1 rounded-full font-bold text-[11px] border ${
+                                className={`px-3 py-1 rounded-full font-bold text-[11px] border ${
                                   progress === 100
                                     ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-800/80'
                                     : progress > 0
@@ -1500,10 +1508,10 @@ export function AdminAcademicPathScreen() {
                             </td>
 
                             <td
-                              className="py-4 text-center"
+                              className="py-4.5 text-center"
                               style={{
-                                paddingRight: isRTL ? '26px' : '20px',
-                                paddingLeft: isRTL ? '20px' : '26px',
+                                paddingRight: isRTL ? '28px' : '20px',
+                                paddingLeft: isRTL ? '20px' : '28px',
                               }}
                             >
                               <button
@@ -1512,7 +1520,7 @@ export function AdminAcademicPathScreen() {
                                   e.stopPropagation();
                                   handleOpenStudentDetail(st.id);
                                 }}
-                                className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer mx-auto"
+                                className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer mx-auto"
                               >
                                 <Eye size={14} />
                                 <span>{language === 'ar' ? 'عرض التقدم' : 'View'}</span>
@@ -1530,7 +1538,7 @@ export function AdminAcademicPathScreen() {
 
           {/* LEVEL 3: Student Academic Progress Detail */}
           {progressViewMode === 'student_detail' && activeProgressStudent && studentCurriculumLevel && (
-            <div className="space-y-6">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
               {/* Back Button & Student Header (Section 4 of PDF) */}
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
@@ -1559,8 +1567,8 @@ export function AdminAcademicPathScreen() {
                   <button
                     type="button"
                     onClick={handleBackToGroupDetail}
-                    className="flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
-                    style={{ padding: '8px 16px' }}
+                    className="flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer shadow-2xs"
+                    style={{ padding: '9px 18px' }}
                   >
                     {isRTL ? <ArrowRight size={15} /> : <ArrowLeft size={15} />}
                     <span>{language === 'ar' ? 'العودة للفوج' : 'Back to Group'}</span>
@@ -1570,7 +1578,7 @@ export function AdminAcademicPathScreen() {
                 {/* Student Profile & Progress Banner */}
                 <div
                   className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6"
-                  style={{ padding: '24px 28px' }}
+                  style={{ padding: '26px 30px' }}
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shrink-0 shadow-md">
@@ -1597,7 +1605,7 @@ export function AdminAcademicPathScreen() {
                   {/* Calculated Overall Progress Card */}
                   <div
                     className="bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center gap-4 shrink-0 shadow-2xs"
-                    style={{ padding: '16px 22px' }}
+                    style={{ padding: '16px 24px' }}
                   >
                     <div>
                       <span className="text-[11px] font-bold text-slate-400 block">
