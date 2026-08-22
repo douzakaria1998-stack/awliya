@@ -12,6 +12,14 @@ import {
   UserPlus,
   Shield,
   KeyRound,
+  ArrowRight,
+  ArrowLeft,
+  CheckCircle2,
+  Sliders,
+  ChevronLeft,
+  ChevronRight,
+  GraduationCap,
+  Briefcase,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -23,6 +31,7 @@ export function AdminRolesScreen() {
 
   const [selectedRoleId, setSelectedRoleId] = useState<AdminRole>('administrator');
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [modalStep, setModalStep] = useState<1 | 2>(1);
 
   // New User Form State
   const [newNameAr, setNewNameAr] = useState('');
@@ -34,6 +43,11 @@ export function AdminRolesScreen() {
   const [newDept, setNewDept] = useState('إدارة شؤون التسجيل');
 
   const currentRoleConfig = rolePermissions.find((r) => r.roleId === selectedRoleId) || rolePermissions[0];
+
+  const handleOpenAddUser = () => {
+    setModalStep(1);
+    setIsAddUserOpen(true);
+  };
 
   const handleCreateAdminUser = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +70,8 @@ export function AdminRolesScreen() {
     setNewUsername('');
     setNewEmail('');
     setNewPhone('');
+    setNewRole('administrator');
+    setModalStep(1);
     setIsAddUserOpen(false);
   };
 
@@ -89,7 +105,7 @@ export function AdminRolesScreen() {
 
         <button
           type="button"
-          onClick={() => setIsAddUserOpen(true)}
+          onClick={handleOpenAddUser}
           className="rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
           style={{ padding: '14px 28px' }}
         >
@@ -265,21 +281,27 @@ export function AdminRolesScreen() {
       {isAddUserOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-md animate-fade-in">
           <div
-            className="w-full max-w-md bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200/80 dark:border-slate-800 animate-fade-in-up"
-            style={{ padding: '26px 30px' }}
+            className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl border border-slate-200/80 dark:border-slate-800 animate-fade-in-up"
+            style={{ padding: '28px 32px' }}
           >
             {/* Modal Header */}
             <div
               className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800"
-              style={{ paddingBottom: '14px', marginBottom: '16px' }}
+              style={{ paddingBottom: '14px', marginBottom: '18px' }}
             >
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center font-black shrink-0">
-                  <UserPlus size={17} />
+                  {modalStep === 1 ? <UserPlus size={17} /> : <ShieldCheck size={17} />}
                 </div>
                 <div>
-                  <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">إضافة حساب إداري جديد</h3>
-                  <p className="text-[11px] text-slate-400 font-medium">تعيين الصلاحيات والبيانات الرسمية للمشرف</p>
+                  <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">
+                    {modalStep === 1 ? 'إضافة حساب إداري جديد' : 'تحديد الدور والصلاحيات الممنوحة'}
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-medium">
+                    {modalStep === 1
+                      ? 'الخطوة 1 من 2: تعيين البيانات الشخصية ورقم التواصل'
+                      : `الخطوة 2 من 2: اختيار الدور وتفويض الصلاحيات لـ ${newNameAr || 'المستخدم'}`}
+                  </p>
                 </div>
               </div>
               <button
@@ -291,107 +313,252 @@ export function AdminRolesScreen() {
               </button>
             </div>
 
-            <form onSubmit={handleCreateAdminUser} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div>
-                <label
-                  className="block text-xs font-bold text-slate-700 dark:text-slate-300"
-                  style={{ marginBottom: '5px' }}
-                >
-                  الاسم الكامل بالعربية *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newNameAr}
-                  onChange={(e) => setNewNameAr(e.target.value)}
-                  placeholder="أ. سفيان لعور"
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
-                  style={{ height: '42px', padding: '8px 14px' }}
-                />
-              </div>
+            {/* STEP 1: Basic Information */}
+            {modalStep === 1 && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (newNameAr.trim() && newUsername.trim()) {
+                    setModalStep(2);
+                  }
+                }}
+                style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}
+              >
+                <div>
+                  <label
+                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '5px' }}
+                  >
+                    الاسم الكامل بالعربية *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newNameAr}
+                    onChange={(e) => setNewNameAr(e.target.value)}
+                    placeholder="أ. سفيان لعور"
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                    style={{ height: '42px', padding: '8px 14px' }}
+                  />
+                </div>
 
-              <div>
-                <label
-                  className="block text-xs font-bold text-slate-700 dark:text-slate-300"
-                  style={{ marginBottom: '5px' }}
-                >
-                  اسم المستخدم (Username) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newUsername}
-                  onChange={(e) => setNewUsername(e.target.value)}
-                  placeholder="soufiane.admin"
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-xs sm:text-sm text-purple-600 dark:text-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
-                  style={{ height: '42px', padding: '8px 14px' }}
-                  dir="ltr"
-                />
-              </div>
+                <div>
+                  <label
+                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '5px' }}
+                  >
+                    اسم المستخدم (Username) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newUsername}
+                    onChange={(e) => setNewUsername(e.target.value)}
+                    placeholder="soufiane.admin"
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-xs sm:text-sm text-purple-600 dark:text-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                    style={{ height: '42px', padding: '8px 14px' }}
+                    dir="ltr"
+                  />
+                </div>
 
-              <div>
-                <label
-                  className="block text-xs font-bold text-slate-700 dark:text-slate-300"
-                  style={{ marginBottom: '5px' }}
-                >
-                  الدور والصلاحيات
-                </label>
-                <select
-                  value={newRole}
-                  onChange={(e) => setNewRole(e.target.value as any)}
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
-                  style={{ height: '42px', padding: '8px 14px' }}
-                >
-                  <option value="administrator">مدير عمليات وشؤون طلاب (Admin)</option>
-                  <option value="super_admin">مدير عام تنفيذي (Super Admin)</option>
-                </select>
-              </div>
+                <div>
+                  <label
+                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '5px' }}
+                  >
+                    القسم أو الإدارة
+                  </label>
+                  <input
+                    type="text"
+                    value={newDept}
+                    onChange={(e) => setNewDept(e.target.value)}
+                    placeholder="إدارة شؤون التسجيل"
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all"
+                    style={{ height: '42px', padding: '8px 14px' }}
+                  />
+                </div>
 
-              <div>
-                <label
-                  className="block text-xs font-bold text-slate-700 dark:text-slate-300"
-                  style={{ marginBottom: '5px' }}
-                >
-                  القسم أو الإدارة
-                </label>
-                <input
-                  type="text"
-                  value={newDept}
-                  onChange={(e) => setNewDept(e.target.value)}
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all"
-                  style={{ height: '42px', padding: '8px 14px' }}
-                />
-              </div>
+                <div>
+                  <label
+                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '5px' }}
+                  >
+                    رقم الهاتف
+                  </label>
+                  <input
+                    type="text"
+                    value={newPhone}
+                    onChange={(e) => setNewPhone(e.target.value)}
+                    placeholder="+213 770 000 000"
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                    style={{ height: '42px', padding: '8px 14px' }}
+                    dir="ltr"
+                  />
+                </div>
 
-              <div>
-                <label
-                  className="block text-xs font-bold text-slate-700 dark:text-slate-300"
-                  style={{ marginBottom: '5px' }}
-                >
-                  رقم الهاتف
-                </label>
-                <input
-                  type="text"
-                  value={newPhone}
-                  onChange={(e) => setNewPhone(e.target.value)}
-                  placeholder="+213 770 000 000"
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
-                  style={{ height: '42px', padding: '8px 14px' }}
-                  dir="ltr"
-                />
-              </div>
+                <div style={{ paddingTop: '6px' }}>
+                  <button
+                    type="submit"
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md hover:scale-[1.01] active:scale-95 transition-all cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-2"
+                    style={{ height: '46px' }}
+                  >
+                    <span>{language === 'ar' ? 'التالي: تحديد الدور والصلاحيات' : 'Next: Select Role & Permissions'}</span>
+                    {isRTL ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+                  </button>
+                </div>
+              </form>
+            )}
 
-              <div style={{ paddingTop: '4px' }}>
-                <button
-                  type="submit"
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md hover:scale-[1.01] active:scale-95 transition-all cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-2"
-                  style={{ height: '44px' }}
-                >
-                  <UserPlus size={16} />
-                  <span>إنشاء وتفعيل الحساب</span>
-                </button>
-              </div>
-            </form>
+            {/* STEP 2: Role & Permissions Selection Popup */}
+            {modalStep === 2 && (
+              <form onSubmit={handleCreateAdminUser} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label
+                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '8px' }}
+                  >
+                    اختر الدور الوظيفي للحساب (Select Account Role):
+                  </label>
+
+                  <div className="grid grid-cols-1 gap-2.5">
+                    {/* Option 1: Administrator */}
+                    <div
+                      onClick={() => setNewRole('administrator')}
+                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                        newRole === 'administrator'
+                          ? 'bg-blue-50/90 dark:bg-blue-950/50 border-blue-500 ring-2 ring-blue-500/20 shadow-xs'
+                          : 'bg-slate-50/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center font-black shrink-0">
+                          <UserCheck size={16} />
+                        </div>
+                        <div>
+                          <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                            <span>مدير عمليات وشؤون طلاب (Administrator)</span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                            إدارة شاملة للطلاب، الأفواج، الحضور، والتسجيل
+                          </p>
+                        </div>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                        newRole === 'administrator' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 dark:border-slate-600'
+                      }`}>
+                        {newRole === 'administrator' && <Check size={12} className="stroke-[3]" />}
+                      </div>
+                    </div>
+
+                    {/* Option 2: Super Admin */}
+                    <div
+                      onClick={() => setNewRole('super_admin')}
+                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                        newRole === 'super_admin'
+                          ? 'bg-purple-50/90 dark:bg-purple-950/50 border-purple-500 ring-2 ring-purple-500/20 shadow-xs'
+                          : 'bg-slate-50/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-950/80 text-purple-600 flex items-center justify-center font-black shrink-0">
+                          <ShieldCheck size={16} />
+                        </div>
+                        <div>
+                          <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                            <span>مدير عام تنفيذي (Super Admin)</span>
+                            <span className="text-[10px] bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300 px-2 py-0.5 rounded-full font-bold">
+                              وصول كامل 100%
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                            صلاحيات مطلقة لإدارة الحسابات، الأمان، وإعدادات النظام
+                          </p>
+                        </div>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                        newRole === 'super_admin' ? 'border-purple-600 bg-purple-600 text-white' : 'border-slate-300 dark:border-slate-600'
+                      }`}>
+                        {newRole === 'super_admin' && <Check size={12} className="stroke-[3]" />}
+                      </div>
+                    </div>
+
+                    {/* Option 3: Teacher */}
+                    <div
+                      onClick={() => setNewRole('teacher')}
+                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                        newRole === 'teacher'
+                          ? 'bg-emerald-50/90 dark:bg-emerald-950/50 border-emerald-500 ring-2 ring-emerald-500/20 shadow-xs'
+                          : 'bg-slate-50/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 flex items-center justify-center font-black shrink-0">
+                          <GraduationCap size={16} />
+                        </div>
+                        <div>
+                          <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                            <span>معلم ومؤطر أكاديمي (Teacher)</span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                            متابعة أفواجه الخاصة ورصد الحضور والواجبات والتقييمات
+                          </p>
+                        </div>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                        newRole === 'teacher' ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300 dark:border-slate-600'
+                      }`}>
+                        {newRole === 'teacher' && <Check size={12} className="stroke-[3]" />}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Permissions Preview Tag Cloud */}
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
+                  <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                    <Sparkles size={13} className="text-purple-600" />
+                    <span>الصلاحيات الممنوحة تلقائياً لهذا الدور:</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(newRole === 'super_admin'
+                      ? ['كافة الوحدات بدون قيود', 'إدارة المستخدمين والأمان', 'إعدادات المنظومة والشهادات', 'الطلاب والأولياء والمعلمين', 'الأفواج والمنهج والحضور', 'الواجبات والتقييمات']
+                      : newRole === 'administrator'
+                      ? ['إدارة الطلاب', 'إدارة أولياء الأمور', 'إدارة الأفواج', 'رصد وتعديل الحضور', 'لوحة المؤشرات العامة', 'متابعة الواجبات والأداء']
+                      : ['أفواجه المخصصة فقط', 'رصد حضور حصصه', 'تقييم أداء طلابه', 'إنشاء وتصحيح الواجبات', 'لوحة المعلم الخاصة']
+                    ).map((perm, i) => (
+                      <span
+                        key={i}
+                        className="px-2 py-0.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-700 dark:text-slate-300"
+                      >
+                        ✓ {perm}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions: Back & Confirm */}
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setModalStep(1)}
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-1.5"
+                    style={{ height: '46px' }}
+                  >
+                    {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+                    <span>{language === 'ar' ? 'السابق (تعديل البيانات)' : 'Back'}</span>
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-xl shadow-md hover:scale-[1.01] active:scale-95 transition-all cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-2"
+                    style={{ height: '46px' }}
+                  >
+                    <CheckCircle2 size={16} />
+                    <span>{language === 'ar' ? 'تأكيد وتفعيل الحساب' : 'Confirm & Create'}</span>
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
