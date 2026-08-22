@@ -452,71 +452,87 @@ export function AdminAcademicPathScreen() {
       {/* Modal: Create Level (Section 15) */}
       {isAddLevelOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-5 animate-fade-in-up">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="font-black text-lg text-slate-900 dark:text-white">
+          <div
+            className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up"
+            style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '18px' }}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3.5">
+              <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">
                 {language === 'ar' ? 'إضافة مستوى دراسي جديد (Create Level)' : 'Create New Level'}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsAddLevelOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 cursor-pointer transition-colors"
               >
                 <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateLevel} className="space-y-4 text-xs font-bold">
+            <form
+              onSubmit={handleCreateLevel}
+              style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}
+            >
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 mb-1">اسم المستوى بالعربية *</label>
+                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                  {language === 'ar' ? 'اسم المستوى بالعربية *' : 'Level Name (Arabic) *'}
+                </label>
                 <input
                   type="text"
                   required
                   value={newLevelNameAr}
                   onChange={(e) => setNewLevelNameAr(e.target.value)}
                   placeholder="مثال: المستوى A1 — المبتدئ"
-                  className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                  className="w-full h-10 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 mb-1">رمز المستوى (Level Code) *</label>
+                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                  {language === 'ar' ? 'رمز المستوى (Level Code) *' : 'Level Code *'}
+                </label>
                 <input
                   type="text"
                   required
                   value={newLevelCode}
                   onChange={(e) => setNewLevelCode(e.target.value)}
                   placeholder="A1, A2, B1, B2, C1"
-                  className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono"
+                  className="w-full h-10 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
                   dir="ltr"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 mb-1">وصف مخرجات التعلم</label>
+                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                  {language === 'ar' ? 'وصف مخرجات التعلم' : 'Learning Outcomes Description'}
+                </label>
                 <textarea
                   rows={3}
                   value={newLevelDescAr}
                   onChange={(e) => setNewLevelDescAr(e.target.value)}
                   placeholder="اكتساب المفردات الأساسية وتكوين الجمل البسيطة..."
-                  className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                  className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors resize-none leading-relaxed"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">عدد الوحدات (Units)</label>
+                  <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                    {language === 'ar' ? 'عدد الوحدات (Units)' : 'Units Count'}
+                  </label>
                   <input
                     type="number"
                     value={newUnitsCount}
                     onChange={(e) => setNewUnitsCount(Number(e.target.value))}
                     min={1}
                     max={20}
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono"
+                    className="w-full h-10 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">اللون المميز (Color)</label>
+                  <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                    {language === 'ar' ? 'اللون المميز (Color)' : 'Level Color'}
+                  </label>
                   <input
                     type="color"
                     value={newLevelColor}
@@ -529,9 +545,9 @@ export function AdminAcademicPathScreen() {
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer text-sm"
+                  className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer text-xs sm:text-sm"
                 >
-                  حفظ المستوى في المنهاج
+                  {language === 'ar' ? 'حفظ المستوى في المنهاج' : 'Save Level to Curriculum'}
                 </button>
               </div>
             </form>
