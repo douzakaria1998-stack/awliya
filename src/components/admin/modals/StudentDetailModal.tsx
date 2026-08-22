@@ -205,20 +205,23 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
 
           {/* TAB 2: Academic Progress */}
           {activeTab === 'academic' && (
-            <div className="space-y-6">
-              <div className="bg-slate-50 dark:bg-slate-800/60 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div
+                className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
+                style={{ padding: '22px 26px', display: 'flex', flexDirection: 'column', gap: '16px' }}
+              >
                 <div className="flex items-center justify-between">
                   <span className="font-black text-slate-900 dark:text-white text-sm">
                     {language === 'ar' ? `نسبة إنجاز المنهج (${student.cefrLevel})` : `Curriculum Progress (${student.cefrLevel})`}
                   </span>
-                  <span className="text-base font-mono font-black text-purple-600">{student.overallProgress}%</span>
+                  <span className="text-base font-mono font-black text-purple-600 dark:text-purple-400">{student.overallProgress}%</span>
                 </div>
-                <div className="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                  <div className="h-full bg-purple-600 rounded-full" style={{ width: `${student.overallProgress}%` }} />
+                <div className="w-full h-3 bg-slate-200 dark:bg-slate-700/80 rounded-full overflow-hidden">
+                  <div className="h-full bg-purple-600 rounded-full transition-all duration-500" style={{ width: `${student.overallProgress}%` }} />
                 </div>
-                <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-                  <span>{student.completedLessonsCount} / {student.totalLessonsCount} حصص منجزة</span>
-                  <span>المتبقي: {student.totalLessonsCount - student.completedLessonsCount} حصص</span>
+                <div className="flex items-center justify-between text-xs text-slate-400 font-semibold pt-1">
+                  <span>{student.completedLessonsCount} / {student.totalLessonsCount} {language === 'ar' ? 'حصص منجزة' : 'Lessons Completed'}</span>
+                  <span>{language === 'ar' ? `المتبقي: ${student.totalLessonsCount - student.completedLessonsCount} حصص` : `Remaining: ${student.totalLessonsCount - student.completedLessonsCount} lessons`}</span>
                 </div>
               </div>
             </div>
