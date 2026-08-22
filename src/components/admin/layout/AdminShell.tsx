@@ -5,19 +5,25 @@ import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
-import { SuperAdminOverview } from '../screens/SuperAdminOverview';
-import { StudentApprovalsScreen } from '../screens/StudentApprovalsScreen';
+import { AdminDashboardScreen } from '../screens/AdminDashboardScreen';
 import { StudentsManagementScreen } from '../screens/StudentsManagementScreen';
-import { TeacherGradebookScreen } from '../screens/TeacherGradebookScreen';
-import { TeacherAttendanceScreen } from '../screens/TeacherAttendanceScreen';
-import { AdminUsersScreen } from '../screens/AdminUsersScreen';
+import { AdminParentsScreen } from '../screens/AdminParentsScreen';
+import { AdminTeachersScreen } from '../screens/AdminTeachersScreen';
+import { AdminGroupsScreen } from '../screens/AdminGroupsScreen';
+import { AdminAcademicPathScreen } from '../screens/AdminAcademicPathScreen';
+import { AdminAttendanceScreen } from '../screens/AdminAttendanceScreen';
+import { AdminPerformanceScreen } from '../screens/AdminPerformanceScreen';
+import { AdminRolesScreen } from '../screens/AdminRolesScreen';
+import { AdminNotificationsScreen } from '../screens/AdminNotificationsScreen';
+import { AdminAuditLogsScreen } from '../screens/AdminAuditLogsScreen';
 import { SystemSettingsScreen } from '../screens/SystemSettingsScreen';
+import { StudentApprovalsScreen } from '../screens/StudentApprovalsScreen';
 import { X } from 'lucide-react';
 
 export function AdminShell() {
   const [mounted, setMounted] = useState(false);
   const { activeTab } = useAdmin();
-  const { dir, isRTL } = useLanguage();
+  const { dir } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -27,21 +33,33 @@ export function AdminShell() {
   const renderActiveScreen = () => {
     switch (activeTab) {
       case 'overview':
-        return <SuperAdminOverview />;
-      case 'approvals':
-        return <StudentApprovalsScreen />;
+        return <AdminDashboardScreen />;
       case 'students':
         return <StudentsManagementScreen />;
-      case 'gradebook':
-        return <TeacherGradebookScreen />;
+      case 'parents':
+        return <AdminParentsScreen />;
+      case 'teachers':
+        return <AdminTeachersScreen />;
+      case 'groups':
+        return <AdminGroupsScreen />;
+      case 'academic':
+        return <AdminAcademicPathScreen />;
       case 'attendance':
-        return <TeacherAttendanceScreen />;
-      case 'users':
-        return <AdminUsersScreen />;
+        return <AdminAttendanceScreen />;
+      case 'performance':
+        return <AdminPerformanceScreen />;
+      case 'roles':
+        return <AdminRolesScreen />;
+      case 'notifications':
+        return <AdminNotificationsScreen />;
+      case 'audit':
+        return <AdminAuditLogsScreen />;
       case 'settings':
         return <SystemSettingsScreen />;
+      case 'approvals':
+        return <StudentApprovalsScreen />;
       default:
-        return <SuperAdminOverview />;
+        return <AdminDashboardScreen />;
     }
   };
 
@@ -49,7 +67,7 @@ export function AdminShell() {
     return (
       <div className="min-h-screen w-full bg-slate-900 flex items-center justify-center" dir="rtl">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-full border-3 border-rose-500 border-t-transparent animate-spin" />
+          <div className="w-10 h-10 rounded-full border-3 border-purple-500 border-t-transparent animate-spin" />
           <span className="text-xs font-bold text-slate-400">جاري تحميل لوحة التحكم...</span>
         </div>
       </div>
@@ -99,15 +117,12 @@ export function AdminShell() {
         <main
           className="w-full pb-28 md:pb-16"
           style={{
-            width: '100%',
             paddingTop: '32px',
-            paddingRight: isRTL ? '56px' : '48px',
-            paddingLeft: isRTL ? '48px' : '56px',
+            paddingRight: '36px',
+            paddingLeft: '36px',
           }}
         >
-          <div className="w-full max-w-6xl">
-            {renderActiveScreen()}
-          </div>
+          {renderActiveScreen()}
         </main>
       </div>
     </div>
