@@ -89,6 +89,9 @@ interface AdminContextType {
   removeStudentFromGroup: (groupId: string, studentId: string) => void;
 
   addCurriculumLevel: (levelData: CurriculumLevel) => void;
+  updateCurriculumLevel: (oldLevelNumber: number, language: 'English' | 'French', levelData: CurriculumLevel) => void;
+  reorderCurriculumLevels: (language: 'English' | 'French', newOrderedLevels: CurriculumLevel[]) => void;
+  deleteCurriculumLevel: (levelNumber: number, language: 'English' | 'French') => void;
 
   recordAttendance: (sessionId: string, records: { studentId: string; status: 'present' | 'late' | 'absent' | 'excused'; note?: string }[]) => void;
   
@@ -665,6 +668,73 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     [logAudit]
   );
 
+  const updateCurriculumLevel = useCallback(
+    (oldLevelNumber: number, lang: 'English' | 'French', levelData: CurriculumLevel) => {
+      setCurricula((prev) => {
+        const updated = prev.map((c) =>
+          c.levelNumber === oldLevelNumber && c.language === lang ? levelData : c
+        );
+        setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        return updated;
+      });
+
+      logAudit(
+        `تعديل بيانات المنهاج: ${levelData.nameAr} (${levelData.cefrCode})`,
+        `Updated curriculum level: ${levelData.nameEn} (${levelData.cefrCode})`,
+        'curriculum',
+        undefined,
+        levelData.nameAr,
+        `Updated units and lessons structure`
+      );
+    },
+    [logAudit]
+  );
+
+  const reorderCurriculumLevels = useCallback(
+    (lang: 'English' | 'French', newOrderedLevels: CurriculumLevel[]) => {
+      setCurricula((prev) => {
+        const otherLang = prev.filter((c) => c.language !== lang);
+        const renumbered = newOrderedLevels.map((lvl, idx) => ({
+          ...lvl,
+          levelNumber: idx + 1,
+        }));
+        const updated = [...otherLang, ...renumbered];
+        setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        return updated;
+      });
+
+      logAudit(
+        `إعادة ترتيب مستويات المنهاج (${lang})`,
+        `Reordered curriculum levels for (${lang})`,
+        'curriculum'
+      );
+    },
+    [logAudit]
+  );
+
+  const deleteCurriculumLevel = useCallback(
+    (lvlNum: number, lang: 'English' | 'French') => {
+      setCurricula((prev) => {
+        const target = prev.find((c) => c.levelNumber === lvlNum && c.language === lang);
+        const filtered = prev.filter((c) => !(c.levelNumber === lvlNum && c.language === lang));
+        const sameLang = filtered.filter((c) => c.language === lang).map((lvl, idx) => ({ ...lvl, levelNumber: idx + 1 }));
+        const otherLang = filtered.filter((c) => c.language !== lang);
+        const updated = [...otherLang, ...sameLang];
+        setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+
+        if (target) {
+          logAudit(
+            `حذف مستوى من المنهاج: ${target.nameAr}`,
+            `Deleted curriculum level: ${target.nameEn}`,
+            'curriculum'
+          );
+        }
+        return updated;
+      });
+    },
+    [logAudit]
+  );
+
   // ==========================================
   // Attendance Actions
   // ==========================================
@@ -1042,6 +1112,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         assignStudentToGroup,
         removeStudentFromGroup,
         addCurriculumLevel,
+        updateCurriculumLevel,
+        reorderCurriculumLevels,
+        deleteCurriculumLevel,
         recordAttendance,
         createHomework,
         evaluateHomework,

@@ -9,6 +9,9 @@ import {
   Layers,
   Sparkles,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
   CheckCircle2,
   Lock,
   FileCheck,
@@ -24,15 +27,24 @@ import { useLanguage } from '@/context/LanguageContext';
 import { CurriculumLevel } from '@/types/admin';
 
 export function AdminAcademicPathScreen() {
-  const { curricula, visibleStudents, currentRole, addCurriculumLevel } = useAdmin();
+  const {
+    curricula,
+    visibleStudents,
+    currentRole,
+    addCurriculumLevel,
+    updateCurriculumLevel,
+    reorderCurriculumLevels,
+    deleteCurriculumLevel,
+  } = useAdmin();
   const { isRTL, language } = useLanguage();
 
   const [activeTab, setActiveTab] = useState<'curriculum' | 'student_progress'>('curriculum');
   const [selectedCurriculumLanguage, setSelectedCurriculumLanguage] = useState<'English' | 'French'>('English');
   const [selectedLevelNumber, setSelectedLevelNumber] = useState(1);
 
-  // Create Level Modal State
+  // Create / Edit Level Modal State
   const [isAddLevelOpen, setIsAddLevelOpen] = useState(false);
+  const [editingLevelNumber, setEditingLevelNumber] = useState<number | null>(null);
   const [modalStep, setModalStep] = useState<'basic' | 'units'>('basic');
   const [newLevelNameAr, setNewLevelNameAr] = useState('');
   const [newLevelNameEn, setNewLevelNameEn] = useState('');
@@ -68,9 +80,11 @@ export function AdminAcademicPathScreen() {
     );
   };
 
-  const activeLevel = curricula.find(
-    (c) => c.levelNumber === selectedLevelNumber && c.language === selectedCurriculumLanguage
-  ) || curricula[0];
+  const currentLangLevels = curricula.filter((c) => c.language === selectedCurriculumLanguage);
+
+  const activeLevel = currentLangLevels.find(
+    (c) => c.levelNumber === selectedLevelNumber
+  ) || currentLangLevels[0] || curricula[0];
 
   const [expandedUnitId, setExpandedUnitId] = useState<string | null>('unit-01');
 
@@ -78,45 +92,129 @@ export function AdminAcademicPathScreen() {
     setExpandedUnitId((prev) => (prev === unitId ? null : unitId));
   };
 
+  // Open modal in Create mode
+  const handleOpenCreateModal = () => {
+    setEditingLevelNumber(null);
+    setNewLevelNameAr('');
+    setNewLevelNameEn('');
+    setNewLevelCode('A1');
+    setNewLevelColor('#3B82F6');
+    setNewLevelDescAr('');
+    setNewLevelDescEn('');
+    setNewUnitsCount(3);
+    setUnitsDraft([]);
+    setModalStep('basic');
+    setIsAddLevelOpen(true);
+  };
+
+  // Open modal in Edit mode
+  const handleOpenEditModal = (level: CurriculumLevel) => {
+    setEditingLevelNumber(level.levelNumber);
+    setNewLevelNameAr(level.nameAr);
+    setNewLevelNameEn(level.nameEn || '');
+    setNewLevelCode(level.cefrCode);
+    setNewLevelColor(level.color || '#3B82F6');
+    setNewLevelDescAr(level.descriptionAr || '');
+    setNewLevelDescEn(level.descriptionEn || '');
+    setNewUnitsCount(level.units.length);
+
+    const mappedDraft: UnitDraft[] = level.units.map((u, uIdx) => ({
+      id: u.id || `draft-unit-${uIdx + 1}-${Date.now()}`,
+      unitNumber: u.unitNumber || uIdx + 1,
+      titleAr: u.titleAr,
+      titleEn: u.titleEn || `Unit ${uIdx + 1}`,
+      lessons: u.lessons.map((l, lIdx) => ({
+        id: l.id || `draft-lesson-${uIdx + 1}-${lIdx + 1}-${Date.now()}`,
+        lessonNumber: l.lessonNumber || lIdx + 1,
+        titleAr: l.titleAr,
+        titleEn: l.titleEn || `Lesson ${lIdx + 1}`,
+        contentSummary: l.contentSummary || '',
+        vocabString: Array.isArray(l.vocabulary) ? l.vocabulary.join(', ') : ((l.vocabulary as any) || ''),
+        hasAssessment: Boolean(l.hasAssessment),
+      })),
+    }));
+
+    setUnitsDraft(mappedDraft);
+    setExpandedDraftUnitIds(mappedDraft.map((u) => u.id));
+    setModalStep('basic');
+    setIsAddLevelOpen(true);
+  };
+
+  // Reorder level left / right
+  const handleMoveLevel = (e: React.MouseEvent, lvlNumber: number, direction: 'prev' | 'next') => {
+    e.stopPropagation();
+    const currentList = curricula.filter((c) => c.language === selectedCurriculumLanguage);
+    const currentIndex = currentList.findIndex((c) => c.levelNumber === lvlNumber);
+    if (currentIndex < 0) return;
+    const targetIndex = direction === 'prev' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= currentList.length) return;
+
+    const reordered = [...currentList];
+    const [moved] = reordered.splice(currentIndex, 1);
+    reordered.splice(targetIndex, 0, moved);
+
+    reorderCurriculumLevels(selectedCurriculumLanguage, reordered);
+    setSelectedLevelNumber(targetIndex + 1);
+  };
+
+  // Delete Level
+  const handleDeleteLevel = (lvlNumber: number) => {
+    const target = curricula.find((c) => c.levelNumber === lvlNumber && c.language === selectedCurriculumLanguage);
+    if (!target) return;
+    if (
+      !confirm(
+        language === 'ar'
+          ? `هل أنت متأكد من رغبتك في حذف مستوى "${target.nameAr}" بالكامل من المنهاج؟`
+          : `Are you sure you want to delete "${target.nameEn}" from the curriculum?`
+      )
+    ) {
+      return;
+    }
+    deleteCurriculumLevel(lvlNumber, selectedCurriculumLanguage);
+    setSelectedLevelNumber(1);
+  };
+
   // Step 1 Submit: Move to Step 2 (Units & Lessons configuration)
   const handleProceedToUnits = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newLevelNameAr.trim()) return;
 
-    // Generate initial units if not already configured
-    const count = Math.max(1, newUnitsCount);
-    const initialUnits: UnitDraft[] = Array.from({ length: count }, (_, uIdx) => {
-      const uNum = uIdx + 1;
-      return {
-        id: `draft-unit-${uNum}-${Date.now()}`,
-        unitNumber: uNum,
-        titleAr: `الوحدة ${uNum}: محاور التأسيس والمفردات (${newLevelCode})`,
-        titleEn: `Unit ${uNum}: Core Vocabulary & Concepts`,
-        lessons: [
-          {
-            id: `draft-lesson-${uNum}-1-${Date.now()}`,
-            lessonNumber: 1,
-            titleAr: `الدرس 1: القواعد والمفردات التأسيسية`,
-            titleEn: `Lesson 1: Foundations & Structure`,
-            contentSummary: 'شرح القواعد الأساسية والمفردات المحورية وتطبيقاتها.',
-            vocabString: 'Introduction, Grammar, Vocabulary',
-            hasAssessment: false,
-          },
-          {
-            id: `draft-lesson-${uNum}-2-${Date.now()}`,
-            lessonNumber: 2,
-            titleAr: `الدرس 2: التعبير الشفهي والتطبيق العملي`,
-            titleEn: `Lesson 2: Speaking & Practice`,
-            contentSummary: 'تمارين تطبيقية وتدريبات محادثة تفاعلية.',
-            vocabString: 'Conversation, Dialogue, Practice',
-            hasAssessment: true,
-          },
-        ],
-      };
-    });
+    if (unitsDraft.length === 0) {
+      const count = Math.max(1, newUnitsCount);
+      const initialUnits: UnitDraft[] = Array.from({ length: count }, (_, uIdx) => {
+        const uNum = uIdx + 1;
+        return {
+          id: `draft-unit-${uNum}-${Date.now()}`,
+          unitNumber: uNum,
+          titleAr: `الوحدة ${uNum}: محاور التأسيس والمفردات (${newLevelCode})`,
+          titleEn: `Unit ${uNum}: Core Vocabulary & Concepts`,
+          lessons: [
+            {
+              id: `draft-lesson-${uNum}-1-${Date.now()}`,
+              lessonNumber: 1,
+              titleAr: `الدرس 1: القواعد والمفردات التأسيسية`,
+              titleEn: `Lesson 1: Foundations & Structure`,
+              contentSummary: 'شرح القواعد الأساسية والمفردات المحورية وتطبيقاتها.',
+              vocabString: 'Introduction, Grammar, Vocabulary',
+              hasAssessment: false,
+            },
+            {
+              id: `draft-lesson-${uNum}-2-${Date.now()}`,
+              lessonNumber: 2,
+              titleAr: `الدرس 2: التعبير الشفهي والتطبيق العملي`,
+              titleEn: `Lesson 2: Speaking & Practice`,
+              contentSummary: 'تمارين تطبيقية وتدريبات محادثة تفاعلية.',
+              vocabString: 'Conversation, Dialogue, Practice',
+              hasAssessment: true,
+            },
+          ],
+        };
+      });
 
-    setUnitsDraft(initialUnits);
-    setExpandedDraftUnitIds(initialUnits.map((u) => u.id));
+      setUnitsDraft(initialUnits);
+      setExpandedDraftUnitIds(initialUnits.map((u) => u.id));
+    }
+
     setModalStep('units');
   };
 
@@ -197,17 +295,17 @@ export function AdminAcademicPathScreen() {
     );
   };
 
-  // Final Step 2 Save: Add level with all units & lessons to context
+  // Final Step 2 Save: Add or Edit level with all units & lessons in context
   const handleFinalSaveLevel = (e: React.FormEvent) => {
     e.preventDefault();
 
     const formattedUnits = unitsDraft.map((u, uIdx) => ({
-      id: `unit-${Date.now()}-${uIdx + 1}`,
+      id: u.id.startsWith('draft-') ? `unit-${Date.now()}-${uIdx + 1}` : u.id,
       unitNumber: uIdx + 1,
       titleAr: u.titleAr.trim() || `الوحدة ${uIdx + 1}`,
       titleEn: u.titleEn.trim() || `Unit ${uIdx + 1}`,
       lessons: u.lessons.map((l, lIdx) => ({
-        id: `lesson-${Date.now()}-${uIdx + 1}-${lIdx + 1}`,
+        id: l.id.startsWith('draft-') ? `lesson-${Date.now()}-${uIdx + 1}-${lIdx + 1}` : l.id,
         lessonNumber: lIdx + 1,
         titleAr: l.titleAr.trim() || `الدرس ${lIdx + 1}`,
         titleEn: l.titleEn.trim() || `Lesson ${lIdx + 1}`,
@@ -221,39 +319,63 @@ export function AdminAcademicPathScreen() {
       })),
     }));
 
-    const sameLangLevels = curricula.filter((c) => c.language === selectedCurriculumLanguage);
-    const newLevelNumber = sameLangLevels.length + 1;
+    if (editingLevelNumber !== null) {
+      const updatedLevel: CurriculumLevel = {
+        levelNumber: editingLevelNumber,
+        cefrCode: newLevelCode,
+        nameAr: newLevelNameAr.trim(),
+        nameEn: newLevelNameEn.trim() || `${newLevelCode} - Level`,
+        descriptionAr: newLevelDescAr.trim() || 'مستوى تعليمي معتمد يركز على الكفاءات اللغوية التأسيسية.',
+        descriptionEn: newLevelDescEn.trim() || 'Accredited curriculum level focusing on core competencies.',
+        color: newLevelColor || '#3B82F6',
+        language: selectedCurriculumLanguage,
+        units: formattedUnits,
+      };
 
-    const newLevel: CurriculumLevel = {
-      levelNumber: newLevelNumber,
-      cefrCode: newLevelCode,
-      nameAr: newLevelNameAr.trim(),
-      nameEn: newLevelNameEn.trim() || `${newLevelCode} - Level`,
-      descriptionAr: newLevelDescAr.trim() || 'مستوى تعليمي معتمد يركز على الكفاءات اللغوية التأسيسية.',
-      descriptionEn: newLevelDescEn.trim() || 'Accredited curriculum level focusing on core competencies.',
-      color: newLevelColor || '#3B82F6',
-      language: selectedCurriculumLanguage,
-      units: formattedUnits,
-    };
+      updateCurriculumLevel(editingLevelNumber, selectedCurriculumLanguage, updatedLevel);
+      setSelectedLevelNumber(editingLevelNumber);
+      alert(
+        language === 'ar'
+          ? `تم بنجاح تحديث وتعديل مستوى (${updatedLevel.cefrCode}) مع ${formattedUnits.length} وحدات تعليمية!`
+          : `Level ${updatedLevel.cefrCode} updated successfully with ${formattedUnits.length} units!`
+      );
+    } else {
+      const sameLangLevels = curricula.filter((c) => c.language === selectedCurriculumLanguage);
+      const newLevelNumber = sameLangLevels.length + 1;
 
-    addCurriculumLevel(newLevel);
-    setSelectedLevelNumber(newLevel.levelNumber);
+      const newLevel: CurriculumLevel = {
+        levelNumber: newLevelNumber,
+        cefrCode: newLevelCode,
+        nameAr: newLevelNameAr.trim(),
+        nameEn: newLevelNameEn.trim() || `${newLevelCode} - Level`,
+        descriptionAr: newLevelDescAr.trim() || 'مستوى تعليمي معتمد يركز على الكفاءات اللغوية التأسيسية.',
+        descriptionEn: newLevelDescEn.trim() || 'Accredited curriculum level focusing on core competencies.',
+        color: newLevelColor || '#3B82F6',
+        language: selectedCurriculumLanguage,
+        units: formattedUnits,
+      };
+
+      addCurriculumLevel(newLevel);
+      setSelectedLevelNumber(newLevel.levelNumber);
+      alert(
+        language === 'ar'
+          ? `تم بنجاح إنشاء واعتماد المستوى (${newLevel.cefrCode}) مع ${formattedUnits.length} وحدات تعليمية!`
+          : `Level ${newLevel.cefrCode} with ${formattedUnits.length} units published successfully!`
+      );
+    }
+
     setIsAddLevelOpen(false);
+    setEditingLevelNumber(null);
     setModalStep('basic');
     setNewLevelNameAr('');
     setNewLevelNameEn('');
     setNewLevelDescAr('');
     setNewLevelDescEn('');
-
-    alert(
-      language === 'ar'
-        ? `تم بنجاح إنشاء واعتماد المستوى (${newLevel.cefrCode}) مع ${formattedUnits.length} وحدات تعليمية!`
-        : `Level ${newLevel.cefrCode} with ${formattedUnits.length} units published successfully!`
-    );
   };
 
   const handleCloseModal = () => {
     setIsAddLevelOpen(false);
+    setEditingLevelNumber(null);
     setModalStep('basic');
   };
 
@@ -277,7 +399,7 @@ export function AdminAcademicPathScreen() {
         {currentRole !== 'teacher' && activeTab === 'curriculum' && (
           <button
             type="button"
-            onClick={() => setIsAddLevelOpen(true)}
+            onClick={handleOpenCreateModal}
             className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
             style={{ padding: '8px 18px' }}
           >
@@ -370,40 +492,90 @@ export function AdminAcademicPathScreen() {
             </div>
           </div>
 
-          {/* Level Cards Selector Bar (A1, A2, B1, B2, C1) */}
+          {/* Level Cards Selector Bar with Reorder and Edit Actions */}
           <div
-            className="grid grid-cols-2 sm:grid-cols-5 gap-3"
-            style={{ marginBottom: '20px' }}
+            className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3.5"
+            style={{ marginBottom: '22px' }}
           >
-            {curricula
-              .filter((c) => c.language === selectedCurriculumLanguage)
-              .map((lvl) => (
-                <div
-                  key={lvl.levelNumber}
-                  onClick={() => setSelectedLevelNumber(lvl.levelNumber)}
-                  className={`rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 shadow-2xs hover:scale-[1.02] active:scale-[0.98] ${
-                    selectedLevelNumber === lvl.levelNumber
-                      ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-500 shadow-xs'
-                      : 'bg-white dark:bg-slate-850 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                  }`}
-                  style={{ padding: '12px 16px' }}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono font-black text-lg sm:text-xl" style={{ color: lvl.color }}>
-                      {lvl.cefrCode}
-                    </span>
-                    <span
-                      className="text-[11px] font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-                      style={{ padding: '2px 8px' }}
-                    >
-                      {lvl.units.length} {language === 'ar' ? 'وحدات' : 'Units'}
-                    </span>
-                  </div>
-                  <div className="text-xs font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 mt-1">
-                    {lvl.nameAr}
-                  </div>
+            {currentLangLevels.map((lvl, lvlIdx) => (
+              <div
+                key={lvl.levelNumber}
+                onClick={() => setSelectedLevelNumber(lvl.levelNumber)}
+                className={`rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 shadow-2xs hover:scale-[1.01] active:scale-[0.99] relative group ${
+                  selectedLevelNumber === lvl.levelNumber
+                    ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-500 shadow-xs ring-2 ring-indigo-500/20'
+                    : 'bg-white dark:bg-slate-850 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                }`}
+                style={{ padding: '12px 14px' }}
+              >
+                {/* Top Row: CEFR Code + Units Count */}
+                <div className="flex items-center justify-between">
+                  <span className="font-mono font-black text-lg sm:text-xl" style={{ color: lvl.color }}>
+                    {lvl.cefrCode}
+                  </span>
+                  <span
+                    className="text-[11px] font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                    style={{ padding: '2px 8px' }}
+                  >
+                    {lvl.units.length} {language === 'ar' ? 'وحدات' : 'Units'}
+                  </span>
                 </div>
-              ))}
+
+                {/* Level Title */}
+                <div className="text-xs font-bold text-slate-900 dark:text-white leading-snug line-clamp-2">
+                  {lvl.nameAr}
+                </div>
+
+                {/* Bottom Row: Reorder Actions and Edit Button */}
+                {currentRole !== 'teacher' && (
+                  <div
+                    className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80 gap-1 mt-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Move Left / Prev */}
+                    <button
+                      type="button"
+                      disabled={lvlIdx === 0}
+                      onClick={(e) => handleMoveLevel(e, lvl.levelNumber, 'prev')}
+                      className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
+                        lvlIdx === 0
+                          ? 'opacity-20 cursor-not-allowed text-slate-400'
+                          : 'hover:bg-indigo-100 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-300 cursor-pointer'
+                      }`}
+                      title={language === 'ar' ? 'تقديم المستوى (تحريك لليسار)' : 'Move level previous'}
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+
+                    {/* Edit Level Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEditModal(lvl)}
+                      className="px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-[10px] flex items-center gap-1 border border-indigo-200/60 dark:border-indigo-800/60 transition-colors cursor-pointer"
+                      title={language === 'ar' ? 'تعديل بيانات المستوى' : 'Edit Level'}
+                    >
+                      <Pencil size={11} />
+                      <span>{language === 'ar' ? 'تعديل' : 'Edit'}</span>
+                    </button>
+
+                    {/* Move Right / Next */}
+                    <button
+                      type="button"
+                      disabled={lvlIdx === currentLangLevels.length - 1}
+                      onClick={(e) => handleMoveLevel(e, lvl.levelNumber, 'next')}
+                      className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
+                        lvlIdx === currentLangLevels.length - 1
+                          ? 'opacity-20 cursor-not-allowed text-slate-400'
+                          : 'hover:bg-indigo-100 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-300 cursor-pointer'
+                      }`}
+                      title={language === 'ar' ? 'تأخير المستوى (تحريك لليمين)' : 'Move level next'}
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
 
           {/* Active Level Detailed Units & Lessons Breakdown (Section 16) */}
@@ -430,8 +602,36 @@ export function AdminAcademicPathScreen() {
                   <p className="text-xs text-slate-400 font-medium mt-1 leading-relaxed">{activeLevel.descriptionAr}</p>
                 </div>
 
-                <div className="text-xs font-bold text-slate-400 shrink-0">
-                  {activeLevel.units.length} {language === 'ar' ? 'وحدات تعليمية معتمدة' : 'Units'}
+                <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto">
+                  <span className="text-xs font-bold text-slate-400">
+                    {activeLevel.units.length} {language === 'ar' ? 'وحدات تعليمية معتمدة' : 'Units'}
+                  </span>
+
+                  {currentRole !== 'teacher' && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditModal(activeLevel)}
+                        className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer hover:scale-105 active:scale-95"
+                        style={{ padding: '7px 14px' }}
+                        title={language === 'ar' ? 'تعديل بيانات المستوى ووحداته' : 'Edit Level & Units'}
+                      >
+                        <Pencil size={14} />
+                        <span>{language === 'ar' ? 'تعديل المستوى' : 'Edit Level'}</span>
+                      </button>
+
+                      {currentLangLevels.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteLevel(activeLevel.levelNumber)}
+                          className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer"
+                          title={language === 'ar' ? 'حذف المستوى' : 'Delete Level'}
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -673,7 +873,9 @@ export function AdminAcademicPathScreen() {
                     {language === 'ar' ? 'الخطوة 1 من 2: بيانات المستوى الأساسية' : 'Step 1 of 2: Basic Level Info'}
                   </span>
                   <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white mt-0.5">
-                    {language === 'ar' ? 'إضافة مستوى دراسي جديد' : 'Create New Level'}
+                    {editingLevelNumber !== null
+                      ? (language === 'ar' ? 'تعديل بيانات المنهاج والمستوى' : 'Edit Curriculum Level')
+                      : (language === 'ar' ? 'إضافة مستوى دراسي جديد' : 'Create New Level')}
                   </h3>
                 </div>
                 <button
@@ -1150,7 +1352,11 @@ export function AdminAcademicPathScreen() {
                   style={{ padding: '10px 26px' }}
                 >
                   <Check size={16} />
-                  <span>{language === 'ar' ? 'حفظ واعتماد المستوى في المنهاج' : 'Save Level to Curriculum'}</span>
+                  <span>
+                    {editingLevelNumber !== null
+                      ? (language === 'ar' ? 'حفظ التعديلات في المنهاج' : 'Save Changes to Curriculum')
+                      : (language === 'ar' ? 'حفظ واعتماد المستوى في المنهاج' : 'Save Level to Curriculum')}
+                  </span>
                 </button>
               </div>
             </div>
