@@ -722,11 +722,14 @@ export function StudentsManagementScreen() {
 
               {/* 3. Link to Parent Section (Enhanced Spacing & Search Container) */}
               <div
-                className="rounded-2xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200/80 dark:border-purple-900/50 space-y-3.5"
-                style={{ padding: '18px 20px', marginTop: '4px', marginBottom: '4px' }}
+                className="rounded-2xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200/80 dark:border-purple-900/50"
+                style={{ padding: '20px 22px', marginTop: '6px', marginBottom: '6px' }}
               >
                 {/* Section Header & Toggle Buttons */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-100 dark:border-purple-900/30 pb-3">
+                <div
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-200/50 dark:border-purple-900/40"
+                  style={{ paddingBottom: '16px', marginBottom: '18px' }}
+                >
                   <div className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
                     <div className="w-7 h-7 rounded-xl bg-purple-100 dark:bg-purple-900/60 text-purple-600 dark:text-purple-300 flex items-center justify-center shrink-0">
                       <Link2 size={15} />
