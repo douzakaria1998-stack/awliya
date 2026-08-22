@@ -41,11 +41,11 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
 
   const tabs: { key: GroupTabKey; labelAr: string; labelEn: string; icon: any }[] = [
     { key: 'overview', labelAr: 'نظرة عامة', labelEn: 'Overview', icon: School },
-    { key: 'students', labelAr: 'قائمة الطلاب', labelEn: 'Students', icon: Users },
-    { key: 'attendance', labelAr: 'سجل الحضور', labelEn: 'Attendance', icon: CalendarCheck2 },
-    { key: 'progress', labelAr: 'التقدم الأكاديمي', labelEn: 'Academic Progress', icon: TrendingUp },
-    { key: 'performance', labelAr: 'الواجبات والأداء', labelEn: 'Homework & Performance', icon: BookCheck },
-    { key: 'assessments', labelAr: 'نتائج الاختبارات', labelEn: 'Assessments', icon: Award },
+    { key: 'students', labelAr: 'الطلاب', labelEn: 'Students', icon: Users },
+    { key: 'attendance', labelAr: 'الحضور', labelEn: 'Attendance', icon: CalendarCheck2 },
+    { key: 'progress', labelAr: 'التقدم', labelEn: 'Progress', icon: TrendingUp },
+    { key: 'performance', labelAr: 'الواجبات', labelEn: 'Homework', icon: BookCheck },
+    { key: 'assessments', labelAr: 'الاختبارات', labelEn: 'Assessments', icon: Award },
   ];
 
   return (
@@ -84,8 +84,8 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
 
         {/* Tab Navigation (Section 13) */}
         <div
-          className="flex items-center bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 overflow-x-auto shrink-0"
-          style={{ padding: '10px 18px', gap: '8px' }}
+          className="flex items-center bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 overflow-x-auto shrink-0 scrollbar-none"
+          style={{ padding: '8px 14px', gap: '6px' }}
         >
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -95,14 +95,14 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   isActive
                     ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs border border-amber-200/60 dark:border-amber-900/60'
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                 }`}
-                style={{ padding: '8px 16px' }}
+                style={{ padding: '6px 12px' }}
               >
-                <Icon size={15} />
+                <Icon size={14} />
                 <span>{language === 'ar' ? tab.labelAr : tab.labelEn}</span>
               </button>
             );
