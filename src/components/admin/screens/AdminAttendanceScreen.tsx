@@ -756,13 +756,24 @@ export function AdminAttendanceScreen() {
 
               {/* Sticky Footer */}
               <div
-                className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 flex items-center justify-end gap-2.5 shrink-0"
-                style={{ padding: '16px 24px' }}
+                className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 flex items-center justify-end gap-3.5 shrink-0"
+                style={{
+                  paddingTop: '22px',
+                  paddingBottom: '24px',
+                  paddingLeft: '32px',
+                  paddingRight: '32px',
+                }}
               >
                 <button
                   type="button"
                   onClick={closeAttendanceDrawer}
-                  className="rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs cursor-pointer transition-colors px-4 py-2"
+                  className="rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 font-bold text-xs sm:text-sm cursor-pointer transition-all"
+                  style={{
+                    paddingTop: '12px',
+                    paddingBottom: '12px',
+                    paddingLeft: '24px',
+                    paddingRight: '24px',
+                  }}
                 >
                   {language === 'ar' ? 'إلغاء' : language === 'fr' ? 'Annuler' : 'Cancel'}
                 </button>
@@ -770,16 +781,22 @@ export function AdminAttendanceScreen() {
                 <button
                   type="button"
                   onClick={handleSaveAttendance}
-                  className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer px-5 py-2"
+                  className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm flex items-center gap-3 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                  style={{
+                    paddingTop: '12px',
+                    paddingBottom: '12px',
+                    paddingLeft: '28px',
+                    paddingRight: '28px',
+                  }}
                 >
                   {savedSuccess ? (
                     <>
-                      <Check size={15} />
+                      <Check size={18} />
                       <span>{language === 'ar' ? 'تم الحفظ بنجاح ✓' : language === 'fr' ? 'Enregistré ✓' : 'Saved ✓'}</span>
                     </>
                   ) : (
                     <>
-                      <Save size={15} />
+                      <Save size={18} />
                       <span>{language === 'ar' ? 'حفظ وتثبيت الحضور' : language === 'fr' ? 'Enregistrer' : 'Save Attendance Sheet'}</span>
                     </>
                   )}
