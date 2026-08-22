@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Settings,
   School,
@@ -12,14 +12,41 @@ import {
   Sparkles,
   Phone,
   MapPin,
+  Upload,
+  Image as ImageIcon,
+  Trash2,
+  Camera,
 } from 'lucide-react';
 import { downloadCertificateHTML } from '@/lib/certificateGenerator';
 
 export function SystemSettingsScreen() {
   const [academyName, setAcademyName] = useState('My School');
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoFileName, setLogoFileName] = useState<string>('');
   const [academyAddress, setAcademyAddress] = useState('Errimal Street, El Oued, Algeria.');
   const [academyPhone, setAcademyPhone] = useState('+213 770 299 292 \\ +213 770 958 887');
   const [saveToast, setSaveToast] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFileName(file.name);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    setLogoUrl(null);
+    setLogoFileName('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,12 +110,83 @@ export function SystemSettingsScreen() {
               <School size={20} />
             </div>
             <div>
-              <h3 className="font-black text-lg text-slate-900 dark:text-white">بيانات الأكاديمية الرسمية</h3>
-              <p className="text-xs text-slate-400 font-medium mt-0.5">تحديث المعلومات الأساسية وعنوان المدرسة وأرقام التواصل</p>
+              <h3 className="font-black text-lg text-slate-900 dark:text-white">بيانات الأكاديمية والشعار الرسمي</h3>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">رفع شعار المدرسة وتحديث المعلومات الأساسية وعنوان المدرسة</p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '26px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+            {/* Logo Upload Field */}
+            <div>
+              <label
+                className="block text-xs sm:text-sm font-black text-slate-700 dark:text-slate-300"
+                style={{ marginBottom: '12px' }}
+              >
+                شعار المدرسة الرسمي (School / Academy Logo):
+              </label>
+
+              <div className="flex flex-col sm:flex-row sm:items-center gap-5 p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-750">
+                {/* Logo Preview Box */}
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white dark:bg-slate-850 border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center overflow-hidden shrink-0 shadow-2xs relative group">
+                  {logoUrl ? (
+                    <img
+                      src={logoUrl}
+                      alt="Academy Logo"
+                      className="w-full h-full object-contain p-2"
+                    />
+                  ) : (
+                    <div className="text-center p-2">
+                      <School size={32} className="mx-auto text-rose-500/80" />
+                      <span className="text-[10px] font-black text-slate-400 block mt-1">My School</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Upload Actions & Hints */}
+                <div className="flex-1 space-y-2.5">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-2 shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      style={{ padding: '10px 20px' }}
+                    >
+                      <Upload size={15} />
+                      <span>{logoUrl ? 'تغيير الشعار (Change Logo)' : 'رفع شعار المدرسة (Upload Logo)'}</span>
+                    </button>
+
+                    {logoUrl && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveLogo}
+                        className="rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-950/40 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                        style={{ padding: '10px 18px' }}
+                      >
+                        <Trash2 size={15} />
+                        <span>إزالة الشعار</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-slate-400 dark:text-slate-400 leading-relaxed font-medium">
+                    {logoFileName ? (
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">الملف المحدد: {logoFileName}</span>
+                    ) : (
+                      'يدعم صيغ PNG, JPG, WebP أو SVG (يُفضل الشعار بخلفية شفافة بدقة عالية ليظهر بشكل رائع في ترويسة الموقع والشهادات).'
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Academy Name Input */}
             <div>
               <label
                 className="block text-xs sm:text-sm font-black text-slate-700 dark:text-slate-300"
@@ -102,6 +200,7 @@ export function SystemSettingsScreen() {
                 onChange={(e) => setAcademyName(e.target.value)}
                 className="w-full rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/90 dark:border-slate-750 text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500/80 transition-all"
                 style={{ padding: '14px 22px', height: '52px' }}
+                placeholder="My School"
               />
             </div>
 
