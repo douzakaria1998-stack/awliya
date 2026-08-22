@@ -257,11 +257,15 @@ export function StudentsManagementScreen() {
       </div>
 
       {/* Search & Comprehensive Multi-Filters (Section 25) */}
+      {/* Search & Filter Bar (Section 6, 37) */}
       <div
-        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs space-y-6"
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs"
         style={{
-          padding: '36px 40px',
-          marginBottom: '36px',
+          padding: '18px 22px',
+          marginBottom: '22px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
         }}
       >
         <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
@@ -272,17 +276,17 @@ export function StudentsManagementScreen() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={language === 'ar' ? 'بحث بالاسم، ولي الأمر، الفوج، أو المسار...' : 'Search student, parent, group...'}
-              className="w-full h-12 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-medium focus:outline-none focus:border-purple-500 transition-colors shadow-2xs"
+              className="w-full h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-purple-500 transition-colors shadow-2xs"
               style={{
-                paddingLeft: isRTL ? '20px' : '50px',
-                paddingRight: isRTL ? '50px' : '20px',
+                paddingLeft: isRTL ? '16px' : '42px',
+                paddingRight: isRTL ? '42px' : '16px',
                 textAlign: isRTL ? 'right' : 'left',
               }}
             />
             <Search
-              size={20}
+              size={16}
               className={`absolute top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none ${
-                isRTL ? 'right-4' : 'left-4'
+                isRTL ? 'right-3.5' : 'left-3.5'
               }`}
             />
           </div>
@@ -294,16 +298,16 @@ export function StudentsManagementScreen() {
         </div>
 
         {/* Filter Dropdowns Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 pt-5 border-t border-slate-100 dark:border-slate-800">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 pt-4 border-t border-slate-100 dark:border-slate-800/80">
           {/* Level Filter */}
           <div>
-            <label className="text-xs font-bold text-slate-400 block mb-2">
+            <label className="text-xs font-bold text-slate-400 block mb-1.5">
               {language === 'ar' ? 'المستوى (Level)' : 'Level'}
             </label>
             <select
               value={selectedLevel}
               onChange={(e) => setSelectedLevel(e.target.value)}
-              className="w-full h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer"
+              className="w-full h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer focus:outline-none focus:border-purple-500"
             >
               <option value="all">{language === 'ar' ? 'جميع المستويات' : 'All Levels'}</option>
               <option value="A1">A1 — Beginner</option>
@@ -316,13 +320,13 @@ export function StudentsManagementScreen() {
 
           {/* Group Filter */}
           <div>
-            <label className="text-xs font-bold text-slate-400 block mb-2">
+            <label className="text-xs font-bold text-slate-400 block mb-1.5">
               {language === 'ar' ? 'الفوج (Group)' : 'Group'}
             </label>
             <select
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value)}
-              className="w-full h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer"
+              className="w-full h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer focus:outline-none focus:border-purple-500"
             >
               <option value="all">{language === 'ar' ? 'جميع الأفواج' : 'All Groups'}</option>
               {groups.map((g) => (
@@ -335,13 +339,13 @@ export function StudentsManagementScreen() {
 
           {/* Teacher Filter */}
           <div>
-            <label className="text-xs font-bold text-slate-400 block mb-2">
+            <label className="text-xs font-bold text-slate-400 block mb-1.5">
               {language === 'ar' ? 'المعلم (Teacher)' : 'Teacher'}
             </label>
             <select
               value={selectedTeacher}
               onChange={(e) => setSelectedTeacher(e.target.value)}
-              className="w-full h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer"
+              className="w-full h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer focus:outline-none focus:border-purple-500"
             >
               <option value="all">{language === 'ar' ? 'جميع المعلمين' : 'All Teachers'}</option>
               {teachers.map((t) => (
@@ -354,13 +358,13 @@ export function StudentsManagementScreen() {
 
           {/* Language Filter */}
           <div>
-            <label className="text-xs font-bold text-slate-400 block mb-2">
+            <label className="text-xs font-bold text-slate-400 block mb-1.5">
               {language === 'ar' ? 'المسار اللغوي' : 'Language'}
             </label>
             <select
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="w-full h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer"
+              className="w-full h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer focus:outline-none focus:border-purple-500"
             >
               <option value="all">{language === 'ar' ? 'كل المسارات' : 'All Tracks'}</option>
               <option value="English">English</option>
@@ -371,13 +375,13 @@ export function StudentsManagementScreen() {
 
           {/* Status Filter */}
           <div>
-            <label className="text-xs font-bold text-slate-400 block mb-2">
+            <label className="text-xs font-bold text-slate-400 block mb-1.5">
               {language === 'ar' ? 'الحالة (Status)' : 'Status'}
             </label>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer"
+              className="w-full h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer focus:outline-none focus:border-purple-500"
             >
               <option value="all">{language === 'ar' ? 'جميع الحالات' : 'All Statuses'}</option>
               <option value="active">Active (نشط)</option>
