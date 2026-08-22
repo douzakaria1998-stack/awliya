@@ -891,7 +891,7 @@ export function StudentsManagementScreen() {
                     })()}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '4px' }}>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                         {language === 'ar' ? 'اسم ولي الأمر الجديد *' : 'New Parent Full Name *'}
