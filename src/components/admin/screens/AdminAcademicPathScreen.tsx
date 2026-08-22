@@ -67,84 +67,87 @@ export function AdminAcademicPathScreen() {
           <button
             type="button"
             onClick={() => setIsAddLevelOpen(true)}
-            className="px-5 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+            className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+            style={{ padding: '14px 28px' }}
           >
-            <Plus size={16} />
-            <span>{language === 'ar' ? '+ إضافة مستوى جديد (Create Level)' : '+ Create New Level'}</span>
+            <Plus size={18} />
+            <span>{language === 'ar' ? 'إضافة مستوى جديد (Create Level)' : 'Create New Level'}</span>
           </button>
         )}
       </div>
 
       {/* Main Two Tabs Bar (Section 17) */}
       <div
-        className="flex items-center gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs"
-        style={{ marginBottom: '32px' }}
+        className="flex items-center gap-3 p-2 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs"
+        style={{ marginBottom: '36px' }}
       >
         <button
           type="button"
           onClick={() => setActiveTab('curriculum')}
-          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+          className={`flex-1 py-3.5 px-6 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
             activeTab === 'curriculum'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
-          <Settings size={16} />
+          <Settings size={18} />
           <span>{language === 'ar' ? 'التبويب 1: هيكل المنهاج والإعدادات (Curriculum / Settings)' : 'Tab 1 — Curriculum / Settings'}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('student_progress')}
-          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+          className={`flex-1 py-3.5 px-6 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
             activeTab === 'student_progress'
               ? 'bg-indigo-600 text-white shadow-md'
               : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
-          <TrendingUp size={16} />
+          <TrendingUp size={18} />
           <span>{language === 'ar' ? 'التبويب 2: مصفوفة تقدم الطلاب (Student Progress Matrix)' : 'Tab 2 — Student Progress'}</span>
         </button>
       </div>
 
       {/* TAB 1: Curriculum / Settings (Section 14, 15, 16) */}
       {activeTab === 'curriculum' && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Language Selector (English / French) */}
           <div
-            className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs flex items-center justify-between gap-4"
+            className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
             style={{
-              padding: '24px 30px',
-              marginBottom: '28px',
+              padding: '32px 36px',
+              marginBottom: '36px',
             }}
           >
-            <div className="flex items-center gap-2.5">
-              <Languages size={20} className="text-indigo-600" />
-              <span className="font-bold text-sm text-slate-900 dark:text-white">
+            <div className="flex items-center gap-3">
+              <Languages size={22} className="text-indigo-600" />
+              <span className="font-black text-sm sm:text-base text-slate-900 dark:text-white">
                 {language === 'ar' ? 'اختر المنهاج اللغوي:' : 'Select Language Curriculum:'}
               </span>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setSelectedCurriculumLanguage('English')}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                   selectedCurriculumLanguage === 'English'
-                    ? 'bg-indigo-600 text-white shadow-xs'
+                    ? 'bg-indigo-600 text-white shadow-sm'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
                 }`}
+                style={{ padding: '10px 22px' }}
               >
                 English Curriculum (CEFR)
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedCurriculumLanguage('French')}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                   selectedCurriculumLanguage === 'French'
-                    ? 'bg-indigo-600 text-white shadow-xs'
+                    ? 'bg-indigo-600 text-white shadow-sm'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
                 }`}
+                style={{ padding: '10px 22px' }}
               >
                 French Curriculum (DELF)
               </button>
@@ -152,28 +155,35 @@ export function AdminAcademicPathScreen() {
           </div>
 
           {/* Level Cards Selector Bar (A1, A2, B1, B2, C1) */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <div
+            className="grid grid-cols-2 sm:grid-cols-5 gap-4"
+            style={{ marginBottom: '36px' }}
+          >
             {curricula
               .filter((c) => c.language === selectedCurriculumLanguage)
               .map((lvl) => (
                 <div
                   key={lvl.levelNumber}
                   onClick={() => setSelectedLevelNumber(lvl.levelNumber)}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-4 shadow-2xs hover:scale-[1.02] active:scale-[0.98] ${
                     selectedLevelNumber === lvl.levelNumber
-                      ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-500 shadow-xs'
+                      ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-500 shadow-sm'
                       : 'bg-white dark:bg-slate-850 border-slate-200 dark:border-slate-800 hover:border-slate-300'
                   }`}
+                  style={{ padding: '20px 24px' }}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono font-black text-lg" style={{ color: lvl.color }}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-black text-2xl" style={{ color: lvl.color }}>
                       {lvl.cefrCode}
                     </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
-                      {lvl.units.length} وحدات
+                    <span
+                      className="text-xs font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                      style={{ padding: '4px 12px' }}
+                    >
+                      {lvl.units.length} {language === 'ar' ? 'وحدات' : 'Units'}
                     </span>
                   </div>
-                  <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                  <div className="text-sm font-black text-slate-900 dark:text-white leading-snug line-clamp-2">
                     {lvl.nameAr}
                   </div>
                 </div>
@@ -183,67 +193,79 @@ export function AdminAcademicPathScreen() {
           {/* Active Level Detailed Units & Lessons Breakdown (Section 16) */}
           {activeLevel && (
             <div
-              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs space-y-6"
-              style={{ padding: '28px 32px' }}
+              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs space-y-8"
+              style={{ padding: '36px 40px', marginBottom: '44px' }}
             >
-              <div className="border-b border-slate-100 dark:border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="border-b border-slate-100 dark:border-slate-800 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-md font-mono font-bold text-white text-xs" style={{ backgroundColor: activeLevel.color }}>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="rounded-xl font-mono font-black text-white text-sm shadow-xs"
+                      style={{ backgroundColor: activeLevel.color, padding: '6px 14px' }}
+                    >
                       {activeLevel.cefrCode}
                     </span>
-                    <h3 className="text-lg font-black text-slate-900 dark:text-white">{activeLevel.nameAr}</h3>
+                    <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">{activeLevel.nameAr}</h3>
                   </div>
-                  <p className="text-xs text-slate-400 font-medium mt-1">{activeLevel.descriptionAr}</p>
+                  <p className="text-sm text-slate-400 font-medium mt-2 leading-relaxed">{activeLevel.descriptionAr}</p>
                 </div>
 
-                <div className="text-xs font-bold text-slate-400">
+                <div className="text-sm font-bold text-slate-400 shrink-0">
                   {activeLevel.units.length} {language === 'ar' ? 'وحدات تعليمية معتمدة' : 'Units'}
                 </div>
               </div>
 
               {/* Units List */}
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {activeLevel.units.map((unit) => (
                   <div
                     key={unit.id}
-                    className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-3"
+                    className="rounded-[28px] bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 space-y-5 shadow-2xs"
+                    style={{ padding: '28px 32px' }}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <Layers size={18} className="text-indigo-600" />
-                        <h4 className="font-black text-sm text-slate-900 dark:text-white">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <Layers size={22} className="text-indigo-600 shrink-0" />
+                        <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">
                           {unit.titleAr} ({unit.titleEn})
                         </h4>
                       </div>
-                      <span className="text-xs font-mono font-bold text-purple-600 bg-white dark:bg-slate-900 px-3 py-1 rounded-xl border border-slate-200 dark:border-slate-700">
+                      <span
+                        className="text-xs font-mono font-bold text-purple-600 bg-white dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0"
+                        style={{ padding: '6px 16px' }}
+                      >
                         {unit.lessons.length} {language === 'ar' ? 'دروس' : 'lessons'}
                       </span>
                     </div>
 
                     {/* Lessons Tree (Section 16: Greetings, Introducing Yourself, Exercises, Vocabulary) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 pt-2">
                       {unit.lessons.map((lesson) => (
                         <div
                           key={lesson.id}
-                          className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 shadow-2xs"
+                          className="bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-750 space-y-3 shadow-2xs hover:border-indigo-500/50 transition-all"
+                          style={{ padding: '20px 24px' }}
                         >
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-xs text-slate-900 dark:text-white">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-black text-sm text-slate-900 dark:text-white">
                               {lesson.titleAr}
                             </span>
                             {lesson.hasAssessment && (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
+                              <span
+                                className="text-xs font-bold rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 shrink-0"
+                                style={{ padding: '4px 12px' }}
+                              >
                                 اختبار مهارة ✓
                               </span>
                             )}
                           </div>
-                          <p className="text-[11px] text-slate-400 leading-relaxed">{lesson.contentSummary}</p>
-                          <div className="flex flex-wrap gap-1 pt-1">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-normal">{lesson.contentSummary}</p>
+                          <div className="flex flex-wrap gap-1.5 pt-1.5">
                             {lesson.vocabulary.map((vocab, vIdx) => (
                               <span
                                 key={vIdx}
-                                className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] font-mono text-slate-600 dark:text-slate-300"
+                                className="rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-mono font-medium text-slate-700 dark:text-slate-300"
+                                style={{ padding: '4px 10px' }}
                               >
                                 {vocab}
                               </span>
@@ -263,16 +285,19 @@ export function AdminAcademicPathScreen() {
       {/* TAB 2: Student Progress Matrix (Section 17-Tab 2 & Section 18) */}
       {activeTab === 'student_progress' && (
         <div
-          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[28px] shadow-xs space-y-5"
-          style={{ padding: '28px 32px' }}
+          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs space-y-6 overflow-hidden"
+          style={{ marginBottom: '44px' }}
         >
-          <div className="flex items-center justify-between">
+          <div
+            className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800"
+            style={{ padding: '32px 40px' }}
+          >
             <div>
-              <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                <TrendingUp size={20} className="text-indigo-600" />
+              <h3 className="font-black text-lg sm:text-xl text-slate-900 dark:text-white flex items-center gap-2.5">
+                <TrendingUp size={22} className="text-indigo-600" />
                 <span>{language === 'ar' ? 'مصفوفة إنجاز الوحدات للطلاب (Curriculum Progress Matrix)' : 'Student Progress Matrix'}</span>
               </h3>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs sm:text-sm text-slate-400 mt-1.5">
                 {currentRole === 'teacher'
                   ? 'عرض تقدم طلاب الأفواج المسندة إليك فقط (Sarah Benali)'
                   : 'متابعة شاملة لتقدم جميع الطلاب عبر الوحدات التعليمية'}
@@ -281,37 +306,73 @@ export function AdminAcademicPathScreen() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-xs sm:text-sm text-right">
+            <table className={`w-full text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
               <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-400 font-bold">
                 <tr>
-                  <th className="py-3.5 px-6 text-right">{language === 'ar' ? 'اسم الطالب' : 'Student'}</th>
-                  <th className="py-3.5 px-4 text-center">{language === 'ar' ? 'الفوج' : 'Group'}</th>
-                  <th className="py-3.5 px-4 text-center">Unit 1 (الوحدة 1)</th>
-                  <th className="py-3.5 px-4 text-center">Unit 2 (الوحدة 2)</th>
-                  <th className="py-3.5 px-4 text-center">Unit 3 (الوحدة 3)</th>
-                  <th className="py-3.5 px-4 text-center">{language === 'ar' ? 'المعدل الإجمالي' : 'Overall'}</th>
+                  <th
+                    className={`font-extrabold text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
+                    style={{
+                      paddingTop: '24px',
+                      paddingBottom: '24px',
+                      paddingLeft: isRTL ? '24px' : '40px',
+                      paddingRight: isRTL ? '40px' : '24px',
+                    }}
+                  >
+                    {language === 'ar' ? 'اسم الطالب' : 'Student'}
+                  </th>
+                  <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الفوج' : 'Group'}</th>
+                  <th className="py-6 px-6 text-center font-extrabold">Unit 1 (الوحدة 1)</th>
+                  <th className="py-6 px-6 text-center font-extrabold">Unit 2 (الوحدة 2)</th>
+                  <th className="py-6 px-6 text-center font-extrabold">Unit 3 (الوحدة 3)</th>
+                  <th
+                    className="font-extrabold text-center"
+                    style={{
+                      paddingTop: '24px',
+                      paddingBottom: '24px',
+                      paddingRight: isRTL ? '40px' : '24px',
+                      paddingLeft: isRTL ? '24px' : '40px',
+                    }}
+                  >
+                    {language === 'ar' ? 'المعدل الإجمالي' : 'Overall'}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {visibleStudents.map((st) => (
                   <tr key={st.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="py-4 px-6 font-bold text-slate-900 dark:text-white">
-                      {st.fullNameAr} ({st.fullNameEn})
+                    <td
+                      className="py-8 font-bold text-slate-900 dark:text-white"
+                      style={{
+                        paddingLeft: isRTL ? '24px' : '40px',
+                        paddingRight: isRTL ? '40px' : '24px',
+                      }}
+                    >
+                      <div className="font-bold text-sm sm:text-base">{st.fullNameAr}</div>
+                      <div className="text-xs text-slate-400 font-mono mt-0.5">{st.fullNameEn}</div>
                     </td>
-                    <td className="py-4 px-4 text-center font-semibold text-slate-600 dark:text-slate-400">
+                    <td className="py-8 px-6 text-center font-semibold text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
                       {st.groupName.split('(')[0].trim()}
                     </td>
-                    <td className="py-4 px-4 text-center font-mono font-bold text-emerald-600">
+                    <td className="py-8 px-6 text-center font-mono font-bold text-emerald-600 text-sm sm:text-base">
                       {st.overallProgress >= 70 ? '100%' : '80%'}
                     </td>
-                    <td className="py-4 px-4 text-center font-mono font-bold text-indigo-600">
+                    <td className="py-8 px-6 text-center font-mono font-bold text-indigo-600 text-sm sm:text-base">
                       {st.overallProgress >= 80 ? '100%' : st.overallProgress >= 60 ? '80%' : '50%'}
                     </td>
-                    <td className="py-4 px-4 text-center font-mono font-bold text-purple-600">
+                    <td className="py-8 px-6 text-center font-mono font-bold text-purple-600 text-sm sm:text-base">
                       {st.overallProgress >= 90 ? '70%' : '50%'}
                     </td>
-                    <td className="py-4 px-4 text-center">
-                      <span className="px-3 py-1 rounded-xl bg-purple-50 dark:bg-purple-950/60 font-mono font-black text-purple-600 dark:text-purple-300">
+                    <td
+                      className="py-8 text-center"
+                      style={{
+                        paddingRight: isRTL ? '40px' : '24px',
+                        paddingLeft: isRTL ? '24px' : '40px',
+                      }}
+                    >
+                      <span
+                        className="rounded-2xl bg-purple-50 dark:bg-purple-950/60 font-mono font-black text-purple-600 dark:text-purple-300 text-xs sm:text-sm"
+                        style={{ padding: '8px 18px' }}
+                      >
                         {st.overallProgress}%
                       </span>
                     </td>
