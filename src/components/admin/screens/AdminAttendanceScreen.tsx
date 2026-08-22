@@ -467,8 +467,8 @@ export function AdminAttendanceScreen() {
           />
 
           {/* Slide-over Container from the Right */}
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-10 z-50 animate-in slide-in-from-right duration-300">
-            <div className="w-screen max-w-2xl bg-white dark:bg-slate-900 shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-800">
+          <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10 z-50 animate-in slide-in-from-right duration-300">
+            <div className="w-screen max-w-4xl bg-white dark:bg-slate-900 shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-800">
               {/* Drawer Header */}
               <div
                 className="border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 bg-slate-50 dark:bg-slate-850/80"
@@ -536,110 +536,152 @@ export function AdminAttendanceScreen() {
                 </div>
               </div>
 
-              {/* Scrollable Student List with Action Status Buttons (Present, Late, Absent, Excused) */}
-              <div className="flex-1 overflow-y-auto space-y-4" style={{ padding: '24px 28px' }}>
-                <div className="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                  <span>{language === 'ar' ? 'قائمة طلاب الفوج' : language === 'fr' ? 'Liste des élèves' : 'Enrolled Students'} ({drawerStudents.length})</span>
-                  <span>{language === 'ar' ? 'حدد حالة الحضور لكل طالب' : 'Select Status for each student'}</span>
+              {/* Table of Students inside Drawer (Side-by-Side: Student | Actions | Comment) */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-850 shadow-2xs overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className={`w-full text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
+                      <thead className="bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200/80 dark:border-slate-800 text-slate-400 font-bold">
+                        <tr>
+                          <th
+                            className={`font-extrabold text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
+                            style={{
+                              paddingTop: '18px',
+                              paddingBottom: '18px',
+                              paddingLeft: isRTL ? '16px' : '24px',
+                              paddingRight: isRTL ? '24px' : '16px',
+                            }}
+                          >
+                            {language === 'ar' ? 'الطالب' : language === 'fr' ? 'Élève' : 'Student'}
+                          </th>
+                          <th className="py-4 px-4 font-extrabold text-center">
+                            {language === 'ar' ? 'حالة الحضور (Action)' : language === 'fr' ? 'Statut (Action)' : 'Attendance Action'}
+                          </th>
+                          <th
+                            className={`font-extrabold text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
+                            style={{
+                              paddingTop: '18px',
+                              paddingBottom: '18px',
+                              paddingRight: isRTL ? '24px' : '16px',
+                              paddingLeft: isRTL ? '16px' : '24px',
+                            }}
+                          >
+                            {language === 'ar' ? 'ملاحظة المعلم (Comment)' : language === 'fr' ? 'Commentaire' : 'Session Note / Comment'}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        {drawerStudents.map((st, idx) => {
+                          const currentStatus = studentStatusMap[st.id] || 'present';
+                          return (
+                            <tr key={st.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                              {/* 1. Student Name */}
+                              <td
+                                className="py-5 font-bold text-slate-900 dark:text-white"
+                                style={{
+                                  paddingLeft: isRTL ? '16px' : '24px',
+                                  paddingRight: isRTL ? '24px' : '16px',
+                                }}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-black text-xs flex items-center justify-center shrink-0">
+                                    {idx + 1}
+                                  </span>
+                                  <div>
+                                    <div className="font-black text-sm text-slate-900 dark:text-white leading-snug">
+                                      {st.fullNameAr}
+                                    </div>
+                                    <div className="text-xs text-slate-400 font-mono">
+                                      {st.fullNameEn}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+
+                              {/* 2. Action Status Pill Buttons (Present, Late, Absent, Excused) */}
+                              <td className="py-5 px-3">
+                                <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                                  {/* Present */}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStatusChange(st.id, 'present')}
+                                    className={`px-3 py-2 rounded-xl font-extrabold text-xs flex items-center gap-1 transition-all cursor-pointer ${
+                                      currentStatus === 'present'
+                                        ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-400/40 scale-105'
+                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-600'
+                                    }`}
+                                  >
+                                    <span>✓</span>
+                                    <span>{language === 'ar' ? 'حاضر' : language === 'fr' ? 'Présent' : 'Present'}</span>
+                                  </button>
+
+                                  {/* Late */}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStatusChange(st.id, 'late')}
+                                    className={`px-3 py-2 rounded-xl font-extrabold text-xs flex items-center gap-1 transition-all cursor-pointer ${
+                                      currentStatus === 'late'
+                                        ? 'bg-amber-500 text-slate-950 shadow-sm ring-2 ring-amber-400/40 scale-105'
+                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600'
+                                    }`}
+                                  >
+                                    <span>⏱</span>
+                                    <span>{language === 'ar' ? 'متأخر' : language === 'fr' ? 'Retard' : 'Late'}</span>
+                                  </button>
+
+                                  {/* Absent */}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStatusChange(st.id, 'absent')}
+                                    className={`px-3 py-2 rounded-xl font-extrabold text-xs flex items-center gap-1 transition-all cursor-pointer ${
+                                      currentStatus === 'absent'
+                                        ? 'bg-rose-600 text-white shadow-sm ring-2 ring-rose-400/40 scale-105'
+                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600'
+                                    }`}
+                                  >
+                                    <span>✕</span>
+                                    <span>{language === 'ar' ? 'غائب' : language === 'fr' ? 'Absent' : 'Absent'}</span>
+                                  </button>
+
+                                  {/* Excused */}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStatusChange(st.id, 'excused')}
+                                    className={`px-3 py-2 rounded-xl font-extrabold text-xs flex items-center gap-1 transition-all cursor-pointer ${
+                                      currentStatus === 'excused'
+                                        ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-400/40 scale-105'
+                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600'
+                                    }`}
+                                  >
+                                    <span>📄</span>
+                                    <span>{language === 'ar' ? 'مبرر' : language === 'fr' ? 'Excusé' : 'Excused'}</span>
+                                  </button>
+                                </div>
+                              </td>
+
+                              {/* 3. Comment / Teacher Note Input beside actions */}
+                              <td
+                                className="py-5"
+                                style={{
+                                  paddingRight: isRTL ? '24px' : '16px',
+                                  paddingLeft: isRTL ? '16px' : '24px',
+                                }}
+                              >
+                                <input
+                                  type="text"
+                                  value={studentNotesMap[st.id] || ''}
+                                  onChange={(e) => setStudentNotesMap({ ...studentNotesMap, [st.id]: e.target.value })}
+                                  placeholder={language === 'ar' ? 'ملاحظة خاصة بالطالب...' : language === 'fr' ? 'Commentaire...' : 'Session note...'}
+                                  className="w-full min-w-[180px] h-10 px-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-xl text-xs text-slate-900 dark:text-white shadow-2xs focus:outline-none focus:border-indigo-500 transition-colors"
+                                />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-
-                {drawerStudents.map((st, idx) => {
-                  const currentStatus = studentStatusMap[st.id] || 'present';
-                  return (
-                    <div
-                      key={st.id}
-                      className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-850 p-4 space-y-3 shadow-2xs hover:border-indigo-500/40 transition-all"
-                      style={{ padding: '20px 22px' }}
-                    >
-                      {/* Student Info & Status Badges */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-black text-xs flex items-center justify-center shrink-0">
-                            {idx + 1}
-                          </div>
-                          <div>
-                            <div className="font-black text-sm text-slate-900 dark:text-white leading-snug">
-                              {st.fullNameAr}
-                            </div>
-                            <div className="text-xs text-slate-400 font-mono">
-                              {st.fullNameEn}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Status Selection Pill Buttons ("Present, Absent, Late, Excused") */}
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {/* Present */}
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(st.id, 'present')}
-                            className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1 transition-all cursor-pointer ${
-                              currentStatus === 'present'
-                                ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-400/40 scale-105'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-600'
-                            }`}
-                          >
-                            <span>✓</span>
-                            <span>{language === 'ar' ? 'حاضر' : language === 'fr' ? 'Présent' : 'Present'}</span>
-                          </button>
-
-                          {/* Late */}
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(st.id, 'late')}
-                            className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1 transition-all cursor-pointer ${
-                              currentStatus === 'late'
-                                ? 'bg-amber-500 text-slate-950 shadow-sm ring-2 ring-amber-400/40 scale-105'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600'
-                            }`}
-                          >
-                            <span>⏱</span>
-                            <span>{language === 'ar' ? 'متأخر' : language === 'fr' ? 'Retard' : 'Late'}</span>
-                          </button>
-
-                          {/* Absent */}
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(st.id, 'absent')}
-                            className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1 transition-all cursor-pointer ${
-                              currentStatus === 'absent'
-                                ? 'bg-rose-600 text-white shadow-sm ring-2 ring-rose-400/40 scale-105'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600'
-                            }`}
-                          >
-                            <span>✕</span>
-                            <span>{language === 'ar' ? 'غائب' : language === 'fr' ? 'Absent' : 'Absent'}</span>
-                          </button>
-
-                          {/* Excused */}
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(st.id, 'excused')}
-                            className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1 transition-all cursor-pointer ${
-                              currentStatus === 'excused'
-                                ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-400/40 scale-105'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600'
-                            }`}
-                          >
-                            <span>📄</span>
-                            <span>{language === 'ar' ? 'مبرر' : language === 'fr' ? 'Excusé' : 'Excused'}</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Teacher Note Input */}
-                      <div>
-                        <input
-                          type="text"
-                          value={studentNotesMap[st.id] || ''}
-                          onChange={(e) => setStudentNotesMap({ ...studentNotesMap, [st.id]: e.target.value })}
-                          placeholder={language === 'ar' ? 'ملاحظة خاصة بالطالب في هذه الجلسة...' : language === 'fr' ? 'Remarque sur l\'élève pour cette séance...' : 'Session note for this student...'}
-                          className="w-full h-10 px-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-xl text-xs text-slate-900 dark:text-white shadow-2xs focus:outline-none focus:border-indigo-500 transition-colors"
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
 
               {/* Sticky Footer */}
