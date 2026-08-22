@@ -1623,103 +1623,106 @@ export function AdminAcademicPathScreen() {
               </div>
 
               {/* Container 2: Section 4, 5, 6: Units & Lessons Breakdown with 3 Interactive States */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div className="flex items-center justify-between">
-                  <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                    <BookOpen size={18} className="text-indigo-600 dark:text-indigo-400" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="flex items-center justify-between" style={{ paddingBottom: '4px' }}>
+                  <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                      <BookOpen size={17} />
+                    </div>
                     <span>{language === 'ar' ? 'تفاصيل الوحدات والدروس ومستويات الإنجاز' : 'Curriculum Units & Lessons Progress'}</span>
                   </h4>
-                  <span className="text-xs font-bold text-slate-400 font-mono">
+                  <span className="text-xs font-bold text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-xl">
                     {studentCurriculumLevel.units.length} {language === 'ar' ? 'وحدات' : 'Units'}
                   </span>
                 </div>
 
-                {studentCurriculumLevel.units.map((unit, uIdx) => {
-                  const totalLessons = unit.lessons.length || 1;
-                  const completedLessons = unit.lessons.filter(
-                    (l) => (lessonProgressRecords[`${activeProgressStudent.id}_${l.id}`] || 'not_started') === 'completed'
-                  ).length;
-                  const inProgressLessons = unit.lessons.filter(
-                    (l) => (lessonProgressRecords[`${activeProgressStudent.id}_${l.id}`] || 'not_started') === 'in_progress'
-                  ).length;
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+                  {studentCurriculumLevel.units.map((unit, uIdx) => {
+                    const totalLessons = unit.lessons.length || 1;
+                    const completedLessons = unit.lessons.filter(
+                      (l) => (lessonProgressRecords[`${activeProgressStudent.id}_${l.id}`] || 'not_started') === 'completed'
+                    ).length;
+                    const inProgressLessons = unit.lessons.filter(
+                      (l) => (lessonProgressRecords[`${activeProgressStudent.id}_${l.id}`] || 'not_started') === 'in_progress'
+                    ).length;
 
-                  // Unit Progress Formula: Completed Lessons ÷ Total Lessons × 100
-                  const unitPercentage = Math.round((completedLessons / totalLessons) * 100);
+                    // Unit Progress Formula: Completed Lessons ÷ Total Lessons × 100
+                    const unitPercentage = Math.round((completedLessons / totalLessons) * 100);
 
-                  const isUnitCompleted = unitPercentage === 100;
-                  const isUnitInProgress = completedLessons > 0 || inProgressLessons > 0;
+                    const isUnitCompleted = unitPercentage === 100;
+                    const isUnitInProgress = completedLessons > 0 || inProgressLessons > 0;
 
-                  return (
-                    <div
-                      key={unit.id}
-                      className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden"
-                    >
-                      {/* Unit Header Bar */}
+                    return (
                       <div
-                        className="bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                        style={{ padding: '18px 24px' }}
+                        key={unit.id}
+                        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden"
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
-                            {uIdx + 1}
-                          </span>
-                          <div>
-                            <div className="flex items-center gap-2.5">
-                              <h5 className="font-black text-sm sm:text-base text-slate-900 dark:text-white">
-                                {unit.titleAr}
-                              </h5>
-                              <span className="text-xs text-slate-400 font-mono font-medium">
-                                ({unit.titleEn})
+                        {/* Unit Header Bar */}
+                        <div
+                          className="bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                          style={{ padding: '20px 28px' }}
+                        >
+                          <div className="flex items-center gap-3.5">
+                            <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
+                              {uIdx + 1}
+                            </span>
+                            <div>
+                              <div className="flex items-center gap-2.5">
+                                <h5 className="font-black text-sm sm:text-base text-slate-900 dark:text-white">
+                                  {unit.titleAr}
+                                </h5>
+                                <span className="text-xs text-slate-400 font-mono font-medium">
+                                  ({unit.titleEn})
+                                </span>
+                              </div>
+                              <span className="text-[11px] text-slate-400 font-bold block mt-0.5">
+                                {completedLessons} {language === 'ar' ? 'من' : 'of'} {totalLessons} {language === 'ar' ? 'دروس مكتملة' : 'lessons completed'}
                               </span>
                             </div>
-                            <span className="text-[11px] text-slate-400 font-bold block mt-0.5">
-                              {completedLessons} {language === 'ar' ? 'من' : 'of'} {totalLessons} {language === 'ar' ? 'دروس مكتملة' : 'lessons completed'}
+                          </div>
+
+                          <div className="flex items-center gap-3 shrink-0">
+                            {/* Unit Progress Badge */}
+                            <span
+                              className={`px-3 py-1 rounded-full font-mono font-black text-xs border flex items-center gap-1.5 ${
+                                isUnitCompleted
+                                  ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-800/80'
+                                  : isUnitInProgress
+                                  ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border-indigo-200/80 dark:border-indigo-800/80'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
+                              }`}
+                            >
+                              <span>{unitPercentage}%</span>
+                              <span>{isUnitCompleted ? '✓' : isUnitInProgress ? '●' : '■'}</span>
                             </span>
+
+                            {/* Mark Unit All Complete Button */}
+                            {!isUnitCompleted && (
+                              <button
+                                type="button"
+                                onClick={() => handleMarkUnitComplete(unit.id)}
+                                className="px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5 border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer shadow-2xs"
+                                title={language === 'ar' ? 'تعليم جميع دروس الوحدة كمكتملة' : 'Mark all unit lessons completed'}
+                              >
+                                <CheckCircle2 size={14} />
+                                <span>{language === 'ar' ? 'إتمام الوحدة' : 'Complete All'}</span>
+                              </button>
+                            )}
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 shrink-0">
-                          {/* Unit Progress Badge */}
-                          <span
-                            className={`px-3 py-1 rounded-full font-mono font-black text-xs border flex items-center gap-1.5 ${
-                              isUnitCompleted
-                                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-800/80'
-                                : isUnitInProgress
-                                ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border-indigo-200/80 dark:border-indigo-800/80'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
-                            }`}
-                          >
-                            <span>{unitPercentage}%</span>
-                            <span>{isUnitCompleted ? '✓' : isUnitInProgress ? '●' : '■'}</span>
-                          </span>
+                        {/* Lessons List inside Unit */}
+                        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                          {unit.lessons.map((lesson, lIdx) => {
+                            const currentStatus =
+                              lessonProgressRecords[`${activeProgressStudent.id}_${lesson.id}`] || 'not_started';
 
-                          {/* Mark Unit All Complete Button */}
-                          {!isUnitCompleted && (
-                            <button
-                              type="button"
-                              onClick={() => handleMarkUnitComplete(unit.id)}
-                              className="px-3 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center gap-1 border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer"
-                              title={language === 'ar' ? 'تعليم جميع دروس الوحدة كمكتملة' : 'Mark all unit lessons completed'}
-                            >
-                              <CheckCircle2 size={13} />
-                              <span>{language === 'ar' ? 'إتمام الوحدة' : 'Complete All'}</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Lessons List inside Unit */}
-                      <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                        {unit.lessons.map((lesson, lIdx) => {
-                          const currentStatus =
-                            lessonProgressRecords[`${activeProgressStudent.id}_${lesson.id}`] || 'not_started';
-
-                          return (
-                            <div
-                              key={lesson.id}
-                              className="flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-900/30"
-                              style={{ padding: '16px 24px' }}
-                            >
+                            return (
+                              <div
+                                key={lesson.id}
+                                className="flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-900/30"
+                                style={{ padding: '18px 28px' }}
+                              >
                               {/* Left: Lesson Info */}
                               <div className="space-y-1.5 flex-1">
                                 <div className="flex items-center gap-2.5">
@@ -1836,6 +1839,7 @@ export function AdminAcademicPathScreen() {
                     </div>
                   );
                 })}
+                </div>
               </div>
             </div>
           )}
