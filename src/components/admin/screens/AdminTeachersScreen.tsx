@@ -145,21 +145,21 @@ export function AdminTeachersScreen() {
       {/* Teachers Table (Section 10) */}
       <div
         className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs overflow-hidden"
-        style={{ marginBottom: '40px' }}
+        style={{ marginBottom: '44px' }}
       >
         <div className="overflow-x-auto">
           <table className="w-full text-xs sm:text-sm text-right">
             <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
               <tr>
-                <th className="py-5 px-6 text-right font-extrabold">{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'اسم المستخدم' : 'Username'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الهاتف' : 'Phone'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'اللغات' : 'Languages'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الأفواج' : 'Groups'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الطلاب' : 'Students'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الحالة' : 'Status'}</th>
-                <th className="py-5 px-6 text-center font-extrabold">{language === 'ar' ? 'الإجراءات' : 'Actions'}</th>
+                <th className="py-6 px-7 text-right font-extrabold">{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
+                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'اسم المستخدم' : 'Username'}</th>
+                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</th>
+                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الهاتف' : 'Phone'}</th>
+                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'اللغات' : 'Languages'}</th>
+                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الأفواج' : 'Groups'}</th>
+                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الطلاب' : 'Students'}</th>
+                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الحالة' : 'Status'}</th>
+                <th className="py-6 px-7 text-center font-extrabold">{language === 'ar' ? 'الإجراءات' : 'Actions'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -175,57 +175,57 @@ export function AdminTeachersScreen() {
                     className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
                     onClick={() => handleOpenTeacher(teach)}
                   >
-                    <td className="py-6 px-6">
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center font-black text-sm shrink-0">
+                    <td className="py-8 px-7">
+                      <div className="flex items-center gap-4">
+                        <div className="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center font-black text-sm shrink-0">
                           {teach.fullNameAr[0]}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">{teach.fullNameAr}</div>
-                          <div className="text-xs text-slate-400 font-mono mt-0.5">{teach.fullNameEn}</div>
+                          <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-snug">{teach.fullNameAr}</div>
+                          <div className="text-xs text-slate-400 font-mono mt-1">{teach.fullNameEn}</div>
                         </div>
                       </div>
                     </td>
 
-                    <td className="py-6 px-4 text-center font-mono font-bold text-purple-600 text-xs sm:text-sm">
+                    <td className="py-8 px-6 text-center font-mono font-bold text-purple-600 text-xs sm:text-sm">
                       @{teach.username}
                     </td>
 
-                    <td className="py-6 px-4 text-center font-mono text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
+                    <td className="py-8 px-6 text-center font-mono text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
                       {teach.email}
                     </td>
 
-                    <td className="py-6 px-4 text-center font-mono font-bold text-slate-700 dark:text-slate-300 text-xs sm:text-sm" dir="ltr">
+                    <td className="py-8 px-6 text-center font-mono font-bold text-slate-700 dark:text-slate-300 text-xs sm:text-sm" dir="ltr">
                       {teach.phone}
                     </td>
 
-                    <td className="py-6 px-4 text-center font-bold text-xs sm:text-sm text-emerald-600">
+                    <td className="py-8 px-6 text-center font-bold text-xs sm:text-sm text-emerald-600">
                       {teach.languagesTaught.join(' & ')}
                     </td>
 
-                    <td className="py-6 px-4 text-center font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
+                    <td className="py-8 px-6 text-center font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
                       {assignedGrps.length} {language === 'ar' ? 'أفواج' : 'groups'}
                     </td>
 
-                    <td className="py-6 px-4 text-center font-mono font-black text-indigo-600 text-sm">
+                    <td className="py-8 px-6 text-center font-mono font-black text-indigo-600 text-sm sm:text-base">
                       {studentsCount} {language === 'ar' ? 'طالب' : 'students'}
                     </td>
 
-                    <td className="py-6 px-4 text-center">
+                    <td className="py-8 px-6 text-center">
                       <span
                         className="text-xs font-bold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
-                        style={{ padding: '6px 14px' }}
+                        style={{ padding: '8px 18px' }}
                       >
                         {teach.status === 'active' ? 'نشط' : 'غير نشط'}
                       </span>
                     </td>
 
-                    <td className="py-6 px-6 text-center" onClick={(e) => e.stopPropagation()}>
+                    <td className="py-8 px-7 text-center" onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
                         onClick={() => handleOpenTeacher(teach)}
-                        className="rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 font-bold text-xs transition-colors cursor-pointer"
-                        style={{ padding: '8px 18px' }}
+                        className="rounded-2xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 font-bold text-xs transition-colors cursor-pointer"
+                        style={{ padding: '10px 22px' }}
                       >
                         {language === 'ar' ? 'الملف والأفواج' : 'Profile & Groups'} →
                       </button>
