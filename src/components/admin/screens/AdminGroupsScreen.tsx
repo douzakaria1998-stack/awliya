@@ -178,14 +178,34 @@ export function AdminGroupsScreen() {
           <table className={`w-full text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
             <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
               <tr>
-                <th className={`py-6 px-7 ${isRTL ? 'text-right' : 'text-left'} font-extrabold`}>{language === 'ar' ? 'الفوج والكود' : 'Group Code & Name'}</th>
-                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'اللغة والمستوى' : 'Language & Level'}</th>
-                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'المعلم المشرف' : 'Assigned Teacher'}</th>
-                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الأيام والتوقيت' : 'Schedule'}</th>
-                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الطلاب / السعة' : 'Capacity'}</th>
-                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
-                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
-                <th className="py-6 px-7 text-center font-extrabold">{language === 'ar' ? 'الإجراءات' : 'Actions'}</th>
+                <th
+                  className={`font-extrabold text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
+                  style={{
+                    paddingTop: '26px',
+                    paddingBottom: '26px',
+                    paddingLeft: isRTL ? '24px' : '40px',
+                    paddingRight: isRTL ? '40px' : '24px',
+                  }}
+                >
+                  {language === 'ar' ? 'الفوج والكود' : 'Group Code & Name'}
+                </th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'اللغة والمستوى' : 'Language & Level'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'المعلم المشرف' : 'Assigned Teacher'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'الأيام والتوقيت' : 'Schedule'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'الطلاب / السعة' : 'Capacity'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
+                <th
+                  className="font-extrabold text-center"
+                  style={{
+                    paddingTop: '26px',
+                    paddingBottom: '26px',
+                    paddingRight: isRTL ? '40px' : '24px',
+                    paddingLeft: isRTL ? '24px' : '40px',
+                  }}
+                >
+                  {language === 'ar' ? 'الإجراءات' : 'Actions'}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -195,7 +215,13 @@ export function AdminGroupsScreen() {
                   className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
                   onClick={() => handleOpenGroup(grp)}
                 >
-                  <td className="py-8 px-7">
+                  <td
+                    className="py-8"
+                    style={{
+                      paddingLeft: isRTL ? '24px' : '40px',
+                      paddingRight: isRTL ? '40px' : '24px',
+                    }}
+                  >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center font-black text-xs shrink-0 font-mono shadow-xs">
                         {grp.code}
@@ -239,7 +265,14 @@ export function AdminGroupsScreen() {
                     {grp.averageProgress}%
                   </td>
 
-                  <td className="py-8 px-7 text-center" onClick={(e) => e.stopPropagation()}>
+                  <td
+                    className="py-8 text-center"
+                    style={{
+                      paddingRight: isRTL ? '40px' : '24px',
+                      paddingLeft: isRTL ? '24px' : '40px',
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <button
                       type="button"
                       onClick={() => handleOpenGroup(grp)}

@@ -152,15 +152,35 @@ export function AdminTeachersScreen() {
           <table className={`w-full text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
             <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
               <tr>
-                <th className={`py-6 px-7 ${isRTL ? 'text-right' : 'text-left'} font-extrabold`}>{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
-                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'اسم المستخدم' : 'Username'}</th>
-                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</th>
-                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الهاتف' : 'Phone'}</th>
-                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'اللغات' : 'Languages'}</th>
-                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الأفواج' : 'Groups'}</th>
-                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الطلاب' : 'Students'}</th>
-                <th className="py-6 px-6 text-center font-extrabold">{language === 'ar' ? 'الحالة' : 'Status'}</th>
-                <th className="py-6 px-7 text-center font-extrabold">{language === 'ar' ? 'الإجراءات' : 'Actions'}</th>
+                <th
+                  className={`font-extrabold text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
+                  style={{
+                    paddingTop: '26px',
+                    paddingBottom: '26px',
+                    paddingLeft: isRTL ? '24px' : '40px',
+                    paddingRight: isRTL ? '40px' : '24px',
+                  }}
+                >
+                  {language === 'ar' ? 'المعلم' : 'Teacher'}
+                </th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'اسم المستخدم' : 'Username'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'الهاتف' : 'Phone'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'اللغات' : 'Languages'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'الأفواج' : 'Groups'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'الطلاب' : 'Students'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'الحالة' : 'Status'}</th>
+                <th
+                  className="font-extrabold text-center"
+                  style={{
+                    paddingTop: '26px',
+                    paddingBottom: '26px',
+                    paddingRight: isRTL ? '40px' : '24px',
+                    paddingLeft: isRTL ? '24px' : '40px',
+                  }}
+                >
+                  {language === 'ar' ? 'الإجراءات' : 'Actions'}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -176,7 +196,13 @@ export function AdminTeachersScreen() {
                     className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
                     onClick={() => handleOpenTeacher(teach)}
                   >
-                    <td className="py-8 px-7">
+                    <td
+                      className="py-8"
+                      style={{
+                        paddingLeft: isRTL ? '24px' : '40px',
+                        paddingRight: isRTL ? '40px' : '24px',
+                      }}
+                    >
                       <div className="flex items-center gap-4">
                         <div className="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center font-black text-sm shrink-0">
                           {teach.fullNameAr[0]}
@@ -221,7 +247,14 @@ export function AdminTeachersScreen() {
                       </span>
                     </td>
 
-                    <td className="py-8 px-7 text-center" onClick={(e) => e.stopPropagation()}>
+                    <td
+                      className="py-8 text-center"
+                      style={{
+                        paddingRight: isRTL ? '40px' : '24px',
+                        paddingLeft: isRTL ? '24px' : '40px',
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
                         type="button"
                         onClick={() => handleOpenTeacher(teach)}

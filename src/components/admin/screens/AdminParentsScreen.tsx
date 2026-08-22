@@ -138,18 +138,38 @@ export function AdminParentsScreen() {
       {/* Parents Table (Section 8) */}
       <div
         className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs overflow-hidden"
-        style={{ marginBottom: '40px' }}
+        style={{ marginBottom: '44px' }}
       >
         <div className="overflow-x-auto">
           <table className={`w-full text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
             <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
               <tr>
-                <th className={`py-5 px-6 ${isRTL ? 'text-right' : 'text-left'} font-extrabold`}>{language === 'ar' ? 'ولي الأمر' : 'Parent Name'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'رقم الهاتف' : 'Phone'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'عدد الأبناء' : 'Children'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الحالة' : 'Status'}</th>
-                <th className="py-5 px-6 text-center font-extrabold">{language === 'ar' ? 'الإجراءات' : 'Actions'}</th>
+                <th
+                  className={`font-extrabold text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
+                  style={{
+                    paddingTop: '26px',
+                    paddingBottom: '26px',
+                    paddingLeft: isRTL ? '24px' : '40px',
+                    paddingRight: isRTL ? '40px' : '24px',
+                  }}
+                >
+                  {language === 'ar' ? 'ولي الأمر' : 'Parent Name'}
+                </th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'رقم الهاتف' : 'Phone'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'عدد الأبناء' : 'Children'}</th>
+                <th className="py-7 px-6 text-center font-extrabold">{language === 'ar' ? 'الحالة' : 'Status'}</th>
+                <th
+                  className="font-extrabold text-center"
+                  style={{
+                    paddingTop: '26px',
+                    paddingBottom: '26px',
+                    paddingRight: isRTL ? '40px' : '24px',
+                    paddingLeft: isRTL ? '24px' : '40px',
+                  }}
+                >
+                  {language === 'ar' ? 'الإجراءات' : 'Actions'}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -160,45 +180,58 @@ export function AdminParentsScreen() {
                     className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
                     onClick={() => handleOpenParent(par)}
                   >
-                    <td className="py-6 px-6">
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center font-black text-sm shrink-0">
+                    <td
+                      className="py-8"
+                      style={{
+                        paddingLeft: isRTL ? '24px' : '40px',
+                        paddingRight: isRTL ? '40px' : '24px',
+                      }}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-11 h-11 rounded-2xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center font-black text-sm shrink-0">
                           {par.fullNameAr[0]}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">{par.fullNameAr}</div>
-                          <div className="text-xs text-slate-400 font-mono mt-0.5">{par.fullNameEn}</div>
+                          <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-snug">{par.fullNameAr}</div>
+                          <div className="text-xs text-slate-400 font-mono mt-1">{par.fullNameEn}</div>
                         </div>
                       </div>
                     </td>
 
-                    <td className="py-6 px-4 text-center font-mono font-bold text-slate-700 dark:text-slate-300 text-xs sm:text-sm" dir="ltr">
+                    <td className="py-8 px-6 text-center font-mono font-bold text-slate-700 dark:text-slate-300 text-xs sm:text-sm" dir="ltr">
                       {par.phone}
                     </td>
 
-                    <td className="py-6 px-4 text-center font-mono text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
+                    <td className="py-8 px-6 text-center font-mono text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
                       {par.email}
                     </td>
 
-                    <td className="py-6 px-4 text-center font-mono font-black text-purple-600 text-sm sm:text-base">
+                    <td className="py-8 px-6 text-center font-mono font-black text-purple-600 text-sm sm:text-base">
                       {par.linkedStudentIds.length} {language === 'ar' ? 'أبناء' : 'children'}
                     </td>
 
-                    <td className="py-6 px-4 text-center">
+                    <td className="py-8 px-6 text-center">
                       <span
                         className="text-xs font-bold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
-                        style={{ padding: '6px 14px' }}
+                        style={{ padding: '8px 18px' }}
                       >
                         {par.status === 'active' ? 'نشط' : 'غير نشط'}
                       </span>
                     </td>
 
-                    <td className="py-6 px-6 text-center" onClick={(e) => e.stopPropagation()}>
+                    <td
+                      className="py-8 text-center"
+                      style={{
+                        paddingRight: isRTL ? '40px' : '24px',
+                        paddingLeft: isRTL ? '24px' : '40px',
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
                         type="button"
                         onClick={() => handleOpenParent(par)}
-                        className="rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-bold text-xs transition-colors cursor-pointer"
-                        style={{ padding: '8px 18px' }}
+                        className="rounded-2xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-bold text-xs transition-colors cursor-pointer"
+                        style={{ padding: '10px 22px' }}
                       >
                         {language === 'ar' ? 'الملف وإدارة الأبناء' : 'Manage Children'} →
                       </button>
