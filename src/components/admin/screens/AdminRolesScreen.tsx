@@ -347,37 +347,37 @@ export function AdminRolesScreen() {
 
       {/* Modal: Create Admin User (Section 31) */}
       {isAddUserOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-md animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-md animate-fade-in">
           <div
-            className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl border border-slate-200/80 dark:border-slate-800 animate-fade-in-up"
-            style={{ padding: '28px 32px' }}
+            className="w-full max-w-md bg-white dark:bg-slate-900 rounded-[24px] shadow-2xl border border-slate-200/80 dark:border-slate-800 animate-fade-in-up"
+            style={{ padding: '20px 24px' }}
           >
             {/* Modal Header */}
             <div
               className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800"
-              style={{ paddingBottom: '14px', marginBottom: '18px' }}
+              style={{ paddingBottom: '10px', marginBottom: '12px' }}
             >
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center font-black shrink-0">
-                  {modalStep === 1 ? <UserPlus size={17} /> : <ShieldCheck size={17} />}
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center font-black shrink-0">
+                  {modalStep === 1 ? <UserPlus size={15} /> : <ShieldCheck size={15} />}
                 </div>
                 <div>
-                  <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">
+                  <h3 className="font-black text-sm sm:text-base text-slate-900 dark:text-white leading-tight">
                     {modalStep === 1 ? 'إضافة حساب إداري جديد' : 'تحديد الدور والصلاحيات الممنوحة'}
                   </h3>
-                  <p className="text-[11px] text-slate-400 font-medium">
+                  <p className="text-[10px] text-slate-400 font-medium">
                     {modalStep === 1
                       ? 'الخطوة 1 من 2: تعيين البيانات الشخصية ورقم التواصل'
-                      : `الخطوة 2 من 2: اختيار الدور وتفويض الصلاحيات لـ ${newNameAr || 'المستخدم'}`}
+                      : `الخطوة 2 من 2: تفويض الصلاحيات لـ ${newNameAr || 'المشرف'}`}
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsAddUserOpen(false)}
-                className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
               >
-                <X size={16} />
+                <X size={14} />
               </button>
             </div>
 
@@ -390,12 +390,12 @@ export function AdminRolesScreen() {
                     setModalStep(2);
                   }
                 }}
-                style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}
+                style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
               >
                 <div>
                   <label
-                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
-                    style={{ marginBottom: '5px' }}
+                    className="block text-[11px] font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '4px' }}
                   >
                     الاسم الكامل بالعربية *
                   </label>
@@ -405,15 +405,15 @@ export function AdminRolesScreen() {
                     value={newNameAr}
                     onChange={(e) => setNewNameAr(e.target.value)}
                     placeholder="أ. سفيان لعور"
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
-                    style={{ height: '42px', padding: '8px 14px' }}
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                    style={{ height: '38px', padding: '6px 12px' }}
                   />
                 </div>
 
                 <div>
                   <label
-                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
-                    style={{ marginBottom: '5px' }}
+                    className="block text-[11px] font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '4px' }}
                   >
                     اسم المستخدم (Username) *
                   </label>
@@ -423,16 +423,16 @@ export function AdminRolesScreen() {
                     value={newUsername}
                     onChange={(e) => setNewUsername(e.target.value)}
                     placeholder="soufiane.admin"
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-xs sm:text-sm text-purple-600 dark:text-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
-                    style={{ height: '42px', padding: '8px 14px' }}
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-xs text-purple-600 dark:text-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                    style={{ height: '38px', padding: '6px 12px' }}
                     dir="ltr"
                   />
                 </div>
 
                 <div>
                   <label
-                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
-                    style={{ marginBottom: '5px' }}
+                    className="block text-[11px] font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '4px' }}
                   >
                     القسم أو الإدارة
                   </label>
@@ -441,15 +441,15 @@ export function AdminRolesScreen() {
                     value={newDept}
                     onChange={(e) => setNewDept(e.target.value)}
                     placeholder="إدارة شؤون التسجيل"
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all"
-                    style={{ height: '42px', padding: '8px 14px' }}
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all"
+                    style={{ height: '38px', padding: '6px 12px' }}
                   />
                 </div>
 
                 <div>
                   <label
-                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
-                    style={{ marginBottom: '5px' }}
+                    className="block text-[11px] font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '4px' }}
                   >
                     رقم الهاتف
                   </label>
@@ -458,20 +458,20 @@ export function AdminRolesScreen() {
                     value={newPhone}
                     onChange={(e) => setNewPhone(e.target.value)}
                     placeholder="+213 770 000 000"
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
-                    style={{ height: '42px', padding: '8px 14px' }}
+                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                    style={{ height: '38px', padding: '6px 12px' }}
                     dir="ltr"
                   />
                 </div>
 
-                <div style={{ paddingTop: '6px' }}>
+                <div style={{ paddingTop: '4px' }}>
                   <button
                     type="submit"
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md hover:scale-[1.01] active:scale-95 transition-all cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-2"
-                    style={{ height: '46px' }}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-xs hover:scale-[1.01] active:scale-95 transition-all cursor-pointer text-xs flex items-center justify-center gap-2"
+                    style={{ height: '40px' }}
                   >
                     <span>{language === 'ar' ? 'التالي: تحديد الدور والصلاحيات' : 'Next: Select Role & Permissions'}</span>
-                    {isRTL ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+                    {isRTL ? <ArrowLeft size={14} /> : <ArrowRight size={14} />}
                   </button>
                 </div>
               </form>
@@ -479,106 +479,106 @@ export function AdminRolesScreen() {
 
             {/* STEP 2: Role & Permissions Selection Popup */}
             {modalStep === 2 && (
-              <form onSubmit={handleCreateAdminUser} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <form onSubmit={handleCreateAdminUser} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div>
                   <label
-                    className="block text-xs font-bold text-slate-700 dark:text-slate-300"
-                    style={{ marginBottom: '10px' }}
+                    className="block text-[11px] font-bold text-slate-700 dark:text-slate-300"
+                    style={{ marginBottom: '6px' }}
                   >
                     اختر الدور الوظيفي للحساب (Select Account Role):
                   </label>
 
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 gap-2">
                     {/* Option 1: Administrator */}
                     <div
                       onClick={() => handleSelectRole('administrator')}
-                      className={`rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                      className={`rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
                         newRole === 'administrator'
-                          ? 'bg-blue-50/90 dark:bg-blue-950/50 border-blue-500 ring-2 ring-blue-500/20 shadow-xs'
+                          ? 'bg-blue-50/90 dark:bg-blue-950/50 border-blue-500 ring-1 ring-blue-500/20 shadow-xs'
                           : 'bg-slate-50/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                       }`}
-                      style={{ padding: '14px 18px' }}
+                      style={{ padding: '8px 12px' }}
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center font-black shrink-0">
-                          <UserCheck size={18} />
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center font-black shrink-0">
+                          <UserCheck size={15} />
                         </div>
                         <div className="min-w-0">
-                          <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                          <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
                             <span>مدير عمليات وشؤون طلاب (Administrator)</span>
                           </div>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                          <p className="text-[10px] text-slate-400 leading-tight truncate">
                             إدارة شاملة للطلاب، الأفواج، الحضور، والتسجيل
                           </p>
                         </div>
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mr-2 ${
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mr-1.5 ${
                         newRole === 'administrator' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 dark:border-slate-600'
                       }`}>
-                        {newRole === 'administrator' && <Check size={12} className="stroke-[3]" />}
+                        {newRole === 'administrator' && <Check size={10} className="stroke-[3]" />}
                       </div>
                     </div>
 
                     {/* Option 2: Super Admin */}
                     <div
                       onClick={() => handleSelectRole('super_admin')}
-                      className={`rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                      className={`rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
                         newRole === 'super_admin'
-                          ? 'bg-purple-50/90 dark:bg-purple-950/50 border-purple-500 ring-2 ring-purple-500/20 shadow-xs'
+                          ? 'bg-purple-50/90 dark:bg-purple-950/50 border-purple-500 ring-1 ring-purple-500/20 shadow-xs'
                           : 'bg-slate-50/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                       }`}
-                      style={{ padding: '14px 18px' }}
+                      style={{ padding: '8px 12px' }}
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950/80 text-purple-600 flex items-center justify-center font-black shrink-0">
-                          <ShieldCheck size={18} />
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-950/80 text-purple-600 flex items-center justify-center font-black shrink-0">
+                          <ShieldCheck size={15} />
                         </div>
                         <div className="min-w-0">
-                          <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white flex flex-wrap items-center gap-2">
+                          <div className="font-bold text-xs text-slate-900 dark:text-white flex flex-wrap items-center gap-1.5">
                             <span>مدير عام تنفيذي (Super Admin)</span>
-                            <span className="text-[10px] bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300 px-2.5 py-0.5 rounded-full font-bold">
-                              وصول كامل 100%
+                            <span className="text-[9px] bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300 px-1.5 py-0.2 rounded-md font-bold">
+                              100%
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                          <p className="text-[10px] text-slate-400 leading-tight truncate">
                             صلاحيات مطلقة لإدارة الحسابات، الأمان، وإعدادات النظام
                           </p>
                         </div>
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mr-2 ${
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mr-1.5 ${
                         newRole === 'super_admin' ? 'border-purple-600 bg-purple-600 text-white' : 'border-slate-300 dark:border-slate-600'
                       }`}>
-                        {newRole === 'super_admin' && <Check size={12} className="stroke-[3]" />}
+                        {newRole === 'super_admin' && <Check size={10} className="stroke-[3]" />}
                       </div>
                     </div>
 
                     {/* Option 3: Teacher */}
                     <div
                       onClick={() => handleSelectRole('teacher')}
-                      className={`rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                      className={`rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
                         newRole === 'teacher'
-                          ? 'bg-emerald-50/90 dark:bg-emerald-950/50 border-emerald-500 ring-2 ring-emerald-500/20 shadow-xs'
+                          ? 'bg-emerald-50/90 dark:bg-emerald-950/50 border-emerald-500 ring-1 ring-emerald-500/20 shadow-xs'
                           : 'bg-slate-50/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                       }`}
-                      style={{ padding: '14px 18px' }}
+                      style={{ padding: '8px 12px' }}
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 flex items-center justify-center font-black shrink-0">
-                          <GraduationCap size={18} />
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 flex items-center justify-center font-black shrink-0">
+                          <GraduationCap size={15} />
                         </div>
                         <div className="min-w-0">
-                          <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                          <div className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
                             <span>معلم ومؤطر أكاديمي (Teacher)</span>
                           </div>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                          <p className="text-[10px] text-slate-400 leading-tight truncate">
                             متابعة أفواجه الخاصة ورصد الحضور والواجبات والتقييمات
                           </p>
                         </div>
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mr-2 ${
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mr-1.5 ${
                         newRole === 'teacher' ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300 dark:border-slate-600'
                       }`}>
-                        {newRole === 'teacher' && <Check size={12} className="stroke-[3]" />}
+                        {newRole === 'teacher' && <Check size={10} className="stroke-[3]" />}
                       </div>
                     </div>
                   </div>
@@ -586,19 +586,19 @@ export function AdminRolesScreen() {
 
                 {/* Interactive Selectable Permissions Box */}
                 <div
-                  className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80"
-                  style={{ padding: '16px 20px' }}
+                  className="rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80"
+                  style={{ padding: '10px 12px' }}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                    <div className="text-xs font-black text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <Sparkles size={14} className="text-purple-600" />
-                      <span>تخصيص وتحديد الصلاحيات الممنوحة (انقر للتحديد أو الإلغاء):</span>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                      <Sparkles size={12} className="text-purple-600" />
+                      <span>الصلاحيات الممنوحة:</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={handleSelectAllPermissions}
-                        className="text-[11px] text-purple-600 hover:text-purple-700 dark:text-purple-400 font-bold hover:underline cursor-pointer"
+                        className="text-[10px] text-purple-600 hover:text-purple-700 dark:text-purple-400 font-bold hover:underline cursor-pointer"
                       >
                         تحديد الكل
                       </button>
@@ -606,14 +606,14 @@ export function AdminRolesScreen() {
                       <button
                         type="button"
                         onClick={handleClearAllPermissions}
-                        className="text-[11px] text-slate-400 hover:text-rose-500 font-bold hover:underline cursor-pointer"
+                        className="text-[10px] text-slate-400 hover:text-rose-500 font-bold hover:underline cursor-pointer"
                       >
                         إلغاء الكل
                       </button>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-0.5">
                     {availablePermissionsList.map((perm) => {
                       const isSelected = selectedPermissions.includes(perm.id);
                       return (
@@ -621,19 +621,19 @@ export function AdminRolesScreen() {
                           key={perm.id}
                           type="button"
                           onClick={() => handleTogglePermission(perm.id)}
-                          className={`rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer select-none hover:scale-105 active:scale-95 ${
+                          className={`rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer select-none hover:scale-102 active:scale-95 ${
                             isSelected
-                              ? 'bg-purple-600 text-white border border-purple-500 shadow-2xs font-black'
+                              ? 'bg-purple-600 text-white border border-purple-500 shadow-2xs font-bold'
                               : 'bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                           }`}
-                          style={{ padding: '7px 14px' }}
+                          style={{ padding: '4px 8px' }}
                         >
                           <div
-                            className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 ${
+                            className={`w-3 h-3 rounded flex items-center justify-center shrink-0 ${
                               isSelected ? 'bg-white/25 text-white' : 'border border-slate-300 dark:border-slate-600'
                             }`}
                           >
-                            {isSelected && <Check size={10} className="stroke-[3]" />}
+                            {isSelected && <Check size={8} className="stroke-[3]" />}
                           </div>
                           <span>{language === 'ar' ? perm.labelAr : perm.labelEn}</span>
                         </button>
@@ -643,23 +643,23 @@ export function AdminRolesScreen() {
                 </div>
 
                 {/* Actions: Back & Confirm */}
-                <div className="flex items-center gap-3 pt-2">
+                <div className="flex items-center gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => setModalStep(1)}
-                    className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-1.5"
-                    style={{ height: '46px' }}
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all cursor-pointer text-xs flex items-center justify-center gap-1"
+                    style={{ height: '38px' }}
                   >
-                    {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-                    <span>{language === 'ar' ? 'السابق (تعديل البيانات)' : 'Back'}</span>
+                    {isRTL ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
+                    <span>{language === 'ar' ? 'السابق' : 'Back'}</span>
                   </button>
 
                   <button
                     type="submit"
-                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-xl shadow-md hover:scale-[1.01] active:scale-95 transition-all cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-2"
-                    style={{ height: '46px' }}
+                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-xs hover:scale-[1.01] active:scale-95 transition-all cursor-pointer text-xs flex items-center justify-center gap-1.5"
+                    style={{ height: '38px' }}
                   >
-                    <CheckCircle2 size={16} />
+                    <CheckCircle2 size={14} />
                     <span>{language === 'ar' ? 'تأكيد وتفعيل الحساب' : 'Confirm & Create'}</span>
                   </button>
                 </div>
