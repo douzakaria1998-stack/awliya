@@ -14,13 +14,17 @@ import {
   FileCheck,
   Languages,
   X,
+  Trash2,
+  ArrowRight,
+  ArrowLeft,
+  Check,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { CurriculumLevel } from '@/types/admin';
 
 export function AdminAcademicPathScreen() {
-  const { curricula, visibleStudents, currentRole } = useAdmin();
+  const { curricula, visibleStudents, currentRole, addCurriculumLevel } = useAdmin();
   const { isRTL, language } = useLanguage();
 
   const [activeTab, setActiveTab] = useState<'curriculum' | 'student_progress'>('curriculum');
@@ -29,12 +33,33 @@ export function AdminAcademicPathScreen() {
 
   // Create Level Modal State
   const [isAddLevelOpen, setIsAddLevelOpen] = useState(false);
+  const [modalStep, setModalStep] = useState<'basic' | 'units'>('basic');
   const [newLevelNameAr, setNewLevelNameAr] = useState('');
   const [newLevelNameEn, setNewLevelNameEn] = useState('');
-  const [newLevelCode, setNewLevelCode] = useState('A1');
+  const [newLevelCode, setNewLevelCode] = useState<'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'>('A1');
   const [newLevelColor, setNewLevelColor] = useState('#3B82F6');
   const [newLevelDescAr, setNewLevelDescAr] = useState('');
-  const [newUnitsCount, setNewUnitsCount] = useState(5);
+  const [newLevelDescEn, setNewLevelDescEn] = useState('');
+  const [newUnitsCount, setNewUnitsCount] = useState(3);
+
+  // Units & Lessons configuration state for Step 2
+  interface UnitDraft {
+    id: string;
+    unitNumber: number;
+    titleAr: string;
+    titleEn: string;
+    lessons: {
+      id: string;
+      lessonNumber: number;
+      titleAr: string;
+      titleEn: string;
+      contentSummary: string;
+      vocabString: string;
+      hasAssessment: boolean;
+    }[];
+  }
+
+  const [unitsDraft, setUnitsDraft] = useState<UnitDraft[]>([]);
 
   const activeLevel = curricula.find(
     (c) => c.levelNumber === selectedLevelNumber && c.language === selectedCurriculumLanguage
@@ -46,10 +71,181 @@ export function AdminAcademicPathScreen() {
     setExpandedUnitId((prev) => (prev === unitId ? null : unitId));
   };
 
-  const handleCreateLevel = (e: React.FormEvent) => {
+  // Step 1 Submit: Move to Step 2 (Units & Lessons configuration)
+  const handleProceedToUnits = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(language === 'ar' ? 'تم إنشاء وحفظ المستوى الجديد بنجاح في المنهاج الأكاديمي!' : 'New level created successfully!');
+    if (!newLevelNameAr.trim()) return;
+
+    // Generate initial units if not already configured
+    const count = Math.max(1, newUnitsCount);
+    const initialUnits: UnitDraft[] = Array.from({ length: count }, (_, uIdx) => {
+      const uNum = uIdx + 1;
+      return {
+        id: `draft-unit-${uNum}-${Date.now()}`,
+        unitNumber: uNum,
+        titleAr: `الوحدة ${uNum}: محاور التأسيس والمفردات (${newLevelCode})`,
+        titleEn: `Unit ${uNum}: Core Vocabulary & Concepts`,
+        lessons: [
+          {
+            id: `draft-lesson-${uNum}-1-${Date.now()}`,
+            lessonNumber: 1,
+            titleAr: `الدرس 1: القواعد والمفردات التأسيسية`,
+            titleEn: `Lesson 1: Foundations & Structure`,
+            contentSummary: 'شرح القواعد الأساسية والمفردات المحورية وتطبيقاتها.',
+            vocabString: 'Introduction, Grammar, Vocabulary',
+            hasAssessment: false,
+          },
+          {
+            id: `draft-lesson-${uNum}-2-${Date.now()}`,
+            lessonNumber: 2,
+            titleAr: `الدرس 2: التعبير الشفهي والتطبيق العملي`,
+            titleEn: `Lesson 2: Speaking & Practice`,
+            contentSummary: 'تمارين تطبيقية وتدريبات محادثة تفاعلية.',
+            vocabString: 'Conversation, Dialogue, Practice',
+            hasAssessment: true,
+          },
+        ],
+      };
+    });
+
+    setUnitsDraft(initialUnits);
+    setModalStep('units');
+  };
+
+  // Helper actions for Units in Step 2
+  const handleAddUnit = () => {
+    const nextNum = unitsDraft.length + 1;
+    const newUnit: UnitDraft = {
+      id: `draft-unit-${nextNum}-${Date.now()}`,
+      unitNumber: nextNum,
+      titleAr: `الوحدة ${nextNum}: المحور التعليمي الجديد`,
+      titleEn: `Unit ${nextNum}: New Topic`,
+      lessons: [
+        {
+          id: `draft-lesson-${nextNum}-1-${Date.now()}`,
+          lessonNumber: 1,
+          titleAr: `الدرس 1: المفردات والتطبيق`,
+          titleEn: `Lesson 1: Vocabulary & Practice`,
+          contentSummary: 'شرح المفردات والمفاهيم الأساسية للوحدة.',
+          vocabString: 'Topic, Words, Exercises',
+          hasAssessment: false,
+        },
+      ],
+    };
+    setUnitsDraft((prev) => [...prev, newUnit]);
+  };
+
+  const handleRemoveUnit = (unitId: string) => {
+    if (unitsDraft.length <= 1) return;
+    setUnitsDraft((prev) => prev.filter((u) => u.id !== unitId).map((u, idx) => ({ ...u, unitNumber: idx + 1 })));
+  };
+
+  const handleUpdateUnit = (unitId: string, updates: Partial<UnitDraft>) => {
+    setUnitsDraft((prev) => prev.map((u) => (u.id === unitId ? { ...u, ...updates } : u)));
+  };
+
+  const handleAddLesson = (unitId: string) => {
+    setUnitsDraft((prev) =>
+      prev.map((unit) => {
+        if (unit.id !== unitId) return unit;
+        const nextLNum = unit.lessons.length + 1;
+        const newLesson = {
+          id: `draft-lesson-${unit.unitNumber}-${nextLNum}-${Date.now()}`,
+          lessonNumber: nextLNum,
+          titleAr: `الدرس ${nextLNum}: عنوان الدرس الجديد`,
+          titleEn: `Lesson ${nextLNum}: New Lesson`,
+          contentSummary: 'محتوى الدرس والأنشطة المقررة.',
+          vocabString: 'New Words, Phrases',
+          hasAssessment: false,
+        };
+        return { ...unit, lessons: [...unit.lessons, newLesson] };
+      })
+    );
+  };
+
+  const handleRemoveLesson = (unitId: string, lessonId: string) => {
+    setUnitsDraft((prev) =>
+      prev.map((unit) => {
+        if (unit.id !== unitId) return unit;
+        if (unit.lessons.length <= 1) return unit;
+        return {
+          ...unit,
+          lessons: unit.lessons.filter((l) => l.id !== lessonId).map((l, lIdx) => ({ ...l, lessonNumber: lIdx + 1 })),
+        };
+      })
+    );
+  };
+
+  const handleUpdateLesson = (unitId: string, lessonId: string, updates: any) => {
+    setUnitsDraft((prev) =>
+      prev.map((unit) => {
+        if (unit.id !== unitId) return unit;
+        return {
+          ...unit,
+          lessons: unit.lessons.map((l) => (l.id === lessonId ? { ...l, ...updates } : l)),
+        };
+      })
+    );
+  };
+
+  // Final Step 2 Save: Add level with all units & lessons to context
+  const handleFinalSaveLevel = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const formattedUnits = unitsDraft.map((u, uIdx) => ({
+      id: `unit-${Date.now()}-${uIdx + 1}`,
+      unitNumber: uIdx + 1,
+      titleAr: u.titleAr.trim() || `الوحدة ${uIdx + 1}`,
+      titleEn: u.titleEn.trim() || `Unit ${uIdx + 1}`,
+      lessons: u.lessons.map((l, lIdx) => ({
+        id: `lesson-${Date.now()}-${uIdx + 1}-${lIdx + 1}`,
+        lessonNumber: lIdx + 1,
+        titleAr: l.titleAr.trim() || `الدرس ${lIdx + 1}`,
+        titleEn: l.titleEn.trim() || `Lesson ${lIdx + 1}`,
+        contentSummary: l.contentSummary.trim() || 'محتوى الدرس المعتمد.',
+        vocabulary: l.vocabString
+          .split(',')
+          .map((v) => v.trim())
+          .filter(Boolean),
+        exercisesCount: 4,
+        hasAssessment: l.hasAssessment,
+      })),
+    }));
+
+    const sameLangLevels = curricula.filter((c) => c.language === selectedCurriculumLanguage);
+    const newLevelNumber = sameLangLevels.length + 1;
+
+    const newLevel: CurriculumLevel = {
+      levelNumber: newLevelNumber,
+      cefrCode: newLevelCode,
+      nameAr: newLevelNameAr.trim(),
+      nameEn: newLevelNameEn.trim() || `${newLevelCode} - Level`,
+      descriptionAr: newLevelDescAr.trim() || 'مستوى تعليمي معتمد يركز على الكفاءات اللغوية التأسيسية.',
+      descriptionEn: newLevelDescEn.trim() || 'Accredited curriculum level focusing on core competencies.',
+      color: newLevelColor || '#3B82F6',
+      language: selectedCurriculumLanguage,
+      units: formattedUnits,
+    };
+
+    addCurriculumLevel(newLevel);
+    setSelectedLevelNumber(newLevel.levelNumber);
     setIsAddLevelOpen(false);
+    setModalStep('basic');
+    setNewLevelNameAr('');
+    setNewLevelNameEn('');
+    setNewLevelDescAr('');
+    setNewLevelDescEn('');
+
+    alert(
+      language === 'ar'
+        ? `تم بنجاح إنشاء واعتماد المستوى (${newLevel.cefrCode}) مع ${formattedUnits.length} وحدات تعليمية!`
+        : `Level ${newLevel.cefrCode} with ${formattedUnits.length} units published successfully!`
+    );
+  };
+
+  const handleCloseModal = () => {
+    setIsAddLevelOpen(false);
+    setModalStep('basic');
   };
 
   return (
@@ -449,109 +645,379 @@ export function AdminAcademicPathScreen() {
         </div>
       )}
 
-      {/* Modal: Create Level (Section 15) */}
+      {/* Modal: Create Level (Step 1: Level Details & Step 2: Units & Lessons Configuration) */}
       {isAddLevelOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div
-            className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up"
-            style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '18px' }}
-          >
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3.5">
-              <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">
-                {language === 'ar' ? 'إضافة مستوى دراسي جديد (Create Level)' : 'Create New Level'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsAddLevelOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 cursor-pointer transition-colors"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <form
-              onSubmit={handleCreateLevel}
-              style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
+          {/* STEP 1: Basic Level Details */}
+          {modalStep === 'basic' && (
+            <div
+              className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up"
+              style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '18px' }}
             >
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
-                  {language === 'ar' ? 'اسم المستوى بالعربية *' : 'Level Name (Arabic) *'}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newLevelNameAr}
-                  onChange={(e) => setNewLevelNameAr(e.target.value)}
-                  placeholder="مثال: المستوى A1 — المبتدئ"
-                  className="w-full h-10 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
-                  {language === 'ar' ? 'رمز المستوى (Level Code) *' : 'Level Code *'}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newLevelCode}
-                  onChange={(e) => setNewLevelCode(e.target.value)}
-                  placeholder="A1, A2, B1, B2, C1"
-                  className="w-full h-10 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
-                  dir="ltr"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
-                  {language === 'ar' ? 'وصف مخرجات التعلم' : 'Learning Outcomes Description'}
-                </label>
-                <textarea
-                  rows={3}
-                  value={newLevelDescAr}
-                  onChange={(e) => setNewLevelDescAr(e.target.value)}
-                  placeholder="اكتساب المفردات الأساسية وتكوين الجمل البسيطة..."
-                  className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors resize-none leading-relaxed"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3.5">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3.5">
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
-                    {language === 'ar' ? 'عدد الوحدات (Units)' : 'Units Count'}
-                  </label>
-                  <input
-                    type="number"
-                    value={newUnitsCount}
-                    onChange={(e) => setNewUnitsCount(Number(e.target.value))}
-                    min={1}
-                    max={20}
-                    className="w-full h-10 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
-                  />
+                  <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 block">
+                    {language === 'ar' ? 'الخطوة 1 من 2: بيانات المستوى الأساسية' : 'Step 1 of 2: Basic Level Info'}
+                  </span>
+                  <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white mt-0.5">
+                    {language === 'ar' ? 'إضافة مستوى دراسي جديد' : 'Create New Level'}
+                  </h3>
                 </div>
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
-                    {language === 'ar' ? 'اللون المميز (Color)' : 'Level Color'}
-                  </label>
-                  <input
-                    type="color"
-                    value={newLevelColor}
-                    onChange={(e) => setNewLevelColor(e.target.value)}
-                    className="w-full h-10 p-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-2">
                 <button
-                  type="submit"
-                  className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer text-xs sm:text-sm"
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 cursor-pointer transition-colors"
                 >
-                  {language === 'ar' ? 'حفظ المستوى في المنهاج' : 'Save Level to Curriculum'}
+                  <X size={16} />
                 </button>
               </div>
-            </form>
-          </div>
+
+              <form
+                onSubmit={handleProceedToUnits}
+                style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}
+              >
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                    {language === 'ar' ? 'اسم المستوى بالعربية *' : 'Level Name (Arabic) *'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newLevelNameAr}
+                    onChange={(e) => setNewLevelNameAr(e.target.value)}
+                    placeholder="مثال: المستوى A1 — المبتدئ والتأسيس"
+                    className="w-full h-10 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                    {language === 'ar' ? 'اسم المستوى بالإنجليزية (اختياري)' : 'Level Name (English)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={newLevelNameEn}
+                    onChange={(e) => setNewLevelNameEn(e.target.value)}
+                    placeholder="e.g. Level A1 — Beginner & Foundation"
+                    className="w-full h-10 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                      {language === 'ar' ? 'رمز المستوى (CEFR) *' : 'CEFR Code *'}
+                    </label>
+                    <select
+                      value={newLevelCode}
+                      onChange={(e) => setNewLevelCode(e.target.value as any)}
+                      className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
+                    >
+                      <option value="A1">A1 — Breakthrough</option>
+                      <option value="A2">A2 — Waystage</option>
+                      <option value="B1">B1 — Threshold</option>
+                      <option value="B2">B2 — Vantage</option>
+                      <option value="C1">C1 — Effective Proficiency</option>
+                      <option value="C2">C2 — Mastery</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                      {language === 'ar' ? 'عدد الوحدات الأولية' : 'Initial Units Count'}
+                    </label>
+                    <input
+                      type="number"
+                      value={newUnitsCount}
+                      onChange={(e) => setNewUnitsCount(Math.max(1, Number(e.target.value)))}
+                      min={1}
+                      max={12}
+                      className="w-full h-10 px-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                    {language === 'ar' ? 'وصف مخرجات التعلم' : 'Learning Outcomes Description'}
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={newLevelDescAr}
+                    onChange={(e) => setNewLevelDescAr(e.target.value)}
+                    placeholder="اكتساب المفردات الأساسية وتكوين الجمل البسيطة..."
+                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors resize-none leading-relaxed"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                    {language === 'ar' ? 'اللون المميز للمستوى (Theme Color)' : 'Level Color'}
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={newLevelColor}
+                      onChange={(e) => setNewLevelColor(e.target.value)}
+                      className="w-12 h-10 p-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer"
+                    />
+                    <span className="font-mono text-xs font-bold text-slate-600 dark:text-slate-400">
+                      {newLevelColor}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-all cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-2"
+                  >
+                    <span>{language === 'ar' ? 'التالي: إدخال الوحدات والدروس' : 'Next: Configure Units & Lessons'}</span>
+                    {isRTL ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* STEP 2: Configure Units and Lessons Popup */}
+          {modalStep === 'units' && (
+            <div
+              className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up flex flex-col max-h-[90vh] overflow-hidden"
+            >
+              {/* Step 2 Header */}
+              <div
+                className="bg-slate-900 text-white flex items-center justify-between shrink-0"
+                style={{ padding: '16px 24px' }}
+              >
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setModalStep('basic')}
+                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+                    title={language === 'ar' ? 'رجوع' : 'Back'}
+                  >
+                    {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+                  </button>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="px-2 py-0.5 rounded-md text-white font-mono font-bold text-xs shadow-xs"
+                        style={{ backgroundColor: newLevelColor }}
+                      >
+                        {newLevelCode}
+                      </span>
+                      <h3 className="text-base sm:text-lg font-black text-white">{newLevelNameAr}</h3>
+                    </div>
+                    <p className="text-xs text-slate-400 font-medium mt-0.5">
+                      {language === 'ar'
+                        ? 'الخطوة 2: تحديد مسميات الوحدات وتفاصيل الدروس والمفردات والتقييمات'
+                        : 'Step 2: Enter unit names, lessons, vocabulary, and assessments'}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Step 2 Action Bar */}
+              <div
+                className="bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0"
+                style={{ padding: '10px 20px' }}
+              >
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+                  <Layers size={16} className="text-indigo-600 dark:text-indigo-400" />
+                  <span>
+                    {language === 'ar'
+                      ? `إجمالي الوحدات: ${unitsDraft.length} | إجمالي الدروس: ${unitsDraft.reduce((acc, u) => acc + u.lessons.length, 0)}`
+                      : `Total Units: ${unitsDraft.length} | Total Lessons: ${unitsDraft.reduce((acc, u) => acc + u.lessons.length, 0)}`}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddUnit}
+                  className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                  style={{ padding: '6px 14px' }}
+                >
+                  <Plus size={14} />
+                  <span>{language === 'ar' ? 'إضافة وحدة جديدة' : 'Add New Unit'}</span>
+                </button>
+              </div>
+
+              {/* Step 2 Scrollable Units and Lessons List */}
+              <div
+                className="overflow-y-auto flex-1 space-y-5"
+                style={{ padding: '20px 24px' }}
+              >
+                {unitsDraft.map((unit, uIdx) => (
+                  <div
+                    key={unit.id}
+                    className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-750 overflow-hidden shadow-2xs"
+                    style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '14px' }}
+                  >
+                    {/* Unit Header Inputs */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-700/80 pb-3.5">
+                      <div className="flex items-center gap-2.5 flex-1">
+                        <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                          {uIdx + 1}
+                        </span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+                          <input
+                            type="text"
+                            value={unit.titleAr}
+                            onChange={(e) => handleUpdateUnit(unit.id, { titleAr: e.target.value })}
+                            placeholder={language === 'ar' ? `اسم الوحدة ${uIdx + 1} بالعربية` : `Unit ${uIdx + 1} Title (AR)`}
+                            className="h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                          />
+                          <input
+                            type="text"
+                            value={unit.titleEn}
+                            onChange={(e) => handleUpdateUnit(unit.id, { titleEn: e.target.value })}
+                            placeholder={`Unit ${uIdx + 1} Title (EN)`}
+                            className="h-9 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                        <button
+                          type="button"
+                          onClick={() => handleAddLesson(unit.id)}
+                          className="rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 font-bold text-[11px] flex items-center gap-1 border border-indigo-200 dark:border-indigo-800 transition-colors cursor-pointer"
+                          style={{ padding: '5px 10px' }}
+                        >
+                          <Plus size={13} />
+                          <span>{language === 'ar' ? 'إضافة درس' : 'Add Lesson'}</span>
+                        </button>
+
+                        {unitsDraft.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveUnit(unit.id)}
+                            className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer"
+                            title={language === 'ar' ? 'حذف الوحدة' : 'Delete Unit'}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Lessons in this Unit */}
+                    <div className="space-y-3">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                        {language === 'ar' ? `دروس الوحدة (${unit.lessons.length} دروس)` : `Unit Lessons (${unit.lessons.length})`}
+                      </span>
+
+                      {unit.lessons.map((lesson, lIdx) => (
+                        <div
+                          key={lesson.id}
+                          className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-750 p-3 space-y-2.5 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-800 transition-colors"
+                        >
+                          {/* Lesson Top Row: Numbers & Titles */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 flex-1">
+                              <span className="w-6 h-6 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-bold text-[11px] flex items-center justify-center shrink-0">
+                                {lIdx + 1}
+                              </span>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+                                <input
+                                  type="text"
+                                  value={lesson.titleAr}
+                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleAr: e.target.value })}
+                                  placeholder={language === 'ar' ? `عنوان الدرس ${lIdx + 1} (عربي)` : `Lesson ${lIdx + 1} Title (AR)`}
+                                  className="h-8 px-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                                />
+                                <input
+                                  type="text"
+                                  value={lesson.titleEn}
+                                  onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleEn: e.target.value })}
+                                  placeholder={`Lesson ${lIdx + 1} Title (EN)`}
+                                  className="h-8 px-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500"
+                                />
+                              </div>
+                            </div>
+
+                            {unit.lessons.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveLesson(unit.id, lesson.id)}
+                                className="w-6 h-6 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                                title={language === 'ar' ? 'حذف الدرس' : 'Delete Lesson'}
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Lesson Summary & Vocabulary inputs */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={lesson.contentSummary}
+                              onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { contentSummary: e.target.value })}
+                              placeholder={language === 'ar' ? 'ملخص ومخرجات الدرس...' : 'Lesson content summary...'}
+                              className="h-7 px-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[11px] text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500"
+                            />
+                            <input
+                              type="text"
+                              value={lesson.vocabString}
+                              onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { vocabString: e.target.value })}
+                              placeholder={language === 'ar' ? 'المفردات (مفصولة بفواصل)' : 'Key Vocabulary (comma-separated)'}
+                              className="h-7 px-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[11px] font-mono text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500"
+                            />
+                          </div>
+
+                          {/* Assessment Checkbox */}
+                          <label className="flex items-center gap-2 cursor-pointer select-none text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                            <input
+                              type="checkbox"
+                              checked={lesson.hasAssessment}
+                              onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { hasAssessment: e.target.checked })}
+                              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                            />
+                            <span>{language === 'ar' ? 'يتضمن اختبار كفاءة وتقييم مهارة ✓' : 'Includes skill assessment checkpoint ✓'}</span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Step 2 Footer */}
+              <div
+                className="bg-slate-50 dark:bg-slate-850 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0"
+                style={{ padding: '14px 24px' }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setModalStep('basic')}
+                  className="rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                  style={{ padding: '8px 18px' }}
+                >
+                  {isRTL ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
+                  <span>{language === 'ar' ? 'رجوع لتعديل البيانات' : 'Back to Level Info'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleFinalSaveLevel}
+                  className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ padding: '10px 24px' }}
+                >
+                  <Check size={16} />
+                  <span>{language === 'ar' ? 'حفظ واعتماد المستوى في المنهاج' : 'Save Level to Curriculum'}</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

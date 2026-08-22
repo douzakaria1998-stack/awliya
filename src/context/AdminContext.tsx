@@ -88,6 +88,8 @@ interface AdminContextType {
   assignStudentToGroup: (groupId: string, studentId: string) => void;
   removeStudentFromGroup: (groupId: string, studentId: string) => void;
 
+  addCurriculumLevel: (levelData: CurriculumLevel) => void;
+
   recordAttendance: (sessionId: string, records: { studentId: string; status: 'present' | 'late' | 'absent' | 'excused'; note?: string }[]) => void;
   
   createHomework: (hwData: Partial<AdminHomeworkAssignment>) => void;
@@ -169,6 +171,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
     const sGroups = getItem<AdminGroup[]>(ADMIN_STORAGE_KEYS.GROUPS);
     if (sGroups?.length) setGroups(sGroups);
+
+    const sCurricula = getItem<CurriculumLevel[]>(ADMIN_STORAGE_KEYS.CURRICULA);
+    if (sCurricula?.length) setCurricula(sCurricula);
 
     const sAttendance = getItem<AttendanceSession[]>(ADMIN_STORAGE_KEYS.ATTENDANCE);
     if (sAttendance?.length) setAttendanceSessions(sAttendance);
@@ -630,6 +635,37 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   );
 
   // ==========================================
+  // Curriculum Actions
+  // ==========================================
+  const addCurriculumLevel = useCallback(
+    (levelData: CurriculumLevel) => {
+      setCurricula((prev) => {
+        const existingIdx = prev.findIndex(
+          (c) => c.levelNumber === levelData.levelNumber && c.language === levelData.language
+        );
+        let updated: CurriculumLevel[];
+        if (existingIdx >= 0) {
+          updated = prev.map((c, i) => (i === existingIdx ? levelData : c));
+        } else {
+          updated = [...prev, levelData];
+        }
+        setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        return updated;
+      });
+
+      logAudit(
+        `إضافة مستوى ومنهاج جديد: ${levelData.nameAr} (${levelData.cefrCode})`,
+        `Added new curriculum level: ${levelData.nameEn} (${levelData.cefrCode})`,
+        'curriculum',
+        undefined,
+        levelData.nameAr,
+        `${levelData.units.length} units configured`
+      );
+    },
+    [logAudit]
+  );
+
+  // ==========================================
   // Attendance Actions
   // ==========================================
   const recordAttendance = useCallback(
@@ -1005,6 +1041,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         updateGroup,
         assignStudentToGroup,
         removeStudentFromGroup,
+        addCurriculumLevel,
         recordAttendance,
         createHomework,
         evaluateHomework,
