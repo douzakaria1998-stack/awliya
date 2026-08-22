@@ -46,6 +46,7 @@ export function AdminAcademicPathScreen() {
   const [isAddLevelOpen, setIsAddLevelOpen] = useState(false);
   const [editingLevelNumber, setEditingLevelNumber] = useState<number | null>(null);
   const [modalStep, setModalStep] = useState<'basic' | 'units'>('basic');
+  const [newLevelLanguage, setNewLevelLanguage] = useState<'English' | 'French'>('English');
   const [newLevelNameAr, setNewLevelNameAr] = useState('');
   const [newLevelNameEn, setNewLevelNameEn] = useState('');
   const [newLevelCode, setNewLevelCode] = useState<'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'>('A1');
@@ -95,6 +96,7 @@ export function AdminAcademicPathScreen() {
   // Open modal in Create mode
   const handleOpenCreateModal = () => {
     setEditingLevelNumber(null);
+    setNewLevelLanguage(selectedCurriculumLanguage);
     setNewLevelNameAr('');
     setNewLevelNameEn('');
     setNewLevelCode('A1');
@@ -110,6 +112,7 @@ export function AdminAcademicPathScreen() {
   // Open modal in Edit mode
   const handleOpenEditModal = (level: CurriculumLevel) => {
     setEditingLevelNumber(level.levelNumber);
+    setNewLevelLanguage(level.language || selectedCurriculumLanguage);
     setNewLevelNameAr(level.nameAr);
     setNewLevelNameEn(level.nameEn || '');
     setNewLevelCode(level.cefrCode);
@@ -328,11 +331,12 @@ export function AdminAcademicPathScreen() {
         descriptionAr: newLevelDescAr.trim() || 'مستوى تعليمي معتمد يركز على الكفاءات اللغوية التأسيسية.',
         descriptionEn: newLevelDescEn.trim() || 'Accredited curriculum level focusing on core competencies.',
         color: newLevelColor || '#3B82F6',
-        language: selectedCurriculumLanguage,
+        language: newLevelLanguage,
         units: formattedUnits,
       };
 
       updateCurriculumLevel(editingLevelNumber, selectedCurriculumLanguage, updatedLevel);
+      setSelectedCurriculumLanguage(newLevelLanguage);
       setSelectedLevelNumber(editingLevelNumber);
       alert(
         language === 'ar'
@@ -340,7 +344,7 @@ export function AdminAcademicPathScreen() {
           : `Level ${updatedLevel.cefrCode} updated successfully with ${formattedUnits.length} units!`
       );
     } else {
-      const sameLangLevels = curricula.filter((c) => c.language === selectedCurriculumLanguage);
+      const sameLangLevels = curricula.filter((c) => c.language === newLevelLanguage);
       const newLevelNumber = sameLangLevels.length + 1;
 
       const newLevel: CurriculumLevel = {
@@ -351,11 +355,12 @@ export function AdminAcademicPathScreen() {
         descriptionAr: newLevelDescAr.trim() || 'مستوى تعليمي معتمد يركز على الكفاءات اللغوية التأسيسية.',
         descriptionEn: newLevelDescEn.trim() || 'Accredited curriculum level focusing on core competencies.',
         color: newLevelColor || '#3B82F6',
-        language: selectedCurriculumLanguage,
+        language: newLevelLanguage,
         units: formattedUnits,
       };
 
       addCurriculumLevel(newLevel);
+      setSelectedCurriculumLanguage(newLevelLanguage);
       setSelectedLevelNumber(newLevel.levelNumber);
       alert(
         language === 'ar'
@@ -892,6 +897,40 @@ export function AdminAcademicPathScreen() {
                 onSubmit={handleProceedToUnits}
                 style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}
               >
+                {/* Curriculum Subject / Language Selection */}
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                    {language === 'ar' ? 'المادة / المنهاج اللغوي (Subject / Language) *' : 'Curriculum Subject / Language *'}
+                  </label>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setNewLevelLanguage('English')}
+                      className={`h-10 rounded-xl font-bold text-xs flex items-center justify-center gap-2 border transition-all cursor-pointer ${
+                        newLevelLanguage === 'English'
+                          ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
+                          : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-750'
+                      }`}
+                    >
+                      <span className="text-sm">🇬🇧</span>
+                      <span>{language === 'ar' ? 'اللغة الإنجليزية' : 'English (CEFR)'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setNewLevelLanguage('French')}
+                      className={`h-10 rounded-xl font-bold text-xs flex items-center justify-center gap-2 border transition-all cursor-pointer ${
+                        newLevelLanguage === 'French'
+                          ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
+                          : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-750'
+                      }`}
+                    >
+                      <span className="text-sm">🇫🇷</span>
+                      <span>{language === 'ar' ? 'اللغة الفرنسية' : 'French (DELF)'}</span>
+                    </button>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
                     {language === 'ar' ? 'اسم المستوى بالعربية *' : 'Level Name (Arabic) *'}
