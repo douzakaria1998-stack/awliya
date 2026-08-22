@@ -290,7 +290,6 @@ export function StudentsManagementScreen() {
                 <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'المستوى' : 'Level'}</th>
                 <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الفوج' : 'Group'}</th>
                 <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
-                <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'ولي الأمر' : 'Parent'}</th>
                 <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الانضباط' : 'Attendance'}</th>
                 <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
                 <th className="py-5 px-4 text-center font-extrabold">{language === 'ar' ? 'الحالة' : 'Status'}</th>
@@ -300,7 +299,7 @@ export function StudentsManagementScreen() {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-16 text-center text-slate-400 font-bold">
+                  <td colSpan={8} className="py-16 text-center text-slate-400 font-bold">
                     {language === 'ar' ? 'لم يتم العثور على أي طالب مطابق لمعايير البحث' : 'No students found matching your filters'}
                   </td>
                 </tr>
@@ -346,12 +345,6 @@ export function StudentsManagementScreen() {
                     {/* Teacher */}
                     <td className="py-6 px-4 text-center font-medium text-slate-600 dark:text-slate-400 text-xs sm:text-sm">
                       {st.teacherName}
-                    </td>
-
-                    {/* Parent */}
-                    <td className="py-6 px-4 text-center">
-                      <div className="font-medium text-slate-800 dark:text-slate-200 text-xs sm:text-sm">{st.parentName}</div>
-                      <div className="text-[11px] text-slate-400 font-mono mt-0.5" dir="ltr">{st.parentPhone}</div>
                     </td>
 
                     {/* Attendance */}
