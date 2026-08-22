@@ -760,7 +760,7 @@ export function StudentsManagementScreen() {
                 </div>
 
                 {parentLinkMode === 'existing' ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {/* Search Container */}
                     <div className="relative w-full">
                       <input
@@ -775,8 +775,8 @@ export function StudentsManagementScreen() {
                         className="w-full rounded-xl bg-white dark:bg-slate-850 border border-purple-200/90 dark:border-purple-800/80 text-xs sm:text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder:text-slate-400 shadow-2xs"
                         style={{
                           height: '42px',
-                          paddingLeft: isRTL ? '16px' : '42px',
-                          paddingRight: isRTL ? '42px' : '16px',
+                          paddingLeft: isRTL ? (parentSearchQuery ? '36px' : '16px') : '42px',
+                          paddingRight: isRTL ? '42px' : (parentSearchQuery ? '36px' : '16px'),
                         }}
                       />
                       <Search
@@ -785,31 +785,63 @@ export function StudentsManagementScreen() {
                           isRTL ? 'right-3.5' : 'left-3.5'
                         }`}
                       />
+                      {parentSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setParentSearchQuery('')}
+                          className={`absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer ${
+                            isRTL ? 'left-3' : 'right-3'
+                          }`}
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
                     </div>
 
-                    {/* Parent Selector Dropdown */}
-                    <div>
-                      <select
-                        value={selectedParentId}
-                        onChange={(e) => setSelectedParentId(e.target.value)}
-                        className="w-full rounded-xl bg-white dark:bg-slate-850 border border-purple-200 dark:border-purple-800/80 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all cursor-pointer shadow-2xs"
-                        style={{ height: '44px', padding: '8px 14px' }}
-                      >
+                    {/* Search Results Dropdown List when typing */}
+                    {parentSearchQuery.trim() && (
+                      <div className="max-h-44 overflow-y-auto rounded-xl bg-white dark:bg-slate-850 border border-purple-200 dark:border-purple-800 divide-y divide-purple-50 dark:divide-slate-800 shadow-lg">
                         {filteredParents.length === 0 ? (
-                          <option value="">{language === 'ar' ? 'لا يوجد ولي أمر مطابق للبحث' : 'No matching parent found'}</option>
+                          <div className="p-3 text-center text-xs text-slate-400 font-medium">
+                            {language === 'ar' ? 'لا يوجد ولي أمر مطابق للبحث' : 'No matching parent found'}
+                          </div>
                         ) : (
                           filteredParents.map((p) => (
-                            <option key={p.id} value={p.id}>
-                              {p.fullNameAr} ({p.fullNameEn}) — 📱 {p.phone}
-                            </option>
+                            <div
+                              key={p.id}
+                              onClick={() => {
+                                setSelectedParentId(p.id);
+                                setParentSearchQuery('');
+                              }}
+                              className={`p-2.5 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-950/40 cursor-pointer transition-colors ${
+                                selectedParentId === p.id ? 'bg-purple-50/80 dark:bg-purple-950/60' : ''
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-xs">
+                                  {p.fullNameAr.charAt(0)}
+                                </div>
+                                <div>
+                                  <div className="text-xs font-bold text-slate-900 dark:text-white">
+                                    {p.fullNameAr} <span className="font-normal text-[11px] text-slate-500 font-mono">({p.fullNameEn})</span>
+                                  </div>
+                                  <div className="text-[11px] font-mono text-purple-600 dark:text-purple-400" dir="ltr">
+                                    📱 {p.phone}
+                                  </div>
+                                </div>
+                              </div>
+                              {selectedParentId === p.id && (
+                                <Check size={14} className="text-purple-600 dark:text-purple-400" />
+                              )}
+                            </div>
                           ))
                         )}
-                      </select>
-                    </div>
+                      </div>
+                    )}
 
                     {/* Linked Parent Live Info Badge */}
                     {(() => {
-                      const activeParent = parents.find((p) => p.id === selectedParentId) || filteredParents[0];
+                      const activeParent = parents.find((p) => p.id === selectedParentId) || parents[0];
                       if (!activeParent) return null;
                       return (
                         <div className="flex items-center justify-between gap-3 rounded-xl bg-white/90 dark:bg-slate-850 border border-purple-200/80 dark:border-purple-900/60 p-3 shadow-2xs">
