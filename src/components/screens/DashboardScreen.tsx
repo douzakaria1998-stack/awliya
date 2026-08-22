@@ -13,6 +13,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { NavTabKey, PerformanceTabKey, SHOW_FINANCIALS_TAB, getStudentGenderNoun } from '@/lib/constants';
 import { levelThemes } from '@/lib/themes';
+import { translateHomeworkTitle, translateTeacherNote, translateSubject } from '@/lib/translations';
 
 interface DashboardScreenProps {
   onNavigate: (tab: NavTabKey, subTab?: PerformanceTabKey) => void;
@@ -37,8 +38,8 @@ export function DashboardScreen({
   const revisionHomework = homeworkList.find((h) => h.status === 'needs_revision');
   const latestFeedback = teacherFeedback[0];
 
-  const studentFirstName = activeStudent.fullNameAr.split(' ')[0] || 'أحمد';
-  const parentFirstName = parent.fullNameAr.split(' ')[0] || 'محمد';
+  const studentFirstName = activeStudent.fullNameAr.split(' ')[0] || 'Youssef';
+  const parentFirstName = parent.fullNameAr.split(' ')[0] || 'Ahmed';
 
   const levelNamesArabic: Record<number, string> = {
     1: 'الأول',
@@ -66,9 +67,24 @@ export function DashboardScreen({
     10: 'Level 10',
   };
 
+  const levelNamesFrench: Record<number, string> = {
+    1: 'Niveau 1',
+    2: 'Niveau 2',
+    3: 'Niveau 3',
+    4: 'Niveau 4',
+    5: 'Niveau 5',
+    6: 'Niveau 6',
+    7: 'Niveau 7',
+    8: 'Niveau 8',
+    9: 'Niveau 9',
+    10: 'Niveau 10',
+  };
+
   const levelWord =
     language === 'ar'
       ? levelNamesArabic[activeStudent.currentLevel] || `المستوى ${activeStudent.currentLevel}`
+      : language === 'fr'
+      ? levelNamesFrench[activeStudent.currentLevel] || `Niveau ${activeStudent.currentLevel}`
       : levelNamesEnglish[activeStudent.currentLevel] || `Level ${activeStudent.currentLevel}`;
 
   return (
@@ -115,7 +131,7 @@ export function DashboardScreen({
               style={{ padding: '8px 18px' }}
             >
               <Clock size={15} />
-              <span>{language === 'ar' ? 'طلب قيد المراجعة - بانتظار الاختبار' : 'Pending - Awaiting Test'}</span>
+              <span>{language === 'ar' ? 'طلب قيد المراجعة - بانتظار الاختبار' : language === 'fr' ? 'En attente - Test de niveau prévu' : 'Pending - Awaiting Placement Test'}</span>
             </div>
           ) : (
             <div
@@ -132,7 +148,7 @@ export function DashboardScreen({
       {/* Pending Account Notice Banner */}
       {activeStudent.status === 'pending' && (
         <div
-          className="bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/80 rounded-2xl flex items-start gap-4 shadow-xs text-right animate-fade-in"
+          className={`bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/80 rounded-2xl flex items-start gap-4 shadow-xs ${isRTL ? 'text-right' : 'text-left'} animate-fade-in`}
           style={{
             padding: '22px 26px',
             marginBottom: '32px',
@@ -143,11 +159,13 @@ export function DashboardScreen({
           </div>
           <div className="min-w-0 flex-1">
             <h4 className="font-black text-amber-950 dark:text-amber-100 text-sm sm:text-base mb-1">
-              {language === 'ar' ? `طلب تسجيل ${getStudentGenderNoun(activeStudent)} قيد المراجعة لدى الإدارة` : 'Registration Request Under Review'}
+              {language === 'ar' ? `طلب تسجيل ${getStudentGenderNoun(activeStudent)} قيد المراجعة لدى الإدارة` : language === 'fr' ? "Demande d'inscription en cours d'examen" : 'Registration Request Under Review'}
             </h4>
             <p className="text-xs sm:text-sm text-amber-800/90 dark:text-amber-300/90 leading-relaxed font-medium">
               {language === 'ar'
                 ? `تم استلام طلب تسجيل ${getStudentGenderNoun(activeStudent)} (${activeStudent.fullNameAr}) في مسار (${activeStudent.enrolledPathAr}) بنجاح. سيقوم فريق الإدارة بالتواصل معكم لتحديد موعد اختبار تحديد المستوى واعتماد التفعيل النهائي.`
+                : language === 'fr'
+                ? `La demande d'inscription pour (${activeStudent.fullNameAr}) a été reçue avec succès. L'administration vous contactera pour organiser le test de niveau.`
                 : `The registration request for (${activeStudent.fullNameAr}) is under review. Our administration team will contact you to schedule the placement test.`}
             </p>
           </div>
@@ -187,10 +205,10 @@ export function DashboardScreen({
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">
-                {t.sonProgress}
+                {activeStudent.gender === 'female' ? t.daughterProgress : t.sonProgress}
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 font-semibold" style={{ marginTop: '4px' }}>
-                {t.level} {levelWord} {t.levelOfTen}
+                {t.level} {levelWord} • {t.levelOfTen}
               </p>
             </div>
           </div>
@@ -238,7 +256,7 @@ export function DashboardScreen({
           {t.recentNotifications}
         </h3>
 
-        {/* Notification Cards with guaranteed 16px gap */}
+        {/* Notification Cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Card 1: Homework Revision */}
           <div
@@ -258,7 +276,6 @@ export function DashboardScreen({
             }}
           >
             <div className="flex items-center min-w-0" style={{ gap: '16px' }}>
-              {/* Icon: 48px x 48px */}
               <div
                 className="rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-500 border border-amber-200/70 dark:border-amber-800/60 flex items-center justify-center shrink-0"
                 style={{ width: '48px', height: '48px', minWidth: '48px' }}
@@ -281,7 +298,6 @@ export function DashboardScreen({
               </div>
             </div>
 
-            {/* Timestamp */}
             <span
               className="text-slate-400 font-semibold whitespace-nowrap shrink-0 text-xs"
               style={{ fontSize: '13px', lineHeight: '20px' }}
@@ -290,7 +306,7 @@ export function DashboardScreen({
             </span>
           </div>
 
-          {/* Card 2: Course Expiry / Payment Alert (Shown only when financials feature is active) */}
+          {/* Card 2: Course Expiry / Payment Alert */}
           {SHOW_FINANCIALS_TAB && (
             <div
               role="button"
@@ -306,7 +322,6 @@ export function DashboardScreen({
               }}
             >
               <div className="flex items-center min-w-0" style={{ gap: '16px' }}>
-                {/* Icon: 48px x 48px */}
                 <div
                   className="rounded-full bg-orange-50 dark:bg-orange-950/40 text-orange-500 border border-orange-200/70 dark:border-orange-800/60 flex items-center justify-center shrink-0"
                   style={{ width: '48px', height: '48px', minWidth: '48px' }}
@@ -329,7 +344,6 @@ export function DashboardScreen({
                 </div>
               </div>
 
-              {/* Timestamp */}
               <span
                 className="text-slate-400 font-semibold whitespace-nowrap shrink-0 text-xs"
                 style={{ fontSize: '13px', lineHeight: '20px' }}
@@ -384,7 +398,7 @@ export function DashboardScreen({
                 minWidth: '48px',
               }}
             >
-              {language === 'ar' ? 'أ.س' : 'Sh.A'}
+              {language === 'ar' ? 'أ.س' : 'T.M'}
             </div>
             <div>
               <h4
@@ -392,8 +406,10 @@ export function DashboardScreen({
                 style={{ fontSize: '17px', lineHeight: '24px' }}
               >
                 {language === 'ar'
-                  ? latestFeedback?.teacherNameAr || 'الشيخ عبد الرحمن السبيعي'
-                  : 'Sheikh Abdulrahman Al-Subaie'}
+                  ? latestFeedback?.teacherNameAr || 'مستر ديفيد ويلسون'
+                  : language === 'fr'
+                  ? 'M. David Wilson'
+                  : 'Mr. David Wilson'}
               </h4>
               <p className="text-xs text-slate-400 font-medium" style={{ marginTop: '2px' }}>
                 {t.quranSubject}
@@ -421,7 +437,7 @@ export function DashboardScreen({
               className="text-slate-700 dark:text-slate-200 font-medium"
               style={{ fontSize: '16px', lineHeight: '28px', padding: '0 4px' }}
             >
-              {language === 'ar' ? latestFeedback?.messageAr || t.teacherDefaultNote : t.teacherDefaultNote}
+              {translateTeacherNote(latestFeedback?.messageAr || t.teacherDefaultNote, language)}
             </p>
           </div>
         </div>

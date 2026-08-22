@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Mail,
   Lock,
@@ -11,16 +11,19 @@ import {
   MessageCircle,
   Sun,
   Moon,
+  ChevronDown,
+  Check,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { InteractiveWaveBackground } from '../ui/InteractiveWaveBackground';
+import { Language } from '@/lib/translations';
 
 export function LoginScreen() {
   const { login } = useAuth();
   const { theme, isDarkMode, toggleDarkMode } = useTheme();
-  const { isRTL } = useLanguage();
+  const { isRTL, language, setLanguage, t } = useLanguage();
 
   const [emailOrPhone, setEmailOrPhone] = useState('ahmed.douzkari@gmail.com');
   const [password, setPassword] = useState('••••••••••••');
@@ -28,6 +31,27 @@ export function LoginScreen() {
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLangOpen, setIsLangOpen] = useState(false);
+
+  const langRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isLangOpen && langRef.current && !langRef.current.contains(event.target as Node)) {
+        setIsLangOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isLangOpen]);
+
+  const languagesList: { code: Language; label: string; flagUrl: string }[] = [
+    { code: 'ar', label: 'العربية', flagUrl: 'https://flagcdn.com/w80/sa.png' },
+    { code: 'en', label: 'English', flagUrl: 'https://flagcdn.com/w80/gb.png' },
+    { code: 'fr', label: 'Français', flagUrl: 'https://flagcdn.com/w80/fr.png' },
+  ];
+
+  const currentLangObj = languagesList.find((l) => l.code === language) || languagesList[0];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,10 +61,22 @@ export function LoginScreen() {
     try {
       const success = await login(emailOrPhone, password);
       if (!success) {
-        setErrorMessage('يرجى إدخال بريد إلكتروني أو رقم هاتف صحيح');
+        setErrorMessage(
+          language === 'ar'
+            ? 'يرجى إدخال بريد إلكتروني أو رقم هاتف صحيح'
+            : language === 'fr'
+            ? 'Veuillez entrer une adresse email ou un numéro valide'
+            : 'Please enter a valid email address or phone number'
+        );
       }
     } catch {
-      setErrorMessage('حدث خطأ أثناء تسجيل الدخول، يرجى المحاولة لاحقاً');
+      setErrorMessage(
+        language === 'ar'
+          ? 'حدث خطأ أثناء تسجيل الدخول، يرجى المحاولة لاحقاً'
+          : language === 'fr'
+          ? 'Une erreur est survenue lors de la connexion'
+          : 'An error occurred while signing in, please try again'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -48,7 +84,7 @@ export function LoginScreen() {
 
   return (
     <div
-      className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 flex flex-col justify-center items-center relative overflow-x-hidden transition-colors selection:bg-rose-500 selection:text-white select-none text-right"
+      className={`min-h-screen w-full bg-slate-50 dark:bg-slate-950 flex flex-col justify-center items-center relative overflow-x-hidden transition-colors selection:bg-rose-500 selection:text-white select-none ${isRTL ? 'text-right' : 'text-left'}`}
       dir={isRTL ? 'rtl' : 'ltr'}
       style={{ padding: '32px 16px' }}
       suppressHydrationWarning
@@ -66,13 +102,55 @@ export function LoginScreen() {
         style={{ backgroundColor: theme.primary }}
       />
 
-      {/* Dark Mode Toggle - Top Corner */}
-      <div className="absolute top-6 left-6 sm:top-8 sm:left-8 z-20">
+      {/* Top Controls Bar: Language + Dark Mode */}
+      <div className={`absolute top-6 ${isRTL ? 'left-6 sm:left-8' : 'right-6 sm:right-8'} z-20 flex items-center gap-2.5`}>
+        {/* Language Switcher */}
+        <div ref={langRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setIsLangOpen(!isLangOpen)}
+            className="rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs hover:bg-white dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-all shadow-2xs h-10 px-3 gap-2"
+          >
+            <img
+              src={currentLangObj.flagUrl}
+              alt={currentLangObj.label}
+              className="w-5 h-5 rounded-full object-cover shrink-0 shadow-2xs"
+            />
+            <span className="font-mono uppercase font-bold text-xs">{currentLangObj.code}</span>
+            <ChevronDown size={14} className={`text-slate-400 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {isLangOpen && (
+            <div className={`absolute top-full mt-2 w-44 bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-xl rounded-2xl p-1.5 z-50 animate-fade-in-up ${isRTL ? 'left-0' : 'right-0'}`}>
+              {languagesList.map((item) => (
+                <button
+                  key={item.code}
+                  type="button"
+                  onClick={() => {
+                    setLanguage(item.code);
+                    setIsLangOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                    language === item.code ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <img src={item.flagUrl} alt={item.label} className="w-4 h-4 rounded-full object-cover" />
+                    <span>{item.label}</span>
+                  </div>
+                  {language === item.code && <Check size={14} className="text-rose-600 dark:text-rose-400" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Theme Toggle */}
         <button
           type="button"
           onClick={toggleDarkMode}
           className="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs border border-slate-200 dark:border-slate-700 shadow-2xs transition-colors cursor-pointer"
-          title={isDarkMode ? 'الوضع النهاري' : 'الوضع الداكن'}
+          title={t.toggleTheme}
         >
           {isDarkMode ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} />}
         </button>
@@ -96,10 +174,14 @@ export function LoginScreen() {
               و
             </div>
             <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              تسجيل الدخول
+              {language === 'ar' ? 'تسجيل الدخول' : language === 'fr' ? 'Connexion' : 'Parent Sign In'}
             </h1>
             <p className="text-xs text-slate-400 font-medium leading-relaxed mt-1.5 max-w-xs">
-              مرحباً بك مجدداً! أدخل بياناتك للمتابعة الأكاديمية والتربوية
+              {language === 'ar'
+                ? 'مرحباً بك مجدداً! أدخل بياناتك للمتابعة الأكاديمية والتربوية'
+                : language === 'fr'
+                ? 'Bienvenue ! Connectez-vous pour suivre le parcours de vos enfants'
+                : 'Welcome back! Sign in to monitor student academic progress'}
             </p>
           </div>
 
@@ -118,7 +200,7 @@ export function LoginScreen() {
             {/* Email or Phone Input */}
             <div style={{ marginBottom: '18px' }}>
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block" style={{ marginBottom: '8px' }}>
-                البريد الإلكتروني أو رقم الهاتف
+                {language === 'ar' ? 'البريد الإلكتروني أو رقم الهاتف' : language === 'fr' ? 'Email ou Numéro de Téléphone' : 'Email Address or Phone Number'}
               </label>
               <div className="relative flex items-center">
                 <input
@@ -126,20 +208,18 @@ export function LoginScreen() {
                   required
                   value={emailOrPhone}
                   onChange={(e) => setEmailOrPhone(e.target.value)}
-                  placeholder="name@example.com أو 0550123456"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 transition-colors"
+                  placeholder={language === 'ar' ? 'name@example.com أو 0550123456' : 'name@example.com'}
+                  className={`w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 transition-colors ${
+                    isRTL ? 'text-right pr-12 pl-4' : 'text-left pl-12 pr-4'
+                  }`}
                   style={{
-                    paddingRight: '46px',
-                    paddingLeft: '16px',
                     height: '48px',
                     borderRadius: '16px',
-                    textAlign: 'right',
                   }}
                 />
                 <Mail
                   size={18}
-                  className="absolute text-slate-400 pointer-events-none"
-                  style={{ right: '16px' }}
+                  className={`absolute text-slate-400 pointer-events-none ${isRTL ? 'right-4' : 'left-4'}`}
                 />
               </div>
             </div>
@@ -148,17 +228,23 @@ export function LoginScreen() {
             <div style={{ marginBottom: '16px' }}>
               <div className="flex items-center justify-between" style={{ marginBottom: '8px' }}>
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
-                  كلمة المرور
+                  {language === 'ar' ? 'كلمة المرور' : language === 'fr' ? 'Mot de Passe' : 'Password'}
                 </label>
                 <a
                   href="#forgot"
                   onClick={(e) => {
                     e.preventDefault();
-                    alert('يرجى التواصل مع إدارة الحلقات لإعادة تعيين كلمة المرور');
+                    alert(
+                      language === 'ar'
+                        ? 'يرجى التواصل مع إدارة الحلقات لإعادة تعيين كلمة المرور'
+                        : language === 'fr'
+                        ? "Veuillez contacter l'administration pour réinitialiser votre mot de passe"
+                        : 'Please contact administration to reset your password'
+                    );
                   }}
                   className="text-[11px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
-                  نسيت كلمة المرور؟
+                  {language === 'ar' ? 'نسيت كلمة المرور؟' : language === 'fr' ? 'Mot de passe oublié ?' : 'Forgot Password?'}
                 </a>
               </div>
               <div className="relative flex items-center">
@@ -168,25 +254,22 @@ export function LoginScreen() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 transition-colors"
+                  className={`w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 transition-colors ${
+                    isRTL ? 'text-right pr-12 pl-12' : 'text-left pl-12 pr-12'
+                  }`}
                   style={{
-                    paddingRight: '46px',
-                    paddingLeft: '46px',
                     height: '48px',
                     borderRadius: '16px',
-                    textAlign: 'right',
                   }}
                 />
                 <Lock
                   size={18}
-                  className="absolute text-slate-400 pointer-events-none"
-                  style={{ right: '16px' }}
+                  className={`absolute text-slate-400 pointer-events-none ${isRTL ? 'right-4' : 'left-4'}`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                  style={{ left: '16px' }}
+                  className={`absolute text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer ${isRTL ? 'left-4' : 'right-4'}`}
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -205,7 +288,7 @@ export function LoginScreen() {
                   style={{ accentColor: theme.primary }}
                 />
                 <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                  تذكر بيانات الدخول
+                  {language === 'ar' ? 'تذكر بيانات الدخول' : language === 'fr' ? 'Se souvenir de moi' : 'Remember Me'}
                 </span>
               </label>
             </div>
@@ -228,7 +311,7 @@ export function LoginScreen() {
                 ) : (
                   <>
                     <LogIn size={18} className="shrink-0" />
-                    <span>تسجيل الدخول</span>
+                    <span>{language === 'ar' ? 'تسجيل الدخول' : language === 'fr' ? 'Se Connecter' : 'Sign In'}</span>
                   </>
                 )}
               </button>
@@ -236,7 +319,7 @@ export function LoginScreen() {
           </form>
         </div>
 
-        {/* Footer Support Link directly below card */}
+        {/* Footer Support Link */}
         <div className="text-center" style={{ marginTop: '24px' }}>
           <a
             href="https://wa.me/"
@@ -245,7 +328,13 @@ export function LoginScreen() {
             className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors"
           >
             <MessageCircle size={15} className="text-emerald-500" />
-            <span>هل تواجه مشكلة في تسجيل الدخول؟ تواصل مع إدارة الحلقات</span>
+            <span>
+              {language === 'ar'
+                ? 'هل تواجه مشكلة في تسجيل الدخول؟ تواصل مع إدارة المنصة'
+                : language === 'fr'
+                ? 'Problème de connexion ? Contactez le support'
+                : 'Need help signing in? Contact platform support'}
+            </span>
           </a>
         </div>
       </main>

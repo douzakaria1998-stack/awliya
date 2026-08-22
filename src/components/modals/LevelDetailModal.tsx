@@ -19,6 +19,7 @@ import { LEVEL_TITLES_EN, LEVEL_TITLES_FR } from '@/lib/constants';
 import { useLanguage } from '@/context/LanguageContext';
 import { useStudent } from '@/context/StudentContext';
 import { downloadCertificateHTML } from '@/lib/certificateGenerator';
+import { translateSubject } from '@/lib/translations';
 
 interface LevelDetailModalProps {
   level: AcademicLevel | null;
@@ -37,7 +38,7 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
 
   const handleDownloadCertificate = () => {
     setDownloaded(true);
-    downloadCertificateHTML(level, activeStudent?.fullNameAr || 'Larbi Guemmoudi', activeStudent);
+    downloadCertificateHTML(level, activeStudent?.fullNameAr || 'Youssef Douzkari', activeStudent);
     setTimeout(() => {
       setDownloaded(false);
     }, 2500);
@@ -59,9 +60,9 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
-      {/* Expanded Modal Box (max-w-2xl sm:max-w-3xl) */}
+      {/* Expanded Modal Box */}
       <div className="relative w-full max-w-2xl sm:max-w-3xl bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
-        {/* 1. Modal Header (Generous 28px 32px padding) */}
+        {/* 1. Modal Header */}
         <div
           className="text-white relative overflow-hidden shrink-0"
           style={{
@@ -142,7 +143,7 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
               )}
             </div>
 
-            {/* Close Button (40px x 40px) */}
+            {/* Close Button */}
             <button
               type="button"
               onClick={onClose}
@@ -162,7 +163,7 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
           </p>
         </div>
 
-        {/* 2. Modal Body (Spacious 30px 34px padding with 26px gap) */}
+        {/* 2. Modal Body */}
         <div
           className={`overflow-y-auto flex-1 ${isRTL ? 'text-right' : 'text-left'}`}
           style={{
@@ -224,7 +225,7 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
             </div>
           )}
 
-          {/* Subjects & Surahs List */}
+          {/* Subjects List */}
           <div>
             <h4
               className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2"
@@ -256,7 +257,7 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
                   >
                     {idx + 1}
                   </span>
-                  <span className="truncate">{subj}</span>
+                  <span className="truncate">{translateSubject(subj, language)}</span>
                 </div>
               ))}
             </div>
@@ -291,7 +292,7 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
                         {mod.isCompleted ? <Check size={16} strokeWidth={3} /> : idx + 1}
                       </div>
                       <span className="font-bold text-slate-800 dark:text-slate-200 truncate">
-                        {mod.titleAr}
+                        {translateSubject(mod.titleAr, language)}
                       </span>
                     </div>
                   </div>

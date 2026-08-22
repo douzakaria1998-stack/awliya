@@ -5,6 +5,12 @@ import { X, BookCheck, AlertCircle, CheckCircle2, Clock, Send, Sparkles, Check }
 import { Homework } from '@/types';
 import { useStudent } from '@/context/StudentContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useLanguage } from '@/context/LanguageContext';
+import {
+  translateSubject,
+  translateHomeworkTitle,
+  translateTeacherNote,
+} from '@/lib/translations';
 
 interface HomeworkDetailModalProps {
   homework: Homework | null;
@@ -15,6 +21,7 @@ interface HomeworkDetailModalProps {
 export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetailModalProps) {
   const { submitHomeworkRevision } = useStudent();
   const { theme } = useTheme();
+  const { t, isRTL, language } = useLanguage();
 
   const [parentNote, setParentNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,7 +44,7 @@ export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetai
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-fade-in select-none">
       <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-fade-in-up">
         {/* Header */}
         <div
@@ -58,12 +65,12 @@ export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetai
                 <BookCheck size={24} />
               )}
             </div>
-            <div className="text-right">
+            <div className={isRTL ? 'text-right' : 'text-left'}>
               <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                تفاصيل الواجب المنزلي
+                {language === 'ar' ? 'تفاصيل الواجب المنزلي' : language === 'fr' ? 'Détails du Devoir' : 'Homework Assignment Details'}
               </h3>
               <p className="text-xs text-slate-400 font-medium mt-0.5">
-                المستوى {homework.level} • {homework.subjectAr}
+                {t.level} {homework.level} • {translateSubject(homework.subjectAr, language)}
               </p>
             </div>
           </div>
@@ -83,15 +90,15 @@ export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetai
               <Check size={36} strokeWidth={3} />
             </div>
             <h4 className="text-lg font-black text-slate-900 dark:text-white mb-1.5">
-              تم إرسال إعادة التسميع بنجاح!
+              {language === 'ar' ? 'تم إرسال إعادة التسليم بنجاح!' : language === 'fr' ? 'Devoir renvoyé avec succès !' : 'Homework Resubmitted Successfully!'}
             </h4>
             <p className="text-xs sm:text-sm text-slate-400 font-medium">
-              تم إشعار المعلم لمراجعة الواجب وتعديل التقييم.
+              {language === 'ar' ? 'تم إشعار المعلم لمراجعة الواجب وتعديل التقييم.' : language === 'fr' ? 'L’enseignant a été notifié pour réévaluation.' : 'The teacher has been notified for re-evaluation.'}
             </p>
           </div>
         ) : (
           <div
-            className="overflow-y-auto text-right flex flex-col"
+            className={`overflow-y-auto flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}
             style={{
               padding: '28px 32px',
               gap: '22px',
@@ -102,7 +109,7 @@ export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetai
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-4">
                 <span className="text-xs font-bold text-slate-400">
-                  عنوان الواجب:
+                  {language === 'ar' ? 'عنوان الواجب:' : language === 'fr' ? 'Titre :' : 'Assignment Title:'}
                 </span>
                 {homework.status === 'needs_revision' && (
                   <span
@@ -113,7 +120,7 @@ export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetai
                       paddingLeft: '16px',
                     }}
                   >
-                    بحاجة إلى مراجعة
+                    {t.needsRevision}
                   </span>
                 )}
                 {homework.status === 'completed' && (
@@ -125,7 +132,7 @@ export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetai
                       paddingLeft: '16px',
                     }}
                   >
-                    مكتمل ✓
+                    {t.completed} ✓
                   </span>
                 )}
                 {homework.status !== 'needs_revision' && homework.status !== 'completed' && (
@@ -137,16 +144,16 @@ export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetai
                       paddingLeft: '16px',
                     }}
                   >
-                    قيد الانتظار
+                    {t.pending}
                   </span>
                 )}
               </div>
               <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-relaxed">
-                {homework.titleAr}
+                {translateHomeworkTitle(homework.titleAr, language)}
               </h4>
             </div>
 
-            {/* Teacher Note Box (Important highlight for needs revision) */}
+            {/* Teacher Note Box */}
             {homework.teacherNote && (
               <div
                 className="rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 shadow-2xs"
@@ -154,10 +161,10 @@ export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetai
               >
                 <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-amber-900 dark:text-amber-200 mb-2">
                   <AlertCircle size={16} className="text-amber-600 shrink-0" />
-                  <span>توجيه وملاحظة المعلم:</span>
+                  <span>{t.teacherNoteLabel}</span>
                 </div>
                 <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-300 font-medium leading-relaxed">
-                  "{homework.teacherNote}"
+                  "{translateTeacherNote(homework.teacherNote, language)}"
                 </p>
               </div>
             )}
@@ -170,7 +177,7 @@ export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetai
               >
                 <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold mb-1.5">
                   <Clock size={16} />
-                  <span>تاريخ الاستحقاق</span>
+                  <span>{t.dueDateLabel}</span>
                 </div>
                 <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white font-mono">
                   {homework.dueDate}
@@ -182,7 +189,7 @@ export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetai
                   className="rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-800 flex flex-col justify-between"
                   style={{ padding: '18px 22px' }}
                 >
-                  <span className="text-xs text-slate-400 font-semibold mb-1.5 block">الدرجة الحالية</span>
+                  <span className="text-xs text-slate-400 font-semibold mb-1.5 block">{t.scoreLabel}</span>
                   <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white font-mono">
                     {homework.score} / {homework.totalScore || 100}
                   </span>
@@ -195,13 +202,13 @@ export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetai
               <form onSubmit={handleResubmit} className="space-y-4 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <div className="space-y-1.5">
                   <label className="block text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
-                    ملاحظة ولي الأمر عند إعادة الإرسال:
+                    {language === 'ar' ? 'ملاحظة ولي الأمر عند إعادة الإرسال:' : language === 'fr' ? 'Remarque du parent pour le renvoi :' : 'Parent Note on Resubmission:'}
                   </label>
                   <textarea
                     rows={3}
                     value={parentNote}
                     onChange={(e) => setParentNote(e.target.value)}
-                    placeholder="مثال: تم تكرار التسميع مع الطالب وضبط الآيات 3-4 بنجاح."
+                    placeholder={language === 'ar' ? 'مثال: تم إتقان المحادثة والتسجيل الصوتي بنجاح مع الطالب.' : language === 'fr' ? 'Exemple : Exercice répété et réenregistré avec succès.' : 'Example: Practice repeated and audio recorded successfully.'}
                     className="w-full p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                   />
                 </div>
@@ -218,7 +225,7 @@ export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetai
                   }}
                 >
                   <Send size={20} className="shrink-0" />
-                  <span>{isSubmitting ? 'جاري الإرسال...' : 'تأكيد إعادة التسميع والمراجعة'}</span>
+                  <span>{isSubmitting ? (language === 'ar' ? 'جاري الإرسال...' : language === 'fr' ? 'Envoi en cours...' : 'Submitting...') : (language === 'ar' ? 'تأكيد إعادة التسليم والمراجعة' : language === 'fr' ? 'Confirmer le renvoi du devoir' : 'Confirm Homework Resubmission')}</span>
                 </button>
               </form>
             )}

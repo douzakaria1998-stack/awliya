@@ -19,6 +19,7 @@ import { AcademicLevel } from '@/types';
 import { LEVEL_TITLES_EN, LEVEL_TITLES_FR } from '@/lib/constants';
 import { LevelDetailModal } from '../modals/LevelDetailModal';
 import { StudentSwitcher } from '../layout/StudentSwitcher';
+import { translateTrack } from '@/lib/translations';
 
 interface AcademicPathScreenProps {
   onOpenAddStudent: () => void;
@@ -82,7 +83,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
           >
             <Sparkles size={16} className="shrink-0" />
             <span className="whitespace-nowrap leading-none">
-              {t.currentLevelBadge}: {language === 'ar' ? theme.shortNameAr : `Level ${activeStudent.currentLevel}`}
+              {t.currentLevelBadge}: {language === 'ar' ? theme.shortNameAr : language === 'fr' ? `Niveau ${activeStudent.currentLevel}` : `Level ${activeStudent.currentLevel}`}
             </span>
           </div>
         </div>
@@ -110,7 +111,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
               style={{ backgroundColor: theme.primary }}
             />
             <span className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-              {t.studentTrack}: {activeStudent.fullNameAr}: {activeStudent.enrolledPathAr}
+              {t.studentTrack}: <span className="font-mono text-slate-600 dark:text-slate-300 font-semibold">{translateTrack(activeStudent.enrolledPathAr, language)}</span>
             </span>
           </div>
           <span className="text-sm font-bold text-slate-500 dark:text-slate-400">

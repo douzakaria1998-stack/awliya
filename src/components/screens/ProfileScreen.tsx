@@ -17,14 +17,22 @@ import {
   Sun,
   MessageCircle,
   Clock,
+  Languages,
 } from 'lucide-react';
 import { useStudent } from '@/context/StudentContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { levelThemes } from '@/lib/themes';
 import { LevelId } from '@/types';
 import { SHOW_FINANCIALS_TAB, SHOW_ADD_STUDENT_BUTTON } from '@/lib/constants';
 import { StudentSwitcher } from '../layout/StudentSwitcher';
+import {
+  translateTrack,
+  translateSchoolLevel,
+  translateBranch,
+  Language,
+} from '@/lib/translations';
 
 interface ProfileScreenProps {
   onOpenAddStudent: () => void;
@@ -40,6 +48,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
     updateNotificationSettings,
   } = useStudent();
   const { theme, isDarkMode, toggleDarkMode } = useTheme();
+  const { t, isRTL, language, setLanguage } = useLanguage();
 
   // Editable parent state
   const [isEditingParent, setIsEditingParent] = useState(false);
@@ -67,16 +76,18 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in text-right" style={{ paddingBottom: '48px' }}>
+    <div className={`space-y-6 animate-fade-in ${isRTL ? 'text-right' : 'text-left'}`} style={{ paddingBottom: '48px' }}>
       {/* Header */}
       <div
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5"
         style={{ marginTop: '28px', marginBottom: '20px' }}
       >
         <div>
-          <span className="text-xs sm:text-sm font-bold text-slate-400">إدارة الحساب والإعدادات</span>
+          <span className="text-xs sm:text-sm font-bold text-slate-400">
+            {language === 'ar' ? 'إدارة الحساب والإعدادات' : language === 'fr' ? 'Gestion du Compte & Préférences' : 'Account Management & Settings'}
+          </span>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
-            الملف الشخصي
+            {t.profileTitle}
           </h1>
         </div>
       </div>
@@ -88,7 +99,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
 
       {/* Stacked Layout: All Containers Under Each Other with Clear & Clean Spacing */}
       <div className="flex flex-col" style={{ gap: '48px' }}>
-        {/* Module 1: بيانات الطالب (Student Information - Full Width) */}
+        {/* Module 1: Student Information */}
         <div
           className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs"
           style={{
@@ -104,7 +115,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
               <div className="flex items-center gap-3">
                 <GraduationCap size={26} className="text-slate-500 shrink-0" />
                 <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                  بيانات الطالب الأكاديمية (قراءة فقط)
+                  {language === 'ar' ? 'بيانات الطالب الأكاديمية (قراءة فقط)' : language === 'fr' ? 'Dossier Académique de l’Élève' : 'Student Academic Profile (Read-Only)'}
                 </h3>
               </div>
               <span
@@ -116,7 +127,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                   paddingLeft: '20px',
                 }}
               >
-                {theme.shortNameAr}
+                {language === 'ar' ? theme.shortNameAr : `${t.level} ${activeStudent.currentLevel}`}
               </span>
             </div>
 
@@ -125,7 +136,9 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
                 style={{ padding: '22px 28px', borderRadius: '20px' }}
               >
-                <span className="text-xs text-slate-400 font-semibold block">الاسم الأول</span>
+                <span className="text-xs text-slate-400 font-semibold block">
+                  {language === 'ar' ? 'الاسم الأول' : language === 'fr' ? 'Prénom' : 'First Name'}
+                </span>
                 <span className="font-bold text-slate-900 dark:text-white truncate block text-sm">
                   {activeStudent.firstNameAr || activeStudent.fullNameAr.split(' ')[0]}
                 </span>
@@ -135,9 +148,11 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
                 style={{ padding: '22px 28px', borderRadius: '20px' }}
               >
-                <span className="text-xs text-slate-400 font-semibold block">اللقب / اسم العائلة</span>
+                <span className="text-xs text-slate-400 font-semibold block">
+                  {language === 'ar' ? 'اللقب / اسم العائلة' : language === 'fr' ? 'Nom de Famille' : 'Last Name'}
+                </span>
                 <span className="font-bold text-slate-900 dark:text-white truncate block text-sm">
-                  {activeStudent.lastNameAr || activeStudent.fullNameAr.split(' ').slice(1).join(' ') || 'الدوزكري'}
+                  {activeStudent.lastNameAr || activeStudent.fullNameAr.split(' ').slice(1).join(' ') || 'Douzkari'}
                 </span>
               </div>
 
@@ -145,7 +160,9 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
                 style={{ padding: '22px 28px', borderRadius: '20px' }}
               >
-                <span className="text-xs text-slate-400 font-semibold block">تاريخ الميلاد</span>
+                <span className="text-xs text-slate-400 font-semibold block">
+                  {language === 'ar' ? 'تاريخ الميلاد' : language === 'fr' ? 'Date de Naissance' : 'Date of Birth'}
+                </span>
                 <span className="font-mono font-bold text-slate-900 dark:text-white block text-sm">
                   {activeStudent.birthday || '2016-09-20'}
                 </span>
@@ -155,9 +172,11 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
                 style={{ padding: '22px 28px', borderRadius: '20px' }}
               >
-                <span className="text-xs text-slate-400 font-semibold block">المستوى المدرسي</span>
+                <span className="text-xs text-slate-400 font-semibold block">
+                  {language === 'ar' ? 'المستوى المدرسي' : language === 'fr' ? 'Niveau Scolaire' : 'School Grade'}
+                </span>
                 <span className="font-bold text-slate-900 dark:text-white truncate block text-sm">
-                  {activeStudent.schoolLevelAr || 'المرحلة الابتدائية'}
+                  {translateSchoolLevel(activeStudent.schoolLevelAr, language)}
                 </span>
               </div>
 
@@ -165,7 +184,9 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
                 style={{ padding: '22px 28px', borderRadius: '20px' }}
               >
-                <span className="text-xs text-slate-400 font-semibold block">الرقم الأكاديمي</span>
+                <span className="text-xs text-slate-400 font-semibold block">
+                  {language === 'ar' ? 'الرقم الأكاديمي' : language === 'fr' ? 'Identifiant Étudiant' : 'Student ID'}
+                </span>
                 <span className="font-mono font-bold text-slate-900 dark:text-white block text-sm">
                   {activeStudent.studentIdNumber}
                 </span>
@@ -175,9 +196,11 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
                 style={{ padding: '22px 28px', borderRadius: '20px' }}
               >
-                <span className="text-xs text-slate-400 font-semibold block">المسار الأكاديمي</span>
+                <span className="text-xs text-slate-400 font-semibold block">
+                  {t.studentTrack}
+                </span>
                 <span className="font-bold text-slate-900 dark:text-white truncate block text-sm">
-                  {activeStudent.enrolledPathAr}
+                  {translateTrack(activeStudent.enrolledPathAr, language)}
                 </span>
               </div>
 
@@ -185,16 +208,18 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2 sm:col-span-2"
                 style={{ padding: '22px 28px', borderRadius: '20px' }}
               >
-                <span className="text-xs text-slate-400 font-semibold block">الفرع والسنة الدراسية</span>
+                <span className="text-xs text-slate-400 font-semibold block">
+                  {language === 'ar' ? 'الفرع والسنة الدراسية' : language === 'fr' ? 'Campus & Année Scolaire' : 'Campus & Academic Year'}
+                </span>
                 <span className="font-bold text-slate-900 dark:text-white truncate block text-sm">
-                  {activeStudent.branchAr} • {activeStudent.academicYearAr}
+                  {translateBranch(activeStudent.branchAr, language)} • {activeStudent.academicYearAr}
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Module 2: بيانات ولي الأمر (Parent Information - Full Width) */}
+        {/* Module 2: Parent Information */}
         <div
           className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs"
           style={{
@@ -210,7 +235,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
               <div className="flex items-center gap-3">
                 <User size={26} className="text-slate-500 shrink-0" />
                 <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                  بيانات ولي الأمر (قابلة للتعديل)
+                  {t.personalInfo}
                 </h3>
               </div>
 
@@ -222,7 +247,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                   style={{ padding: '8px 18px', minHeight: '38px' }}
                 >
                   <Edit2 size={14} />
-                  <span>تعديل البيانات</span>
+                  <span>{language === 'ar' ? 'تعديل البيانات' : language === 'fr' ? 'Modifier' : 'Edit Profile'}</span>
                 </button>
               )}
             </div>
@@ -230,7 +255,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
             {saveSuccess && (
               <div className="p-4 mb-5 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs sm:text-sm font-bold flex items-center gap-2">
                 <Check size={18} />
-                <span>تم حفظ بيانات ولي الأمر بنجاح!</span>
+                <span>{language === 'ar' ? 'تم حفظ بيانات ولي الأمر بنجاح!' : language === 'fr' ? 'Modifications enregistrées avec succès !' : 'Parent details updated successfully!'}</span>
               </div>
             )}
 
@@ -242,7 +267,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                     style={{ padding: '22px 28px', borderRadius: '20px' }}
                   >
                     <label className="block text-xs font-bold text-slate-500 dark:text-slate-400" style={{ marginBottom: '10px' }}>
-                      اسم ولي الأمر:
+                      {language === 'ar' ? 'اسم ولي الأمر:' : language === 'fr' ? 'Nom du Parent :' : 'Parent Full Name:'}
                     </label>
                     <input
                       type="text"
@@ -258,14 +283,14 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                     style={{ padding: '22px 28px', borderRadius: '20px' }}
                   >
                     <label className="block text-xs font-bold text-slate-500 dark:text-slate-400" style={{ marginBottom: '10px' }}>
-                      رقم الهاتف / الجوال:
+                      {t.phoneNumber}:
                     </label>
                     <input
                       type="tel"
                       value={parentPhone}
                       onChange={(e) => setParentPhone(e.target.value)}
                       className="w-full text-sm font-bold text-slate-900 dark:text-white bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
-                      style={{ padding: '14px 20px', direction: 'rtl', textAlign: 'right' }}
+                      style={{ padding: '14px 20px' }}
                     />
                   </div>
 
@@ -274,14 +299,14 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                     style={{ padding: '22px 28px', borderRadius: '20px' }}
                   >
                     <label className="block text-xs font-bold text-slate-500 dark:text-slate-400" style={{ marginBottom: '10px' }}>
-                      البريد الإلكتروني:
+                      {t.emailAddress}:
                     </label>
                     <input
                       type="email"
                       value={parentEmail}
                       onChange={(e) => setParentEmail(e.target.value)}
                       className="w-full text-sm font-bold text-slate-900 dark:text-white bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
-                      style={{ padding: '14px 20px', direction: 'rtl', textAlign: 'right' }}
+                      style={{ padding: '14px 20px' }}
                     />
                   </div>
                 </div>
@@ -298,7 +323,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    إلغاء
+                    {language === 'ar' ? 'إلغاء' : language === 'fr' ? 'Annuler' : 'Cancel'}
                   </button>
                   <button
                     type="submit"
@@ -312,7 +337,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                     }}
                   >
                     <Save size={18} className="shrink-0" />
-                    <span>حفظ التعديلات</span>
+                    <span>{language === 'ar' ? 'حفظ التعديلات' : language === 'fr' ? 'Enregistrer' : 'Save Changes'}</span>
                   </button>
                 </div>
               </form>
@@ -322,14 +347,16 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                   className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
                   style={{ padding: '22px 28px', borderRadius: '20px' }}
                 >
-                  <span className="text-xs text-slate-400 font-semibold block">اسم ولي الأمر</span>
+                  <span className="text-xs text-slate-400 font-semibold block">
+                    {language === 'ar' ? 'اسم ولي الأمر' : language === 'fr' ? 'Nom du Parent' : 'Parent Name'}
+                  </span>
                   <span className="font-bold text-slate-900 dark:text-white truncate block text-sm">{parent.fullNameAr}</span>
                 </div>
                 <div
                   className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
                   style={{ padding: '22px 28px', borderRadius: '20px' }}
                 >
-                  <span className="text-xs text-slate-400 font-semibold block">رقم الجوال</span>
+                  <span className="text-xs text-slate-400 font-semibold block">{t.phoneNumber}</span>
                   <span className="font-mono font-bold text-slate-900 dark:text-white block text-sm" dir="ltr">
                     {parent.phone}
                   </span>
@@ -338,7 +365,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                   className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
                   style={{ padding: '22px 28px', borderRadius: '20px' }}
                 >
-                  <span className="text-xs text-slate-400 font-semibold block">البريد الإلكتروني</span>
+                  <span className="text-xs text-slate-400 font-semibold block">{t.emailAddress}</span>
                   <span className="font-mono font-bold text-slate-900 dark:text-white truncate block text-sm" dir="ltr">
                     {parent.email}
                   </span>
@@ -348,7 +375,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
           </div>
         </div>
 
-        {/* Module 3: إدارة الأبناء (Manage All Children - Full Width) */}
+        {/* Module 3: Manage Children */}
         <div
           className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs"
           style={{
@@ -364,7 +391,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
               <div className="flex items-center gap-3">
                 <Users size={26} className="text-slate-500 shrink-0" />
                 <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                  إدارة الأبناء المربوطين بالحساب ({students.length})
+                  {t.registeredChildren} ({students.length})
                 </h3>
               </div>
               {SHOW_ADD_STUDENT_BUTTON && (
@@ -380,7 +407,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                   }}
                 >
                   <UserPlus size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
-                  <span>إضافة طالب</span>
+                  <span>{t.addStudent}</span>
                 </button>
               )}
             </div>
@@ -433,7 +460,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                               }}
                             >
                               <Clock size={12} className="shrink-0" />
-                              <span>قيد المراجعة والاعتماد</span>
+                              <span>{language === 'ar' ? 'قيد المراجعة والاعتماد' : language === 'fr' ? 'En cours de validation' : 'Pending Approval'}</span>
                             </span>
                           ) : (
                             isSelected && (
@@ -448,13 +475,13 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                                   lineHeight: '1',
                                 }}
                               >
-                                النشط حالياً
+                                {language === 'ar' ? 'النشط حالياً' : language === 'fr' ? 'Actif' : 'Active'}
                               </span>
                             )
                           )}
                         </div>
                         <span className="text-xs text-slate-400 font-medium block truncate">
-                          {st.enrolledPathAr}
+                          {translateTrack(st.enrolledPathAr, language)}
                         </span>
                       </div>
                     </div>
@@ -469,7 +496,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                             paddingLeft: '16px',
                           }}
                         >
-                          بانتظار الاختبار
+                          {language === 'ar' ? 'بانتظار الاختبار' : language === 'fr' ? 'Test prévu' : 'Awaiting Test'}
                         </span>
                       ) : (
                         <span
@@ -481,7 +508,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                             paddingLeft: '16px',
                           }}
                         >
-                          المستوى {st.currentLevel}
+                          {t.level} {st.currentLevel}
                         </span>
                       )}
                     </div>
@@ -492,7 +519,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
           </div>
         </div>
 
-        {/* Module 4: الإعدادات والإشعارات (Settings & Notification Toggles - Full Width) */}
+        {/* Module 4: Settings & Platform Preferences */}
         <div
           className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs"
           style={{
@@ -507,11 +534,71 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
             >
               <Settings size={26} className="text-slate-500 shrink-0" />
               <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                الإعدادات وتفضيلات التنبيهات
+                {t.appSettings}
               </h3>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* Language Selection */}
+              <div
+                className="flex flex-col justify-between bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 gap-4"
+                style={{ padding: '22px 28px', borderRadius: '20px' }}
+              >
+                <div className="flex items-center gap-3">
+                  <Languages size={22} className="text-slate-500 shrink-0" />
+                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    {t.languageSelect}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { code: 'ar' as Language, label: 'العربية' },
+                    { code: 'en' as Language, label: 'English' },
+                    { code: 'fr' as Language, label: 'Français' },
+                  ].map((l) => (
+                    <button
+                      key={l.code}
+                      type="button"
+                      onClick={() => setLanguage(l.code)}
+                      className={`py-2 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                        language === l.code
+                          ? 'bg-rose-600 text-white shadow-xs'
+                          : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                      }`}
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dark Mode toggle */}
+              <div
+                className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 gap-6"
+                style={{ padding: '22px 28px', borderRadius: '20px' }}
+              >
+                <div className="flex items-center gap-3">
+                  {isDarkMode ? <Moon size={22} className="text-amber-400 shrink-0" /> : <Sun size={22} className="text-amber-500 shrink-0" />}
+                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    {isDarkMode ? t.darkTheme : t.lightTheme}
+                  </span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={isDarkMode}
+                    onChange={toggleDarkMode}
+                    className="sr-only peer"
+                  />
+                  <div
+                    className="w-12 h-6.5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:right-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
+                    style={{
+                      backgroundColor: isDarkMode ? theme.primary : undefined,
+                    }}
+                  />
+                </label>
+              </div>
+
               {/* Homework alerts */}
               <div
                 className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 gap-6"
@@ -519,10 +606,10 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
               >
                 <div className="space-y-1">
                   <span className="text-sm font-bold text-slate-800 dark:text-slate-200 block">
-                    تنبيهات الواجبات والتصحيح
+                    {language === 'ar' ? 'تنبيهات الواجبات والتصحيح' : language === 'fr' ? 'Alertes de Devoirs' : 'Homework & Grading Alerts'}
                   </span>
                   <span className="text-xs text-slate-400 font-medium block leading-relaxed">
-                    إشعار عند طلب المعلم مراجعة الواجب أو رصد درجة
+                    {language === 'ar' ? 'إشعار عند طلب المعلم مراجعة الواجب أو رصد درجة' : language === 'fr' ? 'Notification lors de la correction des devoirs' : 'Instant notice when teacher requests revision or grades'}
                   </span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -541,37 +628,6 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 </label>
               </div>
 
-              {/* Payment alerts (Shown only when financials feature is enabled) */}
-              {SHOW_FINANCIALS_TAB && (
-                <div
-                  className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 gap-6"
-                  style={{ padding: '22px 28px', borderRadius: '20px' }}
-                >
-                  <div className="space-y-1">
-                    <span className="text-sm font-bold text-slate-800 dark:text-slate-200 block">
-                      تنبيهات الرسوم والدفع
-                    </span>
-                    <span className="text-xs text-slate-400 font-medium block leading-relaxed">
-                      تذكير بمواعيد الاستحقاق وفواتير الاشتراك
-                    </span>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                    <input
-                      type="checkbox"
-                      checked={notificationSettings.payments}
-                      onChange={() => handleToggleNotif('payments')}
-                      className="sr-only peer"
-                    />
-                    <div
-                      className="w-12 h-6.5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:right-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
-                      style={{
-                        backgroundColor: notificationSettings.payments ? theme.primary : undefined,
-                      }}
-                    />
-                  </label>
-                </div>
-              )}
-
               {/* Attendance alerts */}
               <div
                 className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 gap-6"
@@ -579,10 +635,10 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
               >
                 <div className="space-y-1">
                   <span className="text-sm font-bold text-slate-800 dark:text-slate-200 block">
-                    تنبيهات الحضور والغياب اليومي
+                    {language === 'ar' ? 'تنبيهات الحضور والغياب اليومي' : language === 'fr' ? 'Alertes de Présence Quotidienne' : 'Daily Attendance Alerts'}
                   </span>
                   <span className="text-xs text-slate-400 font-medium block leading-relaxed">
-                    إشعار فوري عند تسجيل حضور أو غياب الطالب
+                    {language === 'ar' ? 'إشعار فوري عند تسجيل حضور أو غياب الطالب' : language === 'fr' ? 'Notification immédiate lors du pointage' : 'Instant notice for present, late, or absent status'}
                   </span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -596,33 +652,6 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                     className="w-12 h-6.5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:right-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
                     style={{
                       backgroundColor: notificationSettings.attendance ? theme.primary : undefined,
-                    }}
-                  />
-                </label>
-              </div>
-
-              {/* Dark Mode toggle */}
-              <div
-                className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 gap-6"
-                style={{ padding: '22px 28px', borderRadius: '20px' }}
-              >
-                <div className="flex items-center gap-3">
-                  {isDarkMode ? <Moon size={22} className="text-amber-400 shrink-0" /> : <Sun size={22} className="text-amber-500 shrink-0" />}
-                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                    الوضع الداكن (Dark Mode)
-                  </span>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                  <input
-                    type="checkbox"
-                    checked={isDarkMode}
-                    onChange={toggleDarkMode}
-                    className="sr-only peer"
-                  />
-                  <div
-                    className="w-12 h-6.5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:right-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"
-                    style={{
-                      backgroundColor: isDarkMode ? theme.primary : undefined,
                     }}
                   />
                 </label>
@@ -641,9 +670,11 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
         >
           <div className="space-y-1">
             <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-              الدعم الفني والأكاديمي
+              {language === 'ar' ? 'الدعم الفني والأكاديمي' : language === 'fr' ? 'Support Pédagogique & Technique' : 'Academic & Technical Support'}
             </h3>
-            <p className="text-xs sm:text-sm text-slate-400 font-medium">تواصل مباشر مع إدارة الحلقات</p>
+            <p className="text-xs sm:text-sm text-slate-400 font-medium">
+              {language === 'ar' ? 'تواصل مباشر مع إدارة الأكاديمية' : language === 'fr' ? 'Contact direct avec la direction My School' : 'Direct contact with My School team'}
+            </p>
           </div>
           <a
             href="https://wa.me/"
@@ -658,7 +689,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
             }}
           >
             <MessageCircle size={20} className="shrink-0" />
-            <span>واتساب الإشراف</span>
+            <span>{language === 'ar' ? 'واتساب الإشراف' : language === 'fr' ? 'WhatsApp Support' : 'WhatsApp Support'}</span>
           </a>
         </div>
       </div>

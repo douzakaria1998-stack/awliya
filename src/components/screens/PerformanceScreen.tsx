@@ -19,28 +19,16 @@ import {
 } from 'lucide-react';
 import { useStudent } from '@/context/StudentContext';
 import { useTheme } from '@/context/ThemeContext';
-import { PerformanceTabKey, PERFORMANCE_TABS } from '@/lib/constants';
+import { useLanguage } from '@/context/LanguageContext';
+import { PerformanceTabKey } from '@/lib/constants';
 import { Homework } from '@/types';
 import { StudentSwitcher } from '../layout/StudentSwitcher';
 import { HomeworkDetailModal } from '../modals/HomeworkDetailModal';
-
-const WEEKS_LIST = [
-  {
-    index: 0,
-    labelAr: 'الأسبوع الحالي',
-    rangeAr: '15 - 20 فبراير 2025',
-  },
-  {
-    index: 1,
-    labelAr: 'الأسبوع الماضي',
-    rangeAr: '08 - 13 فبراير 2025',
-  },
-  {
-    index: 2,
-    labelAr: 'الأسبوع الأسبق',
-    rangeAr: '01 - 06 فبراير 2025',
-  },
-];
+import {
+  translateSubject,
+  translateHomeworkTitle,
+  translateTeacherNote,
+} from '@/lib/translations';
 
 const SUBJECT_CONTAINER_THEMES: Record<
   string,
@@ -108,11 +96,37 @@ export function PerformanceScreen({
 }: PerformanceScreenProps) {
   const { activeStudent, homeworkList, attendanceData, assessments, teacherFeedback } = useStudent();
   const { theme } = useTheme();
+  const { t, isRTL, language } = useLanguage();
 
   const [activeTab, setActiveTab] = useState<PerformanceTabKey>(initialTab);
   const [selectedHomework, setSelectedHomework] = useState<Homework | null>(null);
   const [homeworkFilter, setHomeworkFilter] = useState<'all' | 'needs_revision' | 'completed'>('all');
   const [selectedWeekIndex, setSelectedWeekIndex] = useState<number>(0);
+
+  const WEEKS_LIST = [
+    {
+      index: 0,
+      label: t.currentWeek,
+      range: language === 'ar' ? '15 - 20 فبراير 2025' : language === 'fr' ? '15 - 20 Février 2025' : 'Feb 15 - 20, 2025',
+    },
+    {
+      index: 1,
+      label: t.lastWeek,
+      range: language === 'ar' ? '08 - 13 فبراير 2025' : language === 'fr' ? '08 - 13 Février 2025' : 'Feb 08 - 13, 2025',
+    },
+    {
+      index: 2,
+      label: t.previousWeek,
+      range: language === 'ar' ? '01 - 06 فبراير 2025' : language === 'fr' ? '01 - 06 Février 2025' : 'Feb 01 - 06, 2025',
+    },
+  ];
+
+  const performanceTabs: { key: PerformanceTabKey; label: string }[] = [
+    { key: 'homework', label: t.tabHomework },
+    { key: 'attendance', label: t.tabAttendance },
+    { key: 'assessments', label: t.tabAssessments },
+    { key: 'feedback', label: t.tabTeacherFeedback },
+  ];
 
   // Weekly Attendance calculations
   const currentWeekRecords = attendanceData.records.filter(
@@ -134,8 +148,32 @@ export function PerformanceScreen({
 
   const needsRevisionCount = homeworkList.filter((h) => h.status === 'needs_revision').length;
 
+  const translateDayName = (dayAr?: string) => {
+    if (!dayAr) return '';
+    if (language === 'ar') return dayAr;
+    const daysEn: Record<string, string> = {
+      السبت: 'Saturday',
+      الأحد: 'Sunday',
+      الإثنين: 'Monday',
+      الثلاثاء: 'Tuesday',
+      الأربعاء: 'Wednesday',
+      الخميس: 'Thursday',
+      الجمعة: 'Friday',
+    };
+    const daysFr: Record<string, string> = {
+      السبت: 'Samedi',
+      الأحد: 'Dimanche',
+      الإثنين: 'Lundi',
+      الثلاثاء: 'Mardi',
+      الأربعاء: 'Mercredi',
+      الخميس: 'Jeudi',
+      الجمعة: 'Vendredi',
+    };
+    return language === 'fr' ? daysFr[dayAr] || dayAr : daysEn[dayAr] || dayAr;
+  };
+
   return (
-    <div className="space-y-6 animate-fade-in text-right">
+    <div className={`space-y-6 animate-fade-in ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header */}
       <div
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
@@ -146,10 +184,10 @@ export function PerformanceScreen({
       >
         <div>
           <span className="text-xs sm:text-sm font-bold text-slate-400 block mb-0.5">
-            متابعة دقيقة ومستمرة
+            {t.performanceSubtitle}
           </span>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-            الأداء والتقييمات الأكاديمية
+            {t.performanceTitle}
           </h1>
         </div>
 
@@ -164,7 +202,7 @@ export function PerformanceScreen({
               fontSize: '13px',
             }}
           >
-            المستوى {activeStudent.currentLevel}
+            {t.level} {activeStudent.currentLevel}
           </span>
         </div>
       </div>
@@ -174,7 +212,7 @@ export function PerformanceScreen({
         <StudentSwitcher onOpenAddStudent={onOpenAddStudent} />
       </div>
 
-      {/* Top Segmented Tab Navigation (4 Views RTL) */}
+      {/* Top Segmented Tab Navigation */}
       <div
         className="rounded-2xl bg-slate-100 dark:bg-slate-850 flex gap-2 border border-slate-200/80 dark:border-slate-800 shadow-2xs"
         style={{
@@ -183,7 +221,7 @@ export function PerformanceScreen({
           minHeight: '62px',
         }}
       >
-        {PERFORMANCE_TABS.map((tab) => {
+        {performanceTabs.map((tab) => {
           const isActive = activeTab === tab.key;
           const showBadge = tab.key === 'homework' && needsRevisionCount > 0;
 
@@ -204,7 +242,7 @@ export function PerformanceScreen({
                 color: isActive ? theme.primary : undefined,
               }}
             >
-              <span className="font-black tracking-tight">{tab.labelAr}</span>
+              <span className="font-black tracking-tight">{tab.label}</span>
               {showBadge && (
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shrink-0 ring-2 ring-white dark:ring-slate-900" />
               )}
@@ -214,7 +252,7 @@ export function PerformanceScreen({
       </div>
 
       {/* ============================================================ */}
-      {/* TAB 1: الواجبات (Homework) */}
+      {/* TAB 1: Homework */}
       {/* ============================================================ */}
       {activeTab === 'homework' && (
         <div className="space-y-4 animate-fade-in">
@@ -238,7 +276,7 @@ export function PerformanceScreen({
                 paddingLeft: '18px',
               }}
             >
-              الكل ({homeworkList.length})
+              {t.filterAll} ({homeworkList.length})
             </button>
 
             <button
@@ -255,7 +293,7 @@ export function PerformanceScreen({
                 paddingLeft: '18px',
               }}
             >
-              بحاجة إلى مراجعة ({needsRevisionCount})
+              {t.needsRevision} ({needsRevisionCount})
             </button>
 
             <button
@@ -272,127 +310,133 @@ export function PerformanceScreen({
                 paddingLeft: '18px',
               }}
             >
-              المكتملة
+              {t.completed}
             </button>
           </div>
 
-          {/* Homework Items List (Single Column Stack - Goes Under Each Other) */}
+          {/* Homework Items List */}
           <div className="flex flex-col gap-4">
-            {filteredHomework.map((hw) => {
-              const isRevision = hw.status === 'needs_revision';
-              const isCompleted = hw.status === 'completed';
+            {filteredHomework.length === 0 ? (
+              <div className="text-center py-12 text-slate-400 text-sm font-semibold bg-white dark:bg-slate-850 rounded-3xl border border-slate-200/80 dark:border-slate-800">
+                {t.noHomeworkFound}
+              </div>
+            ) : (
+              filteredHomework.map((hw) => {
+                const isRevision = hw.status === 'needs_revision';
+                const isCompleted = hw.status === 'completed';
 
-              return (
-                <div
-                  key={hw.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setSelectedHomework(hw)}
-                  onKeyDown={(e) => e.key === 'Enter' && setSelectedHomework(hw)}
-                  className={`border transition-all cursor-pointer flex flex-col justify-between select-none ${
-                    isRevision
-                      ? 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-300 dark:border-amber-700/70 shadow-sm ring-1 ring-amber-400/20'
-                      : isCompleted
-                      ? 'bg-white dark:bg-slate-850 border-slate-200/80 dark:border-slate-800 hover:border-emerald-300 shadow-2xs'
-                      : 'bg-white dark:bg-slate-850 border-slate-200/80 dark:border-slate-800 shadow-2xs'
-                  }`}
-                  style={{
-                    padding: '26px 30px',
-                    borderRadius: '24px',
-                  }}
-                >
-                  <div>
-                    {/* Top Bar */}
-                    <div className="flex items-center justify-between gap-3 mb-3">
-                      <span className="text-xs font-bold text-slate-400">
-                        المستوى {hw.level} • {hw.subjectAr}
-                      </span>
+                return (
+                  <div
+                    key={hw.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedHomework(hw)}
+                    onKeyDown={(e) => e.key === 'Enter' && setSelectedHomework(hw)}
+                    className={`border transition-all cursor-pointer flex flex-col justify-between select-none ${
+                      isRevision
+                        ? 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-300 dark:border-amber-700/70 shadow-sm ring-1 ring-amber-400/20'
+                        : isCompleted
+                        ? 'bg-white dark:bg-slate-850 border-slate-200/80 dark:border-slate-800 hover:border-emerald-300 shadow-2xs'
+                        : 'bg-white dark:bg-slate-850 border-slate-200/80 dark:border-slate-800 shadow-2xs'
+                    }`}
+                    style={{
+                      padding: '26px 30px',
+                      borderRadius: '24px',
+                    }}
+                  >
+                    <div>
+                      {/* Top Bar */}
+                      <div className="flex items-center justify-between gap-3 mb-3">
+                        <span className="text-xs font-bold text-slate-400">
+                          {t.level} {hw.level} • {translateSubject(hw.subjectAr, language)}
+                        </span>
 
-                      {isRevision && (
-                        <span
-                          className="inline-flex items-center rounded-full text-xs font-bold bg-amber-500 text-white shadow-xs animate-pulse"
+                        {isRevision && (
+                          <span
+                            className="inline-flex items-center rounded-full text-xs font-bold bg-amber-500 text-white shadow-xs animate-pulse"
+                            style={{
+                              height: '30px',
+                              paddingRight: '14px',
+                              paddingLeft: '14px',
+                            }}
+                          >
+                            {t.needsRevision}
+                          </span>
+                        )}
+
+                        {isCompleted && (
+                          <span
+                            className="inline-flex items-center rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                            style={{
+                              height: '30px',
+                              paddingRight: '14px',
+                              paddingLeft: '14px',
+                            }}
+                          >
+                            {t.completed} ✓
+                          </span>
+                        )}
+
+                        {!isRevision && !isCompleted && (
+                          <span
+                            className="inline-flex items-center rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                            style={{
+                              height: '30px',
+                              paddingRight: '14px',
+                              paddingLeft: '14px',
+                            }}
+                          >
+                            {t.pending}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Title */}
+                      <h3
+                        className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug"
+                        style={{ margin: '8px 0 12px 0' }}
+                      >
+                        {translateHomeworkTitle(hw.titleAr, language)}
+                      </h3>
+
+                      {/* Teacher Feedback Alert if needs revision */}
+                      {hw.teacherNote && isRevision && (
+                        <div
+                          className="rounded-2xl bg-amber-100/70 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800 text-xs sm:text-sm text-amber-900 dark:text-amber-200 leading-relaxed font-medium"
                           style={{
-                            height: '30px',
-                            paddingRight: '14px',
-                            paddingLeft: '14px',
+                            padding: '14px 18px',
+                            marginTop: '12px',
                           }}
                         >
-                          بحاجة إلى مراجعة
-                        </span>
-                      )}
-
-                      {isCompleted && (
-                        <span
-                          className="inline-flex items-center rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                          style={{
-                            height: '30px',
-                            paddingRight: '14px',
-                            paddingLeft: '14px',
-                          }}
-                        >
-                          مكتمل ✓
-                        </span>
-                      )}
-
-                      {!isRevision && !isCompleted && (
-                        <span
-                          className="inline-flex items-center rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-                          style={{
-                            height: '30px',
-                            paddingRight: '14px',
-                            paddingLeft: '14px',
-                          }}
-                        >
-                          قيد الانتظار
-                        </span>
+                          <span className="font-bold">{t.teacherNoteLabel} </span>
+                          {translateTeacherNote(hw.teacherNote, language)}
+                        </div>
                       )}
                     </div>
 
-                    {/* Title */}
-                    <h3
-                      className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug"
-                      style={{ margin: '8px 0 12px 0' }}
-                    >
-                      {hw.titleAr}
-                    </h3>
-
-                    {/* Teacher Feedback Alert if needs revision */}
-                    {hw.teacherNote && isRevision && (
-                      <div
-                        className="rounded-2xl bg-amber-100/70 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800 text-xs sm:text-sm text-amber-900 dark:text-amber-200 leading-relaxed font-medium"
-                        style={{
-                          padding: '14px 18px',
-                          marginTop: '12px',
-                        }}
-                      >
-                        <span className="font-bold">ملاحظة المعلم: </span>
-                        {hw.teacherNote}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer */}
-                  <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 font-medium">
-                    <span className="flex items-center gap-1.5">
-                      <Clock size={14} />
-                      موعد التسليم: {hw.dueDate}
-                    </span>
-
-                    {hw.score !== undefined && (
-                      <span className="font-bold text-slate-800 dark:text-slate-200 text-sm font-mono">
-                        الدرجة: {hw.score} / {hw.totalScore || 100}
+                    {/* Footer */}
+                    <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 font-medium">
+                      <span className="flex items-center gap-1.5">
+                        <Clock size={14} />
+                        {t.dueDateLabel} {hw.dueDate}
                       </span>
-                    )}
+
+                      {hw.score !== undefined && (
+                        <span className="font-bold text-slate-800 dark:text-slate-200 text-sm font-mono">
+                          {t.scoreLabel} {hw.score} / {hw.totalScore || 100}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
       )}
 
       {/* ============================================================ */}
-      {/* TAB 2: الحضور (Student Attendance) */}
+      {/* TAB 2: Attendance */}
       {/* ============================================================ */}
       {activeTab === 'attendance' && (
         <div className="space-y-6 animate-fade-in">
@@ -403,12 +447,12 @@ export function PerformanceScreen({
               style={{ padding: '24px 28px' }}
             >
               <div className="space-y-1.5">
-                <span className="text-xs font-bold text-slate-400">نسبة الحضور التراكمية</span>
+                <span className="text-xs font-bold text-slate-400">{t.overallAttendanceRate}</span>
                 <div className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white font-mono">
                   {attendanceData.summary.attendancePercentage}%
                 </div>
                 <span className="text-xs font-bold text-emerald-600 block">
-                  معدل انضباط متميز
+                  {language === 'ar' ? 'معدل انضباط متميز' : language === 'fr' ? 'Excellent taux de présence' : 'Excellent Discipline Rate'}
                 </span>
               </div>
 
@@ -447,7 +491,7 @@ export function PerformanceScreen({
                   {attendanceData.summary.presentDays}
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 block mt-1.5">
-                  حاضر
+                  {t.present}
                 </span>
               </div>
 
@@ -459,7 +503,7 @@ export function PerformanceScreen({
                   {attendanceData.summary.absentDays}
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 block mt-1.5">
-                  غائب
+                  {t.absent}
                 </span>
               </div>
 
@@ -471,7 +515,7 @@ export function PerformanceScreen({
                   {attendanceData.summary.lateDays}
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 block mt-1.5">
-                  متأخر
+                  {t.late}
                 </span>
               </div>
 
@@ -483,15 +527,15 @@ export function PerformanceScreen({
                   {attendanceData.summary.excusedDays}
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 block mt-1.5">
-                  غياب بعذر
+                  {t.excused}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Weekly Timetable Schedule Section (جدول الحلقات الأسبوعي) */}
+          {/* Weekly Timetable Schedule Section */}
           <div className="space-y-4" style={{ marginTop: '32px' }}>
-            {/* Week Switcher & Timetable Banner */}
+            {/* Week Switcher Banner */}
             <div
               className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"
               style={{
@@ -503,17 +547,17 @@ export function PerformanceScreen({
                 <div className="flex items-center gap-2.5 mb-1.5">
                   <CalendarDays size={22} className="text-slate-500 shrink-0" />
                   <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                    جدول الحضور الأسبوعي للدروس والحلقات
+                    {language === 'ar' ? 'جدول الحضور الأسبوعي للدروس والحلقات' : language === 'fr' ? 'Emploi du temps hebdomadaire des séances' : 'Weekly Attendance & Class Schedule'}
                   </h3>
                 </div>
                 <p className="text-xs sm:text-sm text-slate-400 font-medium">
-                  توزيع الحلقات الأسبوعية مع إمكانية التنقل بين الأسابيع
+                  {language === 'ar' ? 'توزيع الحصص الأسبوعية مع إمكانية التنقل بين الأسابيع' : language === 'fr' ? 'Répartition des cours avec navigation entre les semaines' : 'Weekly session distribution with week navigation'}
                 </p>
               </div>
 
               {/* Week Switcher Controls */}
               <div className="flex items-center gap-2.5 flex-wrap">
-                <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60">
+                <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-700/60">
                   {WEEKS_LIST.map((wk) => {
                     const isSelected = selectedWeekIndex === wk.index;
                     return (
@@ -533,7 +577,7 @@ export function PerformanceScreen({
                           color: isSelected ? theme.primary : undefined,
                         }}
                       >
-                        <span>{wk.labelAr}</span>
+                        <span>{wk.label}</span>
                       </button>
                     );
                   })}
@@ -545,9 +589,9 @@ export function PerformanceScreen({
                     disabled={selectedWeekIndex >= WEEKS_LIST.length - 1}
                     onClick={() => setSelectedWeekIndex((prev) => Math.min(WEEKS_LIST.length - 1, prev + 1))}
                     className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-                    title="الأسبوع السابق"
+                    title={isRTL ? 'الأسبوع السابق' : 'Previous Week'}
                   >
-                    <ChevronRight size={18} />
+                    {isRTL ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
                   </button>
 
                   <button
@@ -555,9 +599,9 @@ export function PerformanceScreen({
                     disabled={selectedWeekIndex <= 0}
                     onClick={() => setSelectedWeekIndex((prev) => Math.max(0, prev - 1))}
                     className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-                    title="الأسبوع التالي"
+                    title={isRTL ? 'الأسبوع التالي' : 'Next Week'}
                   >
-                    <ChevronLeft size={18} />
+                    {isRTL ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
                   </button>
                 </div>
               </div>
@@ -573,30 +617,30 @@ export function PerformanceScreen({
             >
               <div className="flex items-center gap-2.5 text-slate-800 dark:text-slate-200">
                 <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
-                  {WEEKS_LIST[selectedWeekIndex]?.labelAr}:
+                  {WEEKS_LIST[selectedWeekIndex]?.label}:
                 </span>
                 <span className="font-mono text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                  ({WEEKS_LIST[selectedWeekIndex]?.rangeAr})
+                  ({WEEKS_LIST[selectedWeekIndex]?.range})
                 </span>
               </div>
 
               <div className="flex items-center gap-3.5 text-xs sm:text-sm flex-wrap">
                 <span className="text-emerald-600 font-black">
-                  حاضر: {weekPresentCount} أيام
+                  {t.present}: {weekPresentCount} {language === 'ar' ? 'أيام' : language === 'fr' ? 'jours' : 'days'}
                 </span>
                 {weekLateCount > 0 && (
                   <span className="text-amber-600 font-black">
-                    تأخر: {weekLateCount}
+                    {t.late}: {weekLateCount}
                   </span>
                 )}
                 {weekAbsentCount > 0 && (
                   <span className="text-rose-600 font-black">
-                    غياب: {weekAbsentCount}
+                    {t.absent}: {weekAbsentCount}
                   </span>
                 )}
                 {weekExcusedCount > 0 && (
                   <span className="text-blue-600 font-black">
-                    بعذر: {weekExcusedCount}
+                    {t.excused}: {weekExcusedCount}
                   </span>
                 )}
                 <span
@@ -608,22 +652,23 @@ export function PerformanceScreen({
                     paddingLeft: '16px',
                   }}
                 >
-                  نسبة الأسبوع: {weekPercentage}%
+                  {language === 'ar' ? `نسبة الأسبوع: ${weekPercentage}%` : language === 'fr' ? `Taux hebdo: ${weekPercentage}%` : `Week Rate: ${weekPercentage}%`}
                 </span>
               </div>
             </div>
 
-            {/* Weekly Timetable Schedule Grid (6 Days: Saturday to Thursday) */}
+            {/* Weekly Timetable Schedule Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" style={{ paddingBottom: '48px' }}>
               {currentWeekRecords.map((rec) => {
                 const isPresent = rec.status === 'present';
                 const isAbsent = rec.status === 'absent';
                 const isLate = rec.status === 'late';
 
-                const subject = rec.subjectAr || 'اللغة الإنجليزية';
-                const dayName = rec.dayNameAr || 'الخميس';
+                const subjectAr = rec.subjectAr || 'اللغة الإنجليزية';
+                const translatedSubject = translateSubject(subjectAr, language);
+                const dayLabel = translateDayName(rec.dayNameAr);
                 const themeStyles =
-                  SUBJECT_CONTAINER_THEMES[subject] || SUBJECT_CONTAINER_THEMES['اللغة الإنجليزية'];
+                  SUBJECT_CONTAINER_THEMES[subjectAr] || SUBJECT_CONTAINER_THEMES['اللغة الإنجليزية'];
 
                 return (
                   <div
@@ -642,7 +687,7 @@ export function PerformanceScreen({
                       <div className="flex items-center justify-between gap-3 mb-3">
                         <div className="flex items-center gap-2">
                           <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                            يوم {dayName}
+                            {dayLabel}
                           </span>
                           <span className="text-xs text-slate-400 font-mono font-bold">
                             {rec.date}
@@ -666,12 +711,12 @@ export function PerformanceScreen({
                           }}
                         >
                           {isPresent
-                            ? 'حاضر ✓'
+                            ? `${t.present} ✓`
                             : isAbsent
-                            ? 'غائب ✕'
+                            ? `${t.absent} ✕`
                             : isLate
-                            ? 'متأخر ⏱'
-                            : 'غياب بعذر ✉'}
+                            ? `${t.late} ⏱`
+                            : `${t.excused} ✉`}
                         </span>
                       </div>
 
@@ -686,12 +731,12 @@ export function PerformanceScreen({
                           }}
                         >
                           <BookOpen size={14} className="shrink-0" />
-                          <span>{subject}</span>
+                          <span>{translatedSubject}</span>
                         </span>
 
                         <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-300 font-bold flex items-center gap-1.5">
                           <Clock size={14} />
-                          <span>{rec.sessionTimeAr || '04:30 م'}</span>
+                          <span>{rec.sessionTimeAr || '04:30 PM'}</span>
                         </span>
                       </div>
                     </div>
@@ -702,7 +747,7 @@ export function PerformanceScreen({
                         className="mt-3 p-3 px-4 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 text-xs text-slate-700 dark:text-slate-300 font-medium"
                         style={{ marginBottom: '2px' }}
                       >
-                        <span className="font-bold">ملاحظة: </span>
+                        <span className="font-bold">{language === 'ar' ? 'ملاحظة: ' : language === 'fr' ? 'Remarque : ' : 'Note: '}</span>
                         {rec.noteAr}
                       </div>
                     )}
@@ -715,7 +760,7 @@ export function PerformanceScreen({
       )}
 
       {/* ============================================================ */}
-      {/* TAB 3: التقييمات (Assessments) */}
+      {/* TAB 3: Assessments */}
       {/* ============================================================ */}
       {activeTab === 'assessments' && (
         <div className="space-y-6 animate-fade-in" style={{ paddingBottom: '48px' }}>
@@ -728,15 +773,31 @@ export function PerformanceScreen({
             }}
           >
             <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white" style={{ marginBottom: '18px' }}>
-              تقييم المهارات التراكمي (المستوى {activeStudent.currentLevel})
+              {language === 'ar'
+                ? `تقييم المهارات التراكمي (المستوى ${activeStudent.currentLevel})`
+                : language === 'fr'
+                ? `Évaluation cumulative des compétences (${t.level} ${activeStudent.currentLevel})`
+                : `Cumulative Skills Evaluation (${t.level} ${activeStudent.currentLevel})`}
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { name: 'المحادثة والطلاقة الشفهية (Speaking Fluency)', score: 94 },
-                { name: 'الفهم السمعي والاستيعاب (Listening Comprehension)', score: 92 },
-                { name: 'القواعد وبناء التراكيب (Grammar & Structure)', score: 88 },
-                { name: 'القراءة والتعبير الكتابي (Reading & Writing)', score: 85 },
+                {
+                  name: language === 'ar' ? 'المحادثة والطلاقة الشفهية (Speaking Fluency)' : language === 'fr' ? 'Expression Orale & Fluidité (Speaking Fluency)' : 'Speaking & Verbal Fluency',
+                  score: 94,
+                },
+                {
+                  name: language === 'ar' ? 'الفهم السمعي والاستيعاب (Listening Comprehension)' : language === 'fr' ? 'Compréhension Orale (Listening Comprehension)' : 'Listening & Comprehension',
+                  score: 92,
+                },
+                {
+                  name: language === 'ar' ? 'القواعد وبناء التراكيب (Grammar & Structure)' : language === 'fr' ? 'Grammaire & Structures (Grammar & Structure)' : 'Grammar & Syntax Structures',
+                  score: 88,
+                },
+                {
+                  name: language === 'ar' ? 'القراءة والتعبير الكتابي (Reading & Writing)' : language === 'fr' ? 'Lecture & Expression Écrite (Reading & Writing)' : 'Reading & Essay Writing',
+                  score: 85,
+                },
               ].map((skill, idx) => (
                 <div
                   key={idx}
@@ -769,14 +830,14 @@ export function PerformanceScreen({
           {/* Assessments History Cards Grid */}
           <div className="space-y-4" style={{ marginTop: '32px' }}>
             <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-              سجل الاختبارات الدورية:
+              {t.periodicAssessments}:
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {assessments.map((asm) => (
                 <div
                   key={asm.id}
-                  className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs text-right flex flex-col justify-between"
+                  className={`bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between ${isRTL ? 'text-right' : 'text-left'}`}
                   style={{
                     padding: '28px 32px',
                     borderRadius: '24px',
@@ -786,7 +847,7 @@ export function PerformanceScreen({
                     {/* Top Row: Level/Type + Score Badge */}
                     <div className="flex items-center justify-between gap-3" style={{ marginBottom: '14px' }}>
                       <span className="text-xs sm:text-sm font-bold text-slate-400">
-                        المستوى {asm.level} • {asm.typeAr}
+                        {t.level} {asm.level} • {translateSubject(asm.typeAr, language)}
                       </span>
                       <span
                         className="inline-flex items-center justify-center rounded-full text-xs sm:text-sm font-black text-white shadow-2xs select-none"
@@ -797,12 +858,12 @@ export function PerformanceScreen({
                           paddingLeft: '16px',
                         }}
                       >
-                        {asm.score}% ({asm.gradeLetterAr || 'ممتاز'})
+                        {asm.score}% ({language === 'ar' ? asm.gradeLetterAr || 'ممتاز' : asm.score >= 90 ? 'A+' : 'A'})
                       </span>
                     </div>
 
                     <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-snug" style={{ margin: '10px 0' }}>
-                      {asm.titleAr}
+                      {translateHomeworkTitle(asm.titleAr, language)}
                     </h4>
 
                     {asm.teacherComments && (
@@ -814,7 +875,7 @@ export function PerformanceScreen({
                           margin: '14px 0',
                         }}
                       >
-                        "{asm.teacherComments}"
+                        "{translateTeacherNote(asm.teacherComments, language)}"
                       </div>
                     )}
                   </div>
@@ -826,7 +887,7 @@ export function PerformanceScreen({
                       marginTop: '16px',
                     }}
                   >
-                    <span>المادة: {asm.subjectAr}</span>
+                    <span>{language === 'ar' ? 'المادة: ' : language === 'fr' ? 'Matière : ' : 'Subject: '}{translateSubject(asm.subjectAr, language)}</span>
                     <span className="font-mono">{asm.date}</span>
                   </div>
                 </div>
@@ -837,12 +898,11 @@ export function PerformanceScreen({
       )}
 
       {/* ============================================================ */}
-      {/* TAB 4: ملاحظات المعلم (Teacher Feedback Feed) */}
+      {/* TAB 4: Teacher Feedback */}
       {/* ============================================================ */}
       {activeTab === 'feedback' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-fade-in" style={{ paddingBottom: '48px' }}>
           {teacherFeedback.map((fb) => {
-            // Helper to format ISO date and time cleanly
             let formattedDate = fb.date;
             let formattedTime = '';
             try {
@@ -855,7 +915,7 @@ export function PerformanceScreen({
 
                 let hours = d.getHours();
                 const minutes = String(d.getMinutes()).padStart(2, '0');
-                const ampm = hours >= 12 ? 'م' : 'ص';
+                const ampm = language === 'ar' ? (hours >= 12 ? 'م' : 'ص') : (hours >= 12 ? 'PM' : 'AM');
                 hours = hours % 12;
                 hours = hours ? hours : 12;
                 formattedTime = `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
@@ -867,7 +927,7 @@ export function PerformanceScreen({
             return (
               <div
                 key={fb.id}
-                className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs text-right flex flex-col justify-between"
+                className={`bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between ${isRTL ? 'text-right' : 'text-left'}`}
                 style={{
                   padding: '28px 32px',
                   borderRadius: '24px',
@@ -884,7 +944,7 @@ export function PerformanceScreen({
                         className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-sm shadow-xs shrink-0"
                         style={{ backgroundColor: theme.primaryDark }}
                       >
-                        {fb.teacherNameAr.split(' ').slice(-1)[0]?.[0] || 'ش'}
+                        {fb.teacherNameAr.split(' ').slice(-1)[0]?.[0] || 'T'}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-x-2.5 gap-y-2 flex-wrap" style={{ marginBottom: '4px' }}>
@@ -908,12 +968,12 @@ export function PerformanceScreen({
                           className="text-xs text-slate-400 font-medium block"
                           style={{ marginTop: '8px' }}
                         >
-                          {fb.teacherRoleAr || 'معلم المسار الأكاديمي'}
+                          {fb.teacherRoleAr || (language === 'ar' ? 'معلم المسار الأكاديمي' : language === 'fr' ? 'Enseignant Pédagogique' : 'Academic Course Teacher')}
                         </span>
                       </div>
                     </div>
 
-                    {/* Date and Time only */}
+                    {/* Date and Time */}
                     <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
                       <span className="text-xs text-slate-600 dark:text-slate-300 font-mono font-bold bg-slate-100 dark:bg-slate-800/90 border border-slate-200/60 dark:border-slate-700/60 px-3 py-1.5 rounded-xl shadow-2xs">
                         {formattedDate}
@@ -926,21 +986,21 @@ export function PerformanceScreen({
                     </div>
                   </div>
 
-                {/* Message Content */}
-                <div
-                  className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-750 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 leading-relaxed"
-                  style={{
-                    padding: '18px 22px',
-                    borderRadius: '18px',
-                    margin: '14px 0',
-                  }}
-                >
-                  "{fb.messageAr}"
+                  {/* Message Content */}
+                  <div
+                    className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-750 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 leading-relaxed"
+                    style={{
+                      padding: '18px 22px',
+                      borderRadius: '18px',
+                      margin: '14px 0',
+                    }}
+                  >
+                    "{translateTeacherNote(fb.messageAr, language)}"
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
         </div>
       )}
 

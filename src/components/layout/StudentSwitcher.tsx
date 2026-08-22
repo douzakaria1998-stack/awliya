@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, UserPlus, Sparkles, Check } from 'lucide-react';
+import { ChevronDown, UserPlus, Sparkles, Check, Clock } from 'lucide-react';
 import { useStudent } from '@/context/StudentContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { levelThemes } from '@/lib/themes';
 import { LevelId } from '@/types';
 import { SHOW_ADD_STUDENT_BUTTON } from '@/lib/constants';
+import { translateTrack } from '@/lib/translations';
 
 interface StudentSwitcherProps {
   onOpenAddStudent: () => void;
@@ -13,9 +15,10 @@ interface StudentSwitcherProps {
 
 export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
   const { students, activeStudent, setActiveStudentId } = useStudent();
+  const { t, isRTL, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
-  const activeLevelTheme = levelThemes[activeStudent.currentLevel];
+  const activeLevelTheme = levelThemes[activeStudent.currentLevel] || levelThemes[1];
 
   const handleSelectStudent = (id: string) => {
     setActiveStudentId(id);
@@ -23,17 +26,17 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
   };
 
   return (
-    <div className="relative z-30">
+    <div className="relative z-30 select-none">
       {/* Active Student Bar Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200/80 dark:border-slate-700/80 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-600 active:scale-[0.99]"
+        className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200/80 dark:border-slate-700/80 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-600 active:scale-[0.99] cursor-pointer"
       >
         <div className="flex items-center gap-3">
           {/* Avatar with dynamic level color ring */}
           <div
-            className="relative w-11 h-11 rounded-full flex items-center justify-center text-white font-extrabold text-base shadow-sm ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-900"
+            className="relative w-11 h-11 rounded-full flex items-center justify-center text-white font-extrabold text-base shadow-sm ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 shrink-0"
             style={{
               background: activeLevelTheme.gradient,
               borderColor: activeLevelTheme.primary,
@@ -49,26 +52,26 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
           </div>
 
           {/* Student Info */}
-          <div className="text-right">
+          <div className={isRTL ? 'text-right' : 'text-left'}>
             <div className="flex items-center gap-1.5">
               <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
                 {activeStudent.fullNameAr}
               </span>
               {activeStudent.status === 'pending' ? (
                 <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold text-white bg-amber-500 shadow-xs">
-                  بانتظار الاختبار
+                  {language === 'ar' ? 'بانتظار الاختبار' : language === 'fr' ? 'Test prévu' : 'Awaiting Test'}
                 </span>
               ) : (
                 <span
                   className="px-2 py-0.5 rounded-full text-[10.5px] font-bold text-white shadow-xs"
                   style={{ backgroundColor: activeLevelTheme.primary }}
                 >
-                  {activeLevelTheme.shortNameAr}
+                  {language === 'ar' ? activeLevelTheme.shortNameAr : `${t.level} ${activeStudent.currentLevel}`}
                 </span>
               )}
             </div>
             <p className="text-[11.5px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[210px]">
-              {activeStudent.enrolledPathAr}
+              {translateTrack(activeStudent.enrolledPathAr, language)}
             </p>
           </div>
         </div>
@@ -93,14 +96,10 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 z-50 p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl animate-fade-in-up">
+        <div className={`absolute top-full left-0 right-0 mt-2 z-50 p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl animate-fade-in-up ${isRTL ? 'text-right' : 'text-left'}`}>
           <div className="flex items-center justify-between px-2 py-1.5 mb-1 border-b border-slate-100 dark:border-slate-800">
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-              الأبناء المسجلون ({students.length})
-            </span>
-            <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-              <Sparkles size={12} className="text-amber-500" />
-              تغيير اللون حسب المستوى
+              {t.registeredStudents} ({students.length})
             </span>
           </div>
 
@@ -115,7 +114,7 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
                   key={student.id}
                   type="button"
                   onClick={() => handleSelectStudent(student.id)}
-                  className={`w-full flex items-center justify-between p-2 rounded-xl transition-all text-right ${
+                  className={`w-full flex items-center justify-between p-2 rounded-xl transition-all cursor-pointer ${isRTL ? 'text-right' : 'text-left'} ${
                     isSelected
                       ? 'bg-slate-50 dark:bg-slate-800/80 ring-1.5 ring-offset-1'
                       : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/50'
@@ -125,7 +124,6 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
                   }}
                 >
                   <div className="flex items-center gap-2.5">
-                    {/* Level Colored Avatar */}
                     <div
                       className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-black shadow-xs shrink-0"
                       style={{ background: theme.gradient }}
@@ -140,24 +138,24 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
                         </span>
                         {student.status === 'pending' ? (
                           <span className="px-1.5 py-0.2 rounded text-[10px] font-bold text-white bg-amber-500">
-                            بانتظار الاختبار
+                            {language === 'ar' ? 'بانتظار الاختبار' : language === 'fr' ? 'Test prévu' : 'Awaiting Test'}
                           </span>
                         ) : (
                           <span
                             className="px-1.5 py-0.2 rounded text-[10px] font-bold text-white"
                             style={{ backgroundColor: theme.primary }}
                           >
-                            المستوى {student.currentLevel}
+                            {t.level} {student.currentLevel}
                           </span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-[10.5px] text-slate-500 dark:text-slate-400">
-                          {student.enrolledPathAr}
+                          {translateTrack(student.enrolledPathAr, language)}
                         </span>
                         {student.status === 'pending' ? (
                           <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">
-                            (قيد المراجعة)
+                            ({language === 'ar' ? 'قيد المراجعة' : language === 'fr' ? 'En cours' : 'Pending'})
                           </span>
                         ) : (
                           <span className="text-[10px] text-slate-400 font-semibold">
@@ -190,10 +188,10 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
                   setIsOpen(false);
                   onOpenAddStudent();
                 }}
-                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors cursor-pointer"
               >
                 <UserPlus size={15} />
-                <span>إضافة طالب جديد (ربط ابن)</span>
+                <span>{t.addStudent}</span>
               </button>
             </div>
           )}
