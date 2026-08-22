@@ -310,29 +310,37 @@ export function AdminAttendanceScreen() {
           {/* Right: Prominent Big Day Name & Day Switcher */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             {/* Big Day Name Display */}
-            <div className="flex items-center gap-2.5 px-4 py-2 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/80 dark:border-emerald-800/80 rounded-2xl shadow-2xs">
-              <Calendar size={19} className="text-emerald-600 dark:text-emerald-400" />
+            <div
+              className="flex items-center gap-3.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/80 dark:border-emerald-800/80 rounded-2xl shadow-2xs"
+              style={{
+                paddingTop: '12px',
+                paddingBottom: '12px',
+                paddingLeft: '24px',
+                paddingRight: '24px',
+              }}
+            >
+              <Calendar size={20} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
               <span className="text-base sm:text-lg font-black text-emerald-950 dark:text-emerald-100">
                 {getDayName(selectedDate)}
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-xs font-mono font-extrabold text-emerald-700 dark:text-emerald-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+              <span className="text-xs sm:text-sm font-mono font-extrabold text-emerald-700 dark:text-emerald-300">
                 {dayGroups.length} {language === 'ar' ? 'أفواج نشطة' : language === 'fr' ? 'groupes' : 'active groups'}
               </span>
             </div>
 
             {/* Day Switcher Controls (< Date Picker >) */}
-            <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-2 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
               <button
                 type="button"
                 onClick={handlePrevDay}
-                className="w-9 h-9 rounded-xl hover:bg-white dark:hover:bg-slate-850 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                className="w-10 h-10 rounded-xl hover:bg-white dark:hover:bg-slate-850 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
                 title="Previous Day"
               >
                 <ChevronLeft size={18} />
               </button>
 
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-850 rounded-xl border border-slate-200/60 dark:border-slate-750 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white shadow-2xs">
+              <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-850 rounded-xl border border-slate-200/60 dark:border-slate-750 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white shadow-2xs">
                 <input
                   type="date"
                   value={selectedDate}
@@ -344,7 +352,7 @@ export function AdminAttendanceScreen() {
               <button
                 type="button"
                 onClick={handleNextDay}
-                className="w-9 h-9 rounded-xl hover:bg-white dark:hover:bg-slate-850 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                className="w-10 h-10 rounded-xl hover:bg-white dark:hover:bg-slate-850 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
                 title="Next Day"
               >
                 <ChevronRight size={18} />
