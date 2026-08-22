@@ -265,37 +265,37 @@ export function AdminRolesScreen() {
       {isAddUserOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-md animate-fade-in">
           <div
-            className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-[36px] shadow-2xl border border-slate-200/80 dark:border-slate-800 animate-fade-in-up"
-            style={{ padding: '40px 46px' }}
+            className="w-full max-w-md bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200/80 dark:border-slate-800 animate-fade-in-up"
+            style={{ padding: '26px 30px' }}
           >
             {/* Modal Header */}
             <div
               className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800"
-              style={{ paddingBottom: '22px', marginBottom: '28px' }}
+              style={{ paddingBottom: '14px', marginBottom: '16px' }}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center font-black shrink-0">
-                  <UserPlus size={20} />
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center font-black shrink-0">
+                  <UserPlus size={17} />
                 </div>
                 <div>
-                  <h3 className="font-black text-xl text-slate-900 dark:text-white">إضافة حساب إداري جديد</h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">تعيين الصلاحيات والبيانات الرسمية للمشرف</p>
+                  <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">إضافة حساب إداري جديد</h3>
+                  <p className="text-[11px] text-slate-400 font-medium">تعيين الصلاحيات والبيانات الرسمية للمشرف</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsAddUserOpen(false)}
-                className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateAdminUser} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <form onSubmit={handleCreateAdminUser} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
                 <label
-                  className="block text-xs sm:text-sm font-black text-slate-700 dark:text-slate-300"
-                  style={{ marginBottom: '10px' }}
+                  className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                  style={{ marginBottom: '5px' }}
                 >
                   الاسم الكامل بالعربية *
                 </label>
@@ -305,15 +305,15 @@ export function AdminRolesScreen() {
                   value={newNameAr}
                   onChange={(e) => setNewNameAr(e.target.value)}
                   placeholder="أ. سفيان لعور"
-                  className="w-full rounded-2xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
-                  style={{ height: '52px', padding: '14px 22px' }}
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                  style={{ height: '42px', padding: '8px 14px' }}
                 />
               </div>
 
               <div>
                 <label
-                  className="block text-xs sm:text-sm font-black text-slate-700 dark:text-slate-300"
-                  style={{ marginBottom: '10px' }}
+                  className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                  style={{ marginBottom: '5px' }}
                 >
                   اسم المستخدم (Username) *
                 </label>
@@ -323,24 +323,24 @@ export function AdminRolesScreen() {
                   value={newUsername}
                   onChange={(e) => setNewUsername(e.target.value)}
                   placeholder="soufiane.admin"
-                  className="w-full rounded-2xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-sm text-purple-600 dark:text-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
-                  style={{ height: '52px', padding: '14px 22px' }}
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-xs sm:text-sm text-purple-600 dark:text-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                  style={{ height: '42px', padding: '8px 14px' }}
                   dir="ltr"
                 />
               </div>
 
               <div>
                 <label
-                  className="block text-xs sm:text-sm font-black text-slate-700 dark:text-slate-300"
-                  style={{ marginBottom: '10px' }}
+                  className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                  style={{ marginBottom: '5px' }}
                 >
                   الدور والصلاحيات
                 </label>
                 <select
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value as any)}
-                  className="w-full rounded-2xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
-                  style={{ height: '52px', padding: '14px 22px' }}
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
+                  style={{ height: '42px', padding: '8px 14px' }}
                 >
                   <option value="administrator">مدير عمليات وشؤون طلاب (Admin)</option>
                   <option value="super_admin">مدير عام تنفيذي (Super Admin)</option>
@@ -349,8 +349,8 @@ export function AdminRolesScreen() {
 
               <div>
                 <label
-                  className="block text-xs sm:text-sm font-black text-slate-700 dark:text-slate-300"
-                  style={{ marginBottom: '10px' }}
+                  className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                  style={{ marginBottom: '5px' }}
                 >
                   القسم أو الإدارة
                 </label>
@@ -358,15 +358,15 @@ export function AdminRolesScreen() {
                   type="text"
                   value={newDept}
                   onChange={(e) => setNewDept(e.target.value)}
-                  className="w-full rounded-2xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all"
-                  style={{ height: '52px', padding: '14px 22px' }}
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all"
+                  style={{ height: '42px', padding: '8px 14px' }}
                 />
               </div>
 
               <div>
                 <label
-                  className="block text-xs sm:text-sm font-black text-slate-700 dark:text-slate-300"
-                  style={{ marginBottom: '10px' }}
+                  className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                  style={{ marginBottom: '5px' }}
                 >
                   رقم الهاتف
                 </label>
@@ -375,19 +375,19 @@ export function AdminRolesScreen() {
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
                   placeholder="+213 770 000 000"
-                  className="w-full rounded-2xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
-                  style={{ height: '52px', padding: '14px 22px' }}
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
+                  style={{ height: '42px', padding: '8px 14px' }}
                   dir="ltr"
                 />
               </div>
 
-              <div style={{ paddingTop: '8px' }}>
+              <div style={{ paddingTop: '4px' }}>
                 <button
                   type="submit"
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all cursor-pointer text-sm flex items-center justify-center gap-2.5"
-                  style={{ height: '54px' }}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md hover:scale-[1.01] active:scale-95 transition-all cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-2"
+                  style={{ height: '44px' }}
                 >
-                  <UserPlus size={18} />
+                  <UserPlus size={16} />
                   <span>إنشاء وتفعيل الحساب</span>
                 </button>
               </div>
