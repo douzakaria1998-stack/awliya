@@ -111,10 +111,10 @@ export function AdminTeachersScreen() {
 
       {/* Search Bar */}
       <div
-        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs flex items-center justify-between gap-4"
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs flex items-center justify-between gap-4"
         style={{
-          padding: '36px 40px',
-          marginBottom: '36px',
+          padding: '14px 20px',
+          marginBottom: '20px',
         }}
       >
         <div className="relative flex-1">
@@ -123,17 +123,17 @@ export function AdminTeachersScreen() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={language === 'ar' ? 'بحث باسم المعلم، اسم المستخدم، أو البريد الإلكتروني...' : 'Search teacher by name, username, email...'}
-            className="w-full h-12 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-medium focus:outline-none focus:border-emerald-500 transition-colors shadow-2xs"
+            className="w-full h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-emerald-500 transition-colors shadow-2xs"
             style={{
-              paddingLeft: isRTL ? '20px' : '50px',
-              paddingRight: isRTL ? '50px' : '20px',
+              paddingLeft: isRTL ? '16px' : '42px',
+              paddingRight: isRTL ? '42px' : '16px',
               textAlign: isRTL ? 'right' : 'left',
             }}
           />
           <Search
-            size={20}
+            size={16}
             className={`absolute top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none ${
-              isRTL ? 'right-4' : 'left-4'
+              isRTL ? 'right-3.5' : 'left-3.5'
             }`}
           />
         </div>
