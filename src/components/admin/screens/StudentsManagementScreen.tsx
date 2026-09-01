@@ -1005,14 +1005,21 @@ export function StudentsManagementScreen() {
                               setTimeout(() => setIsCustomPassCopied(false), 2000);
                             }
                           }}
-                          className={`h-10 px-3 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0 whitespace-nowrap shadow-2xs ${
+                          className={`rounded-xl border flex items-center justify-center text-xs font-bold transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0 whitespace-nowrap shadow-2xs ${
                             isCustomPassCopied
                               ? 'bg-emerald-600 border-emerald-600 text-white'
                               : 'bg-purple-600 hover:bg-purple-700 border-purple-600 text-white'
                           }`}
+                          style={{
+                            height: '40px',
+                            paddingLeft: '18px',
+                            paddingRight: '18px',
+                            gap: '8px',
+                            minWidth: 'max-content',
+                          }}
                         >
-                          {isCustomPassCopied ? <Check size={13} /> : <Copy size={13} />}
-                          <span>{isCustomPassCopied ? (language === 'ar' ? 'تم النسخ' : 'Copied') : (language === 'ar' ? 'نسخ' : 'Copy')}</span>
+                          {isCustomPassCopied ? <Check size={13} className="shrink-0" /> : <Copy size={13} className="shrink-0" />}
+                          <span className="whitespace-nowrap">{isCustomPassCopied ? (language === 'ar' ? 'تم النسخ' : 'Copied') : (language === 'ar' ? 'نسخ' : 'Copy')}</span>
                         </button>
                       </div>
                     </div>

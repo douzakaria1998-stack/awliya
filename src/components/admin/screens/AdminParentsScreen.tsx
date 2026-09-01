@@ -434,14 +434,21 @@ export function AdminParentsScreen() {
                         }
                       }}
                       title={language === 'ar' ? 'نسخ كلمة المرور' : 'Copy Password'}
-                      className={`h-11 px-3.5 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap ${
+                      className={`rounded-xl border flex items-center justify-center text-xs font-bold transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap ${
                         isCopied
                           ? 'bg-emerald-600 border-emerald-600 text-white'
                           : 'bg-purple-600 hover:bg-purple-700 border-purple-600 text-white hover:scale-105 active:scale-95'
                       }`}
+                      style={{
+                        height: '44px',
+                        paddingLeft: '18px',
+                        paddingRight: '18px',
+                        gap: '8px',
+                        minWidth: 'max-content',
+                      }}
                     >
-                      {isCopied ? <Check size={14} /> : <Copy size={14} />}
-                      <span>{isCopied ? (language === 'ar' ? 'تم' : 'Done') : (language === 'ar' ? 'نسخ' : 'Copy')}</span>
+                      {isCopied ? <Check size={14} className="shrink-0" /> : <Copy size={14} className="shrink-0" />}
+                      <span className="whitespace-nowrap">{isCopied ? (language === 'ar' ? 'تم النسخ' : 'Copied') : (language === 'ar' ? 'نسخ' : 'Copy')}</span>
                     </button>
                   </div>
                 </div>
