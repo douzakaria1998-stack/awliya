@@ -35,7 +35,7 @@ interface ParentDetailModalProps {
 }
 
 export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModalProps) {
-  const { students, linkStudentToParent, unlinkStudentFromParent, updateParent } = useAdmin();
+  const { parents, students, linkStudentToParent, unlinkStudentFromParent, updateParent } = useAdmin();
   const { isRTL, language } = useLanguage();
 
   const [isLinkingOpen, setIsLinkingOpen] = useState(false);
@@ -45,10 +45,12 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
   const [isCopied, setIsCopied] = useState(false);
   const [isFullCopied, setIsFullCopied] = useState(false);
 
-  if (!isOpen || !parent) return null;
+  const currentParent = parents.find((p) => p.id === parent?.id) || parent;
 
-  const linkedStudents = students.filter((s) => parent.linkedStudentIds.includes(s.id));
-  const availableStudentsToLink = students.filter((s) => !parent.linkedStudentIds.includes(s.id));
+  if (!isOpen || !currentParent) return null;
+
+  const linkedStudents = students.filter((s) => currentParent.linkedStudentIds.includes(s.id));
+  const availableStudentsToLink = students.filter((s) => !currentParent.linkedStudentIds.includes(s.id));
 
   const filteredAvailableStudents = availableStudentsToLink.filter((s) => {
     const q = studentSearchTerm.trim().toLowerCase();
@@ -66,7 +68,7 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
 
   const handleLinkStudent = () => {
     if (!selectedStudentToLink) return;
-    linkStudentToParent(parent.id, selectedStudentToLink);
+    linkStudentToParent(currentParent.id, selectedStudentToLink);
     setSelectedStudentToLink('');
     setStudentSearchTerm('');
     setIsLinkingOpen(false);
@@ -82,10 +84,10 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
         >
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-md shrink-0">
-              {parent.fullNameAr[0]}
+              {currentParent.fullNameAr[0]}
             </div>
             <div>
-              <h3 className="text-xl font-black text-white">{parent.fullNameAr} ({parent.fullNameEn})</h3>
+              <h3 className="text-xl font-black text-white">{currentParent.fullNameAr} ({currentParent.fullNameEn})</h3>
               <p className="text-xs text-slate-400 font-medium mt-0.5">
                 {language === 'ar' ? 'ملف ولي الأمر وإدارة الأبناء المربوطين' : 'Parent Profile & Linked Students Management'}
               </p>
@@ -121,21 +123,21 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                   style={{ padding: '18px 22px' }}
                 >
                   <span className="text-xs text-slate-400 block mb-1.5 font-bold">{language === 'ar' ? 'رقم الهاتف:' : 'Phone Number:'}</span>
-                  <span className="font-mono font-black text-slate-900 dark:text-white text-sm" dir="ltr">{parent.phone}</span>
+                  <span className="font-mono font-black text-slate-900 dark:text-white text-sm" dir="ltr">{currentParent.phone}</span>
                 </div>
                 <div
                   className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800"
                   style={{ padding: '18px 22px' }}
                 >
                   <span className="text-xs text-slate-400 block mb-1.5 font-bold">{language === 'ar' ? 'البريد الإلكتروني:' : 'Email:'}</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-white text-xs truncate block">{parent.email}</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white text-xs truncate block">{currentParent.email}</span>
                 </div>
                 <div
                   className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800"
                   style={{ padding: '18px 22px' }}
                 >
                   <span className="text-xs text-slate-400 block mb-1.5 font-bold">{language === 'ar' ? 'العنوان السكني:' : 'Address:'}</span>
-                  <span className="font-bold text-slate-900 dark:text-white text-xs truncate block">{parent.address || 'الجزائر العاصمة'}</span>
+                  <span className="font-bold text-slate-900 dark:text-white text-xs truncate block">{currentParent.address || 'الجزائر العاصمة'}</span>
                 </div>
               </div>
             </div>
@@ -168,11 +170,11 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                 <button
                   type="button"
                   onClick={() => {
-                    const currentPass = parent.password || 'Awliya@2026';
+                    const currentPass = currentParent.password || 'Awliya@2026';
                     const text = `${language === 'ar' ? 'بيانات الدخول لبوابة أولياء الأمور' : 'Parent Portal Login'}\n` +
-                      `👤 ${language === 'ar' ? 'الاسم' : 'Name'}: ${parent.fullNameAr}\n` +
-                      `📱 ${language === 'ar' ? 'الهاتف' : 'Phone'}: ${parent.phone}\n` +
-                      `📧 ${language === 'ar' ? 'البريد' : 'Email'}: ${parent.email}\n` +
+                      `👤 ${language === 'ar' ? 'الاسم' : 'Name'}: ${currentParent.fullNameAr}\n` +
+                      `📱 ${language === 'ar' ? 'الهاتف' : 'Phone'}: ${currentParent.phone}\n` +
+                      `📧 ${language === 'ar' ? 'البريد' : 'Email'}: ${currentParent.email}\n` +
                       `🔑 ${language === 'ar' ? 'كلمة المرور' : 'Password'}: ${currentPass}`;
                     if (navigator.clipboard) {
                       navigator.clipboard.writeText(text);
@@ -206,7 +208,7 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                     {language === 'ar' ? 'كلمة المرور:' : 'Password:'}
                   </span>
                   <span className="flex-1 font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm tracking-wider" dir="ltr">
-                    {showPassword ? (parent.password || 'Awliya@2026') : '••••••••••••'}
+                    {showPassword ? (currentParent.password || 'Awliya@2026') : '••••••••••••'}
                   </span>
 
                   {/* Show/Hide Toggle */}
@@ -223,7 +225,7 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                 <button
                   type="button"
                   onClick={() => {
-                    const pass = parent.password || 'Awliya@2026';
+                    const pass = currentParent.password || 'Awliya@2026';
                     if (navigator.clipboard) {
                       navigator.clipboard.writeText(pass);
                       setIsCopied(true);
@@ -246,7 +248,7 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                   type="button"
                   onClick={() => {
                     const newPass = generateAutoPassword();
-                    updateParent(parent.id, { password: newPass });
+                    updateParent(currentParent.id, { password: newPass });
                     setIsCopied(false);
                   }}
                   title={language === 'ar' ? 'توليد وتعيين كلمة مرور جديدة تلقائياً' : 'Auto generate and set new password'}
@@ -480,7 +482,7 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
 
                     <button
                       type="button"
-                      onClick={() => unlinkStudentFromParent(parent.id, st.id)}
+                      onClick={() => unlinkStudentFromParent(currentParent.id, st.id)}
                       className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
                       title={language === 'ar' ? 'إلغاء ربط الطالب' : 'Unlink student'}
                     >

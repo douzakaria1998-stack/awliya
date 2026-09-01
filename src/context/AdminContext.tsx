@@ -478,6 +478,17 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         );
       }
 
+      // Sync active auth user session in Parent Portal if matching
+      const currentAuthUser = getItem<any>('awliya_auth_user_v4');
+      if (currentAuthUser && currentAuthUser.id === parentId) {
+        const updatedAuth = { ...currentAuthUser, ...updates };
+        setItem('awliya_auth_user_v4', updatedAuth);
+      }
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
       logAudit(`تحديث بيانات ولي الأمر: ${parentId}`, `Updated parent details: ${parentId}`, 'parent');
     },
     [logAudit]
