@@ -295,107 +295,133 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
 
                 {/* Search Input Field */}
                 <div className="relative flex items-center">
-                  <div className={`absolute ${isRTL ? 'right-3.5' : 'left-3.5'} text-purple-500 pointer-events-none`}>
-                    <Search size={16} />
+                  <div
+                    className="absolute text-purple-600 dark:text-purple-400 pointer-events-none flex items-center justify-center"
+                    style={{ [isRTL ? 'right' : 'left']: '16px' }}
+                  >
+                    <Search size={18} />
                   </div>
                   <input
                     type="text"
                     value={studentSearchTerm}
                     onChange={(e) => setStudentSearchTerm(e.target.value)}
-                    placeholder={language === 'ar' ? 'ابحث باسم الطالب، الفوج، أو المستوى...' : 'Search by student name, group, or CEFR level...'}
-                    className={`w-full h-11 bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white placeholder:text-slate-400 transition-all focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 ${
-                      isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'
-                    }`}
+                    placeholder={language === 'ar' ? 'ابدأ بكتابة اسم الطالب، الفوج، أو المستوى...' : 'Type student name, group, or CEFR level to search...'}
+                    className="w-full bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white placeholder:text-slate-400 transition-all focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 shadow-2xs"
+                    style={{
+                      height: '46px',
+                      paddingLeft: isRTL ? '40px' : '48px',
+                      paddingRight: isRTL ? '48px' : '40px',
+                    }}
                   />
                   {studentSearchTerm && (
                     <button
                       type="button"
                       onClick={() => setStudentSearchTerm('')}
-                      className={`absolute ${isRTL ? 'left-3' : 'right-3'} text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 cursor-pointer`}
+                      className="absolute text-slate-400 hover:text-slate-600 dark:hover:text-white p-1.5 cursor-pointer rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                      style={{ [isRTL ? 'left' : 'right']: '12px' }}
                     >
-                      <X size={14} />
+                      <X size={15} />
                     </button>
                   )}
                 </div>
 
-                {/* Filtered Students List */}
-                <div className="max-h-48 overflow-y-auto space-y-1.5 rounded-xl border border-purple-200/80 dark:border-purple-800/60 bg-white/80 dark:bg-slate-900/80 p-2">
-                  {filteredAvailableStudents.length === 0 ? (
-                    <div className="py-6 text-center text-xs font-bold text-slate-400">
-                      {language === 'ar' ? 'لا يوجد طالب مطابق لمعايير البحث' : 'No students found matching your search'}
+                {/* Filtered Students List: ONLY SHOWN WHEN USER TYPES */}
+                {studentSearchTerm.trim().length > 0 && (
+                  <div className="max-h-52 overflow-y-auto space-y-1.5 rounded-2xl border border-purple-200/90 dark:border-purple-800/70 bg-white dark:bg-slate-900 p-2.5 shadow-sm animate-fade-in">
+                    <div className="px-2 py-1 text-[11px] font-bold text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1 flex items-center justify-between">
+                      <span>{language === 'ar' ? 'نتائج البحث المطابقة:' : 'Matching Search Results:'}</span>
+                      <span className="font-mono text-purple-600 dark:text-purple-400 font-bold">{filteredAvailableStudents.length}</span>
                     </div>
-                  ) : (
-                    filteredAvailableStudents.map((s) => {
-                      const isSelected = selectedStudentToLink === s.id;
-                      return (
-                        <button
-                          key={s.id}
-                          type="button"
-                          onClick={() => setSelectedStudentToLink(isSelected ? '' : s.id)}
-                          className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs transition-all cursor-pointer ${
-                            isRTL ? 'text-right' : 'text-left'
-                          } ${
-                            isSelected
-                              ? 'bg-purple-600 text-white shadow-xs'
-                              : 'hover:bg-purple-50 dark:hover:bg-purple-950/50 text-slate-800 dark:text-slate-200'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div
-                              className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] shrink-0 ${
-                                isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300'
-                              }`}
-                            >
-                              {s.fullNameAr[0]}
-                            </div>
-                            <div className="min-w-0">
-                              <span className="font-black block truncate">
-                                {s.fullNameAr} ({s.fullNameEn})
-                              </span>
-                              <span className={`text-[10px] block truncate ${isSelected ? 'text-purple-100' : 'text-slate-400'}`}>
-                                {s.groupName} • {s.teacherName}
-                              </span>
-                            </div>
-                          </div>
 
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span
-                              className={`px-2 py-0.5 rounded-md font-mono text-[10px] font-bold ${
-                                isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
-                              }`}
-                            >
-                              {s.cefrLevel}
-                            </span>
-                            {isSelected && <Check size={15} strokeWidth={3} className="text-white" />}
-                          </div>
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
+                    {filteredAvailableStudents.length === 0 ? (
+                      <div className="py-6 text-center text-xs font-bold text-slate-400">
+                        {language === 'ar' ? 'لا يوجد أي طالب مطابق لبحثك' : 'No students matching your search'}
+                      </div>
+                    ) : (
+                      filteredAvailableStudents.map((s) => {
+                        const isSelected = selectedStudentToLink === s.id;
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedStudentToLink(isSelected ? '' : s.id);
+                              if (!isSelected) {
+                                setStudentSearchTerm('');
+                              }
+                            }}
+                            className={`w-full flex items-center justify-between p-3 rounded-xl text-xs transition-all cursor-pointer ${
+                              isRTL ? 'text-right' : 'text-left'
+                            } ${
+                              isSelected
+                                ? 'bg-purple-600 text-white shadow-xs'
+                                : 'hover:bg-purple-50 dark:hover:bg-purple-950/60 text-slate-800 dark:text-slate-200'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div
+                                className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
+                                  isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300'
+                                }`}
+                              >
+                                {s.fullNameAr[0]}
+                              </div>
+                              <div className="min-w-0">
+                                <span className="font-black text-xs sm:text-sm block truncate">
+                                  {s.fullNameAr} ({s.fullNameEn})
+                                </span>
+                                <span className={`text-[11px] block truncate font-medium ${isSelected ? 'text-purple-100' : 'text-slate-400'}`}>
+                                  {s.groupName} • {s.teacherName}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2.5 shrink-0">
+                              <span
+                                className={`px-2.5 py-1 rounded-lg font-mono text-[11px] font-bold ${
+                                  isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
+                                }`}
+                              >
+                                {s.cefrLevel}
+                              </span>
+                              {isSelected && <Check size={16} strokeWidth={3} className="text-white" />}
+                            </div>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
 
                 {/* Selected Action Bar */}
                 {selectedStudentObj && (
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-purple-100/80 dark:bg-purple-950/80 border border-purple-300 dark:border-purple-700 animate-fade-in">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <CheckCircle2 size={16} className="text-purple-700 dark:text-purple-300 shrink-0" />
-                      <span className="text-xs font-black text-purple-950 dark:text-purple-100 truncate">
-                        {language === 'ar' ? `المحدد: ${selectedStudentObj.fullNameAr}` : `Selected: ${selectedStudentObj.fullNameAr}`}
-                      </span>
+                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-purple-100/90 dark:bg-purple-950/90 border border-purple-300 dark:border-purple-700 animate-fade-in shadow-xs">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                        {selectedStudentObj.fullNameAr[0]}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-xs sm:text-sm font-black text-purple-950 dark:text-purple-100 truncate block">
+                          {selectedStudentObj.fullNameAr} ({selectedStudentObj.fullNameEn})
+                        </span>
+                        <span className="text-[11px] text-purple-700 dark:text-purple-300 font-medium truncate block">
+                          {selectedStudentObj.groupName} • Level {selectedStudentObj.cefrLevel}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2.5 shrink-0">
                       <button
                         type="button"
                         onClick={() => setSelectedStudentToLink('')}
-                        className="px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white cursor-pointer hover:bg-white/40"
                       >
-                        {language === 'ar' ? 'إلغاء' : 'Clear'}
+                        {language === 'ar' ? 'تغيير' : 'Change'}
                       </button>
                       <button
                         type="button"
                         onClick={handleLinkStudent}
-                        className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-black transition-all shadow-xs cursor-pointer hover:scale-105 active:scale-95"
+                        className="h-10 px-5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-black transition-all shadow-md cursor-pointer hover:scale-105 active:scale-95 whitespace-nowrap"
                       >
                         {language === 'ar' ? 'تأكيد الربط الآن' : 'Confirm Link Now'}
                       </button>
