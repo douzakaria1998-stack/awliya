@@ -64,9 +64,10 @@ export function NoLinkedStudentsScreen() {
             href="https://wa.me/"
             target="_blank"
             rel="noreferrer"
-            className="h-11 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2.5 shadow-md transition-all cursor-pointer shrink-0 hover:scale-105 active:scale-95 whitespace-nowrap"
+            className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-3 shadow-md transition-all cursor-pointer shrink-0 hover:scale-105 active:scale-95 whitespace-nowrap"
+            style={{ padding: '0 24px', height: '46px', minWidth: 'max-content' }}
           >
-            <MessageCircle size={17} className="shrink-0" />
+            <MessageCircle size={18} className="shrink-0" />
             <span>{language === 'ar' ? 'تواصل مع الإدارة عبر واتساب' : 'Contact Support via WhatsApp'}</span>
           </a>
         </div>
@@ -134,7 +135,7 @@ export function NoLinkedStudentsScreen() {
       {/* 3. Empty State Guidance & Instructions */}
       <div
         className="rounded-3xl bg-slate-50/80 dark:bg-slate-900/40 border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-center"
-        style={{ padding: '48px 32px' }}
+        style={{ padding: '52px 36px' }}
       >
         <div className="w-18 h-18 rounded-3xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-5 shadow-xs shrink-0">
           <Users size={34} />
@@ -145,7 +146,7 @@ export function NoLinkedStudentsScreen() {
             ? 'لا يوجد طلاب مرتبطين بهذا الحساب حالياً'
             : 'No Students Linked To This Account Yet'}
         </h3>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed mb-7 font-medium">
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-lg mx-auto leading-relaxed mb-8 font-medium">
           {language === 'ar'
             ? 'عندما تقوم إدارة المدرسة بربط الطلاب أو تسجيل أبنائك من لوحة التحكم، ستظهر هنا جميع الإحصائيات الأكاديمية، الحضور والغياب، الواجبات المنزلية، والتقييمات تلقائياً.'
             : 'When the administration registers or links your children, all academic indicators, attendance, homework, and assessments will automatically appear here.'}
@@ -155,9 +156,10 @@ export function NoLinkedStudentsScreen() {
           href="https://wa.me/"
           target="_blank"
           rel="noreferrer"
-          className="h-11 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2.5 shadow-md transition-all cursor-pointer hover:scale-105 active:scale-95 whitespace-nowrap"
+          className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-3 shadow-md transition-all cursor-pointer hover:scale-105 active:scale-95 whitespace-nowrap"
+          style={{ padding: '0 32px', height: '48px', minWidth: 'max-content' }}
         >
-          <MessageCircle size={17} className="shrink-0" />
+          <MessageCircle size={18} className="shrink-0" />
           <span>{language === 'ar' ? 'تواصل مع إدارة المدرسة للمتابعة' : 'Contact School Administration'}</span>
         </a>
       </div>
