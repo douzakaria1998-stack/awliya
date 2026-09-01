@@ -250,18 +250,26 @@ export function LoginScreen() {
                   value={emailOrPhone}
                   onChange={(e) => setEmailOrPhone(e.target.value)}
                   placeholder={language === 'ar' ? 'name@example.com أو 0550123456' : 'name@example.com'}
-                  className={`w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-purple-500 dark:focus:border-purple-500 transition-colors ${
-                    isRTL ? 'text-right pr-12 pl-4' : 'text-left pl-12 pr-4'
-                  }`}
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-purple-500 dark:focus:border-purple-500 transition-colors"
                   style={{
                     height: '48px',
                     borderRadius: '16px',
+                    paddingLeft: isRTL ? '16px' : '48px',
+                    paddingRight: isRTL ? '48px' : '16px',
+                    textAlign: isRTL ? 'right' : 'left',
                   }}
                 />
-                <Mail
-                  size={18}
-                  className={`absolute text-slate-400 pointer-events-none ${isRTL ? 'right-4' : 'left-4'}`}
-                />
+                <div
+                  className="absolute pointer-events-none text-slate-400 flex items-center justify-center"
+                  style={{
+                    left: isRTL ? 'auto' : '16px',
+                    right: isRTL ? '16px' : 'auto',
+                    width: '20px',
+                    height: '20px',
+                  }}
+                >
+                  <Mail size={18} />
+                </div>
               </div>
             </div>
 
@@ -295,24 +303,36 @@ export function LoginScreen() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className={`w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-purple-500 dark:focus:border-purple-500 transition-colors ${
-                    isRTL ? 'text-right pr-12 pl-12' : 'text-left pl-12 pr-12'
-                  }`}
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-purple-500 dark:focus:border-purple-500 transition-colors"
                   style={{
                     height: '48px',
                     borderRadius: '16px',
+                    paddingLeft: '48px',
+                    paddingRight: '48px',
+                    textAlign: isRTL ? 'right' : 'left',
                   }}
                 />
-                <Lock
-                  size={18}
-                  className={`absolute text-slate-400 pointer-events-none ${isRTL ? 'right-4' : 'left-4'}`}
-                />
+                <div
+                  className="absolute pointer-events-none text-slate-400 flex items-center justify-center"
+                  style={{
+                    left: isRTL ? 'auto' : '16px',
+                    right: isRTL ? '16px' : 'auto',
+                    width: '20px',
+                    height: '20px',
+                  }}
+                >
+                  <Lock size={18} />
+                </div>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className={`absolute text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer ${
-                    isRTL ? 'left-4' : 'right-4'
-                  }`}
+                  className="absolute text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer flex items-center justify-center p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  style={{
+                    right: isRTL ? 'auto' : '14px',
+                    left: isRTL ? '14px' : 'auto',
+                    width: '28px',
+                    height: '28px',
+                  }}
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
