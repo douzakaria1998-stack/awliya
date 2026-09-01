@@ -21,6 +21,7 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
+  Search,
 } from 'lucide-react';
 import { AdminParent, AdminStudent } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
@@ -39,6 +40,7 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
 
   const [isLinkingOpen, setIsLinkingOpen] = useState(false);
   const [selectedStudentToLink, setSelectedStudentToLink] = useState('');
+  const [studentSearchTerm, setStudentSearchTerm] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isFullCopied, setIsFullCopied] = useState(false);
@@ -48,10 +50,25 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
   const linkedStudents = students.filter((s) => parent.linkedStudentIds.includes(s.id));
   const availableStudentsToLink = students.filter((s) => !parent.linkedStudentIds.includes(s.id));
 
+  const filteredAvailableStudents = availableStudentsToLink.filter((s) => {
+    const q = studentSearchTerm.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      s.fullNameAr.toLowerCase().includes(q) ||
+      s.fullNameEn.toLowerCase().includes(q) ||
+      s.id.toLowerCase().includes(q) ||
+      s.groupName.toLowerCase().includes(q) ||
+      s.cefrLevel.toLowerCase().includes(q)
+    );
+  });
+
+  const selectedStudentObj = students.find((s) => s.id === selectedStudentToLink);
+
   const handleLinkStudent = () => {
     if (!selectedStudentToLink) return;
     linkStudentToParent(parent.id, selectedStudentToLink);
     setSelectedStudentToLink('');
+    setStudentSearchTerm('');
     setIsLinkingOpen(false);
   };
 
@@ -261,37 +278,130 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                 </button>
               </div>
 
-            {/* Link Student Selection Form */}
+            {/* Link Student Searchable Selection Box */}
             {isLinkingOpen && (
               <div
-                className="rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 space-y-3 animate-fade-in"
-                style={{ padding: '20px 24px' }}
+                className="rounded-2xl bg-purple-50/90 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 space-y-3.5 animate-fade-in"
+                style={{ padding: '22px 24px' }}
               >
-                <span className="text-xs font-bold text-purple-950 dark:text-purple-200 block">
-                  {language === 'ar' ? 'اختر طالباً من قائمة الطلاب لربطه بحساب ولي الأمر:' : 'Select an existing student to link with this parent account:'}
-                </span>
-                <div className="flex gap-2">
-                  <select
-                    value={selectedStudentToLink}
-                    onChange={(e) => setSelectedStudentToLink(e.target.value)}
-                    className="flex-1 h-10 bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white px-3 cursor-pointer"
-                  >
-                    <option value="">{language === 'ar' ? '-- اختر الطالب --' : '-- Select Student --'}</option>
-                    {availableStudentsToLink.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.fullNameAr} ({s.fullNameEn}) — {s.groupName}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={handleLinkStudent}
-                    disabled={!selectedStudentToLink}
-                    className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold text-xs transition-colors cursor-pointer"
-                  >
-                    {language === 'ar' ? 'تأكيد الربط' : 'Confirm Link'}
-                  </button>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-purple-950 dark:text-purple-200 block">
+                    {language === 'ar' ? 'البحث عن طالب لربطه بحساب ولي الأمر:' : 'Search & Select Student to Link:'}
+                  </span>
+                  <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400">
+                    {availableStudentsToLink.length} {language === 'ar' ? 'طالب متاح' : 'available students'}
+                  </span>
                 </div>
+
+                {/* Search Input Field */}
+                <div className="relative flex items-center">
+                  <div className={`absolute ${isRTL ? 'right-3.5' : 'left-3.5'} text-purple-500 pointer-events-none`}>
+                    <Search size={16} />
+                  </div>
+                  <input
+                    type="text"
+                    value={studentSearchTerm}
+                    onChange={(e) => setStudentSearchTerm(e.target.value)}
+                    placeholder={language === 'ar' ? 'ابحث باسم الطالب، الفوج، أو المستوى...' : 'Search by student name, group, or CEFR level...'}
+                    className={`w-full h-11 bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white placeholder:text-slate-400 transition-all focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 ${
+                      isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'
+                    }`}
+                  />
+                  {studentSearchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setStudentSearchTerm('')}
+                      className={`absolute ${isRTL ? 'left-3' : 'right-3'} text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 cursor-pointer`}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Filtered Students List */}
+                <div className="max-h-48 overflow-y-auto space-y-1.5 rounded-xl border border-purple-200/80 dark:border-purple-800/60 bg-white/80 dark:bg-slate-900/80 p-2">
+                  {filteredAvailableStudents.length === 0 ? (
+                    <div className="py-6 text-center text-xs font-bold text-slate-400">
+                      {language === 'ar' ? 'لا يوجد طالب مطابق لمعايير البحث' : 'No students found matching your search'}
+                    </div>
+                  ) : (
+                    filteredAvailableStudents.map((s) => {
+                      const isSelected = selectedStudentToLink === s.id;
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => setSelectedStudentToLink(isSelected ? '' : s.id)}
+                          className={`w-full flex items-center justify-between p-2.5 rounded-lg text-xs transition-all cursor-pointer ${
+                            isRTL ? 'text-right' : 'text-left'
+                          } ${
+                            isSelected
+                              ? 'bg-purple-600 text-white shadow-xs'
+                              : 'hover:bg-purple-50 dark:hover:bg-purple-950/50 text-slate-800 dark:text-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div
+                              className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] shrink-0 ${
+                                isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300'
+                              }`}
+                            >
+                              {s.fullNameAr[0]}
+                            </div>
+                            <div className="min-w-0">
+                              <span className="font-black block truncate">
+                                {s.fullNameAr} ({s.fullNameEn})
+                              </span>
+                              <span className={`text-[10px] block truncate ${isSelected ? 'text-purple-100' : 'text-slate-400'}`}>
+                                {s.groupName} • {s.teacherName}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span
+                              className={`px-2 py-0.5 rounded-md font-mono text-[10px] font-bold ${
+                                isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
+                              }`}
+                            >
+                              {s.cefrLevel}
+                            </span>
+                            {isSelected && <Check size={15} strokeWidth={3} className="text-white" />}
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Selected Action Bar */}
+                {selectedStudentObj && (
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-purple-100/80 dark:bg-purple-950/80 border border-purple-300 dark:border-purple-700 animate-fade-in">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CheckCircle2 size={16} className="text-purple-700 dark:text-purple-300 shrink-0" />
+                      <span className="text-xs font-black text-purple-950 dark:text-purple-100 truncate">
+                        {language === 'ar' ? `المحدد: ${selectedStudentObj.fullNameAr}` : `Selected: ${selectedStudentObj.fullNameAr}`}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedStudentToLink('')}
+                        className="px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white cursor-pointer"
+                      >
+                        {language === 'ar' ? 'إلغاء' : 'Clear'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleLinkStudent}
+                        className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-black transition-all shadow-xs cursor-pointer hover:scale-105 active:scale-95"
+                      >
+                        {language === 'ar' ? 'تأكيد الربط الآن' : 'Confirm Link Now'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
