@@ -37,6 +37,17 @@ export function AppLayout() {
     }
   };
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen w-full bg-slate-50/70 dark:bg-slate-950 flex items-center justify-center" dir="rtl" suppressHydrationWarning>
+        <div className="flex flex-col items-center gap-4" suppressHydrationWarning>
+          <div className="w-10 h-10 rounded-full border-3 border-rose-500 border-t-transparent animate-spin" />
+          <span className="text-xs font-bold text-slate-400">جاري تحميل بوابة ولي الأمر...</span>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return <LoginScreen />;
   }
