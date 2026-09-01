@@ -57,13 +57,13 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
-      <div className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-fade-in-up flex flex-col max-h-[92vh]">
         {/* Modal Header */}
         <div
           className="bg-slate-900 text-white flex items-center justify-between shrink-0"
-          style={{ padding: '24px 32px' }}
+          style={{ padding: '26px 36px' }}
         >
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-md shrink-0">
               {parent.fullNameAr[0]}
             </div>
@@ -78,56 +78,56 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className={`overflow-y-auto flex-1 p-6 sm:p-8 space-y-6 ${isRTL ? 'text-right' : 'text-left'}`}>
-          {/* Personal Information (Section 8) */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+        <div className={`overflow-y-auto flex-1 p-6 sm:p-9 space-y-7 ${isRTL ? 'text-right' : 'text-left'}`}>
+          {/* Personal Information */}
+          <div className="space-y-3.5">
+            <h4 className="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
               {language === 'ar' ? 'البيانات الشخصية لولي الأمر (Personal Information)' : 'Personal Information'}
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div
-                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
-                style={{ padding: '20px 24px' }}
+                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800"
+                style={{ padding: '18px 22px' }}
               >
-                <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'رقم الهاتف:' : 'Phone Number:'}</span>
-                <span className="font-mono font-bold text-slate-900 dark:text-white text-sm" dir="ltr">{parent.phone}</span>
+                <span className="text-xs text-slate-400 block mb-1.5 font-bold">{language === 'ar' ? 'رقم الهاتف:' : 'Phone Number:'}</span>
+                <span className="font-mono font-black text-slate-900 dark:text-white text-sm" dir="ltr">{parent.phone}</span>
               </div>
               <div
-                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
-                style={{ padding: '20px 24px' }}
+                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800"
+                style={{ padding: '18px 22px' }}
               >
-                <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'البريد الإلكتروني:' : 'Email:'}</span>
+                <span className="text-xs text-slate-400 block mb-1.5 font-bold">{language === 'ar' ? 'البريد الإلكتروني:' : 'Email:'}</span>
                 <span className="font-mono font-bold text-slate-900 dark:text-white text-xs truncate block">{parent.email}</span>
               </div>
               <div
-                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
-                style={{ padding: '20px 24px' }}
+                className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800"
+                style={{ padding: '18px 22px' }}
               >
-                <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'العنوان السكني:' : 'Address:'}</span>
-                <span className="font-bold text-slate-900 dark:text-white text-xs">{parent.address || 'الجزائر العاصمة'}</span>
+                <span className="text-xs text-slate-400 block mb-1.5 font-bold">{language === 'ar' ? 'العنوان السكني:' : 'Address:'}</span>
+                <span className="font-bold text-slate-900 dark:text-white text-xs truncate block">{parent.address || 'الجزائر العاصمة'}</span>
               </div>
             </div>
           </div>
 
-          {/* Account Login Credentials & Auto-Generated Password Card */}
-          <div className="rounded-2xl bg-gradient-to-r from-purple-50/80 via-indigo-50/50 to-purple-50/80 dark:from-purple-950/40 dark:via-indigo-950/30 dark:to-purple-950/40 border border-purple-200/80 dark:border-purple-800/60 p-4 sm:p-5 space-y-3 shadow-2xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-xs shrink-0">
-                  <Key size={16} />
+          {/* Account Login Credentials Card */}
+          <div className="rounded-2xl bg-gradient-to-r from-purple-50/80 via-indigo-50/50 to-purple-50/80 dark:from-purple-950/40 dark:via-indigo-950/30 dark:to-purple-950/40 border border-purple-200/80 dark:border-purple-800/60 p-5 sm:p-6 space-y-4 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                  <Key size={18} />
                 </div>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-black text-purple-950 dark:text-purple-100">
+                  <h4 className="text-sm font-black text-purple-950 dark:text-purple-100">
                     {language === 'ar' ? 'بيانات دخول ولي الأمر إلى البوابة (Parent Portal Credentials)' : 'Parent Portal Login Credentials'}
                   </h4>
-                  <p className="text-[11px] text-purple-700/80 dark:text-purple-300/80 font-medium">
+                  <p className="text-xs text-purple-700/80 dark:text-purple-300/80 font-medium mt-0.5">
                     {language === 'ar' ? 'كلمة المرور الحالية لحساب ولي الأمر المعتمدة في النظام' : 'Current active portal password for this parent'}
                   </p>
                 </div>
@@ -149,20 +149,19 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                     setTimeout(() => setIsFullCopied(false), 2000);
                   }
                 }}
-                className={`rounded-xl border flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer shadow-2xs shrink-0 ${
+                className={`h-10 px-4 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap ${
                   isFullCopied
                     ? 'bg-emerald-600 border-emerald-600 text-white'
                     : 'bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/60 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:scale-105 active:scale-95'
                 }`}
-                style={{ padding: '8px 14px' }}
               >
                 {isFullCopied ? <Check size={14} /> : <ShieldCheck size={14} />}
                 <span>{isFullCopied ? (language === 'ar' ? 'تم نسخ كامل البيانات' : 'Credentials Copied!') : (language === 'ar' ? 'نسخ بيانات الدخول كاملة' : 'Copy Full Credentials')}</span>
               </button>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
-              <div className="flex-1 flex items-center gap-2 bg-white dark:bg-slate-900 border border-purple-200/90 dark:border-purple-800 rounded-xl px-3.5 h-11">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
+              <div className="flex-1 flex items-center gap-2.5 bg-white dark:bg-slate-900 border border-purple-200/90 dark:border-purple-800 rounded-xl px-4 h-11 shadow-2xs">
                 <span className="text-xs text-slate-400 font-bold shrink-0">
                   {language === 'ar' ? 'كلمة المرور:' : 'Password:'}
                 </span>
@@ -174,9 +173,9 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors cursor-pointer p-1"
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors cursor-pointer p-1 shrink-0"
                 >
-                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
 
@@ -191,7 +190,7 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                     setTimeout(() => setIsCopied(false), 2000);
                   }
                 }}
-                className={`h-11 px-3.5 rounded-xl border flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                className={`h-11 px-4 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                   isCopied
                     ? 'bg-emerald-600 border-emerald-600 text-white'
                     : 'bg-purple-600 hover:bg-purple-700 border-purple-600 text-white shadow-xs hover:scale-105 active:scale-95'
@@ -210,7 +209,7 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                   setIsCopied(false);
                 }}
                 title={language === 'ar' ? 'توليد وتعيين كلمة مرور جديدة تلقائياً' : 'Auto generate and set new password'}
-                className="h-11 px-3.5 bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/50 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-xl flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0"
+                className="h-11 px-4 bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/50 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0 whitespace-nowrap shadow-2xs"
               >
                 <RefreshCw size={14} />
                 <span>{language === 'ar' ? 'توليد كلمة جديدة' : 'Reset Password'}</span>
@@ -218,8 +217,8 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
             </div>
           </div>
 
-          {/* Linked Students List (Section 8, 9) */}
-          <div className="space-y-3 pt-2">
+          {/* Linked Students List */}
+          <div className="space-y-4 pt-1">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
                 <Users size={18} className="text-purple-600" />
@@ -229,11 +228,10 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
               <button
                 type="button"
                 onClick={() => setIsLinkingOpen(!isLinkingOpen)}
-                className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-                style={{ padding: '10px 18px' }}
+                className="h-10 px-5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer hover:scale-105 active:scale-95 whitespace-nowrap"
               >
-                <Plus size={15} />
-                <span>{language === 'ar' ? '+ ربط طالب جديد' : '+ Link Student'}</span>
+                <Plus size={16} />
+                <span>{language === 'ar' ? 'ربط طالب جديد' : 'Link Student'}</span>
               </button>
             </div>
 
