@@ -38,6 +38,7 @@ import {
   mockPendingApprovals,
 } from '@/data/adminMock';
 import { getItem, setItem } from '@/lib/localStorage';
+import { generateAutoPassword } from '@/lib/utils';
 import { useStudent } from '@/context/StudentContext';
 
 interface AdminContextType {
@@ -78,6 +79,7 @@ interface AdminContextType {
   archiveStudent: (studentId: string) => void;
   
   addParent: (parentData: Partial<AdminParent>) => void;
+  updateParent: (parentId: string, updates: Partial<AdminParent>) => void;
   linkStudentToParent: (parentId: string, studentId: string) => void;
   unlinkStudentFromParent: (parentId: string, studentId: string) => void;
 
@@ -433,6 +435,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         fullNameEn: data.fullNameEn || 'New Parent',
         phone: data.phone || '+213 550 000 000',
         email: data.email || 'parent@myschool.edu',
+        address: data.address || 'الجزائر العاصمة',
+        password: data.password || generateAutoPassword(),
         linkedStudentIds: data.linkedStudentIds || [],
         status: data.status || 'active',
         createdAt: new Date().toISOString().substring(0, 10),
@@ -445,6 +449,36 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       });
 
       logAudit(`إضافة ولي أمر جديد: ${newParent.fullNameAr}`, `Added new parent: ${newParent.fullNameEn}`, 'parent');
+    },
+    [logAudit]
+  );
+
+  const updateParent = useCallback(
+    (parentId: string, updates: Partial<AdminParent>) => {
+      setParents((prev) => {
+        const updated = prev.map((p) => (p.id === parentId ? { ...p, ...updates } : p));
+        setItem(ADMIN_STORAGE_KEYS.PARENTS, updated);
+        return updated;
+      });
+
+      // If phone/email changed, sync linked students
+      if (updates.fullNameAr || updates.phone || updates.email) {
+        setStudents((prev) =>
+          prev.map((s) => {
+            if (s.parentId === parentId) {
+              return {
+                ...s,
+                parentName: updates.fullNameAr || s.parentName,
+                parentPhone: updates.phone || s.parentPhone,
+                parentEmail: updates.email !== undefined ? updates.email : s.parentEmail,
+              };
+            }
+            return s;
+          })
+        );
+      }
+
+      logAudit(`تحديث بيانات ولي الأمر: ${parentId}`, `Updated parent details: ${parentId}`, 'parent');
     },
     [logAudit]
   );
@@ -1220,6 +1254,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         updateStudent,
         archiveStudent,
         addParent,
+        updateParent,
         linkStudentToParent,
         unlinkStudentFromParent,
         addTeacher,

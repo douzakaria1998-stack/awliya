@@ -14,10 +14,18 @@ import {
   Sparkles,
   CheckCircle2,
   Calendar,
+  Key,
+  Copy,
+  Check,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  ShieldCheck,
 } from 'lucide-react';
 import { AdminParent, AdminStudent } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { generateAutoPassword } from '@/lib/utils';
 
 interface ParentDetailModalProps {
   parent: AdminParent | null;
@@ -26,11 +34,14 @@ interface ParentDetailModalProps {
 }
 
 export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModalProps) {
-  const { students, linkStudentToParent, unlinkStudentFromParent } = useAdmin();
+  const { students, linkStudentToParent, unlinkStudentFromParent, updateParent } = useAdmin();
   const { isRTL, language } = useLanguage();
 
   const [isLinkingOpen, setIsLinkingOpen] = useState(false);
   const [selectedStudentToLink, setSelectedStudentToLink] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [isFullCopied, setIsFullCopied] = useState(false);
 
   if (!isOpen || !parent) return null;
 
@@ -102,6 +113,108 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                 <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'العنوان السكني:' : 'Address:'}</span>
                 <span className="font-bold text-slate-900 dark:text-white text-xs">{parent.address || 'الجزائر العاصمة'}</span>
               </div>
+            </div>
+          </div>
+
+          {/* Account Login Credentials & Auto-Generated Password Card */}
+          <div className="rounded-2xl bg-gradient-to-r from-purple-50/80 via-indigo-50/50 to-purple-50/80 dark:from-purple-950/40 dark:via-indigo-950/30 dark:to-purple-950/40 border border-purple-200/80 dark:border-purple-800/60 p-4 sm:p-5 space-y-3 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                  <Key size={16} />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-black text-purple-950 dark:text-purple-100">
+                    {language === 'ar' ? 'بيانات دخول ولي الأمر إلى البوابة (Parent Portal Credentials)' : 'Parent Portal Login Credentials'}
+                  </h4>
+                  <p className="text-[11px] text-purple-700/80 dark:text-purple-300/80 font-medium">
+                    {language === 'ar' ? 'كلمة المرور الحالية لحساب ولي الأمر المعتمدة في النظام' : 'Current active portal password for this parent'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Copy Full Credentials */}
+              <button
+                type="button"
+                onClick={() => {
+                  const currentPass = parent.password || 'Awliya@2026';
+                  const text = `${language === 'ar' ? 'بيانات الدخول لبوابة أولياء الأمور' : 'Parent Portal Login'}\n` +
+                    `👤 ${language === 'ar' ? 'الاسم' : 'Name'}: ${parent.fullNameAr}\n` +
+                    `📱 ${language === 'ar' ? 'الهاتف' : 'Phone'}: ${parent.phone}\n` +
+                    `📧 ${language === 'ar' ? 'البريد' : 'Email'}: ${parent.email}\n` +
+                    `🔑 ${language === 'ar' ? 'كلمة المرور' : 'Password'}: ${currentPass}`;
+                  if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text);
+                    setIsFullCopied(true);
+                    setTimeout(() => setIsFullCopied(false), 2000);
+                  }
+                }}
+                className={`rounded-xl border flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer shadow-2xs shrink-0 ${
+                  isFullCopied
+                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                    : 'bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/60 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:scale-105 active:scale-95'
+                }`}
+                style={{ padding: '8px 14px' }}
+              >
+                {isFullCopied ? <Check size={14} /> : <ShieldCheck size={14} />}
+                <span>{isFullCopied ? (language === 'ar' ? 'تم نسخ كامل البيانات' : 'Credentials Copied!') : (language === 'ar' ? 'نسخ بيانات الدخول كاملة' : 'Copy Full Credentials')}</span>
+              </button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+              <div className="flex-1 flex items-center gap-2 bg-white dark:bg-slate-900 border border-purple-200/90 dark:border-purple-800 rounded-xl px-3.5 h-11">
+                <span className="text-xs text-slate-400 font-bold shrink-0">
+                  {language === 'ar' ? 'كلمة المرور:' : 'Password:'}
+                </span>
+                <span className="flex-1 font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm tracking-wider" dir="ltr">
+                  {showPassword ? (parent.password || 'Awliya@2026') : '••••••••••••'}
+                </span>
+
+                {/* Show/Hide */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors cursor-pointer p-1"
+                >
+                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+
+              {/* Copy Single Password */}
+              <button
+                type="button"
+                onClick={() => {
+                  const pass = parent.password || 'Awliya@2026';
+                  if (navigator.clipboard) {
+                    navigator.clipboard.writeText(pass);
+                    setIsCopied(true);
+                    setTimeout(() => setIsCopied(false), 2000);
+                  }
+                }}
+                className={`h-11 px-3.5 rounded-xl border flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                  isCopied
+                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                    : 'bg-purple-600 hover:bg-purple-700 border-purple-600 text-white shadow-xs hover:scale-105 active:scale-95'
+                }`}
+              >
+                {isCopied ? <Check size={14} /> : <Copy size={14} />}
+                <span>{isCopied ? (language === 'ar' ? 'تم النسخ' : 'Copied') : (language === 'ar' ? 'نسخ الرمز' : 'Copy')}</span>
+              </button>
+
+              {/* Regenerate Password */}
+              <button
+                type="button"
+                onClick={() => {
+                  const newPass = generateAutoPassword();
+                  updateParent(parent.id, { password: newPass });
+                  setIsCopied(false);
+                }}
+                title={language === 'ar' ? 'توليد وتعيين كلمة مرور جديدة تلقائياً' : 'Auto generate and set new password'}
+                className="h-11 px-3.5 bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/50 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-xl flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0"
+              >
+                <RefreshCw size={14} />
+                <span>{language === 'ar' ? 'توليد كلمة جديدة' : 'Reset Password'}</span>
+              </button>
             </div>
           </div>
 

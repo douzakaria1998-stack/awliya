@@ -14,10 +14,18 @@ import {
   ExternalLink,
   PlusCircle,
   X,
+  Key,
+  RefreshCw,
+  Copy,
+  Check,
+  Eye,
+  EyeOff,
+  Sparkles,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdminParent } from '@/types/admin';
+import { generateAutoPassword } from '@/lib/utils';
 import { ParentDetailModal } from '../modals/ParentDetailModal';
 
 export function AdminParentsScreen() {
@@ -35,6 +43,9 @@ export function AdminParentsScreen() {
   const [newPhone, setNewPhone] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newAddress, setNewAddress] = useState('');
+  const [newPassword, setNewPassword] = useState(() => generateAutoPassword());
+  const [showPassword, setShowPassword] = useState(true);
+  const [isCopied, setIsCopied] = useState(false);
 
   const filteredParents = useMemo(() => {
     return visibleParents.filter((p) => {
@@ -53,6 +64,18 @@ export function AdminParentsScreen() {
     setIsModalOpen(true);
   };
 
+  const handleOpenAddParent = () => {
+    setNewNameAr('');
+    setNewNameEn('');
+    setNewPhone('');
+    setNewEmail('');
+    setNewAddress('');
+    setNewPassword(generateAutoPassword());
+    setShowPassword(true);
+    setIsCopied(false);
+    setIsAddParentOpen(true);
+  };
+
   const handleCreateParent = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newNameAr || !newPhone) return;
@@ -63,6 +86,7 @@ export function AdminParentsScreen() {
       phone: newPhone,
       email: newEmail || 'parent@myschool.edu',
       address: newAddress || 'الجزائر العاصمة',
+      password: newPassword || generateAutoPassword(),
       status: 'active',
     });
 
@@ -71,6 +95,7 @@ export function AdminParentsScreen() {
     setNewPhone('');
     setNewEmail('');
     setNewAddress('');
+    setNewPassword(generateAutoPassword());
     setIsAddParentOpen(false);
   };
 
@@ -92,7 +117,7 @@ export function AdminParentsScreen() {
 
         <button
           type="button"
-          onClick={() => setIsAddParentOpen(true)}
+          onClick={handleOpenAddParent}
           className="rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
           style={{ padding: '14px 28px' }}
         >
@@ -341,6 +366,82 @@ export function AdminParentsScreen() {
                   placeholder="الجزائر العاصمة"
                   className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm text-slate-900 dark:text-white"
                 />
+              </div>
+
+              {/* Auto-Generated Account Password */}
+              <div className="rounded-2xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/90 dark:border-purple-800/60 p-3.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-1.5 text-purple-950 dark:text-purple-200 text-xs font-bold">
+                    <Key size={14} className="text-purple-600 dark:text-purple-400" />
+                    <span>{language === 'ar' ? 'كلمة المرور للحساب (توليد تلقائي) *' : 'Account Password (Auto-Generated) *'}</span>
+                  </label>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/80 text-purple-700 dark:text-purple-300 flex items-center gap-1">
+                    <Sparkles size={11} />
+                    <span>{language === 'ar' ? 'توليد ذكي' : 'Auto Generated'}</span>
+                  </span>
+                </div>
+
+                <div className="relative flex items-center gap-1.5">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="flex-1 h-11 px-4 bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm font-bold text-slate-900 dark:text-white"
+                    dir="ltr"
+                  />
+
+                  {/* Regenerate Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const pass = generateAutoPassword();
+                      setNewPassword(pass);
+                      setIsCopied(false);
+                    }}
+                    title={language === 'ar' ? 'توليد كلمة مرور جديدة' : 'Generate New Password'}
+                    className="h-11 px-3 bg-white dark:bg-slate-900 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-xl flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0"
+                  >
+                    <RefreshCw size={15} />
+                  </button>
+
+                  {/* Show/Hide Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    title={showPassword ? (language === 'ar' ? 'إخفاء' : 'Hide') : (language === 'ar' ? 'إظهار' : 'Show')}
+                    className="h-11 px-3 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-purple-200 dark:border-purple-700 text-slate-600 dark:text-slate-300 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0"
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+
+                  {/* Copy Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (navigator.clipboard) {
+                        navigator.clipboard.writeText(newPassword);
+                        setIsCopied(true);
+                        setTimeout(() => setIsCopied(false), 2000);
+                      }
+                    }}
+                    title={language === 'ar' ? 'نسخ كلمة المرور' : 'Copy Password'}
+                    className={`h-11 px-3.5 rounded-xl border flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                      isCopied
+                        ? 'bg-emerald-600 border-emerald-600 text-white'
+                        : 'bg-purple-600 hover:bg-purple-700 border-purple-600 text-white hover:scale-105 active:scale-95 shadow-xs'
+                    }`}
+                  >
+                    {isCopied ? <Check size={14} /> : <Copy size={14} />}
+                    <span className="hidden sm:inline">{isCopied ? (language === 'ar' ? 'تم النسخ' : 'Copied') : (language === 'ar' ? 'نسخ' : 'Copy')}</span>
+                  </button>
+                </div>
+
+                <p className="text-[11px] text-purple-700/80 dark:text-purple-300/80 font-medium">
+                  {language === 'ar'
+                    ? '✨ يتم إنشاء كلمة المرور تلقائياً لحساب ولي الأمر، ويمكنك نسخها لتسليمها لولي الأمر لتسجيل الدخول.'
+                    : '✨ Password is automatically generated. You can copy and share it with the parent for portal login.'}
+                </p>
               </div>
 
               <div style={{ paddingTop: '8px' }}>

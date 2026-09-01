@@ -31,14 +31,19 @@ import {
   Phone,
   Mail,
   Check,
+  Key,
+  RefreshCw,
+  Copy,
+  EyeOff,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdminStudent, EntityStatus } from '@/types/admin';
+import { generateAutoPassword } from '@/lib/utils';
 import { StudentDetailModal } from '../modals/StudentDetailModal';
 
 export function StudentsManagementScreen() {
-  const { visibleStudents, groups, teachers, parents, addStudent, updateStudent, archiveStudent } = useAdmin();
+  const { visibleStudents, groups, teachers, parents, addStudent, addParent, updateStudent, archiveStudent } = useAdmin();
   const { isRTL, language } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,6 +77,9 @@ export function StudentsManagementScreen() {
   const [customParentName, setCustomParentName] = useState('');
   const [customParentPhone, setCustomParentPhone] = useState('');
   const [customParentEmail, setCustomParentEmail] = useState('');
+  const [customParentPassword, setCustomParentPassword] = useState(() => generateAutoPassword());
+  const [showCustomPassword, setShowCustomPassword] = useState(true);
+  const [isCustomPassCopied, setIsCustomPassCopied] = useState(false);
 
   // Filtered Parents for Link to Parent search
   const filteredParents = useMemo(() => {
@@ -152,6 +160,7 @@ export function StudentsManagementScreen() {
     let parentId = 'par-01';
     let parentName = 'محمد بن علي';
     let parentPhone = '+213 555 123 456';
+    let parentEmail = 'mohamed.benali@gmail.com';
 
     if (parentLinkMode === 'existing') {
       const existingParent = parents.find((p) => p.id === selectedParentId) || parents[0];
@@ -159,10 +168,25 @@ export function StudentsManagementScreen() {
         parentId = existingParent.id;
         parentName = existingParent.fullNameAr;
         parentPhone = existingParent.phone;
+        parentEmail = existingParent.email;
       }
     } else {
       parentName = customParentName.trim() || 'ولي أمر الطالب';
       parentPhone = customParentPhone.trim() || '+213 550 000 000';
+      parentEmail = customParentEmail.trim() || 'parent@myschool.edu';
+      const newParentPassword = customParentPassword.trim() || generateAutoPassword();
+      const newGeneratedParentId = `par-${Date.now()}`;
+      parentId = newGeneratedParentId;
+
+      addParent({
+        id: newGeneratedParentId,
+        fullNameAr: parentName,
+        fullNameEn: parentName,
+        phone: parentPhone,
+        email: parentEmail,
+        password: newParentPassword,
+        status: 'active',
+      });
     }
 
     addStudent({
@@ -932,6 +956,65 @@ export function StudentsManagementScreen() {
                         style={{ height: '42px', padding: '8px 14px' }}
                         dir="ltr"
                       />
+                    </div>
+
+                    {/* Auto-Generated Password Field */}
+                    <div className="rounded-xl bg-purple-50/80 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 p-2.5 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="flex items-center gap-1 text-purple-950 dark:text-purple-200 text-[11px] font-bold">
+                          <Key size={13} className="text-purple-600" />
+                          <span>{language === 'ar' ? 'كلمة المرور للحساب (توليد تلقائي) *' : 'Account Password (Auto-Generated) *'}</span>
+                        </label>
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-purple-200/70 dark:bg-purple-900 text-purple-800 dark:text-purple-300">
+                          {language === 'ar' ? 'توليد تلقائي' : 'Auto Generated'}
+                        </span>
+                      </div>
+
+                      <div className="relative flex items-center gap-1">
+                        <input
+                          type={showCustomPassword ? 'text' : 'password'}
+                          value={customParentPassword}
+                          onChange={(e) => setCustomParentPassword(e.target.value)}
+                          className="flex-1 rounded-lg bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-700 font-mono text-xs font-bold text-slate-900 dark:text-white px-2.5 h-9 focus:outline-none"
+                          dir="ltr"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCustomParentPassword(generateAutoPassword());
+                            setIsCustomPassCopied(false);
+                          }}
+                          title={language === 'ar' ? 'توليد كلمة جديدة' : 'Regenerate'}
+                          className="w-9 h-9 bg-white dark:bg-slate-900 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-lg flex items-center justify-center transition-all cursor-pointer"
+                        >
+                          <RefreshCw size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCustomPassword(!showCustomPassword)}
+                          className="w-9 h-9 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-purple-200 dark:border-purple-700 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all cursor-pointer"
+                        >
+                          {showCustomPassword ? <EyeOff size={13} /> : <Eye size={13} />}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (navigator.clipboard) {
+                              navigator.clipboard.writeText(customParentPassword);
+                              setIsCustomPassCopied(true);
+                              setTimeout(() => setIsCustomPassCopied(false), 2000);
+                            }
+                          }}
+                          className={`h-9 px-2.5 rounded-lg border flex items-center gap-1 text-[11px] font-bold transition-all cursor-pointer ${
+                            isCustomPassCopied
+                              ? 'bg-emerald-600 border-emerald-600 text-white'
+                              : 'bg-purple-600 hover:bg-purple-700 border-purple-600 text-white shadow-xs'
+                          }`}
+                        >
+                          {isCustomPassCopied ? <Check size={12} /> : <Copy size={12} />}
+                          <span>{isCustomPassCopied ? (language === 'ar' ? 'تم النسخ' : 'Copied') : (language === 'ar' ? 'نسخ' : 'Copy')}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

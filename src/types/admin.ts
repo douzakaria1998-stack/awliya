@@ -99,6 +99,7 @@ export interface AdminParent {
   email: string;
   nationalId?: string;
   address?: string;
+  password?: string;
   linkedStudentIds: string[];
   status: EntityStatus;
   createdAt: string;

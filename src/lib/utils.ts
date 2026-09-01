@@ -30,3 +30,11 @@ export function getPercentageColor(percentage: number): string {
 export function generateId(): string {
     return Math.random().toString(36).substring(2, 11);
 }
+
+export function generateAutoPassword(prefix: string = 'Awliya'): string {
+    const symbols = ['@', '#', '$', '!', '&', '*'];
+    const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+    const randomNum = Math.floor(1000 + Math.random() * 9000); // 4-digit number
+    return `${prefix}${symbol}${randomNum}`;
+}
+
