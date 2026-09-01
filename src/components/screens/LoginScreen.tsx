@@ -136,17 +136,25 @@ export function LoginScreen() {
           <button
             type="button"
             onClick={() => setIsLangOpen(!isLangOpen)}
-            className="rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs hover:bg-white dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-all shadow-2xs h-10 px-3 gap-2"
+            className="rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs hover:bg-white dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-all shadow-2xs whitespace-nowrap"
+            style={{
+              height: '44px',
+              paddingLeft: '18px',
+              paddingRight: '18px',
+              gap: '10px',
+            }}
           >
             <img
               src={currentLangObj.flagUrl}
               alt={currentLangObj.label}
-              className="w-5 h-5 rounded-full object-cover shrink-0 shadow-2xs"
+              className="w-5 h-5 min-w-[20px] min-h-[20px] rounded-full object-cover shrink-0 shadow-2xs border border-slate-200 dark:border-slate-700"
             />
-            <span className="font-mono uppercase font-bold text-xs">{currentLangObj.code}</span>
+            <span className="font-mono uppercase font-black text-xs text-slate-800 dark:text-slate-200 tracking-wider">
+              {currentLangObj.code}
+            </span>
             <ChevronDown
               size={14}
-              className={`text-slate-400 transition-transform ${isLangOpen ? 'rotate-180' : ''}`}
+              className={`text-slate-400 shrink-0 transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`}
             />
           </button>
 

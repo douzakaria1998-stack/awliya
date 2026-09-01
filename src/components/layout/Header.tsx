@@ -186,11 +186,11 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                 setIsProfileOpen(false);
                 setIsNotifOpen(false);
               }}
-              className="rounded-full bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-all shadow-2xs"
+              className="rounded-full bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-all shadow-2xs whitespace-nowrap"
               style={{
-                height: '42px',
-                paddingRight: '14px',
-                paddingLeft: '14px',
+                height: '44px',
+                paddingRight: '18px',
+                paddingLeft: '18px',
                 gap: '10px',
               }}
               title="تغيير اللغة / Change Language / Changer la langue"
@@ -198,7 +198,7 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
               <img
                 src={currentLangObj.flagUrl}
                 alt={currentLangObj.label}
-                className="w-5 h-5 rounded-full object-cover shrink-0 shadow-2xs border border-slate-200 dark:border-slate-700"
+                className="w-5 h-5 min-w-[20px] min-h-[20px] rounded-full object-cover shrink-0 shadow-2xs border border-slate-200 dark:border-slate-700"
               />
               <span className="hidden sm:inline font-mono uppercase tracking-wider font-extrabold">{currentLangObj.code}</span>
               <ChevronDown
