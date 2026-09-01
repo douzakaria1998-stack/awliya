@@ -16,7 +16,7 @@ import {
   NotificationSettings,
   LevelId,
 } from '@/types';
-import { AdminStudent } from '@/types/admin';
+import { AdminStudent, AdminParent } from '@/types/admin';
 import { getItem, setItem } from '@/lib/localStorage';
 import { STORAGE_KEYS, SHOW_FINANCIALS_TAB } from '@/lib/constants';
 import {
@@ -35,6 +35,15 @@ import {
 import { mockAdminStudents } from '@/data/adminMock';
 import { useTheme } from './ThemeContext';
 import { useAuth } from './AuthContext';
+
+const emptyAttendanceSummary: AttendanceSummary = {
+  totalDays: 0,
+  presentDays: 0,
+  absentDays: 0,
+  lateDays: 0,
+  excusedDays: 0,
+  attendancePercentage: 0,
+};
 
 export const emptyStudent: Student = {
   id: '',
@@ -142,14 +151,21 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Dynamically resolve students belonging to the authenticated parent
-  useEffect(() => {
-    if (!parent) {
+  const syncParentStudents = useCallback(() => {
+    // Check latest parent session
+    const currentAuthUser = getItem<any>('awliya_auth_user');
+    const activeParent = currentAuthUser || parent;
+
+    if (!activeParent) {
       setStudents([]);
       setActiveStudentIdState('');
       return;
     }
 
-    const storedAdminStudents = getItem<AdminStudent[]>(STORAGE_KEYS.ADMIN_STUDENTS) || [];
+    const storedAdminParents = getItem<AdminParent[]>('myschool_admin_parents_v2') || [];
+    const currentParentRecord = storedAdminParents.find((p) => p.id === activeParent.id) || activeParent;
+
+    const storedAdminStudents = getItem<AdminStudent[]>('myschool_admin_students_v2') || [];
     const allAdminStudents = [...storedAdminStudents, ...mockAdminStudents];
     const storedPortalStudents = getItem<Student[]>(STORAGE_KEYS.STUDENTS_LIST) || [];
     const allPortalStudents = [...storedPortalStudents, ...mockStudents];
@@ -161,8 +177,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     // 1. Check direct ID matches or parentId in portal students
     allPortalStudents.forEach((s) => {
       const isMatch =
-        s.parentId === parent.id ||
-        (parent.linkedStudentIds && parent.linkedStudentIds.includes(s.id));
+        s.parentId === currentParentRecord.id ||
+        (currentParentRecord.linkedStudentIds && currentParentRecord.linkedStudentIds.includes(s.id));
       if (isMatch && !seenIds.has(s.id)) {
         seenIds.add(s.id);
         parentChildren.push(s);
@@ -172,8 +188,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     // 2. Check admin students linked to this parent
     allAdminStudents.forEach((adminStu) => {
       const isMatch =
-        adminStu.parentId === parent.id ||
-        (parent.linkedStudentIds && parent.linkedStudentIds.includes(adminStu.id));
+        adminStu.parentId === currentParentRecord.id ||
+        (currentParentRecord.linkedStudentIds && currentParentRecord.linkedStudentIds.includes(adminStu.id));
       if (isMatch && !seenIds.has(adminStu.id)) {
         seenIds.add(adminStu.id);
         const nameParts = adminStu.fullNameAr.trim().split(' ');
@@ -182,13 +198,13 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           parentId: adminStu.parentId,
           fullNameAr: adminStu.fullNameAr,
           firstNameAr: nameParts[0] || adminStu.fullNameAr,
-          lastNameAr: nameParts.slice(1).join(' ') || parent.fullNameAr.split(' ').slice(1).join(' '),
+          lastNameAr: nameParts.slice(1).join(' ') || (currentParentRecord.fullNameAr ? currentParentRecord.fullNameAr.split(' ').slice(1).join(' ') : ''),
           birthday: '2015-06-15',
           schoolLevelAr: 'المرحلة الابتدائية',
           nicknameAr: nameParts[0] || adminStu.fullNameAr,
           enrolledPathAr: adminStu.enrolledPathAr || 'مسار اللغة الإنجليزية المكثف (English Track)',
           currentLevel: (adminStu.currentLevel || 1) as LevelId,
-          currentLevelProgress: adminStu.overallProgress || 75,
+          currentLevelProgress: adminStu.overallProgress !== undefined ? adminStu.overallProgress : 0,
           studentIdNumber: adminStu.id.toUpperCase(),
           academicYearAr: '1446-1447هـ (2024-2025)',
           branchAr: 'الفرع المركزي',
@@ -215,6 +231,27 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       setActiveStudentIdState('');
     }
   }, [parent, activeStudentId, setLevel]);
+
+  // Sync on parent change and listen to window/storage sync events
+  useEffect(() => {
+    syncParentStudents();
+
+    const handleSync = () => {
+      syncParentStudents();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('awliya-data-sync', handleSync);
+      window.addEventListener('storage', handleSync);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('awliya-data-sync', handleSync);
+        window.removeEventListener('storage', handleSync);
+      }
+    };
+  }, [syncParentStudents]);
 
   // Current active student object
   const activeStudent = useMemo(() => {
@@ -341,70 +378,36 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   }, [activeStudent.currentLevel]);
 
   const homeworkList = useMemo(() => {
-    return homeworkMap[activeStudent.id] || [
-      {
-        id: `hw-gen-1`,
-        studentId: activeStudent.id,
-        titleAr: `تسميع مقرر ${activeStudent.enrolledPathAr}`,
-        subjectAr: 'الحفظ والتلاوة',
-        level: activeStudent.currentLevel,
-        status: 'pending' as const,
-        dueDate: '2025-03-01',
-      },
-      {
-        id: `hw-gen-2`,
-        studentId: activeStudent.id,
-        titleAr: 'تطبيق مهارات النطق والطلاقة الشفهية',
-        subjectAr: 'محادثة ونطق',
-        level: activeStudent.currentLevel,
-        status: 'needs_revision' as const,
-        dueDate: '2025-02-28',
-        teacherNote: 'يرجى إعادة التسجيل الصوتي مع مراعاة النطق السليم ومخارج الأصوات.',
-      },
-    ];
-  }, [homeworkMap, activeStudent.id, activeStudent.enrolledPathAr, activeStudent.currentLevel]);
+    if (!activeStudent.id) return [];
+    return homeworkMap[activeStudent.id] || [];
+  }, [homeworkMap, activeStudent.id]);
 
   const attendanceData = useMemo(() => {
-    return getAttendanceDataForStudent(activeStudent.id);
+    if (!activeStudent.id) {
+      return {
+        records: [],
+        summary: emptyAttendanceSummary,
+      };
+    }
+    const data = getAttendanceDataForStudent(activeStudent.id);
+    if (!data || data.records.length === 0) {
+      return {
+        records: [],
+        summary: emptyAttendanceSummary,
+      };
+    }
+    return data;
   }, [activeStudent.id]);
 
   const assessments = useMemo(() => {
-    return (
-      mockAssessmentsMap[activeStudent.id] || [
-        {
-          id: `asm-gen-1`,
-          studentId: activeStudent.id,
-          titleAr: `تقييم المستوى الأكاديمي الحالي`,
-          subjectAr: 'الحفظ والإتقان',
-          level: activeStudent.currentLevel,
-          score: 91,
-          totalScore: 100,
-          date: '2025-02-15',
-          typeAr: 'اختبار دوري',
-          gradeLetterAr: 'ممتاز',
-          teacherComments: 'أداء متميز وتفاعل إيجابي مستمر.',
-        },
-      ]
-    );
-  }, [activeStudent.id, activeStudent.currentLevel]);
+    if (!activeStudent.id) return [];
+    return mockAssessmentsMap[activeStudent.id] || [];
+  }, [activeStudent.id]);
 
   const teacherFeedback = useMemo(() => {
-    return (
-      mockTeacherFeedbackMap[activeStudent.id] || [
-        {
-          id: `fb-gen-1`,
-          studentId: activeStudent.id,
-          teacherNameAr: 'الشيخ عبد الرحمن السبيعي',
-          teacherRoleAr: 'معلم المسار الأكاديمي',
-          messageAr: `السلام عليكم، يسرني إبلاغكم بأن ${activeStudent.fullNameAr} يواصل تقدمه المميز في المستوى ${activeStudent.currentLevel}. نرجو الاستمرار في المتابعة المنزلية المباركة.`,
-          date: '2025-02-20T17:45:00',
-          subjectAr: 'المتابعة العامة',
-          isRead: false,
-          badgeAr: 'طالب متميز',
-        },
-      ]
-    );
-  }, [activeStudent.id, activeStudent.fullNameAr, activeStudent.currentLevel]);
+    if (!activeStudent.id) return [];
+    return mockTeacherFeedbackMap[activeStudent.id] || [];
+  }, [activeStudent.id]);
 
   const studentFees = useMemo(() => {
     return fees.filter((f) => f.studentId === activeStudent.id || !f.studentId);

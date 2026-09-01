@@ -281,35 +281,41 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
               <h4 className="text-sm font-black text-slate-900 dark:text-white">
                 {language === 'ar' ? 'سجل الواجبات والتسليمات' : 'Homework & Submissions'}
               </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {studentHomework.map((hw) => {
-                  const myEval = hw.evaluations.find((e) => e.studentId === student.id);
-                  return (
-                    <div
-                      key={hw.id}
-                      className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
-                      style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: '10px' }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-sm text-slate-900 dark:text-white">{hw.assignmentNameAr}</span>
-                        <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">
-                          {myEval?.score !== undefined ? `${myEval.score} / ${hw.totalScore}` : 'قيد التصحيح'}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{hw.descriptionAr}</p>
-                      {myEval?.teacherComment && (
-                        <div
-                          className="text-xs font-medium text-amber-800 dark:text-amber-300 bg-amber-50/90 dark:bg-amber-950/40 rounded-xl border border-amber-200/60 dark:border-amber-900/40"
-                          style={{ padding: '10px 16px', marginTop: '4px' }}
-                        >
-                          <span className="font-bold">{language === 'ar' ? 'ملاحظة المعلم: ' : 'Teacher Note: '}</span>
-                          <span>"{myEval.teacherComment}"</span>
+              {studentHomework.length === 0 ? (
+                <div className="py-10 text-center text-slate-400 text-xs font-semibold bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800">
+                  {language === 'ar' ? 'لا توجد واجبات مسندة لهذا الطالب بعد' : 'No homework assignments recorded yet'}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {studentHomework.map((hw) => {
+                    const myEval = hw.evaluations.find((e) => e.studentId === student.id);
+                    return (
+                      <div
+                        key={hw.id}
+                        className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                        style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: '10px' }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-sm text-slate-900 dark:text-white">{hw.assignmentNameAr}</span>
+                          <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">
+                            {myEval?.score !== undefined ? `${myEval.score} / ${hw.totalScore}` : 'قيد التصحيح'}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{hw.descriptionAr}</p>
+                        {myEval?.teacherComment && (
+                          <div
+                            className="text-xs font-medium text-amber-800 dark:text-amber-300 bg-amber-50/90 dark:bg-amber-950/40 rounded-xl border border-amber-200/60 dark:border-amber-900/40"
+                            style={{ padding: '10px 16px', marginTop: '4px' }}
+                          >
+                            <span className="font-bold">{language === 'ar' ? 'ملاحظة المعلم: ' : 'Teacher Note: '}</span>
+                            <span>"{myEval.teacherComment}"</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
@@ -323,10 +329,10 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
                   {[
-                    { name: 'الاستماع (Listening)', score: student.skills.listening, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50/80 dark:bg-blue-950/40' },
-                    { name: 'المحادثة (Speaking)', score: student.skills.speaking, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50/80 dark:bg-emerald-950/40' },
-                    { name: 'القراءة (Reading)', score: student.skills.reading, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50/80 dark:bg-purple-950/40' },
-                    { name: 'الكتابة (Writing)', score: student.skills.writing, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50/80 dark:bg-amber-950/40' },
+                    { name: 'الاستماع (Listening)', score: student.skills?.listening || 0, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50/80 dark:bg-blue-950/40' },
+                    { name: 'المحادثة (Speaking)', score: student.skills?.speaking || 0, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50/80 dark:bg-emerald-950/40' },
+                    { name: 'القراءة (Reading)', score: student.skills?.reading || 0, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50/80 dark:bg-purple-950/40' },
+                    { name: 'الكتابة (Writing)', score: student.skills?.writing || 0, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50/80 dark:bg-amber-950/40' },
                   ].map((sk, idx) => (
                     <div
                       key={idx}
@@ -345,21 +351,27 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                 <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   {language === 'ar' ? 'سجل الاختبارات الدورية' : 'Assessment History'}
                 </h5>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {studentAssessments.map((asm) => (
-                    <div
-                      key={asm.id}
-                      className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between"
-                      style={{ padding: '16px 22px' }}
-                    >
-                      <div>
-                        <span className="font-bold text-sm text-slate-900 dark:text-white block">{asm.level} — {asm.assessmentType}</span>
-                        <span className="text-xs text-slate-400 font-mono mt-1 block">{asm.date}</span>
+                {studentAssessments.length === 0 ? (
+                  <div className="py-8 text-center text-slate-400 text-xs font-semibold bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    {language === 'ar' ? 'لا توجد اختبارات مسجلة لهذا الطالب بعد' : 'No assessments recorded yet'}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {studentAssessments.map((asm) => (
+                      <div
+                        key={asm.id}
+                        className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center justify-between"
+                        style={{ padding: '16px 22px' }}
+                      >
+                        <div>
+                          <span className="font-bold text-sm text-slate-900 dark:text-white block">{asm.level} — {asm.assessmentType}</span>
+                          <span className="text-xs text-slate-400 font-mono mt-1 block">{asm.date}</span>
+                        </div>
+                        <span className="text-sm font-mono font-black text-purple-600 dark:text-purple-400">{asm.scores.overall}% ({asm.gradeLetterAr})</span>
                       </div>
-                      <span className="text-sm font-mono font-black text-purple-600 dark:text-purple-400">{asm.scores.overall}% ({asm.gradeLetterAr})</span>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -371,53 +383,59 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                 {language === 'ar' ? 'التوجيهات التربوية والتواصل مع ولي الأمر' : 'Teacher Guidance & Parent Feedback'}
               </h4>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {studentFeedback.map((fb) => (
-                  <div
-                    key={fb.id}
-                    className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '22px 26px', display: 'flex', flexDirection: 'column', gap: '16px' }}
-                  >
-                    <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700/60 pb-3.5">
-                      <span className="font-bold text-sm text-slate-900 dark:text-white">{fb.teacherName}</span>
-                      <span className="text-xs text-slate-400 font-mono">{fb.date}</span>
-                    </div>
+              {studentFeedback.length === 0 ? (
+                <div className="py-10 text-center text-slate-400 text-xs font-semibold bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800">
+                  {language === 'ar' ? 'لا توجد ملاحظات أو توجيهات مسجلة بعد' : 'No teacher feedback recorded yet'}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {studentFeedback.map((fb) => (
+                    <div
+                      key={fb.id}
+                      className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
+                      style={{ padding: '22px 26px', display: 'flex', flexDirection: 'column', gap: '16px' }}
+                    >
+                      <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-700/60 pb-3.5">
+                        <span className="font-bold text-sm text-slate-900 dark:text-white">{fb.teacherName}</span>
+                        <span className="text-xs text-slate-400 font-mono">{fb.date}</span>
+                      </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }} className="text-xs sm:text-sm">
-                      <div>
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400 block mb-1">
-                          {language === 'ar' ? 'نقاط القوة:' : 'Strengths:'}
-                        </span>
-                        <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{fb.teacherFeedback.strengths.join(' • ')}</p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }} className="text-xs sm:text-sm">
+                        <div>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400 block mb-1">
+                            {language === 'ar' ? 'نقاط القوة:' : 'Strengths:'}
+                          </span>
+                          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{fb.teacherFeedback.strengths.join(' • ')}</p>
+                        </div>
+                        <div>
+                          <span className="font-bold text-amber-600 dark:text-amber-400 block mb-1">
+                            {language === 'ar' ? 'مجالات التطوير:' : 'Areas for Improvement:'}
+                          </span>
+                          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{fb.teacherFeedback.needsImprovement.join(' • ')}</p>
+                        </div>
+                        <div>
+                          <span className="font-bold text-indigo-600 dark:text-indigo-400 block mb-1">
+                            {language === 'ar' ? 'التوصية للمنزل:' : 'Home Recommendation:'}
+                          </span>
+                          <p className="text-slate-700 dark:text-slate-300 leading-relaxed">"{fb.teacherFeedback.recommendations}"</p>
+                        </div>
                       </div>
-                      <div>
-                        <span className="font-bold text-amber-600 dark:text-amber-400 block mb-1">
-                          {language === 'ar' ? 'مجالات التطوير:' : 'Areas for Improvement:'}
-                        </span>
-                        <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{fb.teacherFeedback.needsImprovement.join(' • ')}</p>
-                      </div>
-                      <div>
-                        <span className="font-bold text-indigo-600 dark:text-indigo-400 block mb-1">
-                          {language === 'ar' ? 'التوصية للمنزل:' : 'Home Recommendation:'}
-                        </span>
-                        <p className="text-slate-700 dark:text-slate-300 leading-relaxed">"{fb.teacherFeedback.recommendations}"</p>
-                      </div>
-                    </div>
 
-                    {fb.parentFeedback && (
-                      <div
-                        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/80 text-xs sm:text-sm shadow-2xs"
-                        style={{ padding: '14px 18px', marginTop: '6px' }}
-                      >
-                        <span className="font-bold text-purple-600 dark:text-purple-400 block mb-1.5">
-                          {language === 'ar' ? 'رد ولي الأمر:' : 'Parent Reply:'}
-                        </span>
-                        <p className="text-slate-800 dark:text-slate-200 font-medium leading-relaxed">"{fb.parentFeedback.message}"</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                      {fb.parentFeedback && (
+                        <div
+                          className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/80 text-xs sm:text-sm shadow-2xs"
+                          style={{ padding: '14px 18px', marginTop: '6px' }}
+                        >
+                          <span className="font-bold text-purple-600 dark:text-purple-400 block mb-1.5">
+                            {language === 'ar' ? 'رد ولي الأمر:' : 'Parent Reply:'}
+                          </span>
+                          <p className="text-slate-800 dark:text-slate-200 font-medium leading-relaxed">"{fb.parentFeedback.message}"</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

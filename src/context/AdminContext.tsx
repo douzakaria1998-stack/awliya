@@ -507,6 +507,21 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         });
       }
 
+      // Sync active auth session if current user is this parent
+      const currentAuthUser = getItem<any>('awliya_auth_user');
+      if (currentAuthUser && currentAuthUser.id === parentId) {
+        const updatedUser = {
+          ...currentAuthUser,
+          linkedStudentIds: Array.from(new Set([...(currentAuthUser.linkedStudentIds || []), studentId])),
+        };
+        setItem('awliya_auth_user', updatedUser);
+      }
+
+      // Dispatch cross-context synchronization event
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
       logAudit(
         `ربط الطالب ${studentId} بولي الأمر ${parentId}`,
         `Linked student ${studentId} to parent ${parentId}`,
@@ -528,13 +543,37 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         setItem(ADMIN_STORAGE_KEYS.PARENTS, updated);
         return updated;
       });
+
+      // Clear student's parent reference
+      updateStudent(studentId, {
+        parentId: undefined,
+        parentName: undefined,
+        parentPhone: undefined,
+        parentEmail: undefined,
+      });
+
+      // Sync active auth session if current user is this parent
+      const currentAuthUser = getItem<any>('awliya_auth_user');
+      if (currentAuthUser && currentAuthUser.id === parentId) {
+        const updatedUser = {
+          ...currentAuthUser,
+          linkedStudentIds: (currentAuthUser.linkedStudentIds || []).filter((id: string) => id !== studentId),
+        };
+        setItem('awliya_auth_user', updatedUser);
+      }
+
+      // Dispatch cross-context synchronization event
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
       logAudit(
         `إلغاء ربط الطالب ${studentId} بولي الأمر ${parentId}`,
         `Unlinked student ${studentId} from parent ${parentId}`,
         'parent'
       );
     },
-    [logAudit]
+    [updateStudent, logAudit]
   );
 
   // ==========================================
