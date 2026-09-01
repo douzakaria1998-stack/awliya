@@ -44,7 +44,7 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
     markAllNotificationsRead,
   } = useStudent();
   const { theme, isDarkMode, toggleDarkMode } = useTheme();
-  const { parent } = useAuth();
+  const { parent, logout } = useAuth();
   const { language, setLanguage, t, isRTL } = useLanguage();
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -569,16 +569,27 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                   })}
                 </div>
 
-                {/* Direct Link to Control Panel (/admin) */}
-                <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800">
+                {/* Direct Link to Control Panel (/admin) & Logout */}
+                <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
                   <Link
                     href="/admin"
                     onClick={() => setIsProfileOpen(false)}
-                    className="w-full h-10 px-3 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs"
+                    className="w-full h-10 px-3 rounded-xl bg-purple-50 hover:bg-purple-100/80 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs"
                   >
-                    <Shield size={14} className="text-rose-600 dark:text-rose-400" />
+                    <Shield size={14} className="text-purple-600 dark:text-purple-400" />
                     <span>{t.adminPortalLink}</span>
                   </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      logout();
+                    }}
+                    className="w-full h-10 px-3 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-950/50 dark:hover:text-rose-400 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs"
+                  >
+                    <span>{language === 'ar' ? 'تسجيل الخروج' : language === 'fr' ? 'Se Déconnecter' : 'Sign Out'}</span>
+                  </button>
                 </div>
               </div>
             )}

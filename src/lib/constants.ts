@@ -23,6 +23,8 @@ export const STORAGE_KEYS = {
   PAYMENTS: 'awliya_payments_v4',
   THEME_MODE: 'awliya_theme_mode_v4',
   VIEWPORT_MODE: 'awliya_viewport_mode_v4',
+  ADMIN_PARENTS: 'myschool_admin_parents_v2',
+  ADMIN_STUDENTS: 'myschool_admin_students_v2',
 } as const;
 
 // Navigation tabs

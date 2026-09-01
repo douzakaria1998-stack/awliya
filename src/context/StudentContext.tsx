@@ -16,6 +16,7 @@ import {
   NotificationSettings,
   LevelId,
 } from '@/types';
+import { AdminStudent } from '@/types/admin';
 import { getItem, setItem } from '@/lib/localStorage';
 import { STORAGE_KEYS, SHOW_FINANCIALS_TAB } from '@/lib/constants';
 import {
@@ -31,7 +32,9 @@ import {
   mockNotificationSettings,
   getFinancialSummaryForStudent,
 } from '@/data/mock';
+import { mockAdminStudents } from '@/data/adminMock';
 import { useTheme } from './ThemeContext';
+import { useAuth } from './AuthContext';
 
 interface StudentContextType {
   students: Student[];
@@ -77,6 +80,7 @@ const StudentContext = createContext<StudentContextType | undefined>(undefined);
 
 export function StudentProvider({ children }: { children: React.ReactNode }) {
   const { setLevel } = useTheme();
+  const { parent } = useAuth();
 
   // 1. Initial states are strictly deterministic for SSR matching
   const [students, setStudents] = useState<Student[]>(mockStudents);
@@ -89,35 +93,6 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
   // Sync from localStorage after client mount
   useEffect(() => {
-    const storedStudents = getItem<Student[]>(STORAGE_KEYS.STUDENTS_LIST) || getItem<Student[]>('awliya_students_list');
-    if (storedStudents && storedStudents.length > 0) {
-      const sanitized = storedStudents.map((s) => {
-        if (
-          !s.enrolledPathAr ||
-          s.enrolledPathAr.includes('القرآن') ||
-          s.enrolledPathAr.includes('تجويد') ||
-          s.enrolledPathAr.includes('نورانية') ||
-          s.enrolledPathAr.includes('حفظ')
-        ) {
-          const defaultTrack =
-            s.id === 'student-002'
-              ? 'مسار اللغة الفرنسية المتقدم (French Language Path)'
-              : s.id === 'student-003'
-              ? 'المسار المزدوج: إنجليزية وفرنسية (Dual Languages Path)'
-              : 'مسار اللغة الإنجليزية المكثف (English Language Path)';
-          return { ...s, enrolledPathAr: defaultTrack };
-        }
-        return s;
-      });
-      setStudents(sanitized);
-      setItem(STORAGE_KEYS.STUDENTS_LIST, sanitized);
-    }
-
-    const storedActiveId = getItem<string>(STORAGE_KEYS.ACTIVE_STUDENT_ID);
-    if (storedActiveId) {
-      setActiveStudentIdState(storedActiveId);
-    }
-
     const storedHw = getItem<Record<string, Homework[]>>(STORAGE_KEYS.HOMEWORK);
     if (storedHw) setHomeworkMap(storedHw);
 
@@ -145,6 +120,97 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     const storedSettings = getItem<NotificationSettings>(STORAGE_KEYS.NOTIFICATION_SETTINGS);
     if (storedSettings) setNotificationSettings(storedSettings);
   }, []);
+
+  // Dynamically resolve students belonging to the authenticated parent
+  useEffect(() => {
+    if (!parent) return;
+
+    const storedAdminStudents = getItem<AdminStudent[]>(STORAGE_KEYS.ADMIN_STUDENTS) || [];
+    const allAdminStudents = [...storedAdminStudents, ...mockAdminStudents];
+    const storedPortalStudents = getItem<Student[]>(STORAGE_KEYS.STUDENTS_LIST) || [];
+    const allPortalStudents = [...storedPortalStudents, ...mockStudents];
+
+    // Find children linked to parent
+    const parentChildren: Student[] = [];
+    const seenIds = new Set<string>();
+
+    // 1. Check direct ID matches or parentId in portal students
+    allPortalStudents.forEach((s) => {
+      const isMatch =
+        s.parentId === parent.id ||
+        (parent.linkedStudentIds && parent.linkedStudentIds.includes(s.id));
+      if (isMatch && !seenIds.has(s.id)) {
+        seenIds.add(s.id);
+        parentChildren.push(s);
+      }
+    });
+
+    // 2. Check admin students linked to this parent
+    allAdminStudents.forEach((adminStu) => {
+      const isMatch =
+        adminStu.parentId === parent.id ||
+        (parent.linkedStudentIds && parent.linkedStudentIds.includes(adminStu.id));
+      if (isMatch && !seenIds.has(adminStu.id)) {
+        seenIds.add(adminStu.id);
+        const nameParts = adminStu.fullNameAr.trim().split(' ');
+        parentChildren.push({
+          id: adminStu.id,
+          parentId: adminStu.parentId,
+          fullNameAr: adminStu.fullNameAr,
+          firstNameAr: nameParts[0] || adminStu.fullNameAr,
+          lastNameAr: nameParts.slice(1).join(' ') || parent.fullNameAr.split(' ').slice(1).join(' '),
+          birthday: '2015-06-15',
+          schoolLevelAr: 'المرحلة الابتدائية',
+          nicknameAr: nameParts[0] || adminStu.fullNameAr,
+          enrolledPathAr: adminStu.enrolledPathAr || 'مسار اللغة الإنجليزية المكثف (English Track)',
+          currentLevel: (adminStu.currentLevel || 1) as LevelId,
+          currentLevelProgress: adminStu.overallProgress || 75,
+          studentIdNumber: adminStu.id.toUpperCase(),
+          academicYearAr: '1446-1447هـ (2024-2025)',
+          branchAr: 'الفرع المركزي',
+          timingAr: 'خلال أيام الأسبوع (Weekdays)',
+          gender: adminStu.gender,
+          status: adminStu.status as any,
+          enrollmentDate: adminStu.enrollmentDate,
+          age: 10,
+        });
+      }
+    });
+
+    if (parentChildren.length > 0) {
+      setStudents(parentChildren);
+      // If activeStudentId is not in parent's children, select the first child
+      if (!parentChildren.some((c) => c.id === activeStudentId)) {
+        setActiveStudentIdState(parentChildren[0].id);
+        setItem(STORAGE_KEYS.ACTIVE_STUDENT_ID, parentChildren[0].id);
+        setLevel(parentChildren[0].currentLevel);
+      }
+    } else {
+      // Fallback for newly created parent with no linked child yet
+      const fallbackChild: Student = {
+        id: `stu-new-${parent.id}`,
+        parentId: parent.id,
+        fullNameAr: `ابن ${parent.fullNameAr}`,
+        firstNameAr: 'الابن',
+        lastNameAr: parent.fullNameAr.split(' ').slice(1).join(' ') || 'العائلة',
+        birthday: '2016-01-01',
+        schoolLevelAr: 'السنة الرابعة ابتدائي',
+        nicknameAr: 'الابن',
+        enrolledPathAr: 'مسار اللغة الإنجليزية المكثف (Intensive English)',
+        currentLevel: 1 as LevelId,
+        currentLevelProgress: 10,
+        studentIdNumber: `STD-${parent.id.toUpperCase()}`,
+        academicYearAr: '1446-1447هـ (2024-2025)',
+        branchAr: 'الفرع المركزي',
+        timingAr: 'خلال أيام الأسبوع',
+        enrollmentDate: new Date().toISOString().split('T')[0],
+        age: 9,
+      };
+      setStudents([fallbackChild]);
+      setActiveStudentIdState(fallbackChild.id);
+      setLevel(fallbackChild.currentLevel);
+    }
+  }, [parent, activeStudentId, setLevel]);
 
   // Current active student object
   const activeStudent = useMemo(() => {

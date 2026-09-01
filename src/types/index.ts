@@ -23,10 +23,14 @@ export interface LevelTheme {
 export interface Parent {
   id: string;
   fullNameAr: string;
+  fullNameEn?: string;
   email: string;
   phone: string;
+  password?: string;
+  address?: string;
   nationalId?: string;
   avatarUrl?: string;
+  linkedStudentIds?: string[];
 }
 
 export interface Student {

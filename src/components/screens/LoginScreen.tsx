@@ -13,37 +13,48 @@ import {
   Moon,
   ChevronDown,
   Check,
+  UserCheck,
+  Sparkles,
+  ArrowRight,
+  School,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { InteractiveWaveBackground } from '../ui/InteractiveWaveBackground';
 import { Language } from '@/lib/translations';
+import { Parent } from '@/types';
 
 export function LoginScreen() {
-  const { login } = useAuth();
+  const { login, allRegisteredParents } = useAuth();
   const { theme, isDarkMode, toggleDarkMode } = useTheme();
   const { isRTL, language, setLanguage, t } = useLanguage();
 
-  const [emailOrPhone, setEmailOrPhone] = useState('ahmed.douzkari@gmail.com');
-  const [password, setPassword] = useState('••••••••••••');
+  const [emailOrPhone, setEmailOrPhone] = useState('mohamed.benali@gmail.com');
+  const [password, setPassword] = useState('Awliya@2026');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const [isDemoPickerOpen, setIsDemoPickerOpen] = useState(false);
 
   const langRef = useRef<HTMLDivElement>(null);
+  const demoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isLangOpen && langRef.current && !langRef.current.contains(event.target as Node)) {
         setIsLangOpen(false);
       }
+      if (isDemoPickerOpen && demoRef.current && !demoRef.current.contains(event.target as Node)) {
+        setIsDemoPickerOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isLangOpen]);
+  }, [isLangOpen, isDemoPickerOpen]);
 
   const languagesList: { code: Language; label: string; flagUrl: string }[] = [
     { code: 'ar', label: 'العربية', flagUrl: 'https://flagcdn.com/w80/sa.png' },
@@ -53,21 +64,46 @@ export function LoginScreen() {
 
   const currentLangObj = languagesList.find((l) => l.code === language) || languagesList[0];
 
+  const handleSelectParent = (p: Parent) => {
+    setEmailOrPhone(p.email || p.phone);
+    setPassword(p.password || 'Awliya@2026');
+    setErrorMessage('');
+    setIsDemoPickerOpen(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
     setIsLoading(true);
 
     try {
-      const success = await login(emailOrPhone, password);
-      if (!success) {
-        setErrorMessage(
-          language === 'ar'
-            ? 'يرجى إدخال بريد إلكتروني أو رقم هاتف صحيح'
-            : language === 'fr'
-            ? 'Veuillez entrer une adresse email ou un numéro valide'
-            : 'Please enter a valid email address or phone number'
-        );
+      const result = await login(emailOrPhone, password);
+      if (!result.success) {
+        if (result.message === 'invalid_password') {
+          setErrorMessage(
+            language === 'ar'
+              ? 'كلمة المرور غير صحيحة، يرجى التأكد وإعادة المحاولة'
+              : language === 'fr'
+              ? 'Mot de passe incorrect, veuillez réessayer'
+              : 'Incorrect password, please try again'
+          );
+        } else if (result.message === 'parent_not_found') {
+          setErrorMessage(
+            language === 'ar'
+              ? 'لم يتم العثور على حساب مسجل بهذا البريد أو الهاتف'
+              : language === 'fr'
+              ? 'Aucun compte parent trouvé avec cet email ou téléphone'
+              : 'No parent account found with this email or phone number'
+          );
+        } else {
+          setErrorMessage(
+            language === 'ar'
+              ? 'يرجى إدخال بريد إلكتروني أو رقم هاتف صحيح'
+              : language === 'fr'
+              ? 'Veuillez entrer une adresse email ou un numéro valide'
+              : 'Please enter a valid email address or phone number'
+          );
+        }
       }
     } catch {
       setErrorMessage(
@@ -84,7 +120,9 @@ export function LoginScreen() {
 
   return (
     <div
-      className={`min-h-screen w-full bg-slate-50 dark:bg-slate-950 flex flex-col justify-center items-center relative overflow-x-hidden transition-colors selection:bg-rose-500 selection:text-white select-none ${isRTL ? 'text-right' : 'text-left'}`}
+      className={`min-h-screen w-full bg-slate-50 dark:bg-slate-950 flex flex-col justify-center items-center relative overflow-x-hidden transition-colors selection:bg-rose-500 selection:text-white select-none ${
+        isRTL ? 'text-right' : 'text-left'
+      }`}
       dir={isRTL ? 'rtl' : 'ltr'}
       style={{ padding: '32px 16px' }}
       suppressHydrationWarning
@@ -102,8 +140,22 @@ export function LoginScreen() {
         style={{ backgroundColor: theme.primary }}
       />
 
-      {/* Top Controls Bar: Language + Dark Mode */}
-      <div className={`absolute top-6 ${isRTL ? 'left-6 sm:left-8' : 'right-6 sm:right-8'} z-20 flex items-center gap-2.5`}>
+      {/* Top Controls Bar: Language + Dark Mode + Backoffice Link */}
+      <div
+        className={`absolute top-6 ${
+          isRTL ? 'left-6 sm:left-8' : 'right-6 sm:right-8'
+        } z-20 flex items-center gap-2.5`}
+      >
+        {/* Back Office shortcut */}
+        <Link
+          href="/admin"
+          className="hidden sm:flex items-center gap-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs hover:bg-white dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-purple-600 dark:text-purple-400 h-10 px-3.5 shadow-2xs transition-all hover:scale-105"
+          title="Back Office Portal"
+        >
+          <School size={15} />
+          <span>{language === 'ar' ? 'لوحة الإدارة (Back Office)' : 'Admin Portal'}</span>
+        </Link>
+
         {/* Language Switcher */}
         <div ref={langRef} className="relative">
           <button
@@ -117,11 +169,18 @@ export function LoginScreen() {
               className="w-5 h-5 rounded-full object-cover shrink-0 shadow-2xs"
             />
             <span className="font-mono uppercase font-bold text-xs">{currentLangObj.code}</span>
-            <ChevronDown size={14} className={`text-slate-400 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              size={14}
+              className={`text-slate-400 transition-transform ${isLangOpen ? 'rotate-180' : ''}`}
+            />
           </button>
 
           {isLangOpen && (
-            <div className={`absolute top-full mt-2 w-44 bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-xl rounded-2xl p-1.5 z-50 animate-fade-in-up ${isRTL ? 'left-0' : 'right-0'}`}>
+            <div
+              className={`absolute top-full mt-2 w-44 bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-xl rounded-2xl p-1.5 z-50 animate-fade-in-up ${
+                isRTL ? 'left-0' : 'right-0'
+              }`}
+            >
               {languagesList.map((item) => (
                 <button
                   key={item.code}
@@ -131,7 +190,9 @@ export function LoginScreen() {
                     setIsLangOpen(false);
                   }}
                   className={`w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                    language === item.code ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    language === item.code
+                      ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400'
+                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -157,7 +218,7 @@ export function LoginScreen() {
       </div>
 
       {/* Main Login Card Container */}
-      <main className="w-full max-w-[440px] z-10">
+      <main className="w-full max-w-[450px] z-10">
         <div
           className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-xl"
           style={{
@@ -166,7 +227,7 @@ export function LoginScreen() {
           }}
         >
           {/* Brand & Greetings */}
-          <div className="flex flex-col items-center justify-center text-center" style={{ marginBottom: '28px' }}>
+          <div className="flex flex-col items-center justify-center text-center" style={{ marginBottom: '24px' }}>
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-md mb-3.5 shrink-0"
               style={{ background: theme.gradient }}
@@ -174,22 +235,72 @@ export function LoginScreen() {
               و
             </div>
             <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {language === 'ar' ? 'تسجيل الدخول' : language === 'fr' ? 'Connexion' : 'Parent Sign In'}
+              {language === 'ar' ? 'بوابة أولياء الأمور' : language === 'fr' ? 'Portail Parents' : 'Parent Portal'}
             </h1>
             <p className="text-xs text-slate-400 font-medium leading-relaxed mt-1.5 max-w-xs">
               {language === 'ar'
-                ? 'مرحباً بك مجدداً! أدخل بياناتك للمتابعة الأكاديمية والتربوية'
+                ? 'مرحباً بك! أدخل البريد الإلكتروني وكلمة المرور المسجلة في الإدارة'
                 : language === 'fr'
-                ? 'Bienvenue ! Connectez-vous pour suivre le parcours de vos enfants'
-                : 'Welcome back! Sign in to monitor student academic progress'}
+                ? 'Bienvenue ! Connectez-vous avec vos identifiants enregistrés'
+                : 'Welcome! Sign in with your registered email and password'}
             </p>
+          </div>
+
+          {/* Quick Select from Backoffice Parents */}
+          <div className="mb-5 relative" ref={demoRef}>
+            <button
+              type="button"
+              onClick={() => setIsDemoPickerOpen(!isDemoPickerOpen)}
+              className="w-full py-2 px-3 rounded-xl bg-purple-50 hover:bg-purple-100/80 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 border border-purple-200/80 dark:border-purple-800/60 text-purple-700 dark:text-purple-300 font-bold text-xs flex items-center justify-between transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles size={14} className="text-purple-600 dark:text-purple-400 shrink-0" />
+                <span className="truncate">
+                  {language === 'ar' ? 'اختر حساب ولي أمر مسجل للتجربة السريعة' : 'Quick select registered parent account'}
+                </span>
+              </div>
+              <ChevronDown
+                size={14}
+                className={`text-purple-500 shrink-0 transition-transform ${isDemoPickerOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {isDemoPickerOpen && (
+              <div
+                className={`absolute top-full mt-2 w-full bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-2xl p-2 z-50 animate-fade-in-up ${
+                  isRTL ? 'right-0 text-right' : 'left-0 text-left'
+                }`}
+              >
+                <div className="text-[10px] font-bold text-slate-400 px-2 py-1 mb-1 border-b border-slate-100 dark:border-slate-700">
+                  {language === 'ar'
+                    ? 'الحسابات المسجلة في الإدارة (Back Office):'
+                    : 'Parents Registered in Back Office:'}
+                </div>
+                <div className="max-h-56 overflow-y-auto space-y-1">
+                  {allRegisteredParents.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => handleSelectParent(p)}
+                      className="w-full p-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-purple-50 dark:hover:bg-purple-950/50 hover:text-purple-700 dark:hover:text-purple-300 flex items-center justify-between transition-colors cursor-pointer"
+                    >
+                      <div className="min-w-0 text-right">
+                        <div className="font-bold text-slate-900 dark:text-white truncate text-xs">{p.fullNameAr}</div>
+                        <div className="text-[11px] text-slate-400 font-mono truncate">{p.email}</div>
+                      </div>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono shrink-0 ml-2">
+                        {p.password || 'Awliya@2026'}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Error alert */}
           {errorMessage && (
-            <div
-              className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-bold p-3.5 rounded-2xl mb-5 flex items-center gap-2.5"
-            >
+            <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-bold p-3.5 rounded-2xl mb-5 flex items-center gap-2.5">
               <ShieldCheck size={16} className="shrink-0" />
               <span>{errorMessage}</span>
             </div>
@@ -199,8 +310,15 @@ export function LoginScreen() {
           <form onSubmit={handleSubmit}>
             {/* Email or Phone Input */}
             <div style={{ marginBottom: '18px' }}>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block" style={{ marginBottom: '8px' }}>
-                {language === 'ar' ? 'البريد الإلكتروني أو رقم الهاتف' : language === 'fr' ? 'Email ou Numéro de Téléphone' : 'Email Address or Phone Number'}
+              <label
+                className="text-xs font-bold text-slate-700 dark:text-slate-300 block"
+                style={{ marginBottom: '8px' }}
+              >
+                {language === 'ar'
+                  ? 'البريد الإلكتروني أو رقم الهاتف'
+                  : language === 'fr'
+                  ? 'Email ou Numéro de Téléphone'
+                  : 'Email Address or Phone Number'}
               </label>
               <div className="relative flex items-center">
                 <input
@@ -209,7 +327,7 @@ export function LoginScreen() {
                   value={emailOrPhone}
                   onChange={(e) => setEmailOrPhone(e.target.value)}
                   placeholder={language === 'ar' ? 'name@example.com أو 0550123456' : 'name@example.com'}
-                  className={`w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 transition-colors ${
+                  className={`w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-purple-500 dark:focus:border-purple-500 transition-colors ${
                     isRTL ? 'text-right pr-12 pl-4' : 'text-left pl-12 pr-4'
                   }`}
                   style={{
@@ -236,13 +354,13 @@ export function LoginScreen() {
                     e.preventDefault();
                     alert(
                       language === 'ar'
-                        ? 'يرجى التواصل مع إدارة الحلقات لإعادة تعيين كلمة المرور'
+                        ? 'يرجى التواصل مع إدارة المدرسة أو مراجعة لوحة الإدارة Back Office لمعرفة كلمة المرور.'
                         : language === 'fr'
-                        ? "Veuillez contacter l'administration pour réinitialiser votre mot de passe"
-                        : 'Please contact administration to reset your password'
+                        ? "Veuillez contacter l'administration de l'école pour réinitialiser votre mot de passe."
+                        : 'Please contact school administration to retrieve your login password.'
                     );
                   }}
-                  className="text-[11px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                  className="text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline transition-colors"
                 >
                   {language === 'ar' ? 'نسيت كلمة المرور؟' : language === 'fr' ? 'Mot de passe oublié ?' : 'Forgot Password?'}
                 </a>
@@ -254,7 +372,7 @@ export function LoginScreen() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className={`w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 transition-colors ${
+                  className={`w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-purple-500 dark:focus:border-purple-500 transition-colors ${
                     isRTL ? 'text-right pr-12 pl-12' : 'text-left pl-12 pr-12'
                   }`}
                   style={{
@@ -269,7 +387,9 @@ export function LoginScreen() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className={`absolute text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer ${isRTL ? 'left-4' : 'right-4'}`}
+                  className={`absolute text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer ${
+                    isRTL ? 'left-4' : 'right-4'
+                  }`}
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -284,7 +404,7 @@ export function LoginScreen() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-rose-600 focus:ring-0 cursor-pointer"
+                  className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-0 cursor-pointer"
                   style={{ accentColor: theme.primary }}
                 />
                 <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
@@ -341,3 +461,4 @@ export function LoginScreen() {
     </div>
   );
 }
+
