@@ -1,17 +1,9 @@
 import type { Metadata, Viewport } from 'next';
-import { Cairo } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { StudentProvider } from '@/context/StudentContext';
 import { LanguageProvider } from '@/context/LanguageContext';
-
-const cairo = Cairo({
-  subsets: ['arabic', 'latin'],
-  weight: ['300', '400', '500', '600', '700', '800', '900'],
-  variable: '--font-cairo',
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: 'Awliya Parent Portal | بوابة أولياء الأمور | Portail Parents',
@@ -34,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" className={cairo.variable} suppressHydrationWarning>
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
