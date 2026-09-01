@@ -94,11 +94,11 @@ export function AdminShell() {
           />
 
           {/* Drawer Panel */}
-          <div className="relative z-10 w-[300px] h-full bg-slate-900 shadow-2xl flex flex-col">
+          <div className="relative z-10 w-[300px] h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col">
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="absolute top-4 left-4 p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white z-50"
+              className="absolute top-4 left-4 p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors z-50 cursor-pointer"
             >
               <X size={18} />
             </button>

@@ -195,9 +195,9 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
 
   return (
     <aside
-      className={`hidden lg:flex flex-col w-[270px] min-w-[270px] max-w-[270px] shrink-0 bg-slate-900 text-slate-100 ${
+      className={`hidden lg:flex flex-col w-[270px] min-w-[270px] max-w-[270px] shrink-0 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 ${
         isRTL ? 'border-l' : 'border-r'
-      } border-slate-800 min-h-screen sticky top-0 h-screen z-30 justify-between select-none ${
+      } border-slate-200/80 dark:border-slate-800 min-h-screen sticky top-0 h-screen z-30 justify-between select-none transition-colors duration-200 ${
         isRTL ? 'text-right' : 'text-left'
       }`}
       suppressHydrationWarning
@@ -205,23 +205,23 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
       <div className="flex flex-col overflow-y-auto flex-1 pb-3">
         {/* 1. Brand Header */}
         <div
-          className="h-16 border-b border-slate-800 flex items-center gap-3 shrink-0"
+          className="h-16 border-b border-slate-200/80 dark:border-slate-800 flex items-center gap-3 shrink-0"
           style={{
             paddingRight: isRTL ? '20px' : '14px',
             paddingLeft: isRTL ? '14px' : '20px',
           }}
         >
-          <div className="h-9 px-2 py-1 rounded-xl bg-white flex items-center justify-center shadow-xs shrink-0">
+          <div className="h-9 px-2 py-1 rounded-xl bg-slate-50 dark:bg-white border border-slate-200/80 dark:border-transparent flex items-center justify-center shadow-xs shrink-0">
             <img src="/myschool-logo.png" alt="My School" className="h-6.5 w-auto object-contain" />
           </div>
           <div className="min-w-0">
-            <div className="font-black text-xs text-white flex items-center gap-1.5">
+            <div className="font-black text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
               <span>My School</span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40">
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/15 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 font-bold border border-purple-500/30 dark:border-purple-500/40">
                 Back Office
               </span>
             </div>
-            <div className="text-[10px] text-slate-400 font-medium truncate">
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">
               {language === 'ar' ? 'لوحة التحكم والمتابعة' : language === 'fr' ? 'Panneau de Contrôle & Suivi' : 'Control & Analytics Panel'}
             </div>
           </div>
@@ -229,7 +229,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
 
         {/* 2. Admin User Profile & Role Switcher Banner */}
         <div
-          className="rounded-2xl bg-slate-800/90 border border-slate-700/70 shadow-sm shrink-0"
+          className="rounded-2xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/70 shadow-xs shrink-0"
           style={{
             margin: '12px 14px',
             padding: '10px 12px',
@@ -240,12 +240,12 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
               {currentAdmin.fullNameAr[0]}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="font-black text-xs text-white truncate">
+              <div className="font-black text-xs text-slate-900 dark:text-white truncate">
                 {currentAdmin.fullNameAr}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className={`w-1.5 h-1.5 rounded-full ${roleConfig[currentRole].dotClass}`} />
-                <span className="text-[10px] font-bold text-slate-300 truncate">
+                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 truncate">
                   {language === 'ar' ? roleConfig[currentRole].labelAr : language === 'fr' ? roleConfig[currentRole].labelFr : roleConfig[currentRole].labelEn}
                 </span>
               </div>
@@ -253,8 +253,8 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           </div>
 
           {/* Quick Interactive Role Switcher Pill */}
-          <div className="mt-2.5 pt-2 border-t border-slate-700/70 flex items-center justify-between text-[10px]">
-            <span className="text-slate-400 font-bold">
+          <div className="mt-2.5 pt-2 border-t border-slate-200/80 dark:border-slate-700/70 flex items-center justify-between text-[10px]">
+            <span className="text-slate-500 dark:text-slate-400 font-bold">
               {language === 'ar' ? 'معاينة دور:' : language === 'fr' ? 'Tester:' : 'Preview:'}
             </span>
             <div className="flex gap-1">
@@ -262,7 +262,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                 type="button"
                 onClick={() => switchRole('super_admin')}
                 className={`px-1.5 py-0.5 rounded text-[9px] font-bold cursor-pointer transition-colors ${
-                  currentRole === 'super_admin' ? 'bg-purple-600 text-white' : 'bg-slate-700 text-slate-300 hover:text-white'
+                  currentRole === 'super_admin' ? 'bg-purple-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:text-white'
                 }`}
                 title="Super Admin"
               >
@@ -272,7 +272,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                 type="button"
                 onClick={() => switchRole('administrator')}
                 className={`px-1.5 py-0.5 rounded text-[9px] font-bold cursor-pointer transition-colors ${
-                  currentRole === 'administrator' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:text-white'
+                  currentRole === 'administrator' ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:text-white'
                 }`}
                 title="Admin"
               >
@@ -282,7 +282,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                 type="button"
                 onClick={() => switchRole('teacher')}
                 className={`px-1.5 py-0.5 rounded text-[9px] font-bold cursor-pointer transition-colors ${
-                  currentRole === 'teacher' ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-slate-300 hover:text-white'
+                  currentRole === 'teacher' ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:text-white'
                 }`}
                 title="Teacher (Sarah Benali)"
               >
@@ -300,7 +300,7 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
 
             return (
               <div key={catIdx}>
-                <div className="px-2.5 text-[10px] font-black text-slate-400/80 uppercase tracking-wider mb-1.5">
+                <div className="px-2.5 text-[10px] font-black text-slate-400 dark:text-slate-400/80 uppercase tracking-wider mb-1.5">
                   {language === 'ar' ? cat.titleAr : language === 'fr' ? cat.titleFr : cat.titleEn}
                 </div>
 
@@ -316,15 +316,22 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                           setActiveTab(item.key);
                           if (onCloseMobile) onCloseMobile();
                         }}
-                        className={`w-full flex items-center justify-between rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                        className={`w-full flex items-center justify-between rounded-xl font-bold text-xs transition-all cursor-pointer group ${
                           isActive
-                            ? 'bg-purple-600 text-white shadow-md'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800/80'
+                            ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80'
                         }`}
                         style={{ padding: '8px 12px' }}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <Icon size={17} className={isActive ? 'text-white shrink-0' : 'text-slate-400 shrink-0'} />
+                          <Icon
+                            size={17}
+                            className={
+                              isActive
+                                ? 'text-white shrink-0'
+                                : 'text-slate-400 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white shrink-0'
+                            }
+                          />
                           <span className="truncate">
                             {language === 'ar' ? item.labelAr : language === 'fr' ? item.labelFr : item.labelEn}
                           </span>
@@ -346,18 +353,18 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
       </div>
 
       {/* 4. Bottom Footer Link */}
-      <div className="p-4 border-t border-slate-800 shrink-0">
+      <div className="p-4 border-t border-slate-200/80 dark:border-slate-800 shrink-0">
         <Link
           href="/"
-          className="w-full py-2.5 px-3 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold flex items-center justify-between transition-colors cursor-pointer"
+          className="w-full py-2.5 px-3 rounded-xl bg-slate-100/90 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold flex items-center justify-between transition-colors cursor-pointer border border-slate-200/60 dark:border-transparent shadow-2xs"
         >
           <div className="flex items-center gap-2">
-            <School size={16} className="text-purple-400" />
+            <School size={16} className="text-purple-600 dark:text-purple-400" />
             <span>
               {language === 'ar' ? 'بوابة أولياء الأمور' : language === 'fr' ? 'Portail Parents' : 'Parent Portal'}
             </span>
           </div>
-          <ExternalLink size={14} className="text-slate-500" />
+          <ExternalLink size={14} className="text-slate-400 dark:text-slate-500" />
         </Link>
       </div>
     </aside>
