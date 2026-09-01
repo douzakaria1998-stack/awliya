@@ -57,6 +57,12 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
   const [parentEmail, setParentEmail] = useState(parent.email);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  React.useEffect(() => {
+    setParentName(parent.fullNameAr);
+    setParentPhone(parent.phone);
+    setParentEmail(parent.email);
+  }, [parent.fullNameAr, parent.phone, parent.email]);
+
   const handleSaveParent = (e: React.FormEvent) => {
     e.preventDefault();
     updateParent({

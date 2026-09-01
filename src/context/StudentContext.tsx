@@ -162,22 +162,37 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    const combinedParentsMap = new Map<string, AdminParent>();
+    mockAdminParents.forEach((p) => combinedParentsMap.set(p.id, p));
     const storedAdminParents = getItem<AdminParent[]>('myschool_admin_parents_v2') || [];
-    const allAdminParents = [...storedAdminParents, ...mockAdminParents];
+    storedAdminParents.forEach((p) => combinedParentsMap.set(p.id, p));
+    const allAdminParents = Array.from(combinedParentsMap.values());
+
+    const cleanActivePhone = (activeParent.phone || '').replace(/[\s\-+()]/g, '');
+    const cleanActiveEmail = (activeParent.email || '').toLowerCase().trim();
+    const cleanActiveNameAr = (activeParent.fullNameAr || '').trim();
 
     // Match exact parent record in admin database
     const currentParentRecord =
       storedAdminParents.find((p) => p.id === activeParent.id) ||
-      allAdminParents.find(
-        (p) =>
+      allAdminParents.find((p) => {
+        const pPhone = (p.phone || '').replace(/[\s\-+()]/g, '');
+        const pEmail = (p.email || '').toLowerCase().trim();
+        const pNameAr = (p.fullNameAr || '').trim();
+        return (
           p.id === activeParent.id ||
-          (activeParent.email && p.email?.toLowerCase().trim() === activeParent.email?.toLowerCase().trim()) ||
-          (activeParent.phone && p.phone?.replace(/\s/g, '') === activeParent.phone?.replace(/\s/g, ''))
-      ) ||
+          (cleanActiveEmail && pEmail === cleanActiveEmail) ||
+          (cleanActivePhone && cleanActivePhone.length > 5 && (pPhone.includes(cleanActivePhone) || cleanActivePhone.includes(pPhone))) ||
+          (cleanActiveNameAr && pNameAr === cleanActiveNameAr)
+        );
+      }) ||
       activeParent;
 
+    const combinedAdminStudentsMap = new Map<string, AdminStudent>();
+    mockAdminStudents.forEach((st) => combinedAdminStudentsMap.set(st.id, st));
     const storedAdminStudents = getItem<AdminStudent[]>('myschool_admin_students_v2') || [];
-    const allAdminStudents = storedAdminStudents.length > 0 ? storedAdminStudents : mockAdminStudents;
+    storedAdminStudents.forEach((st) => combinedAdminStudentsMap.set(st.id, st));
+    const allAdminStudents = Array.from(combinedAdminStudentsMap.values());
 
     // Strict set of linked student IDs for this parent
     const parentLinkedIds = new Set<string>(currentParentRecord.linkedStudentIds || []);
