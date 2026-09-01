@@ -126,11 +126,15 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
             {/* 2. Account Login Credentials Card */}
             <div
               className="rounded-3xl bg-gradient-to-r from-purple-50/90 via-indigo-50/60 to-purple-50/90 dark:from-purple-950/50 dark:via-indigo-950/40 dark:to-purple-950/50 border border-purple-200/90 dark:border-purple-800/70 shadow-xs"
-              style={{ padding: '24px 28px' }}
+              style={{ padding: '26px 30px' }}
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              {/* Header row with Title and Copy Full Credentials */}
+              <div
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                style={{ marginBottom: '20px' }}
+              >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-xs shrink-0">
                     <Key size={18} />
                   </div>
                   <div>
@@ -159,19 +163,28 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                       setTimeout(() => setIsFullCopied(false), 2000);
                     }
                   }}
-                  className={`h-10 px-4 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap ${
+                  className={`rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap ${
                     isFullCopied
                       ? 'bg-emerald-600 border-emerald-600 text-white'
                       : 'bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/60 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:scale-105 active:scale-95'
                   }`}
+                  style={{ height: '42px', padding: '0 18px' }}
                 >
-                  {isFullCopied ? <Check size={14} /> : <ShieldCheck size={14} />}
+                  {isFullCopied ? <Check size={15} /> : <ShieldCheck size={15} />}
                   <span>{isFullCopied ? (language === 'ar' ? 'تم نسخ كامل البيانات' : 'Credentials Copied!') : (language === 'ar' ? 'نسخ بيانات الدخول كاملة' : 'Copy Full Credentials')}</span>
                 </button>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
-                <div className="flex-1 flex items-center gap-2.5 bg-white dark:bg-slate-900 border border-purple-200/90 dark:border-purple-800 rounded-xl px-4 h-11 shadow-2xs">
+              {/* Password field and action buttons row */}
+              <div
+                className="flex flex-col sm:flex-row items-stretch sm:items-center"
+                style={{ gap: '12px' }}
+              >
+                {/* Password display pill */}
+                <div
+                  className="flex-1 flex items-center gap-3 bg-white dark:bg-slate-900 border border-purple-200/90 dark:border-purple-800 rounded-xl shadow-2xs"
+                  style={{ height: '46px', padding: '0 16px' }}
+                >
                   <span className="text-xs text-slate-400 font-bold shrink-0">
                     {language === 'ar' ? 'كلمة المرور:' : 'Password:'}
                   </span>
@@ -179,17 +192,17 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                     {showPassword ? (parent.password || 'Awliya@2026') : '••••••••••••'}
                   </span>
 
-                  {/* Show/Hide */}
+                  {/* Show/Hide Toggle */}
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors cursor-pointer p-1 shrink-0"
+                    className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors cursor-pointer p-1.5 shrink-0 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
 
-                {/* Copy Single Password */}
+                {/* Copy Single Password Button */}
                 <button
                   type="button"
                   onClick={() => {
@@ -200,17 +213,18 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                       setTimeout(() => setIsCopied(false), 2000);
                     }
                   }}
-                  className={`h-11 px-4 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer shrink-0 whitespace-nowrap ${
+                  className={`rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                     isCopied
                       ? 'bg-emerald-600 border-emerald-600 text-white'
                       : 'bg-purple-600 hover:bg-purple-700 border-purple-600 text-white shadow-xs hover:scale-105 active:scale-95'
                   }`}
+                  style={{ height: '46px', padding: '0 18px' }}
                 >
-                  {isCopied ? <Check size={14} /> : <Copy size={14} />}
+                  {isCopied ? <Check size={15} /> : <Copy size={15} />}
                   <span>{isCopied ? (language === 'ar' ? 'تم النسخ' : 'Copied') : (language === 'ar' ? 'نسخ الرمز' : 'Copy')}</span>
                 </button>
 
-                {/* Regenerate Password */}
+                {/* Regenerate Password Button */}
                 <button
                   type="button"
                   onClick={() => {
@@ -219,9 +233,10 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                     setIsCopied(false);
                   }}
                   title={language === 'ar' ? 'توليد وتعيين كلمة مرور جديدة تلقائياً' : 'Auto generate and set new password'}
-                  className="h-11 px-4 bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/50 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0 whitespace-nowrap shadow-2xs"
+                  className="bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/50 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0 whitespace-nowrap shadow-2xs"
+                  style={{ height: '46px', padding: '0 18px' }}
                 >
-                  <RefreshCw size={14} />
+                  <RefreshCw size={15} />
                   <span>{language === 'ar' ? 'توليد كلمة جديدة' : 'Reset Password'}</span>
                 </button>
               </div>
