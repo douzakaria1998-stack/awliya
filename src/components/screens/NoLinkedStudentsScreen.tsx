@@ -61,13 +61,15 @@ export function NoLinkedStudentsScreen() {
             </div>
           </div>
 
-          <Link
-            href="/admin"
-            className="rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md transition-all cursor-pointer shrink-0 px-5 py-3 hover:scale-105 active:scale-95"
+          <a
+            href="https://wa.me/"
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md transition-all cursor-pointer shrink-0 px-5 py-3 hover:scale-105 active:scale-95"
           >
-            <School size={16} />
-            <span>{language === 'ar' ? 'لوحة الإدارة (Back Office)' : 'Admin Back Office'}</span>
-          </Link>
+            <MessageCircle size={16} />
+            <span>{language === 'ar' ? 'تواصل مع الإدارة عبر واتساب' : 'Contact Support via WhatsApp'}</span>
+          </a>
         </div>
       </div>
 
@@ -130,27 +132,19 @@ export function NoLinkedStudentsScreen() {
         </h3>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-lg mx-auto leading-relaxed mb-6">
           {language === 'ar'
-            ? 'عندما تقوم إدارة المدرسة بربط الطلاب أو تسجيل أبنائك من لوحة التحكم Back Office، ستظهر هنا جميع الإحصائيات الأكاديمية، الحضور والغياب، الواجبات المنزلية، والتقييمات تلقائياً.'
-            : 'When the administration registers or links your children from the Back Office, all academic indicators, attendance, homework, and assessments will automatically appear here.'}
+            ? 'عندما تقوم إدارة المدرسة بربط الطلاب أو تسجيل أبنائك من لوحة التحكم، ستظهر هنا جميع الإحصائيات الأكاديمية، الحضور والغياب، الواجبات المنزلية، والتقييمات تلقائياً.'
+            : 'When the administration registers or links your children, all academic indicators, attendance, homework, and assessments will automatically appear here.'}
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/admin"
-            className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-xs cursor-pointer"
-          >
-            <School size={14} />
-            <span>{language === 'ar' ? 'الذهاب إلى لوحة الإدارة لربط طالب' : 'Go to Admin to Link a Student'}</span>
-          </Link>
-
           <a
             href="https://wa.me/"
             target="_blank"
             rel="noreferrer"
-            className="px-5 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all flex items-center gap-2 shadow-2xs"
+            className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-xs cursor-pointer hover:scale-105"
           >
-            <MessageCircle size={14} className="text-emerald-500" />
-            <span>{language === 'ar' ? 'تواصل مع إدارة المدرسة' : 'Contact Administration'}</span>
+            <MessageCircle size={15} />
+            <span>{language === 'ar' ? 'تواصل مع إدارة المدرسة للمتابعة' : 'Contact School Administration'}</span>
           </a>
         </div>
       </div>

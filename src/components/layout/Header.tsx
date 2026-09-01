@@ -575,17 +575,8 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                 )}
                 </div>
 
-                {/* Direct Link to Control Panel (/admin) & Logout */}
-                <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
-                  <Link
-                    href="/admin"
-                    onClick={() => setIsProfileOpen(false)}
-                    className="w-full h-10 px-3 rounded-xl bg-purple-50 hover:bg-purple-100/80 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs"
-                  >
-                    <Shield size={14} className="text-purple-600 dark:text-purple-400" />
-                    <span>{t.adminPortalLink}</span>
-                  </Link>
-
+                {/* Logout Button */}
+                <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800">
                   <button
                     type="button"
                     onClick={() => {
