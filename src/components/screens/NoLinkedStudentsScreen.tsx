@@ -75,42 +75,58 @@ export function NoLinkedStudentsScreen() {
       {/* 2. Registered Parent Profile Card */}
       <div
         className="rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs"
-        style={{ padding: '28px 32px' }}
+        style={{ padding: '32px 36px' }}
       >
-        <h2 className="text-sm font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
-          <span>{language === 'ar' ? 'بيانات حساب ولي الأمر المسجلة:' : 'Registered Parent Account Information:'}</span>
-        </h2>
+        <div className="flex items-center gap-2.5 mb-6">
+          <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
+            <CheckCircle2 size={16} />
+          </div>
+          <h2 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+            {language === 'ar' ? 'بيانات حساب ولي الأمر المسجلة' : 'Registered Parent Account Information'}
+          </h2>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-center">
-            <span className="text-[11px] font-bold text-slate-400 block mb-1.5 flex items-center gap-1.5">
-              <Mail size={13} className="text-slate-400 shrink-0" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Email Address */}
+          <div
+            className="rounded-2xl bg-slate-50/90 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-center transition-all hover:border-purple-300 dark:hover:border-purple-800"
+            style={{ padding: '18px 22px' }}
+          >
+            <div className="flex items-center gap-2 text-slate-400 dark:text-slate-400 text-xs font-bold mb-2">
+              <Mail size={15} className="text-purple-600 dark:text-purple-400 shrink-0" />
               <span>{language === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}</span>
-            </span>
-            <span className="text-xs sm:text-sm font-mono font-bold text-slate-800 dark:text-slate-200 truncate block">
+            </div>
+            <div className="text-xs sm:text-sm font-mono font-black text-slate-900 dark:text-white truncate">
               {parent?.email || '—'}
-            </span>
+            </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-center">
-            <span className="text-[11px] font-bold text-slate-400 block mb-1.5 flex items-center gap-1.5">
-              <Phone size={13} className="text-slate-400 shrink-0" />
+          {/* Phone Number */}
+          <div
+            className="rounded-2xl bg-slate-50/90 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-center transition-all hover:border-purple-300 dark:hover:border-purple-800"
+            style={{ padding: '18px 22px' }}
+          >
+            <div className="flex items-center gap-2 text-slate-400 dark:text-slate-400 text-xs font-bold mb-2">
+              <Phone size={15} className="text-blue-600 dark:text-blue-400 shrink-0" />
               <span>{language === 'ar' ? 'رقم الهاتف' : 'Phone Number'}</span>
-            </span>
-            <span className="text-xs sm:text-sm font-mono font-bold text-slate-800 dark:text-slate-200 truncate block" dir="ltr">
+            </div>
+            <div className="text-xs sm:text-sm font-mono font-black text-slate-900 dark:text-white truncate" dir="ltr">
               {parent?.phone || '—'}
-            </span>
+            </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-center">
-            <span className="text-[11px] font-bold text-slate-400 block mb-1.5 flex items-center gap-1.5">
-              <MapPin size={13} className="text-slate-400 shrink-0" />
-              <span>{language === 'ar' ? 'العنوان السكني' : 'Address'}</span>
-            </span>
-            <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 truncate block">
+          {/* Residential Address */}
+          <div
+            className="rounded-2xl bg-slate-50/90 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-center transition-all hover:border-purple-300 dark:hover:border-purple-800"
+            style={{ padding: '18px 22px' }}
+          >
+            <div className="flex items-center gap-2 text-slate-400 dark:text-slate-400 text-xs font-bold mb-2">
+              <MapPin size={15} className="text-rose-600 dark:text-rose-400 shrink-0" />
+              <span>{language === 'ar' ? 'العنوان السكني' : 'Residential Address'}</span>
+            </div>
+            <div className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate">
               {parent?.address || (language === 'ar' ? 'الجزائر العاصمة' : 'Algiers, Algeria')}
-            </span>
+            </div>
           </div>
         </div>
       </div>
