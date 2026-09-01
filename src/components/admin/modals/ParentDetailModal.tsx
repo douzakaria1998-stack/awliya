@@ -423,20 +423,22 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5 shrink-0">
+                    <div className="flex items-center gap-3 shrink-0">
                       <button
                         type="button"
                         onClick={() => setSelectedStudentToLink('')}
-                        className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white cursor-pointer hover:bg-white/40"
+                        className="rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white cursor-pointer hover:bg-white/50 dark:hover:bg-slate-800/60 transition-colors whitespace-nowrap"
+                        style={{ height: '44px', padding: '0 18px', minWidth: 'max-content' }}
                       >
                         {language === 'ar' ? 'تغيير' : 'Change'}
                       </button>
                       <button
                         type="button"
                         onClick={handleLinkStudent}
-                        className="h-10 px-5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-black transition-all shadow-md cursor-pointer hover:scale-105 active:scale-95 whitespace-nowrap"
+                        className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-black transition-all shadow-md cursor-pointer hover:scale-105 active:scale-95 whitespace-nowrap flex items-center justify-center"
+                        style={{ height: '44px', padding: '0 24px', minWidth: 'max-content' }}
                       >
-                        {language === 'ar' ? 'تأكيد الربط الآن' : 'Confirm Link Now'}
+                        <span>{language === 'ar' ? 'تأكيد الربط الآن' : 'Confirm Link Now'}</span>
                       </button>
                     </div>
                   </div>
