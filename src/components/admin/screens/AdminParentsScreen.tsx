@@ -21,6 +21,7 @@ import {
   Eye,
   EyeOff,
   Sparkles,
+  UserPlus,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -274,89 +275,96 @@ export function AdminParentsScreen() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div
             className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up"
-            style={{ padding: '28px 32px' }}
+            style={{ padding: '22px 26px' }}
           >
             <div
               className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800"
-              style={{ paddingBottom: '16px', marginBottom: '20px' }}
+              style={{ paddingBottom: '12px', marginBottom: '16px' }}
             >
               <div>
-                <h3 className="font-black text-xl text-slate-900 dark:text-white">
+                <h3 className="font-black text-lg text-slate-900 dark:text-white">
                   {language === 'ar' ? 'إضافة ولي أمر جديد' : 'Add New Parent'}
                 </h3>
-                <p className="text-xs text-slate-400 font-medium mt-1">
+                <p className="text-[11px] text-slate-400 font-medium mt-0.5">
                   {language === 'ar' ? 'تسجيل بيانات ولي الأمر في المنظومة' : 'Register parent credentials in the system'}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsAddParentOpen(false)}
-                className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
               >
-                <X size={17} />
+                <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateParent} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} className="text-xs font-bold">
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold" style={{ marginBottom: '8px' }}>
-                  {language === 'ar' ? 'الاسم بالعربية *' : 'Arabic Name *'}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newNameAr}
-                  onChange={(e) => setNewNameAr(e.target.value)}
-                  placeholder="مثال: عبد الرحمن بن سالم"
-                  className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm text-slate-900 dark:text-white"
-                />
+            <form onSubmit={handleCreateParent} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }} className="text-xs font-bold">
+              {/* Row 1: Names (Arabic & English) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 text-[11px] font-bold" style={{ marginBottom: '5px' }}>
+                    {language === 'ar' ? 'الاسم بالعربية *' : 'Arabic Name *'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newNameAr}
+                    onChange={(e) => setNewNameAr(e.target.value)}
+                    placeholder="مثال: عبد الرحمن بن سالم"
+                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs text-slate-900 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 text-[11px] font-bold" style={{ marginBottom: '5px' }}>
+                    {language === 'ar' ? 'الاسم بالإنجليزية' : 'English Name'}
+                  </label>
+                  <input
+                    type="text"
+                    value={newNameEn}
+                    onChange={(e) => setNewNameEn(e.target.value)}
+                    placeholder="Ex: Abderrahmane Bensalem"
+                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs text-slate-900 dark:text-white"
+                    dir="ltr"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold" style={{ marginBottom: '8px' }}>
-                  {language === 'ar' ? 'الاسم بالإنجليزية' : 'English Name'}
-                </label>
-                <input
-                  type="text"
-                  value={newNameEn}
-                  onChange={(e) => setNewNameEn(e.target.value)}
-                  placeholder="Ex: Abderrahmane Bensalem"
-                  className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm text-slate-900 dark:text-white"
-                  dir="ltr"
-                />
+              {/* Row 2: Phone & Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 text-[11px] font-bold" style={{ marginBottom: '5px' }}>
+                    {language === 'ar' ? 'رقم الهاتف *' : 'Phone Number *'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newPhone}
+                    onChange={(e) => setNewPhone(e.target.value)}
+                    placeholder="+213 550 000 000"
+                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs text-slate-900 dark:text-white"
+                    dir="ltr"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 text-[11px] font-bold" style={{ marginBottom: '5px' }}>
+                    {language === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}
+                  </label>
+                  <input
+                    type="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    placeholder="parent@example.com"
+                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs text-slate-900 dark:text-white"
+                    dir="ltr"
+                  />
+                </div>
               </div>
 
+              {/* Row 3: Address */}
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold" style={{ marginBottom: '8px' }}>
-                  {language === 'ar' ? 'رقم الهاتف *' : 'Phone Number *'}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newPhone}
-                  onChange={(e) => setNewPhone(e.target.value)}
-                  placeholder="+213 550 000 000"
-                  className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm text-slate-900 dark:text-white"
-                  dir="ltr"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold" style={{ marginBottom: '8px' }}>
-                  {language === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}
-                </label>
-                <input
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="parent@example.com"
-                  className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm text-slate-900 dark:text-white"
-                  dir="ltr"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold" style={{ marginBottom: '8px' }}>
+                <label className="block text-slate-700 dark:text-slate-300 text-[11px] font-bold" style={{ marginBottom: '5px' }}>
                   {language === 'ar' ? 'العنوان السكني' : 'Residential Address'}
                 </label>
                 <input
@@ -364,14 +372,14 @@ export function AdminParentsScreen() {
                   value={newAddress}
                   onChange={(e) => setNewAddress(e.target.value)}
                   placeholder="الجزائر العاصمة"
-                  className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm text-slate-900 dark:text-white"
+                  className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs text-slate-900 dark:text-white"
                 />
               </div>
 
-              {/* Password Field (Auto-Generated) */}
+              {/* Row 4: Password Field (Auto-Generated) */}
               <div>
-                <div className="flex items-center justify-between" style={{ marginBottom: '8px' }}>
-                  <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold">
+                <div className="flex items-center justify-between" style={{ marginBottom: '5px' }}>
+                  <label className="block text-slate-700 dark:text-slate-300 text-[11px] font-bold">
                     {language === 'ar' ? 'كلمة المرور للحساب *' : 'Account Password *'}
                   </label>
                   <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded-md border border-purple-200/60 dark:border-purple-800/60 flex items-center gap-1">
@@ -380,7 +388,7 @@ export function AdminParentsScreen() {
                   </span>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <div className="relative flex-1">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -388,17 +396,13 @@ export function AdminParentsScreen() {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Awliya@2026"
-                      className="w-full h-11 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm font-bold text-slate-900 dark:text-white"
-                      style={{
-                        paddingLeft: '16px',
-                        paddingRight: '16px',
-                      }}
+                      className="w-full h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs font-bold text-slate-900 dark:text-white px-3"
                       dir="ltr"
                     />
                   </div>
 
                   {/* Actions Row */}
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     {/* Regenerate Button */}
                     <button
                       type="button"
@@ -408,9 +412,9 @@ export function AdminParentsScreen() {
                         setIsCopied(false);
                       }}
                       title={language === 'ar' ? 'توليد كلمة مرور جديدة' : 'Generate New Password'}
-                      className="w-11 h-11 rounded-xl bg-white dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-purple-900/40 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-purple-600 flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-2xs shrink-0"
+                      className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-purple-900/40 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-purple-600 flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-2xs shrink-0"
                     >
-                      <RefreshCw size={15} />
+                      <RefreshCw size={14} />
                     </button>
 
                     {/* Show/Hide Toggle */}
@@ -418,9 +422,9 @@ export function AdminParentsScreen() {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       title={showPassword ? (language === 'ar' ? 'إخفاء' : 'Hide') : (language === 'ar' ? 'إظهار' : 'Show')}
-                      className="w-11 h-11 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
+                      className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
                     >
-                      {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                      {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                     </button>
 
                     {/* Copy Button */}
@@ -440,26 +444,28 @@ export function AdminParentsScreen() {
                           : 'bg-purple-600 hover:bg-purple-700 border-purple-600 text-white hover:scale-105 active:scale-95'
                       }`}
                       style={{
-                        height: '44px',
-                        paddingLeft: '18px',
-                        paddingRight: '18px',
-                        gap: '8px',
+                        height: '40px',
+                        paddingLeft: '16px',
+                        paddingRight: '16px',
+                        gap: '6px',
                         minWidth: 'max-content',
                       }}
                     >
-                      {isCopied ? <Check size={14} className="shrink-0" /> : <Copy size={14} className="shrink-0" />}
+                      {isCopied ? <Check size={13} className="shrink-0" /> : <Copy size={13} className="shrink-0" />}
                       <span className="whitespace-nowrap">{isCopied ? (language === 'ar' ? 'تم النسخ' : 'Copied') : (language === 'ar' ? 'نسخ' : 'Copy')}</span>
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div style={{ paddingTop: '8px' }}>
+              {/* Submit Button */}
+              <div style={{ paddingTop: '6px' }}>
                 <button
                   type="submit"
-                  className="w-full h-12 bg-purple-600 hover:bg-purple-700 active:scale-[0.99] text-white font-bold rounded-xl shadow-md transition-all cursor-pointer text-sm"
+                  className="w-full h-11 bg-purple-600 hover:bg-purple-700 active:scale-[0.99] text-white font-bold rounded-xl shadow-md transition-all cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-2"
                 >
-                  {language === 'ar' ? 'حفظ ولي الأمر' : 'Save Parent'}
+                  <UserPlus size={16} />
+                  <span>{language === 'ar' ? 'حفظ ولي الأمر' : 'Save Parent'}</span>
                 </button>
               </div>
             </form>
