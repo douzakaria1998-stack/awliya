@@ -247,87 +247,108 @@ export function AdminParentsScreen() {
       {/* Modal: Add New Parent */}
       {isAddParentOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-5 animate-fade-in-up">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="font-black text-lg text-slate-900 dark:text-white">
-                {language === 'ar' ? 'إضافة ولي أمر جديد' : 'Add New Parent'}
-              </h3>
+          <div
+            className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up"
+            style={{ padding: '28px 32px' }}
+          >
+            <div
+              className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800"
+              style={{ paddingBottom: '16px', marginBottom: '20px' }}
+            >
+              <div>
+                <h3 className="font-black text-xl text-slate-900 dark:text-white">
+                  {language === 'ar' ? 'إضافة ولي أمر جديد' : 'Add New Parent'}
+                </h3>
+                <p className="text-xs text-slate-400 font-medium mt-1">
+                  {language === 'ar' ? 'تسجيل بيانات ولي الأمر في المنظومة' : 'Register parent credentials in the system'}
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsAddParentOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 cursor-pointer"
+                className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
               >
-                <X size={16} />
+                <X size={17} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateParent} className="space-y-4 text-xs font-bold">
+            <form onSubmit={handleCreateParent} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} className="text-xs font-bold">
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 mb-1">الاسم بالعربية *</label>
+                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold" style={{ marginBottom: '8px' }}>
+                  {language === 'ar' ? 'الاسم بالعربية *' : 'Arabic Name *'}
+                </label>
                 <input
                   type="text"
                   required
                   value={newNameAr}
                   onChange={(e) => setNewNameAr(e.target.value)}
                   placeholder="مثال: عبد الرحمن بن سالم"
-                  className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                  className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 mb-1">الاسم بالإنجليزية</label>
+                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold" style={{ marginBottom: '8px' }}>
+                  {language === 'ar' ? 'الاسم بالإنجليزية' : 'English Name'}
+                </label>
                 <input
                   type="text"
                   value={newNameEn}
                   onChange={(e) => setNewNameEn(e.target.value)}
                   placeholder="Ex: Abderrahmane Bensalem"
-                  className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono"
+                  className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm text-slate-900 dark:text-white"
                   dir="ltr"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 mb-1">رقم الهاتف *</label>
+                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold" style={{ marginBottom: '8px' }}>
+                  {language === 'ar' ? 'رقم الهاتف *' : 'Phone Number *'}
+                </label>
                 <input
                   type="text"
                   required
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
                   placeholder="+213 550 000 000"
-                  className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono"
+                  className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm text-slate-900 dark:text-white"
                   dir="ltr"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 mb-1">البريد الإلكتروني</label>
+                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold" style={{ marginBottom: '8px' }}>
+                  {language === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}
+                </label>
                 <input
                   type="email"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="parent@example.com"
-                  className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono"
+                  className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm text-slate-900 dark:text-white"
                   dir="ltr"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 mb-1">العنوان السكني</label>
+                <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold" style={{ marginBottom: '8px' }}>
+                  {language === 'ar' ? 'العنوان السكني' : 'Residential Address'}
+                </label>
                 <input
                   type="text"
                   value={newAddress}
                   onChange={(e) => setNewAddress(e.target.value)}
                   placeholder="الجزائر العاصمة"
-                  className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                  className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm text-slate-900 dark:text-white"
                 />
               </div>
 
-              <div className="pt-2">
+              <div style={{ paddingTop: '8px' }}>
                 <button
                   type="submit"
-                  className="w-full h-11 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer text-sm"
+                  className="w-full h-12 bg-purple-600 hover:bg-purple-700 active:scale-[0.99] text-white font-bold rounded-xl shadow-md transition-all cursor-pointer text-sm"
                 >
-                  حفظ ولي الأمر
+                  {language === 'ar' ? 'حفظ ولي الأمر' : 'Save Parent'}
                 </button>
               </div>
             </form>

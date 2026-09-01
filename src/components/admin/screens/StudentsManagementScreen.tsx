@@ -285,9 +285,8 @@ export function StudentsManagementScreen() {
             />
             <Search
               size={16}
-              className={`absolute top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none ${
-                isRTL ? 'right-3.5' : 'left-3.5'
-              }`}
+              className={`absolute top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none ${isRTL ? 'right-3.5' : 'left-3.5'
+                }`}
             />
           </div>
 
@@ -496,8 +495,8 @@ export function StudentsManagementScreen() {
                           st.attendanceRate >= 85
                             ? 'text-emerald-600 dark:text-emerald-400'
                             : st.attendanceRate >= 75
-                            ? 'text-amber-600 dark:text-amber-400'
-                            : 'text-rose-600 dark:text-rose-400'
+                              ? 'text-amber-600 dark:text-amber-400'
+                              : 'text-rose-600 dark:text-rose-400'
                         }
                       >
                         {st.attendanceRate}%
@@ -514,13 +513,12 @@ export function StudentsManagementScreen() {
                     {/* Status */}
                     <td className="py-3.5 px-4 text-center">
                       <span
-                        className={`text-xs font-bold rounded-full ${
-                          st.status === 'active'
+                        className={`text-xs font-bold rounded-full ${st.status === 'active'
                             ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
                             : st.status === 'archived'
-                            ? 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
-                            : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
-                        }`}
+                              ? 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                              : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
+                          }`}
                         style={{ padding: '5px 12px' }}
                       >
                         {st.status === 'active' ? 'نشط' : st.status === 'archived' ? 'مؤرشف' : 'موقوف'}
@@ -749,11 +747,10 @@ export function StudentsManagementScreen() {
                     <button
                       type="button"
                       onClick={() => setParentLinkMode('existing')}
-                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                        parentLinkMode === 'existing'
+                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${parentLinkMode === 'existing'
                           ? 'bg-purple-600 text-white shadow-xs scale-[1.01]'
                           : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-                      }`}
+                        }`}
                       style={{ padding: '6px 12px' }}
                     >
                       <UserCheck size={13} />
@@ -762,11 +759,10 @@ export function StudentsManagementScreen() {
                     <button
                       type="button"
                       onClick={() => setParentLinkMode('new')}
-                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                        parentLinkMode === 'new'
+                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${parentLinkMode === 'new'
                           ? 'bg-purple-600 text-white shadow-xs scale-[1.01]'
                           : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-                      }`}
+                        }`}
                       style={{ padding: '6px 12px' }}
                     >
                       <UserPlus size={13} />
@@ -797,17 +793,15 @@ export function StudentsManagementScreen() {
                       />
                       <Search
                         size={17}
-                        className={`absolute top-1/2 -translate-y-1/2 text-purple-600 ${
-                          isRTL ? 'right-4' : 'left-4'
-                        }`}
+                        className={`absolute top-1/2 -translate-y-1/2 text-purple-600 ${isRTL ? 'right-4' : 'left-4'
+                          }`}
                       />
                       {parentSearchQuery && (
                         <button
                           type="button"
                           onClick={() => setParentSearchQuery('')}
-                          className={`absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer ${
-                            isRTL ? 'left-3.5' : 'right-3.5'
-                          }`}
+                          className={`absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer ${isRTL ? 'left-3.5' : 'right-3.5'
+                            }`}
                         >
                           <X size={15} />
                         </button>
@@ -829,9 +823,8 @@ export function StudentsManagementScreen() {
                                 setSelectedParentId(p.id);
                                 setParentSearchQuery('');
                               }}
-                              className={`p-3 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-950/40 cursor-pointer transition-colors ${
-                                selectedParentId === p.id ? 'bg-purple-50/80 dark:bg-purple-950/60' : ''
-                              }`}
+                              className={`p-3 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-950/40 cursor-pointer transition-colors ${selectedParentId === p.id ? 'bg-purple-50/80 dark:bg-purple-950/60' : ''
+                                }`}
                             >
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 flex items-center justify-center font-black text-xs">
