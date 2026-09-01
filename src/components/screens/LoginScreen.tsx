@@ -152,31 +152,47 @@ export function LoginScreen() {
 
           {isLangOpen && (
             <div
-              className={`absolute top-full mt-2 w-44 bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-xl rounded-2xl p-1.5 z-50 animate-fade-in-up ${
-                isRTL ? 'left-0' : 'right-0'
+              className={`absolute top-full mt-2 min-w-[210px] bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-2xl z-50 animate-fade-in-up ${
+                isRTL ? 'left-0 text-right' : 'right-0 text-left'
               }`}
+              style={{
+                padding: '8px',
+                borderRadius: '20px',
+              }}
             >
-              {languagesList.map((item) => (
-                <button
-                  key={item.code}
-                  type="button"
-                  onClick={() => {
-                    setLanguage(item.code);
-                    setIsLangOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                    language === item.code
-                      ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400'
-                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <img src={item.flagUrl} alt={item.label} className="w-4 h-4 rounded-full object-cover" />
-                    <span>{item.label}</span>
-                  </div>
-                  {language === item.code && <Check size={14} className="text-rose-600 dark:text-rose-400" />}
-                </button>
-              ))}
+              <div className="space-y-1">
+                {languagesList.map((item) => (
+                  <button
+                    key={item.code}
+                    type="button"
+                    onClick={() => {
+                      setLanguage(item.code);
+                      setIsLangOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between text-xs font-bold transition-colors cursor-pointer ${
+                      language === item.code
+                        ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-black'
+                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    }`}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '14px',
+                    }}
+                  >
+                    <span className="flex items-center gap-3">
+                      <img
+                        src={item.flagUrl}
+                        alt={item.label}
+                        className="w-5 h-5 rounded-full object-cover shrink-0 shadow-2xs border border-slate-200 dark:border-slate-700"
+                      />
+                      <span className="font-bold text-xs sm:text-sm">{item.label}</span>
+                    </span>
+                    {language === item.code && (
+                      <Check size={16} className="stroke-[3] shrink-0 text-rose-600 dark:text-rose-400" />
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
