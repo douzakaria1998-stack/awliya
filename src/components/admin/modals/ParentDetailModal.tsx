@@ -253,9 +253,10 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                 <button
                   type="button"
                   onClick={() => setIsLinkingOpen(!isLinkingOpen)}
-                  className="h-10 px-5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer hover:scale-105 active:scale-95 whitespace-nowrap"
+                  className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs flex items-center justify-center gap-2.5 transition-all shadow-xs cursor-pointer hover:scale-105 active:scale-95 whitespace-nowrap shrink-0"
+                  style={{ height: '42px', padding: '0 22px', minWidth: 'max-content' }}
                 >
-                  <Plus size={16} />
+                  <Plus size={16} className="shrink-0" />
                   <span>{language === 'ar' ? 'ربط طالب جديد' : 'Link Student'}</span>
                 </button>
               </div>
