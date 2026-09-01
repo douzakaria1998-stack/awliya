@@ -380,27 +380,25 @@ export function AdminParentsScreen() {
                   </span>
                 </div>
 
-                <div className="relative flex items-center">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Awliya@2026"
-                    className="w-full h-11 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm font-bold text-slate-900 dark:text-white"
-                    style={{
-                      paddingRight: isRTL ? '14px' : '110px',
-                      paddingLeft: isRTL ? '110px' : '14px',
-                    }}
-                    dir="ltr"
-                  />
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Awliya@2026"
+                      className="w-full h-11 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs sm:text-sm font-bold text-slate-900 dark:text-white"
+                      style={{
+                        paddingLeft: '16px',
+                        paddingRight: '16px',
+                      }}
+                      dir="ltr"
+                    />
+                  </div>
 
-                  {/* Actions inside input */}
-                  <div
-                    className={`absolute flex items-center gap-1 ${
-                      isRTL ? 'left-1.5' : 'right-1.5'
-                    }`}
-                  >
+                  {/* Actions Row */}
+                  <div className="flex items-center gap-1.5 shrink-0">
                     {/* Regenerate Button */}
                     <button
                       type="button"
@@ -410,9 +408,9 @@ export function AdminParentsScreen() {
                         setIsCopied(false);
                       }}
                       title={language === 'ar' ? 'توليد كلمة مرور جديدة' : 'Generate New Password'}
-                      className="w-8 h-8 rounded-lg bg-white dark:bg-slate-700 hover:bg-purple-50 dark:hover:bg-purple-900/40 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-purple-600 flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-2xs"
+                      className="w-11 h-11 rounded-xl bg-white dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-purple-900/40 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-purple-600 flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-2xs shrink-0"
                     >
-                      <RefreshCw size={13} />
+                      <RefreshCw size={15} />
                     </button>
 
                     {/* Show/Hide Toggle */}
@@ -420,9 +418,9 @@ export function AdminParentsScreen() {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       title={showPassword ? (language === 'ar' ? 'إخفاء' : 'Hide') : (language === 'ar' ? 'إظهار' : 'Show')}
-                      className="w-8 h-8 rounded-lg bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                      className="w-11 h-11 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
                     >
-                      {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
+                      {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
 
                     {/* Copy Button */}
@@ -436,13 +434,13 @@ export function AdminParentsScreen() {
                         }
                       }}
                       title={language === 'ar' ? 'نسخ كلمة المرور' : 'Copy Password'}
-                      className={`h-8 px-2.5 rounded-lg border flex items-center gap-1 text-[11px] font-bold transition-all cursor-pointer shadow-2xs ${
+                      className={`h-11 px-3.5 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap ${
                         isCopied
                           ? 'bg-emerald-600 border-emerald-600 text-white'
                           : 'bg-purple-600 hover:bg-purple-700 border-purple-600 text-white hover:scale-105 active:scale-95'
                       }`}
                     >
-                      {isCopied ? <Check size={12} /> : <Copy size={12} />}
+                      {isCopied ? <Check size={14} /> : <Copy size={14} />}
                       <span>{isCopied ? (language === 'ar' ? 'تم' : 'Done') : (language === 'ar' ? 'نسخ' : 'Copy')}</span>
                     </button>
                   </div>

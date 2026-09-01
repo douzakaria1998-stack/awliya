@@ -970,12 +970,12 @@ export function StudentsManagementScreen() {
                         </span>
                       </div>
 
-                      <div className="relative flex items-center gap-1">
+                      <div className="flex items-center gap-1.5">
                         <input
                           type={showCustomPassword ? 'text' : 'password'}
                           value={customParentPassword}
                           onChange={(e) => setCustomParentPassword(e.target.value)}
-                          className="flex-1 rounded-lg bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-700 font-mono text-xs font-bold text-slate-900 dark:text-white px-2.5 h-9 focus:outline-none"
+                          className="flex-1 rounded-xl bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-700 font-mono text-xs font-bold text-slate-900 dark:text-white px-3 h-10 focus:outline-none"
                           dir="ltr"
                         />
                         <button
@@ -985,16 +985,16 @@ export function StudentsManagementScreen() {
                             setIsCustomPassCopied(false);
                           }}
                           title={language === 'ar' ? 'توليد كلمة جديدة' : 'Regenerate'}
-                          className="w-9 h-9 bg-white dark:bg-slate-900 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-lg flex items-center justify-center transition-all cursor-pointer"
+                          className="w-10 h-10 bg-white dark:bg-slate-900 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-xl flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0 shadow-2xs"
                         >
-                          <RefreshCw size={13} />
+                          <RefreshCw size={14} />
                         </button>
                         <button
                           type="button"
                           onClick={() => setShowCustomPassword(!showCustomPassword)}
-                          className="w-9 h-9 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-purple-200 dark:border-purple-700 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all cursor-pointer"
+                          className="w-10 h-10 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-purple-200 dark:border-purple-700 text-slate-600 dark:text-slate-300 rounded-xl flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0 shadow-2xs"
                         >
-                          {showCustomPassword ? <EyeOff size={13} /> : <Eye size={13} />}
+                          {showCustomPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                         </button>
                         <button
                           type="button"
@@ -1005,13 +1005,13 @@ export function StudentsManagementScreen() {
                               setTimeout(() => setIsCustomPassCopied(false), 2000);
                             }
                           }}
-                          className={`h-9 px-2.5 rounded-lg border flex items-center gap-1 text-[11px] font-bold transition-all cursor-pointer ${
+                          className={`h-10 px-3 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0 whitespace-nowrap shadow-2xs ${
                             isCustomPassCopied
                               ? 'bg-emerald-600 border-emerald-600 text-white'
-                              : 'bg-purple-600 hover:bg-purple-700 border-purple-600 text-white shadow-xs'
+                              : 'bg-purple-600 hover:bg-purple-700 border-purple-600 text-white'
                           }`}
                         >
-                          {isCustomPassCopied ? <Check size={12} /> : <Copy size={12} />}
+                          {isCustomPassCopied ? <Check size={13} /> : <Copy size={13} />}
                           <span>{isCustomPassCopied ? (language === 'ar' ? 'تم النسخ' : 'Copied') : (language === 'ar' ? 'نسخ' : 'Copy')}</span>
                         </button>
                       </div>
