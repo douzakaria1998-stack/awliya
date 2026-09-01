@@ -33,6 +33,14 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
+                  // Suppress noisy external chrome extension runtime errors from triggering Next.js dev overlay
+                  window.addEventListener('error', function(e) {
+                    if (e.filename && (e.filename.indexOf('chrome-extension:') !== -1 || e.filename.indexOf('moz-extension:') !== -1)) {
+                      e.stopImmediatePropagation();
+                      e.preventDefault();
+                    }
+                  });
+
                   var mode = localStorage.getItem('awliya_theme_mode_v4');
                   var isDark = mode ? mode === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
                   if (isDark) {
