@@ -14,47 +14,38 @@ import {
   ChevronDown,
   Check,
   UserCheck,
-  Sparkles,
   ArrowRight,
-  School,
 } from 'lucide-react';
-import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { InteractiveWaveBackground } from '../ui/InteractiveWaveBackground';
 import { Language } from '@/lib/translations';
-import { Parent } from '@/types';
 
 export function LoginScreen() {
-  const { login, allRegisteredParents } = useAuth();
+  const { login } = useAuth();
   const { theme, isDarkMode, toggleDarkMode } = useTheme();
   const { isRTL, language, setLanguage, t } = useLanguage();
 
-  const [emailOrPhone, setEmailOrPhone] = useState('mohamed.benali@gmail.com');
-  const [password, setPassword] = useState('Awliya@2026');
+  const [emailOrPhone, setEmailOrPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLangOpen, setIsLangOpen] = useState(false);
-  const [isDemoPickerOpen, setIsDemoPickerOpen] = useState(false);
 
   const langRef = useRef<HTMLDivElement>(null);
-  const demoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isLangOpen && langRef.current && !langRef.current.contains(event.target as Node)) {
         setIsLangOpen(false);
       }
-      if (isDemoPickerOpen && demoRef.current && !demoRef.current.contains(event.target as Node)) {
-        setIsDemoPickerOpen(false);
-      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isLangOpen, isDemoPickerOpen]);
+  }, [isLangOpen]);
 
   const languagesList: { code: Language; label: string; flagUrl: string }[] = [
     { code: 'ar', label: 'العربية', flagUrl: 'https://flagcdn.com/w80/sa.png' },
@@ -63,13 +54,6 @@ export function LoginScreen() {
   ];
 
   const currentLangObj = languagesList.find((l) => l.code === language) || languagesList[0];
-
-  const handleSelectParent = (p: Parent) => {
-    setEmailOrPhone(p.email || p.phone);
-    setPassword(p.password || 'Awliya@2026');
-    setErrorMessage('');
-    setIsDemoPickerOpen(false);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,15 +131,6 @@ export function LoginScreen() {
         } z-20 flex items-center gap-2.5`}
       >
         {/* Back Office shortcut */}
-        <Link
-          href="/admin"
-          className="hidden sm:flex items-center gap-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-xs hover:bg-white dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-purple-600 dark:text-purple-400 h-10 px-3.5 shadow-2xs transition-all hover:scale-105"
-          title="Back Office Portal"
-        >
-          <School size={15} />
-          <span>{language === 'ar' ? 'لوحة الإدارة (Back Office)' : 'Admin Portal'}</span>
-        </Link>
-
         {/* Language Switcher */}
         <div ref={langRef} className="relative">
           <button
@@ -244,58 +219,6 @@ export function LoginScreen() {
                 ? 'Bienvenue ! Connectez-vous avec vos identifiants enregistrés'
                 : 'Welcome! Sign in with your registered email and password'}
             </p>
-          </div>
-
-          {/* Quick Select from Backoffice Parents */}
-          <div className="mb-5 relative" ref={demoRef}>
-            <button
-              type="button"
-              onClick={() => setIsDemoPickerOpen(!isDemoPickerOpen)}
-              className="w-full py-2 px-3 rounded-xl bg-purple-50 hover:bg-purple-100/80 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 border border-purple-200/80 dark:border-purple-800/60 text-purple-700 dark:text-purple-300 font-bold text-xs flex items-center justify-between transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Sparkles size={14} className="text-purple-600 dark:text-purple-400 shrink-0" />
-                <span className="truncate">
-                  {language === 'ar' ? 'اختر حساب ولي أمر مسجل للتجربة السريعة' : 'Quick select registered parent account'}
-                </span>
-              </div>
-              <ChevronDown
-                size={14}
-                className={`text-purple-500 shrink-0 transition-transform ${isDemoPickerOpen ? 'rotate-180' : ''}`}
-              />
-            </button>
-
-            {isDemoPickerOpen && (
-              <div
-                className={`absolute top-full mt-2 w-full bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-2xl p-2 z-50 animate-fade-in-up ${
-                  isRTL ? 'right-0 text-right' : 'left-0 text-left'
-                }`}
-              >
-                <div className="text-[10px] font-bold text-slate-400 px-2 py-1 mb-1 border-b border-slate-100 dark:border-slate-700">
-                  {language === 'ar'
-                    ? 'الحسابات المسجلة في الإدارة (Back Office):'
-                    : 'Parents Registered in Back Office:'}
-                </div>
-                <div className="max-h-56 overflow-y-auto space-y-1">
-                  {allRegisteredParents.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => handleSelectParent(p)}
-                      className="w-full p-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-purple-50 dark:hover:bg-purple-950/50 hover:text-purple-700 dark:hover:text-purple-300 flex items-center justify-between transition-colors cursor-pointer"
-                    >
-                      <div className="min-w-0 text-right">
-                        <div className="font-bold text-slate-900 dark:text-white truncate text-xs">{p.fullNameAr}</div>
-                        <div className="text-[11px] text-slate-400 font-mono truncate">{p.email}</div>
-                      </div>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono shrink-0 ml-2">
-                        {p.password || 'Awliya@2026'}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Error alert */}
