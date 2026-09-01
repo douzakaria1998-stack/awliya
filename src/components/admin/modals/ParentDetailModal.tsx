@@ -281,10 +281,11 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
             {/* Link Student Searchable Selection Box */}
             {isLinkingOpen && (
               <div
-                className="rounded-2xl bg-purple-50/90 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 space-y-3.5 animate-fade-in"
-                style={{ padding: '22px 24px' }}
+                className="rounded-3xl bg-purple-50/90 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 animate-fade-in shadow-xs"
+                style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}
               >
-                <div className="flex items-center justify-between">
+                {/* Header row */}
+                <div className="flex items-center justify-between" style={{ marginBottom: '2px' }}>
                   <span className="text-xs font-black text-purple-950 dark:text-purple-200 block">
                     {language === 'ar' ? 'البحث عن طالب لربطه بحساب ولي الأمر:' : 'Search & Select Student to Link:'}
                   </span>
@@ -306,11 +307,11 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                     value={studentSearchTerm}
                     onChange={(e) => setStudentSearchTerm(e.target.value)}
                     placeholder={language === 'ar' ? 'ابدأ بكتابة اسم الطالب، الفوج، أو المستوى...' : 'Type student name, group, or CEFR level to search...'}
-                    className="w-full bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white placeholder:text-slate-400 transition-all focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 shadow-2xs"
+                    className="w-full bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-700 rounded-xl text-xs sm:text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 transition-all focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 shadow-2xs"
                     style={{
-                      height: '46px',
-                      paddingLeft: isRTL ? '40px' : '48px',
-                      paddingRight: isRTL ? '48px' : '40px',
+                      height: '48px',
+                      paddingLeft: isRTL ? '44px' : '50px',
+                      paddingRight: isRTL ? '50px' : '44px',
                     }}
                   />
                   {studentSearchTerm && (
@@ -327,84 +328,96 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
 
                 {/* Filtered Students List: ONLY SHOWN WHEN USER TYPES */}
                 {studentSearchTerm.trim().length > 0 && (
-                  <div className="max-h-52 overflow-y-auto space-y-1.5 rounded-2xl border border-purple-200/90 dark:border-purple-800/70 bg-white dark:bg-slate-900 p-2.5 shadow-sm animate-fade-in">
-                    <div className="px-2 py-1 text-[11px] font-bold text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1 flex items-center justify-between">
+                  <div
+                    className="max-h-56 overflow-y-auto rounded-2xl border border-purple-200/90 dark:border-purple-800/70 bg-white dark:bg-slate-900 shadow-sm animate-fade-in"
+                    style={{ padding: '14px 16px', marginTop: '4px' }}
+                  >
+                    <div
+                      className="text-[11px] font-bold text-slate-400 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between"
+                      style={{ paddingBottom: '10px', marginBottom: '12px' }}
+                    >
                       <span>{language === 'ar' ? 'نتائج البحث المطابقة:' : 'Matching Search Results:'}</span>
                       <span className="font-mono text-purple-600 dark:text-purple-400 font-bold">{filteredAvailableStudents.length}</span>
                     </div>
 
                     {filteredAvailableStudents.length === 0 ? (
-                      <div className="py-6 text-center text-xs font-bold text-slate-400">
+                      <div className="py-8 text-center text-xs font-bold text-slate-400">
                         {language === 'ar' ? 'لا يوجد أي طالب مطابق لبحثك' : 'No students matching your search'}
                       </div>
                     ) : (
-                      filteredAvailableStudents.map((s) => {
-                        const isSelected = selectedStudentToLink === s.id;
-                        return (
-                          <button
-                            key={s.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedStudentToLink(isSelected ? '' : s.id);
-                              if (!isSelected) {
-                                setStudentSearchTerm('');
-                              }
-                            }}
-                            className={`w-full flex items-center justify-between p-3 rounded-xl text-xs transition-all cursor-pointer ${
-                              isRTL ? 'text-right' : 'text-left'
-                            } ${
-                              isSelected
-                                ? 'bg-purple-600 text-white shadow-xs'
-                                : 'hover:bg-purple-50 dark:hover:bg-purple-950/60 text-slate-800 dark:text-slate-200'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div
-                                className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
-                                  isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300'
-                                }`}
-                              >
-                                {s.fullNameAr[0]}
+                      <div className="space-y-2">
+                        {filteredAvailableStudents.map((s) => {
+                          const isSelected = selectedStudentToLink === s.id;
+                          return (
+                            <button
+                              key={s.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedStudentToLink(isSelected ? '' : s.id);
+                                if (!isSelected) {
+                                  setStudentSearchTerm('');
+                                }
+                              }}
+                              className={`w-full flex items-center justify-between transition-all cursor-pointer ${
+                                isRTL ? 'text-right' : 'text-left'
+                              } ${
+                                isSelected
+                                  ? 'bg-purple-600 text-white shadow-xs'
+                                  : 'hover:bg-purple-50 dark:hover:bg-purple-950/60 text-slate-800 dark:text-slate-200 bg-slate-50/70 dark:bg-slate-850/60'
+                              }`}
+                              style={{ padding: '12px 14px', borderRadius: '14px' }}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div
+                                  className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
+                                    isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300'
+                                  }`}
+                                >
+                                  {s.fullNameAr[0]}
+                                </div>
+                                <div className="min-w-0">
+                                  <span className="font-black text-xs sm:text-sm block truncate">
+                                    {s.fullNameAr} ({s.fullNameEn})
+                                  </span>
+                                  <span className={`text-[11px] block truncate font-medium mt-0.5 ${isSelected ? 'text-purple-100' : 'text-slate-400'}`}>
+                                    {s.groupName} • {s.teacherName}
+                                  </span>
+                                </div>
                               </div>
-                              <div className="min-w-0">
-                                <span className="font-black text-xs sm:text-sm block truncate">
-                                  {s.fullNameAr} ({s.fullNameEn})
-                                </span>
-                                <span className={`text-[11px] block truncate font-medium ${isSelected ? 'text-purple-100' : 'text-slate-400'}`}>
-                                  {s.groupName} • {s.teacherName}
-                                </span>
-                              </div>
-                            </div>
 
-                            <div className="flex items-center gap-2.5 shrink-0">
-                              <span
-                                className={`px-2.5 py-1 rounded-lg font-mono text-[11px] font-bold ${
-                                  isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
-                                }`}
-                              >
-                                {s.cefrLevel}
-                              </span>
-                              {isSelected && <Check size={16} strokeWidth={3} className="text-white" />}
-                            </div>
-                          </button>
-                        );
-                      })
+                              <div className="flex items-center gap-2.5 shrink-0">
+                                <span
+                                  className={`px-2.5 py-1 rounded-lg font-mono text-[11px] font-bold ${
+                                    isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
+                                  }`}
+                                >
+                                  {s.cefrLevel}
+                                </span>
+                                {isSelected && <Check size={16} strokeWidth={3} className="text-white" />}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
                     )}
                   </div>
                 )}
 
                 {/* Selected Action Bar */}
                 {selectedStudentObj && (
-                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-purple-100/90 dark:bg-purple-950/90 border border-purple-300 dark:border-purple-700 animate-fade-in shadow-xs">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                  <div
+                    className="flex items-center justify-between rounded-2xl bg-purple-100/90 dark:bg-purple-950/90 border border-purple-300 dark:border-purple-700 animate-fade-in shadow-xs"
+                    style={{ padding: '16px 20px', marginTop: '6px' }}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
                         {selectedStudentObj.fullNameAr[0]}
                       </div>
                       <div className="min-w-0">
                         <span className="text-xs sm:text-sm font-black text-purple-950 dark:text-purple-100 truncate block">
                           {selectedStudentObj.fullNameAr} ({selectedStudentObj.fullNameEn})
                         </span>
-                        <span className="text-[11px] text-purple-700 dark:text-purple-300 font-medium truncate block">
+                        <span className="text-[11px] text-purple-700 dark:text-purple-300 font-medium truncate block mt-0.5">
                           {selectedStudentObj.groupName} • Level {selectedStudentObj.cefrLevel}
                         </span>
                       </div>
