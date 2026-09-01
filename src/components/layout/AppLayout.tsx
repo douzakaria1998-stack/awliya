@@ -12,8 +12,10 @@ import { PerformanceScreen } from '../screens/PerformanceScreen';
 import { FinancialsScreen } from '../screens/FinancialsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { LoginScreen } from '../screens/LoginScreen';
+import { NoLinkedStudentsScreen } from '../screens/NoLinkedStudentsScreen';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
+import { useStudent } from '@/context/StudentContext';
 
 export function AppLayout() {
   const [mounted, setMounted] = useState(false);
@@ -22,6 +24,7 @@ export function AppLayout() {
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
   const { dir, isRTL } = useLanguage();
   const { isAuthenticated, isLoading } = useAuth();
+  const { students } = useStudent();
 
   useEffect(() => {
     setMounted(true);
@@ -75,30 +78,36 @@ export function AppLayout() {
           }}
         >
           <div className="w-full max-w-5xl">
-            {activeTab === 'dashboard' && (
-              <DashboardScreen
-                onNavigate={handleNavigate}
-                onOpenAddStudent={() => setIsAddStudentOpen(true)}
-              />
-            )}
+            {students.length === 0 ? (
+              <NoLinkedStudentsScreen />
+            ) : (
+              <>
+                {activeTab === 'dashboard' && (
+                  <DashboardScreen
+                    onNavigate={handleNavigate}
+                    onOpenAddStudent={() => setIsAddStudentOpen(true)}
+                  />
+                )}
 
-            {activeTab === 'academic' && (
-              <AcademicPathScreen onOpenAddStudent={() => setIsAddStudentOpen(true)} />
-            )}
+                {activeTab === 'academic' && (
+                  <AcademicPathScreen onOpenAddStudent={() => setIsAddStudentOpen(true)} />
+                )}
 
-            {activeTab === 'performance' && (
-              <PerformanceScreen
-                initialTab={performanceSubTab}
-                onOpenAddStudent={() => setIsAddStudentOpen(true)}
-              />
-            )}
+                {activeTab === 'performance' && (
+                  <PerformanceScreen
+                    initialTab={performanceSubTab}
+                    onOpenAddStudent={() => setIsAddStudentOpen(true)}
+                  />
+                )}
 
-            {activeTab === 'financials' && (
-              <FinancialsScreen onOpenAddStudent={() => setIsAddStudentOpen(true)} />
-            )}
+                {activeTab === 'financials' && (
+                  <FinancialsScreen onOpenAddStudent={() => setIsAddStudentOpen(true)} />
+                )}
 
-            {activeTab === 'profile' && (
-              <ProfileScreen onOpenAddStudent={() => setIsAddStudentOpen(true)} />
+                {activeTab === 'profile' && (
+                  <ProfileScreen onOpenAddStudent={() => setIsAddStudentOpen(true)} />
+                )}
+              </>
             )}
           </div>
         </main>

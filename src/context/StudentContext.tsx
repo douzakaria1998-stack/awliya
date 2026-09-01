@@ -36,6 +36,26 @@ import { mockAdminStudents } from '@/data/adminMock';
 import { useTheme } from './ThemeContext';
 import { useAuth } from './AuthContext';
 
+export const emptyStudent: Student = {
+  id: '',
+  parentId: '',
+  fullNameAr: '',
+  firstNameAr: '',
+  lastNameAr: '',
+  birthday: '',
+  schoolLevelAr: '',
+  nicknameAr: '',
+  enrolledPathAr: '',
+  currentLevel: 1 as LevelId,
+  currentLevelProgress: 0,
+  studentIdNumber: '',
+  academicYearAr: '',
+  branchAr: '',
+  timingAr: '',
+  enrollmentDate: '',
+  age: 0,
+};
+
 interface StudentContextType {
   students: Student[];
   activeStudent: Student;
@@ -123,7 +143,11 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
   // Dynamically resolve students belonging to the authenticated parent
   useEffect(() => {
-    if (!parent) return;
+    if (!parent) {
+      setStudents([]);
+      setActiveStudentIdState('');
+      return;
+    }
 
     const storedAdminStudents = getItem<AdminStudent[]>(STORAGE_KEYS.ADMIN_STUDENTS) || [];
     const allAdminStudents = [...storedAdminStudents, ...mockAdminStudents];
@@ -186,36 +210,17 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         setLevel(parentChildren[0].currentLevel);
       }
     } else {
-      // Fallback for newly created parent with no linked child yet
-      const fallbackChild: Student = {
-        id: `stu-new-${parent.id}`,
-        parentId: parent.id,
-        fullNameAr: `ابن ${parent.fullNameAr}`,
-        firstNameAr: 'الابن',
-        lastNameAr: parent.fullNameAr.split(' ').slice(1).join(' ') || 'العائلة',
-        birthday: '2016-01-01',
-        schoolLevelAr: 'السنة الرابعة ابتدائي',
-        nicknameAr: 'الابن',
-        enrolledPathAr: 'مسار اللغة الإنجليزية المكثف (Intensive English)',
-        currentLevel: 1 as LevelId,
-        currentLevelProgress: 10,
-        studentIdNumber: `STD-${parent.id.toUpperCase()}`,
-        academicYearAr: '1446-1447هـ (2024-2025)',
-        branchAr: 'الفرع المركزي',
-        timingAr: 'خلال أيام الأسبوع',
-        enrollmentDate: new Date().toISOString().split('T')[0],
-        age: 9,
-      };
-      setStudents([fallbackChild]);
-      setActiveStudentIdState(fallbackChild.id);
-      setLevel(fallbackChild.currentLevel);
+      // Parent has NO linked students yet: leave students strictly empty!
+      setStudents([]);
+      setActiveStudentIdState('');
     }
   }, [parent, activeStudentId, setLevel]);
 
   // Current active student object
   const activeStudent = useMemo(() => {
+    if (students.length === 0) return emptyStudent;
     const found = students.find((s) => s.id === activeStudentId);
-    return found || students[0] || mockStudents[0];
+    return found || students[0] || emptyStudent;
   }, [students, activeStudentId]);
 
   // Sync theme whenever active student changes

@@ -512,27 +512,32 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
 
                 {/* Students List */}
                 <div className="space-y-3">
-                  {students.map((st) => {
-                    const isSelected = st.id === activeStudent.id;
-                    const stTheme = levelThemes[st.currentLevel as LevelId] || levelThemes[1];
+                  {students.length === 0 ? (
+                    <div className="text-center py-4 text-xs font-bold text-slate-400">
+                      {language === 'ar' ? 'لا يوجد طلاب مرتبطين بهذا الحساب بعد' : 'No students linked yet'}
+                    </div>
+                  ) : (
+                    students.map((st) => {
+                      const isSelected = activeStudent ? st.id === activeStudent.id : false;
+                      const stTheme = levelThemes[st.currentLevel as LevelId] || levelThemes[1];
 
-                    return (
-                      <button
-                        key={st.id}
-                        type="button"
-                        onClick={() => {
-                          setActiveStudentId(st.id);
-                          setIsProfileOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between rounded-2xl transition-all cursor-pointer select-none ${
-                          isRTL ? 'text-right' : 'text-left'
-                        } ${
-                          isSelected
-                            ? 'bg-slate-50 dark:bg-slate-800/90 ring-1.5 ring-slate-200 dark:ring-slate-700 shadow-2xs'
-                            : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'
-                        }`}
-                        style={{ padding: '12px 14px' }}
-                      >
+                      return (
+                        <button
+                          key={st.id}
+                          type="button"
+                          onClick={() => {
+                            setActiveStudentId(st.id);
+                            setIsProfileOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between rounded-2xl transition-all cursor-pointer select-none ${
+                            isRTL ? 'text-right' : 'text-left'
+                          } ${
+                            isSelected
+                              ? 'bg-slate-50 dark:bg-slate-800/90 ring-1.5 ring-slate-200 dark:ring-slate-700 shadow-2xs'
+                              : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                          }`}
+                          style={{ padding: '12px 14px' }}
+                        >
                         <div className="flex items-center gap-3.5 min-w-0">
                           <div
                             className="w-7 h-7 min-w-[28px] min-h-[28px] rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 shadow-2xs"
@@ -566,7 +571,8 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                         )}
                       </button>
                     );
-                  })}
+                  })
+                )}
                 </div>
 
                 {/* Direct Link to Control Panel (/admin) & Logout */}
