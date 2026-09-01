@@ -73,18 +73,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const storedStatus = getItem<string>(STORAGE_KEYS.AUTH_STATUS);
-    if (storedStatus === 'logged_out') {
-      setIsAuthenticated(false);
-    } else {
-      setIsAuthenticated(true);
+    const syncAuth = () => {
+      const storedStatus = getItem<string>(STORAGE_KEYS.AUTH_STATUS);
+      if (storedStatus === 'logged_out') {
+        setIsAuthenticated(false);
+      } else {
+        setIsAuthenticated(true);
+      }
+
+      const storedParent = getItem<Parent>(STORAGE_KEYS.AUTH_USER);
+      if (storedParent) {
+        // Refresh with latest parent record from admin parents if available
+        const storedAdminParents = getItem<AdminParent[]>(STORAGE_KEYS.ADMIN_PARENTS) || [];
+        const matchingAdminParent = storedAdminParents.find((p) => p.id === storedParent.id);
+        if (matchingAdminParent) {
+          const synced: Parent = {
+            ...storedParent,
+            fullNameAr: matchingAdminParent.fullNameAr,
+            fullNameEn: matchingAdminParent.fullNameEn,
+            email: matchingAdminParent.email,
+            phone: matchingAdminParent.phone,
+            password: matchingAdminParent.password || storedParent.password,
+            address: matchingAdminParent.address,
+            linkedStudentIds: matchingAdminParent.linkedStudentIds || [],
+          };
+          setParent(synced);
+        } else {
+          setParent(storedParent);
+        }
+      }
+      setIsLoading(false);
+    };
+
+    syncAuth();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('awliya-data-sync', syncAuth);
+      window.addEventListener('storage', syncAuth);
     }
 
-    const storedParent = getItem<Parent>(STORAGE_KEYS.AUTH_USER);
-    if (storedParent) {
-      setParent(storedParent);
-    }
-    setIsLoading(false);
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('awliya-data-sync', syncAuth);
+        window.removeEventListener('storage', syncAuth);
+      }
+    };
   }, []);
 
   const login = useCallback(

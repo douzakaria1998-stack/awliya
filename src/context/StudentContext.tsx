@@ -32,7 +32,7 @@ import {
   mockNotificationSettings,
   getFinancialSummaryForStudent,
 } from '@/data/mock';
-import { mockAdminStudents } from '@/data/adminMock';
+import { mockAdminStudents, mockAdminParents } from '@/data/adminMock';
 import { useTheme } from './ThemeContext';
 import { useAuth } from './AuthContext';
 
@@ -163,39 +163,40 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     }
 
     const storedAdminParents = getItem<AdminParent[]>('myschool_admin_parents_v2') || [];
-    const currentParentRecord = storedAdminParents.find((p) => p.id === activeParent.id) || activeParent;
+    const allAdminParents = [...storedAdminParents, ...mockAdminParents];
+
+    // Match exact parent record in admin database
+    const currentParentRecord =
+      storedAdminParents.find((p) => p.id === activeParent.id) ||
+      allAdminParents.find(
+        (p) =>
+          p.id === activeParent.id ||
+          (activeParent.email && p.email?.toLowerCase().trim() === activeParent.email?.toLowerCase().trim()) ||
+          (activeParent.phone && p.phone?.replace(/\s/g, '') === activeParent.phone?.replace(/\s/g, ''))
+      ) ||
+      activeParent;
 
     const storedAdminStudents = getItem<AdminStudent[]>('myschool_admin_students_v2') || [];
-    const allAdminStudents = [...storedAdminStudents, ...mockAdminStudents];
-    const storedPortalStudents = getItem<Student[]>(STORAGE_KEYS.STUDENTS_LIST) || [];
-    const allPortalStudents = [...storedPortalStudents, ...mockStudents];
+    const allAdminStudents = storedAdminStudents.length > 0 ? storedAdminStudents : mockAdminStudents;
 
-    // Find children linked to parent
+    // Strict set of linked student IDs for this parent
+    const parentLinkedIds = new Set<string>(currentParentRecord.linkedStudentIds || []);
+
     const parentChildren: Student[] = [];
     const seenIds = new Set<string>();
 
-    // 1. Check direct ID matches or parentId in portal students
-    allPortalStudents.forEach((s) => {
-      const isMatch =
-        s.parentId === currentParentRecord.id ||
-        (currentParentRecord.linkedStudentIds && currentParentRecord.linkedStudentIds.includes(s.id));
-      if (isMatch && !seenIds.has(s.id)) {
-        seenIds.add(s.id);
-        parentChildren.push(s);
-      }
-    });
-
-    // 2. Check admin students linked to this parent
+    // 1. Check all admin students linked to this parent (PRIMARY SOURCE OF TRUTH)
     allAdminStudents.forEach((adminStu) => {
-      const isMatch =
-        adminStu.parentId === currentParentRecord.id ||
-        (currentParentRecord.linkedStudentIds && currentParentRecord.linkedStudentIds.includes(adminStu.id));
-      if (isMatch && !seenIds.has(adminStu.id)) {
+      const isLinked =
+        parentLinkedIds.has(adminStu.id) ||
+        adminStu.parentId === currentParentRecord.id;
+
+      if (isLinked && !seenIds.has(adminStu.id)) {
         seenIds.add(adminStu.id);
         const nameParts = adminStu.fullNameAr.trim().split(' ');
         parentChildren.push({
           id: adminStu.id,
-          parentId: adminStu.parentId,
+          parentId: currentParentRecord.id,
           fullNameAr: adminStu.fullNameAr,
           firstNameAr: nameParts[0] || adminStu.fullNameAr,
           lastNameAr: nameParts.slice(1).join(' ') || (currentParentRecord.fullNameAr ? currentParentRecord.fullNameAr.split(' ').slice(1).join(' ') : ''),
@@ -214,6 +215,16 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           enrollmentDate: adminStu.enrollmentDate,
           age: 10,
         });
+      }
+    });
+
+    // 2. Also check if any portal-added students were specifically registered with this parent's id
+    const storedPortalStudents = getItem<Student[]>(STORAGE_KEYS.STUDENTS_LIST) || [];
+    storedPortalStudents.forEach((s) => {
+      const isMatch = parentLinkedIds.has(s.id) || s.parentId === currentParentRecord.id;
+      if (isMatch && !seenIds.has(s.id)) {
+        seenIds.add(s.id);
+        parentChildren.push(s);
       }
     });
 
