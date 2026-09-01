@@ -34,15 +34,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (typeof document !== 'undefined') {
         if (next) {
           document.documentElement.classList.add('dark');
+          document.body?.classList.add('dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
         } else {
           document.documentElement.classList.remove('dark');
+          document.body?.classList.remove('dark');
+          document.documentElement.setAttribute('data-theme', 'light');
         }
       }
       return next;
     });
   }, []);
 
-  // Initialize theme from storage
+  // Initialize theme from storage and system preference
   useEffect(() => {
     const storedLevel = getItem<LevelId>(STORAGE_KEYS.CURRENT_LEVEL);
     const level = storedLevel || mockStudent.currentLevel;
@@ -50,9 +54,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     applyThemeCSS(level);
 
     const storedMode = getItem<string>(STORAGE_KEYS.THEME_MODE);
-    if (storedMode === 'dark') {
+    const prefersDark =
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    const isDark = storedMode ? storedMode === 'dark' : prefersDark;
+
+    if (isDark) {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
+      document.body?.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+      document.body?.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
     }
   }, []);
 

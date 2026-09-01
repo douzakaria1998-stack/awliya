@@ -35,6 +35,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" className={cairo.variable} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var mode = localStorage.getItem('awliya_theme_mode_v4');
+                  var isDark = mode ? mode === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  if (isDark) {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className="font-sans antialiased select-none selection:bg-rose-500 selection:text-white"
         suppressHydrationWarning
