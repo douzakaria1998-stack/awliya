@@ -3101,18 +3101,31 @@ export function AdminAcademicPathScreen() {
             {/* Modal Scrollable Body */}
             <div className="p-6 sm:p-8 overflow-y-auto space-y-8 flex-1">
               {/* Step 1: Target Level & New Group Information Container */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 space-y-4 shadow-2xs">
-                <div className="flex items-center gap-2 pb-1 border-b border-slate-200/50 dark:border-slate-800/60">
-                  <TrendingUp size={18} className="text-emerald-600 dark:text-emerald-400" />
-                  <h4 className="font-black text-sm text-slate-900 dark:text-white">
+              <div
+                className="rounded-3xl bg-slate-50/90 dark:bg-slate-850/80 border border-slate-200/90 dark:border-slate-800 shadow-2xs"
+                style={{ padding: '26px 28px' }}
+              >
+                {/* Container Header */}
+                <div
+                  className="flex items-center gap-2.5 border-b border-slate-200/70 dark:border-slate-800"
+                  style={{ paddingBottom: '16px', marginBottom: '22px' }}
+                >
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
+                    <TrendingUp size={16} />
+                  </div>
+                  <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white">
                     {language === 'ar' ? 'بيانات المستوى والفوج بعد الترقية' : 'New Level & Group Details'}
                   </h4>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
-                  {/* Target CEFR Level */}
+                {/* 3 Input Columns Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  {/* 1. Target CEFR Level */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label
+                      className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                      style={{ marginBottom: '8px' }}
+                    >
                       {language === 'ar' ? 'المستوى الجديد المستهدف:' : 'Target Next Level:'}
                     </label>
                     <select
@@ -3123,7 +3136,8 @@ export function AdminAcademicPathScreen() {
                         setTargetGroupName(activeProgressGroup.name.replace(activeProgressGroup.level, newLvl));
                         setTargetGroupCode(activeProgressGroup.code.replace(activeProgressGroup.level, newLvl));
                       }}
-                      className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 cursor-pointer shadow-2xs"
+                      className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 cursor-pointer shadow-2xs transition-colors"
+                      style={{ paddingLeft: '14px', paddingRight: '14px' }}
                     >
                       {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((lvl) => (
                         <option key={lvl} value={lvl}>
@@ -3133,29 +3147,37 @@ export function AdminAcademicPathScreen() {
                     </select>
                   </div>
 
-                  {/* Target Group Name */}
+                  {/* 2. Target Group Name */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label
+                      className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                      style={{ marginBottom: '8px' }}
+                    >
                       {language === 'ar' ? 'اسم الفوج المحدث:' : 'Updated Group Name:'}
                     </label>
                     <input
                       type="text"
                       value={targetGroupName}
                       onChange={(e) => setTargetGroupName(e.target.value)}
-                      className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 shadow-2xs"
+                      className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 shadow-2xs transition-colors"
+                      style={{ paddingLeft: '16px', paddingRight: '16px' }}
                     />
                   </div>
 
-                  {/* Target Group Code */}
+                  {/* 3. Target Group Code */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label
+                      className="block text-xs font-bold text-slate-700 dark:text-slate-300"
+                      style={{ marginBottom: '8px' }}
+                    >
                       {language === 'ar' ? 'رمز الفوج الجديد:' : 'Updated Group Code:'}
                     </label>
                     <input
                       type="text"
                       value={targetGroupCode}
                       onChange={(e) => setTargetGroupCode(e.target.value)}
-                      className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 shadow-2xs"
+                      className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 shadow-2xs transition-colors"
+                      style={{ paddingLeft: '16px', paddingRight: '16px' }}
                     />
                   </div>
                 </div>
