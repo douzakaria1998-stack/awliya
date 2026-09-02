@@ -3099,20 +3099,20 @@ export function AdminAcademicPathScreen() {
             </div>
 
             {/* Modal Scrollable Body */}
-            <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
-              {/* Step 1: Target Level & New Group Information */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 space-y-3.5">
-                <div className="flex items-center gap-2">
-                  <TrendingUp size={16} className="text-emerald-600 dark:text-emerald-400" />
-                  <h4 className="font-black text-xs sm:text-sm text-slate-900 dark:text-white">
+            <div className="p-6 sm:p-8 overflow-y-auto space-y-8 flex-1">
+              {/* Step 1: Target Level & New Group Information Container */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 space-y-4 shadow-2xs">
+                <div className="flex items-center gap-2 pb-1 border-b border-slate-200/50 dark:border-slate-800/60">
+                  <TrendingUp size={18} className="text-emerald-600 dark:text-emerald-400" />
+                  <h4 className="font-black text-sm text-slate-900 dark:text-white">
                     {language === 'ar' ? 'بيانات المستوى والفوج بعد الترقية' : 'New Level & Group Details'}
                   </h4>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
                   {/* Target CEFR Level */}
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                       {language === 'ar' ? 'المستوى الجديد المستهدف:' : 'Target Next Level:'}
                     </label>
                     <select
@@ -3123,7 +3123,7 @@ export function AdminAcademicPathScreen() {
                         setTargetGroupName(activeProgressGroup.name.replace(activeProgressGroup.level, newLvl));
                         setTargetGroupCode(activeProgressGroup.code.replace(activeProgressGroup.level, newLvl));
                       }}
-                      className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 cursor-pointer shadow-2xs"
+                      className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 cursor-pointer shadow-2xs"
                     >
                       {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((lvl) => (
                         <option key={lvl} value={lvl}>
@@ -3135,42 +3135,43 @@ export function AdminAcademicPathScreen() {
 
                   {/* Target Group Name */}
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                       {language === 'ar' ? 'اسم الفوج المحدث:' : 'Updated Group Name:'}
                     </label>
                     <input
                       type="text"
                       value={targetGroupName}
                       onChange={(e) => setTargetGroupName(e.target.value)}
-                      className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 shadow-2xs"
+                      className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 shadow-2xs"
                     />
                   </div>
 
                   {/* Target Group Code */}
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                       {language === 'ar' ? 'رمز الفوج الجديد:' : 'Updated Group Code:'}
                     </label>
                     <input
                       type="text"
                       value={targetGroupCode}
                       onChange={(e) => setTargetGroupCode(e.target.value)}
-                      className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 shadow-2xs"
+                      className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 shadow-2xs"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Step 2: Student Decision Controls */}
-              <div className="space-y-3.5">
-                <div className="space-y-2">
+              {/* Step 2: Student Decision Controls Container */}
+              <div className="space-y-5">
+                {/* Header & Quick Actions */}
+                <div className="space-y-3">
                   <div>
-                    <h4 className="font-black text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                      <Users size={16} className="text-indigo-600" />
+                    <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-2">
+                      <Users size={18} className="text-indigo-600" />
                       <span>{language === 'ar' ? 'تحديد مصير كل طالب في الفوج' : 'Set Outcome for Each Student'}</span>
                       <span className="text-xs text-slate-400 font-normal">({groupStudentsList.length} {language === 'ar' ? 'طلاب' : 'students'})</span>
                     </h4>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
+                    <p className="text-xs text-slate-400 mt-1">
                       {language === 'ar'
                         ? 'حدد للطلاب: الانتقال للمستوى الجديد، أو إعادة المستوى، أو التوقف عن الدراسة.'
                         : 'Choose whether each student passes to the next level, repeats the current level, or stops.'}
@@ -3178,8 +3179,8 @@ export function AdminAcademicPathScreen() {
                   </div>
 
                   {/* Quick Preset Actions Toolbar */}
-                  <div className="flex items-center gap-2 flex-wrap pt-1">
-                    <span className="text-[11px] font-bold text-slate-400 shrink-0">
+                  <div className="flex items-center gap-2.5 flex-wrap pt-1.5 pb-0.5">
+                    <span className="text-xs font-bold text-slate-400 shrink-0">
                       {language === 'ar' ? 'إجراءات سريعة:' : 'Quick Actions:'}
                     </span>
                     <button
@@ -3189,7 +3190,7 @@ export function AdminAcademicPathScreen() {
                         groupStudentsList.forEach((s) => (updated[s.id] = 'pass'));
                         setStudentDecisions(updated);
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] border border-emerald-300 dark:border-emerald-800 transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-bold text-xs border border-emerald-300 dark:border-emerald-800 transition-colors cursor-pointer shadow-2xs"
                     >
                       {language === 'ar' ? 'تحديد الكل ناجحين ✓' : 'All Pass ✓'}
                     </button>
@@ -3200,7 +3201,7 @@ export function AdminAcademicPathScreen() {
                         groupStudentsList.forEach((s) => (updated[s.id] = 'repeat'));
                         setStudentDecisions(updated);
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold text-[11px] border border-amber-300 dark:border-amber-800 transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold text-xs border border-amber-300 dark:border-amber-800 transition-colors cursor-pointer shadow-2xs"
                     >
                       {language === 'ar' ? 'تحديد الكل إعادة 🔁' : 'All Repeat 🔁'}
                     </button>
@@ -3215,54 +3216,54 @@ export function AdminAcademicPathScreen() {
                         });
                         setStudentDecisions(updated);
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-[11px] border border-indigo-300 dark:border-indigo-800 transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs border border-indigo-300 dark:border-indigo-800 transition-colors cursor-pointer shadow-2xs"
                     >
                       {language === 'ar' ? 'تحديد ذكي تلقائي ✨' : 'Auto-detect ✨'}
                     </button>
                   </div>
                 </div>
 
-                {/* Summary Metrics Bar */}
-                <div className="grid grid-cols-3 gap-2.5">
-                  <div className="p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-center">
-                    <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 block">
+                {/* Summary Metrics Bar Container */}
+                <div className="grid grid-cols-3 gap-3.5 pt-1">
+                  <div className="p-3.5 sm:p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-center shadow-2xs">
+                    <span className="text-[11px] sm:text-xs font-bold text-emerald-700 dark:text-emerald-300 block mb-1">
                       {language === 'ar' ? 'المنتقلون للمستوى الجديد 🎓' : 'Passing 🎓'}
                     </span>
-                    <span className="font-mono font-black text-lg sm:text-xl text-emerald-800 dark:text-emerald-200">
+                    <span className="font-mono font-black text-xl sm:text-2xl text-emerald-800 dark:text-emerald-200">
                       {groupStudentsList.filter((s) => (studentDecisions[s.id] || 'pass') === 'pass').length}
                     </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-center">
-                    <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 block">
+                  <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-center shadow-2xs">
+                    <span className="text-[11px] sm:text-xs font-bold text-amber-700 dark:text-amber-300 block mb-1">
                       {language === 'ar' ? 'المعيدون لنفس المستوى 🔁' : 'Repeating 🔁'}
                     </span>
-                    <span className="font-mono font-black text-lg sm:text-xl text-amber-800 dark:text-amber-200">
+                    <span className="font-mono font-black text-xl sm:text-2xl text-amber-800 dark:text-amber-200">
                       {groupStudentsList.filter((s) => studentDecisions[s.id] === 'repeat').length}
                     </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 text-center">
-                    <span className="text-[11px] font-bold text-rose-700 dark:text-rose-300 block">
+                  <div className="p-3.5 sm:p-4 rounded-2xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 text-center shadow-2xs">
+                    <span className="text-[11px] sm:text-xs font-bold text-rose-700 dark:text-rose-300 block mb-1">
                       {language === 'ar' ? 'المتوقفون عن الدراسة ⛔' : 'Stopped ⛔'}
                     </span>
-                    <span className="font-mono font-black text-lg sm:text-xl text-rose-800 dark:text-rose-200">
+                    <span className="font-mono font-black text-xl sm:text-2xl text-rose-800 dark:text-rose-200">
                       {groupStudentsList.filter((s) => studentDecisions[s.id] === 'stopped').length}
                     </span>
                   </div>
                 </div>
 
-                {/* Students List with Decisions */}
-                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden bg-white dark:bg-slate-900 shadow-2xs">
+                {/* Students List with Individual Spaced Cards */}
+                <div className="space-y-3 pt-2">
                   {groupStudentsList.map((st) => {
                     const currentDecision = studentDecisions[st.id] || 'pass';
 
                     return (
                       <div
                         key={st.id}
-                        className="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/70 dark:hover:bg-slate-850/60 transition-colors"
+                        className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-850/70 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-all shadow-2xs"
                       >
                         {/* Student Name & Current Status */}
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
                             {st.fullNameAr.slice(0, 1)}
                           </div>
                           <div className="min-w-0">
@@ -3287,12 +3288,12 @@ export function AdminAcademicPathScreen() {
                         </div>
 
                         {/* 3 Decision Radio Buttons in a compact grid */}
-                        <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/90 w-full sm:w-auto shrink-0">
+                        <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-slate-200/70 dark:bg-slate-800 w-full sm:w-auto shrink-0 shadow-inner">
                           {/* 1. Pass */}
                           <button
                             type="button"
                             onClick={() => setStudentDecisions((prev) => ({ ...prev, [st.id]: 'pass' }))}
-                            className={`flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                            className={`flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                               currentDecision === 'pass'
                                 ? 'bg-emerald-600 text-white shadow-xs'
                                 : 'text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300'
@@ -3306,7 +3307,7 @@ export function AdminAcademicPathScreen() {
                           <button
                             type="button"
                             onClick={() => setStudentDecisions((prev) => ({ ...prev, [st.id]: 'repeat' }))}
-                            className={`flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                            className={`flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                               currentDecision === 'repeat'
                                 ? 'bg-amber-500 text-white shadow-xs'
                                 : 'text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-300'
@@ -3320,7 +3321,7 @@ export function AdminAcademicPathScreen() {
                           <button
                             type="button"
                             onClick={() => setStudentDecisions((prev) => ({ ...prev, [st.id]: 'stopped' }))}
-                            className={`flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                            className={`flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                               currentDecision === 'stopped'
                                 ? 'bg-rose-600 text-white shadow-xs'
                                 : 'text-slate-600 dark:text-slate-400 hover:text-rose-700 dark:hover:text-rose-300'
