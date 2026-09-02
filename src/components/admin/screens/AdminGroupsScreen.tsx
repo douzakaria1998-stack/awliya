@@ -176,11 +176,11 @@ export function AdminGroupsScreen() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as any)}
-          className="h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500 cursor-pointer shadow-2xs shrink-0"
+          className="h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500 cursor-pointer shadow-2xs shrink-0"
         >
-          <option value="all">{language === 'ar' ? 'جميع الأفواج (All)' : 'All Groups'}</option>
-          <option value="active">{language === 'ar' ? 'الأفواج النشطة 🟢' : 'Active Groups 🟢'}</option>
-          <option value="archived">{language === 'ar' ? 'الأفواج المؤرشفة 📁' : 'Archived Groups 📁'}</option>
+          <option value="all">{language === 'ar' ? 'جميع الأفواج' : 'All Groups'}</option>
+          <option value="active">{language === 'ar' ? 'الأفواج النشطة' : 'Active Groups'}</option>
+          <option value="archived">{language === 'ar' ? 'الأفواج المؤرشفة' : 'Archived Groups'}</option>
         </select>
 
         <div className="text-xs sm:text-sm font-bold text-slate-400 shrink-0">
@@ -279,14 +279,18 @@ export function AdminGroupsScreen() {
 
                   <td className="py-3.5 px-4 text-center">
                     {grp.status === 'archived' ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-[11px] border border-amber-300/80 dark:border-amber-800 shadow-2xs whitespace-nowrap">
-                        <Archive size={12} className="shrink-0" />
-                        <span>{language === 'ar' ? 'مؤرشف 📁' : 'Archived 📁'}</span>
+                      <span
+                        className="inline-flex items-center justify-center font-bold text-xs rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shadow-2xs whitespace-nowrap"
+                        style={{ padding: '6px 18px', minWidth: '68px', lineHeight: '1.2' }}
+                      >
+                        {language === 'ar' ? 'مؤرشف' : 'Archived'}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] border border-emerald-300/80 dark:border-emerald-800 shadow-2xs whitespace-nowrap">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                        <span>{language === 'ar' ? 'نشط 🟢' : 'Active 🟢'}</span>
+                      <span
+                        className="inline-flex items-center justify-center font-bold text-xs rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-2xs whitespace-nowrap"
+                        style={{ padding: '6px 18px', minWidth: '68px', lineHeight: '1.2' }}
+                      >
+                        {language === 'ar' ? 'نشط' : 'Active'}
                       </span>
                     )}
                   </td>

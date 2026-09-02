@@ -1331,9 +1331,9 @@ export function AdminAcademicPathScreen() {
                     onChange={(e) => setGroupStatusFilter(e.target.value as any)}
                     className="h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500 cursor-pointer shadow-2xs"
                   >
-                    <option value="all">{language === 'ar' ? 'جميع الأفواج (All)' : 'All Groups'}</option>
-                    <option value="active">{language === 'ar' ? 'الأفواج النشطة 🟢' : 'Active Groups 🟢'}</option>
-                    <option value="archived">{language === 'ar' ? 'الأفواج المؤرشفة 📁' : 'Archived Groups 📁'}</option>
+                    <option value="all">{language === 'ar' ? 'جميع الأفواج' : 'All Groups'}</option>
+                    <option value="active">{language === 'ar' ? 'الأفواج النشطة' : 'Active Groups'}</option>
+                    <option value="archived">{language === 'ar' ? 'الأفواج المؤرشفة' : 'Archived Groups'}</option>
                   </select>
                 </div>
               </div>
@@ -1507,14 +1507,18 @@ export function AdminAcademicPathScreen() {
 
                             <td className="py-4 px-6 text-center">
                               {grp.status === 'archived' ? (
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-[11px] border border-amber-300/80 dark:border-amber-800 shadow-2xs whitespace-nowrap">
-                                  <Archive size={12} className="shrink-0" />
-                                  <span>{language === 'ar' ? 'مؤرشف 📁' : 'Archived 📁'}</span>
+                                <span
+                                  className="inline-flex items-center justify-center font-bold text-xs rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shadow-2xs whitespace-nowrap"
+                                  style={{ padding: '6px 18px', minWidth: '68px', lineHeight: '1.2' }}
+                                >
+                                  {language === 'ar' ? 'مؤرشف' : 'Archived'}
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] border border-emerald-300/80 dark:border-emerald-800 shadow-2xs whitespace-nowrap">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                                  <span>{language === 'ar' ? 'نشط 🟢' : 'Active 🟢'}</span>
+                                <span
+                                  className="inline-flex items-center justify-center font-bold text-xs rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-2xs whitespace-nowrap"
+                                  style={{ padding: '6px 18px', minWidth: '68px', lineHeight: '1.2' }}
+                                >
+                                  {language === 'ar' ? 'نشط' : 'Active'}
                                 </span>
                               )}
                             </td>
@@ -1647,14 +1651,18 @@ export function AdminAcademicPathScreen() {
 
                     {/* Show status of the group: whether it's active or archived */}
                     {activeProgressGroup.status === 'archived' ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-bold text-xs border border-amber-300 dark:border-amber-700 shadow-2xs">
-                        <Archive size={13} className="shrink-0" />
-                        <span>{language === 'ar' ? 'فوج مؤرشف 📁' : 'Archived 📁'}</span>
+                      <span
+                        className="inline-flex items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-bold text-xs border border-amber-300 dark:border-amber-700 shadow-2xs whitespace-nowrap"
+                        style={{ padding: '6px 18px', minWidth: '72px', lineHeight: '1.2' }}
+                      >
+                        {language === 'ar' ? 'مؤرشف' : 'Archived'}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold text-xs border border-emerald-300 dark:border-emerald-700 shadow-2xs">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                        <span>{language === 'ar' ? 'فوج نشط 🟢' : 'Active 🟢'}</span>
+                      <span
+                        className="inline-flex items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold text-xs border border-emerald-300 dark:border-emerald-700 shadow-2xs whitespace-nowrap"
+                        style={{ padding: '6px 18px', minWidth: '72px', lineHeight: '1.2' }}
+                      >
+                        {language === 'ar' ? 'نشط' : 'Active'}
                       </span>
                     )}
                   </div>
