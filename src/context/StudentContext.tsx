@@ -116,7 +116,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
   // 1. Initial states are strictly deterministic for SSR matching
   const [students, setStudents] = useState<Student[]>(mockStudents);
-  const [activeStudentId, setActiveStudentIdState] = useState<string>(mockStudents[0].id);
+  const [activeStudentId, setActiveStudentIdState] = useState<string>(mockStudents[0]?.id || '');
   const [homeworkMap, setHomeworkMap] = useState<Record<string, Homework[]>>(mockHomeworkMap);
   const [fees, setFees] = useState<Fee[]>(mockFees);
   const [payments, setPayments] = useState<PaymentRecord[]>(mockPayments);

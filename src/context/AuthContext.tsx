@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     combinedMap.set(mockParent.id, {
       ...mockParent,
       password: 'Awliya@2026',
-      linkedStudentIds: ['student-001', 'student-002', 'student-003'],
+      linkedStudentIds: [],
     });
 
     // 2. Mock Admin Parents
