@@ -280,15 +280,15 @@ export function AdminGroupsScreen() {
                   <td className="py-3.5 px-4 text-center">
                     {grp.status === 'archived' ? (
                       <span
-                        className="inline-flex items-center justify-center font-bold text-xs rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shadow-2xs whitespace-nowrap"
-                        style={{ padding: '6px 18px', minWidth: '68px', lineHeight: '1.2' }}
+                        className="inline-flex items-center justify-center font-bold text-[11px] rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shadow-2xs whitespace-nowrap"
+                        style={{ padding: '3px 12px', minWidth: '54px', lineHeight: '1.2' }}
                       >
                         {language === 'ar' ? 'مؤرشف' : 'Archived'}
                       </span>
                     ) : (
                       <span
-                        className="inline-flex items-center justify-center font-bold text-xs rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-2xs whitespace-nowrap"
-                        style={{ padding: '6px 18px', minWidth: '68px', lineHeight: '1.2' }}
+                        className="inline-flex items-center justify-center font-bold text-[11px] rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-2xs whitespace-nowrap"
+                        style={{ padding: '3px 12px', minWidth: '54px', lineHeight: '1.2' }}
                       >
                         {language === 'ar' ? 'نشط' : 'Active'}
                       </span>
