@@ -355,14 +355,14 @@ export function AdminDashboardScreen() {
             </div>
 
             {levelProgressData.length === 0 ? (
-              <div className="py-8 flex flex-col items-center justify-center text-center">
-                <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3.5 shadow-xs">
-                  <TrendingUp size={28} />
+              <div className="py-10 flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4 shadow-xs border border-indigo-100 dark:border-indigo-900/50">
+                  <TrendingUp size={30} />
                 </div>
-                <p className="text-sm sm:text-base font-black text-slate-800 dark:text-slate-100 mb-1.5">
+                <h5 className="text-base sm:text-lg font-black text-slate-800 dark:text-slate-100 mb-2">
                   {language === 'ar' ? 'لا توجد مستويات أكاديمية مضافة' : 'No curriculum levels added yet'}
-                </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed mb-6 px-4">
+                </h5>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed mb-6 px-4">
                   {language === 'ar'
                     ? 'قم بإضافة المستويات والوحدات والدروس من شاشة المسار الأكاديمي للبدء في تتبع الإنجاز.'
                     : 'Add levels, units, and lessons in Academic Path to start tracking progress.'}
@@ -370,10 +370,12 @@ export function AdminDashboardScreen() {
                 <button
                   type="button"
                   onClick={() => setActiveTab('academic')}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-black transition-all shadow-md hover:shadow-lg cursor-pointer whitespace-nowrap active:scale-98"
+                  className="inline-flex items-center justify-center gap-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer whitespace-nowrap"
+                  style={{ minHeight: '48px', padding: '12px 32px' }}
                 >
+                  <Sparkles size={16} className="shrink-0 text-amber-300" />
                   <span>{language === 'ar' ? 'إضافة مستوى أكاديمي' : 'Add Academic Level'}</span>
-                  <span className="text-base leading-none">→</span>
+                  <span className="font-mono text-sm leading-none font-bold">{isRTL ? '←' : '→'}</span>
                 </button>
               </div>
             ) : (
