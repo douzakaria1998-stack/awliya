@@ -209,6 +209,7 @@ export function AdminAcademicPathScreen() {
 
   // Group Level Upgrade State
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [targetLevelNumber, setTargetLevelNumber] = useState<number>(2);
   const [targetLevel, setTargetLevel] = useState<'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'>('A2');
   const [targetGroupName, setTargetGroupName] = useState('');
   const [targetGroupCode, setTargetGroupCode] = useState('');
@@ -219,19 +220,33 @@ export function AdminAcademicPathScreen() {
   const handleOpenUpgradeModal = () => {
     if (!activeProgressGroup) return;
 
-    const nextLevelMap: Record<string, 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'> = {
-      A1: 'A2',
-      A2: 'B1',
-      B1: 'B2',
-      B2: 'C1',
-      C1: 'C2',
-      C2: 'C2',
-    };
-    const nextLvl = nextLevelMap[activeProgressGroup.level] || 'A2';
-    setTargetLevel(nextLvl);
+    const levelsList = currentLangLevels.length > 0 ? currentLangLevels : curricula;
 
-    const updatedName = activeProgressGroup.name.replace(activeProgressGroup.level, nextLvl);
-    const updatedCode = activeProgressGroup.code.replace(activeProgressGroup.level, nextLvl);
+    // Find the current level index based on group CEFR level
+    const currentLvlIndex = levelsList.findIndex((lvl) => lvl.cefrCode === activeProgressGroup.level);
+    let nextLvlObj = currentLvlIndex !== -1 && currentLvlIndex + 1 < levelsList.length
+      ? levelsList[currentLvlIndex + 1]
+      : levelsList.find((lvl) => lvl.cefrCode !== activeProgressGroup.level) || levelsList[0];
+
+    if (!nextLvlObj && levelsList.length > 0) {
+      nextLvlObj = levelsList[0];
+    }
+
+    const nextCefr = (nextLvlObj?.cefrCode || 'A2') as 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
+    const nextNum = nextLvlObj?.levelNumber || 2;
+
+    setTargetLevelNumber(nextNum);
+    setTargetLevel(nextCefr);
+
+    const oldLvl = activeProgressGroup.level;
+    const updatedName = activeProgressGroup.name.includes(oldLvl)
+      ? activeProgressGroup.name.replace(oldLvl, nextCefr)
+      : `${activeProgressGroup.name} (${nextCefr})`;
+
+    const updatedCode = activeProgressGroup.code.includes(oldLvl)
+      ? activeProgressGroup.code.replace(oldLvl, nextCefr)
+      : `${nextCefr}-${activeProgressGroup.code}`;
+
     setTargetGroupName(updatedName);
     setTargetGroupCode(updatedCode);
 
@@ -253,8 +268,14 @@ export function AdminAcademicPathScreen() {
   const handleConfirmUpgradeGroup = () => {
     if (!activeProgressGroup) return;
 
+    const levelsList = currentLangLevels.length > 0 ? currentLangLevels : curricula;
+    const targetLevelObj =
+      levelsList.find((lvl) => lvl.levelNumber === targetLevelNumber) ||
+      levelsList.find((lvl) => lvl.cefrCode === targetLevel);
+
     const levelMap: Record<string, number> = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5, C2: 6 };
-    const nextLevelNum = levelMap[targetLevel] || 2;
+    const nextLevelNum = targetLevelObj ? targetLevelObj.levelNumber : (levelMap[targetLevel] || 2);
+    const finalTargetCefr = targetLevelObj ? (targetLevelObj.cefrCode as 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2') : targetLevel;
     const currentLevelNum = levelMap[activeProgressGroup.level] || 1;
 
     const passingStudents = groupStudentsList.filter((s) => (studentDecisions[s.id] || 'pass') === 'pass');
@@ -265,7 +286,7 @@ export function AdminAcademicPathScreen() {
     passingStudents.forEach((s) => {
       updateStudent(s.id, {
         currentLevel: nextLevelNum,
-        cefrLevel: targetLevel,
+        cefrLevel: finalTargetCefr,
         groupName: targetGroupName,
         groupId: activeProgressGroup.id,
         overallProgress: 0,
@@ -3129,19 +3150,33 @@ export function AdminAcademicPathScreen() {
                       {language === 'ar' ? 'المستوى الجديد المستهدف:' : 'Target Next Level:'}
                     </label>
                     <select
-                      value={targetLevel}
+                      value={targetLevelNumber}
                       onChange={(e) => {
-                        const newLvl = e.target.value as any;
-                        setTargetLevel(newLvl);
-                        setTargetGroupName(activeProgressGroup.name.replace(activeProgressGroup.level, newLvl));
-                        setTargetGroupCode(activeProgressGroup.code.replace(activeProgressGroup.level, newLvl));
+                        const selNum = Number(e.target.value);
+                        const levelsList = currentLangLevels.length > 0 ? currentLangLevels : curricula;
+                        const chosen = levelsList.find((lvl) => lvl.levelNumber === selNum);
+                        if (!chosen) return;
+                        setTargetLevelNumber(selNum);
+                        setTargetLevel(chosen.cefrCode as any);
+
+                        const oldLvl = activeProgressGroup.level;
+                        const newCefr = chosen.cefrCode;
+                        const updatedName = activeProgressGroup.name.includes(oldLvl)
+                          ? activeProgressGroup.name.replace(oldLvl, newCefr)
+                          : `${activeProgressGroup.name} (${newCefr})`;
+                        const updatedCode = activeProgressGroup.code.includes(oldLvl)
+                          ? activeProgressGroup.code.replace(oldLvl, newCefr)
+                          : `${newCefr}-${activeProgressGroup.code}`;
+
+                        setTargetGroupName(updatedName);
+                        setTargetGroupCode(updatedCode);
                       }}
                       className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 cursor-pointer shadow-2xs transition-colors"
                       style={{ paddingLeft: '14px', paddingRight: '14px' }}
                     >
-                      {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((lvl) => (
-                        <option key={lvl} value={lvl}>
-                          {lvl} {lvl === 'A1' ? '(Beginner)' : lvl === 'A2' ? '(Elementary)' : lvl === 'B1' ? '(Intermediate)' : lvl === 'B2' ? '(Upper Int.)' : '(Advanced)'}
+                      {(currentLangLevels.length > 0 ? currentLangLevels : curricula).map((lvl) => (
+                        <option key={lvl.levelNumber} value={lvl.levelNumber}>
+                          {lvl.cefrCode} — {language === 'ar' ? lvl.nameAr : (lvl.nameEn || lvl.nameAr)} ({lvl.units.length} {language === 'ar' ? 'وحدات' : 'Units'})
                         </option>
                       ))}
                     </select>
