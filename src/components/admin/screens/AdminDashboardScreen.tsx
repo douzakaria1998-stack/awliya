@@ -355,14 +355,14 @@ export function AdminDashboardScreen() {
             </div>
 
             {levelProgressData.length === 0 ? (
-              <div className="py-12 flex flex-col items-center justify-center text-center">
-                <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 dark:text-indigo-400 flex items-center justify-center mb-3">
+              <div className="py-8 flex flex-col items-center justify-center text-center">
+                <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3.5 shadow-xs">
                   <TrendingUp size={28} />
                 </div>
-                <p className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-1">
+                <p className="text-sm sm:text-base font-black text-slate-800 dark:text-slate-100 mb-1.5">
                   {language === 'ar' ? 'لا توجد مستويات أكاديمية مضافة' : 'No curriculum levels added yet'}
                 </p>
-                <p className="text-xs text-slate-400 max-w-xs mb-4">
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed mb-6 px-4">
                   {language === 'ar'
                     ? 'قم بإضافة المستويات والوحدات والدروس من شاشة المسار الأكاديمي للبدء في تتبع الإنجاز.'
                     : 'Add levels, units, and lessons in Academic Path to start tracking progress.'}
@@ -370,9 +370,10 @@ export function AdminDashboardScreen() {
                 <button
                   type="button"
                   onClick={() => setActiveTab('academic')}
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-black transition-all shadow-md hover:shadow-lg cursor-pointer whitespace-nowrap active:scale-98"
                 >
-                  {language === 'ar' ? 'إضافة مستوى أكاديمي' : 'Add Academic Level'}
+                  <span>{language === 'ar' ? 'إضافة مستوى أكاديمي' : 'Add Academic Level'}</span>
+                  <span className="text-base leading-none">→</span>
                 </button>
               </div>
             ) : (
