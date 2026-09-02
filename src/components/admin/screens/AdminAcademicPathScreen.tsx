@@ -3093,29 +3093,42 @@ export function AdminAcademicPathScreen() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
           <div className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up flex flex-col overflow-hidden max-h-[90vh]">
             {/* Modal Header */}
-            <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4 bg-gradient-to-r from-emerald-50/60 via-teal-50/30 to-transparent dark:from-emerald-950/20 dark:via-teal-950/10">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
+            <div
+              className="border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4 bg-gradient-to-r from-emerald-50/60 via-teal-50/30 to-transparent dark:from-emerald-950/20 dark:via-teal-950/10"
+              style={{ padding: '22px 28px' }}
+            >
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
                   <GraduationCap size={24} />
                 </div>
                 <div className="min-w-0">
                   <h3 className="font-black text-base sm:text-xl text-slate-900 dark:text-white leading-tight truncate">
-                    {language === 'ar' ? 'ترقية وترحيل الفوج للمستوى التالي 🎓' : 'Upgrade Group to Next Level'}
+                    {language === 'ar' ? 'ترقية وترحيل الفوج للمستوى التالي 🎓' : 'Upgrade Group to Next Level 🎓'}
                   </h3>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 block font-medium mt-0.5 truncate">
-                    {language === 'ar' ? 'الفوج الحالي:' : 'Current Group:'}{' '}
-                    <strong className="text-slate-700 dark:text-slate-200">{activeProgressGroup.name} ({activeProgressGroup.code})</strong>
-                    {' '}• {language === 'ar' ? 'المستوى الحالي:' : 'Level:'}{' '}
-                    <span className="inline-block px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold font-mono text-[11px]">{activeProgressGroup.level}</span>
-                  </span>
+                  <div
+                    className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2.5 flex-wrap font-medium truncate"
+                    style={{ marginTop: '6px' }}
+                  >
+                    <span>
+                      {language === 'ar' ? 'الفوج الحالي:' : 'Current Group:'}{' '}
+                      <strong className="text-slate-700 dark:text-slate-200">{activeProgressGroup.name} ({activeProgressGroup.code})</strong>
+                    </span>
+                    <span className="text-slate-300 dark:text-slate-700 font-bold">•</span>
+                    <span className="inline-flex items-center gap-2">
+                      <span>{language === 'ar' ? 'المستوى الحالي:' : 'Current Level:'}</span>
+                      <span className="inline-block px-2.5 py-0.5 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold font-mono text-xs shadow-2xs">
+                        {activeProgressGroup.level}
+                      </span>
+                    </span>
+                  </div>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsUpgradeModalOpen(false)}
-                className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer transition-colors shrink-0"
+                className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer transition-colors shrink-0 shadow-2xs"
               >
-                <X size={17} />
+                <X size={18} />
               </button>
             </div>
 
