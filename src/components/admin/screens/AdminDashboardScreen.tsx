@@ -54,14 +54,72 @@ export function AdminDashboardScreen() {
   const pendingCount = pendingApprovals.filter((a) => a.status === 'pending').length;
   const fallingBehindStudents = visibleStudents.filter((s) => s.isFallingBehind || s.attendanceRate < 75 || s.overallProgress < 50);
 
-  // Level Progress Distribution (CEFR Levels)
-  const levelProgressData = [
-    { level: 'A1', nameAr: 'المبتدئ والتأسيس', nameEn: 'Beginner A1', count: students.filter((s) => s.cefrLevel === 'A1').length, progress: 82 },
-    { level: 'A2', nameAr: 'الأساسي والتطبيق', nameEn: 'Elementary A2', count: students.filter((s) => s.cefrLevel === 'A2').length, progress: 76 },
-    { level: 'B1', nameAr: 'المتوسط والاستقلالية', nameEn: 'Intermediate B1', count: students.filter((s) => s.cefrLevel === 'B1').length, progress: 84 },
-    { level: 'B2', nameAr: 'فوق المتوسط والطلاقة', nameEn: 'Upper Intermediate B2', count: students.filter((s) => s.cefrLevel === 'B2').length, progress: 90 },
-    { level: 'C1', nameAr: 'المتقدم والاحترافي', nameEn: 'Advanced C1', count: 0, progress: 95 },
+  // Level Progress Distribution (CEFR Levels) - Dynamically calculated from real student data
+  const cefrDefinitions = [
+    { level: 'A1', nameAr: 'المبتدئ والتأسيس', nameEn: 'Beginner A1' },
+    { level: 'A2', nameAr: 'الأساسي والتطبيق', nameEn: 'Elementary A2' },
+    { level: 'B1', nameAr: 'المتوسط والاستقلالية', nameEn: 'Intermediate B1' },
+    { level: 'B2', nameAr: 'فوق المتوسط والطلاقة', nameEn: 'Upper Intermediate B2' },
+    { level: 'C1', nameAr: 'المتقدم والاحترافي', nameEn: 'Advanced C1' },
   ];
+
+  const levelProgressData = cefrDefinitions.map((item) => {
+    const studentsInLevel = visibleStudents.filter((s) => s.cefrLevel === item.level);
+    const count = studentsInLevel.length;
+    const progress = count > 0
+      ? Math.round(studentsInLevel.reduce((sum, s) => sum + (s.overallProgress || 0), 0) / count)
+      : 0;
+    return {
+      ...item,
+      count,
+      progress,
+    };
+  });
+
+  // Real Attendance Calculations from attendanceSessions
+  const allAttendanceRecords = attendanceSessions.flatMap((s) => s.records || []);
+  const totalAttendanceCount = allAttendanceRecords.length;
+  
+  const presentOrLateCount = allAttendanceRecords.filter((r) => r.status === 'present' || r.status === 'late').length;
+  const overallWeekAttendanceRate = totalAttendanceCount > 0
+    ? Math.round((presentOrLateCount / totalAttendanceCount) * 100)
+    : (students.length > 0 ? avgAttendance : 0);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const yesterdayDate = new Date();
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const yesterdayStr = yesterdayDate.toISOString().split('T')[0];
+
+  const todaySessions = attendanceSessions.filter((s) => s.date === todayStr);
+  const todayRecords = todaySessions.flatMap((s) => s.records || []);
+  const todayAttendanceRate = todayRecords.length > 0
+    ? Math.round((todayRecords.filter((r) => r.status === 'present' || r.status === 'late').length / todayRecords.length) * 100)
+    : (attendanceSessions.length > 0 ? overallWeekAttendanceRate : 0);
+
+  const yesterdaySessions = attendanceSessions.filter((s) => s.date === yesterdayStr);
+  const yesterdayRecords = yesterdaySessions.flatMap((s) => s.records || []);
+  const yesterdayAttendanceRate = yesterdayRecords.length > 0
+    ? Math.round((yesterdayRecords.filter((r) => r.status === 'present' || r.status === 'late').length / yesterdayRecords.length) * 100)
+    : (attendanceSessions.length > 0 ? overallWeekAttendanceRate : 0);
+
+  const totalSessionsCompleted = attendanceSessions.length;
+  const totalExcusedAbsences = allAttendanceRecords.filter((r) => r.status === 'excused').length;
+
+  const attendanceSubtext = students.length === 0
+    ? (language === 'ar' ? 'لا توجد بيانات حضور' : 'No attendance data')
+    : avgAttendance >= 85
+    ? (language === 'ar' ? 'متوسط انضباط ممتاز' : 'High engagement')
+    : avgAttendance >= 70
+    ? (language === 'ar' ? 'انضباط متوسط' : 'Average engagement')
+    : (language === 'ar' ? 'بحاجة إلى متابعة' : 'Needs attention');
+
+  const performanceSubtext = students.length === 0
+    ? (language === 'ar' ? 'لا توجد بيانات تقييم' : 'No evaluation data')
+    : avgPerformance >= 85
+    ? (language === 'ar' ? 'تقدير عام: ممتاز' : 'Excellent Overall')
+    : avgPerformance >= 70
+    ? (language === 'ar' ? 'تقدير عام: جيد جداً' : 'Very Good Overall')
+    : (language === 'ar' ? 'بحاجة إلى تعزيز' : 'Needs improvement');
 
   return (
     <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -206,7 +264,7 @@ export function AdminDashboardScreen() {
               {avgAttendance}%
             </div>
             <span className="text-[11px] font-bold text-teal-600 mt-1 block">
-              {language === 'ar' ? 'متوسط انضباط ممتاز' : 'High engagement'}
+              {attendanceSubtext}
             </span>
           </div>
 
@@ -226,7 +284,7 @@ export function AdminDashboardScreen() {
               {avgPerformance}%
             </div>
             <span className="text-[11px] font-bold text-rose-600 mt-1 block">
-              {language === 'ar' ? 'تقدير عام: جيد جداً' : 'Very Good Overall'}
+              {performanceSubtext}
             </span>
           </div>
 
@@ -350,7 +408,7 @@ export function AdminDashboardScreen() {
                   {language === 'ar' ? 'اليوم (Today)' : 'Today'}
                 </span>
                 <span className="text-3xl font-black text-emerald-800 dark:text-emerald-200 font-mono block">
-                  94%
+                  {todayAttendanceRate}%
                 </span>
               </div>
               <div
@@ -361,7 +419,7 @@ export function AdminDashboardScreen() {
                   {language === 'ar' ? 'أمس (Yesterday)' : 'Yesterday'}
                 </span>
                 <span className="text-3xl font-black text-blue-800 dark:text-blue-200 font-mono block">
-                  91%
+                  {yesterdayAttendanceRate}%
                 </span>
               </div>
               <div
@@ -372,7 +430,7 @@ export function AdminDashboardScreen() {
                   {language === 'ar' ? 'هذا الأسبوع' : 'This Week'}
                 </span>
                 <span className="text-3xl font-black text-purple-800 dark:text-purple-200 font-mono block">
-                  92%
+                  {overallWeekAttendanceRate}%
                 </span>
               </div>
             </div>
@@ -383,9 +441,11 @@ export function AdminDashboardScreen() {
                 style={{ padding: '18px 24px' }}
               >
                 <span className="text-slate-700 dark:text-slate-200 font-bold">
-                  {language === 'ar' ? 'إجمالي الحصص المنجزة هذا الأسبوع:' : 'Sessions Completed This Week:'}
+                  {language === 'ar' ? 'إجمالي الحصص المنجزة:' : 'Completed Sessions:'}
                 </span>
-                <span className="font-mono font-black text-slate-900 dark:text-white text-base">18 حصة</span>
+                <span className="font-mono font-black text-slate-900 dark:text-white text-base">
+                  {totalSessionsCompleted} {language === 'ar' ? 'حصة' : 'sessions'}
+                </span>
               </div>
               <div
                 className="flex items-center justify-between rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800"
@@ -394,7 +454,9 @@ export function AdminDashboardScreen() {
                 <span className="text-slate-700 dark:text-slate-200 font-bold">
                   {language === 'ar' ? 'عدد حالات الغياب المبرر:' : 'Excused Absences:'}
                 </span>
-                <span className="font-mono font-black text-blue-600 dark:text-blue-400 text-base">2 حالات</span>
+                <span className="font-mono font-black text-blue-600 dark:text-blue-400 text-base">
+                  {totalExcusedAbsences} {language === 'ar' ? 'حالات' : 'cases'}
+                </span>
               </div>
             </div>
           </div>
