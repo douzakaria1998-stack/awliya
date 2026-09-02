@@ -3069,47 +3069,50 @@ export function AdminAcademicPathScreen() {
       )}
       {/* Modal: Upgrade Group to Next Level & Student Outcomes Selection */}
       {isUpgradeModalOpen && activeProgressGroup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
-          <div className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up flex flex-col overflow-hidden max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
+          <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up flex flex-col overflow-hidden max-h-[92vh]">
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-emerald-50/60 via-teal-50/30 to-transparent dark:from-emerald-950/20 dark:via-teal-950/10">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
-                  <GraduationCap size={24} />
+            <div className="p-6 sm:p-7 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-emerald-50/60 via-teal-50/30 to-transparent dark:from-emerald-950/20 dark:via-teal-950/10">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
+                  <GraduationCap size={26} />
                 </div>
                 <div>
-                  <h3 className="font-black text-lg sm:text-xl text-slate-900 dark:text-white leading-tight">
+                  <h3 className="font-black text-lg sm:text-2xl text-slate-900 dark:text-white leading-tight">
                     {language === 'ar' ? 'ترقية وترحيل الفوج للمستوى التالي 🎓' : 'Upgrade Group to Next Level'}
                   </h3>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 block font-medium mt-0.5">
-                    {language === 'ar' ? 'الفوج الحالي:' : 'Current Group:'} {activeProgressGroup.name} ({activeProgressGroup.code}) • {language === 'ar' ? 'المستوى الحالي:' : 'Current Level:'} {activeProgressGroup.level}
+                  <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 block font-medium mt-1">
+                    {language === 'ar' ? 'الفوج الحالي:' : 'Current Group:'}{' '}
+                    <strong className="text-slate-700 dark:text-slate-200">{activeProgressGroup.name} ({activeProgressGroup.code})</strong>
+                    {' '}• {language === 'ar' ? 'المستوى الحالي:' : 'Current Level:'}{' '}
+                    <span className="inline-block px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold font-mono text-xs">{activeProgressGroup.level}</span>
                   </span>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsUpgradeModalOpen(false)}
-                className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 cursor-pointer transition-colors"
+                className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer transition-colors shrink-0"
               >
-                <X size={17} />
+                <X size={18} />
               </button>
             </div>
 
             {/* Modal Scrollable Body */}
-            <div className="p-6 overflow-y-auto space-y-6 flex-1">
+            <div className="p-6 sm:p-7 overflow-y-auto space-y-7 flex-1">
               {/* Step 1: Target Level & New Group Information */}
-              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 space-y-4">
+              <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 space-y-4">
                 <div className="flex items-center gap-2">
-                  <TrendingUp size={16} className="text-emerald-600 dark:text-emerald-400" />
-                  <h4 className="font-black text-sm text-slate-900 dark:text-white">
+                  <TrendingUp size={18} className="text-emerald-600 dark:text-emerald-400" />
+                  <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white">
                     {language === 'ar' ? 'بيانات المستوى والفوج بعد الترقية' : 'New Level & Group Details'}
                   </h4>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                   {/* Target CEFR Level */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
                       {language === 'ar' ? 'المستوى الجديد المستهدف:' : 'Target Next Level:'}
                     </label>
                     <select
@@ -3120,7 +3123,7 @@ export function AdminAcademicPathScreen() {
                         setTargetGroupName(activeProgressGroup.name.replace(activeProgressGroup.level, newLvl));
                         setTargetGroupCode(activeProgressGroup.code.replace(activeProgressGroup.level, newLvl));
                       }}
-                      className="w-full h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 cursor-pointer"
+                      className="w-full h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 cursor-pointer shadow-2xs"
                     >
                       {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((lvl) => (
                         <option key={lvl} value={lvl}>
@@ -3132,27 +3135,27 @@ export function AdminAcademicPathScreen() {
 
                   {/* Target Group Name */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
                       {language === 'ar' ? 'اسم الفوج المحدث:' : 'Updated Group Name:'}
                     </label>
                     <input
                       type="text"
                       value={targetGroupName}
                       onChange={(e) => setTargetGroupName(e.target.value)}
-                      className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                      className="w-full h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 shadow-2xs"
                     />
                   </div>
 
                   {/* Target Group Code */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
                       {language === 'ar' ? 'رمز الفوج الجديد:' : 'Updated Group Code:'}
                     </label>
                     <input
                       type="text"
                       value={targetGroupCode}
                       onChange={(e) => setTargetGroupCode(e.target.value)}
-                      className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                      className="w-full h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 shadow-2xs"
                     />
                   </div>
                 </div>
@@ -3163,11 +3166,11 @@ export function AdminAcademicPathScreen() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-2">
-                      <Users size={16} className="text-indigo-600" />
+                      <Users size={18} className="text-indigo-600" />
                       <span>{language === 'ar' ? 'تحديد مصير كل طالب في الفوج' : 'Set Outcome for Each Student'}</span>
                       <span className="text-xs text-slate-400 font-normal">({groupStudentsList.length} {language === 'ar' ? 'طلاب' : 'students'})</span>
                     </h4>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-slate-400 mt-1">
                       {language === 'ar'
                         ? 'حدد للطلاب: الانتقال للمستوى الجديد، أو إعادة المستوى، أو التوقف عن الدراسة.'
                         : 'Choose whether each student passes to the next level, repeats the current level, or stops.'}
@@ -3175,7 +3178,7 @@ export function AdminAcademicPathScreen() {
                   </div>
 
                   {/* Quick Preset Actions */}
-                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                  <div className="flex items-center gap-2.5 flex-wrap shrink-0">
                     <button
                       type="button"
                       onClick={() => {
@@ -3183,7 +3186,7 @@ export function AdminAcademicPathScreen() {
                         groupStudentsList.forEach((s) => (updated[s.id] = 'pass'));
                         setStudentDecisions(updated);
                       }}
-                      className="px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] border border-emerald-300 dark:border-emerald-800 transition-colors cursor-pointer"
+                      className="px-3.5 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-bold text-xs border border-emerald-300 dark:border-emerald-800 transition-colors cursor-pointer shadow-2xs whitespace-nowrap"
                     >
                       {language === 'ar' ? 'تحديد الكل ناجحين ✓' : 'All Pass ✓'}
                     </button>
@@ -3194,7 +3197,7 @@ export function AdminAcademicPathScreen() {
                         groupStudentsList.forEach((s) => (updated[s.id] = 'repeat'));
                         setStudentDecisions(updated);
                       }}
-                      className="px-2.5 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold text-[11px] border border-amber-300 dark:border-amber-800 transition-colors cursor-pointer"
+                      className="px-3.5 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold text-xs border border-amber-300 dark:border-amber-800 transition-colors cursor-pointer shadow-2xs whitespace-nowrap"
                     >
                       {language === 'ar' ? 'تحديد الكل إعادة 🔁' : 'All Repeat 🔁'}
                     </button>
@@ -3209,7 +3212,7 @@ export function AdminAcademicPathScreen() {
                         });
                         setStudentDecisions(updated);
                       }}
-                      className="px-2.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-[11px] border border-indigo-300 dark:border-indigo-800 transition-colors cursor-pointer"
+                      className="px-3.5 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs border border-indigo-300 dark:border-indigo-800 transition-colors cursor-pointer shadow-2xs whitespace-nowrap"
                     >
                       {language === 'ar' ? 'تحديد ذكي تلقائي ✨' : 'Auto-detect ✨'}
                     </button>
@@ -3217,82 +3220,82 @@ export function AdminAcademicPathScreen() {
                 </div>
 
                 {/* Summary Metrics Bar */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-center">
-                    <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 block">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                  <div className="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-center">
+                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 block mb-1">
                       {language === 'ar' ? 'المنتقلون للمستوى الجديد 🎓' : 'Passing to Next Level 🎓'}
                     </span>
-                    <span className="font-mono font-black text-xl text-emerald-800 dark:text-emerald-200">
+                    <span className="font-mono font-black text-2xl text-emerald-800 dark:text-emerald-200">
                       {groupStudentsList.filter((s) => (studentDecisions[s.id] || 'pass') === 'pass').length}
                     </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-center">
-                    <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 block">
+                  <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-center">
+                    <span className="text-xs font-bold text-amber-700 dark:text-amber-300 block mb-1">
                       {language === 'ar' ? 'المعيدون لنفس المستوى 🔁' : 'Repeating Level 🔁'}
                     </span>
-                    <span className="font-mono font-black text-xl text-amber-800 dark:text-amber-200">
+                    <span className="font-mono font-black text-2xl text-amber-800 dark:text-amber-200">
                       {groupStudentsList.filter((s) => studentDecisions[s.id] === 'repeat').length}
                     </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 text-center">
-                    <span className="text-[11px] font-bold text-rose-700 dark:text-rose-300 block">
+                  <div className="p-4 rounded-2xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 text-center">
+                    <span className="text-xs font-bold text-rose-700 dark:text-rose-300 block mb-1">
                       {language === 'ar' ? 'المتوقفون عن الدراسة ⛔' : 'Stopped / Paused ⛔'}
                     </span>
-                    <span className="font-mono font-black text-xl text-rose-800 dark:text-rose-200">
+                    <span className="font-mono font-black text-2xl text-rose-800 dark:text-rose-200">
                       {groupStudentsList.filter((s) => studentDecisions[s.id] === 'stopped').length}
                     </span>
                   </div>
                 </div>
 
                 {/* Students List with Decisions */}
-                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl divide-y divide-slate-100 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900 shadow-2xs">
+                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden bg-white dark:bg-slate-900 shadow-2xs">
                   {groupStudentsList.map((st) => {
                     const currentDecision = studentDecisions[st.id] || 'pass';
 
                     return (
                       <div
                         key={st.id}
-                        className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3.5 hover:bg-slate-50/70 dark:hover:bg-slate-850/60 transition-colors"
+                        className="p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 hover:bg-slate-50/70 dark:hover:bg-slate-850/60 transition-colors"
                       >
                         {/* Student Name & Current Status */}
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-2xs">
                             {st.fullNameAr.slice(0, 1)}
                           </div>
                           <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white block">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-black text-xs sm:text-sm text-slate-900 dark:text-white block">
                                 {st.fullNameAr}
                               </span>
-                              <span className="font-mono text-[11px] text-slate-400">
+                              <span className="font-mono text-xs text-slate-400">
                                 ({st.fullNameEn})
                               </span>
                             </div>
-                            <div className="flex items-center gap-2.5 mt-0.5">
-                              <span className="text-[11px] text-slate-400 font-mono">
+                            <div className="flex items-center gap-3 mt-1 text-xs">
+                              <span className="text-slate-400 font-mono text-[11px]">
                                 ID: {st.id}
                               </span>
-                              <span>•</span>
-                              <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 font-mono">
-                                {language === 'ar' ? 'الإنجاز:' : 'Progress:'} {st.overallProgress || 0}%
+                              <span className="text-slate-300">•</span>
+                              <span className="font-bold text-indigo-600 dark:text-indigo-400 font-mono text-xs">
+                                {language === 'ar' ? 'نسبة الإنجاز:' : 'Progress:'} {st.overallProgress || 0}%
                               </span>
                             </div>
                           </div>
                         </div>
 
-                        {/* 3 Decision Radio Buttons / Pills */}
-                        <div className="flex items-center gap-1.5 shrink-0 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl self-start md:self-auto">
+                        {/* 3 Decision Radio Buttons / Segmented Controls */}
+                        <div className="flex items-center gap-2 shrink-0 bg-slate-100 dark:bg-slate-800/90 p-1.5 rounded-2xl self-start lg:self-auto flex-wrap sm:flex-nowrap">
                           {/* 1. Pass */}
                           <button
                             type="button"
                             onClick={() => setStudentDecisions((prev) => ({ ...prev, [st.id]: 'pass' }))}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                               currentDecision === 'pass'
-                                ? 'bg-emerald-600 text-white shadow-xs'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300'
+                                ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-500/20'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-slate-200/50'
                             }`}
                           >
-                            <Check size={13} strokeWidth={3} />
+                            <Check size={14} strokeWidth={2.5} />
                             <span>{language === 'ar' ? 'ناجح (للمستوى الجديد)' : 'Pass (Next Level)'}</span>
                           </button>
 
@@ -3300,13 +3303,13 @@ export function AdminAcademicPathScreen() {
                           <button
                             type="button"
                             onClick={() => setStudentDecisions((prev) => ({ ...prev, [st.id]: 'repeat' }))}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                               currentDecision === 'repeat'
-                                ? 'bg-amber-500 text-white shadow-xs'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-300'
+                                ? 'bg-amber-500 text-white shadow-xs ring-2 ring-amber-500/20'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-slate-200/50'
                             }`}
                           >
-                            <RotateCcw size={13} strokeWidth={2.5} />
+                            <RotateCcw size={14} strokeWidth={2.5} />
                             <span>{language === 'ar' ? 'إعادة المستوى' : 'Repeat'}</span>
                           </button>
 
@@ -3314,13 +3317,13 @@ export function AdminAcademicPathScreen() {
                           <button
                             type="button"
                             onClick={() => setStudentDecisions((prev) => ({ ...prev, [st.id]: 'stopped' }))}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                               currentDecision === 'stopped'
-                                ? 'bg-rose-600 text-white shadow-xs'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-rose-700 dark:hover:text-rose-300'
+                                ? 'bg-rose-600 text-white shadow-xs ring-2 ring-rose-500/20'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-rose-700 dark:hover:text-rose-300 hover:bg-slate-200/50'
                             }`}
                           >
-                            <UserX size={13} strokeWidth={2.5} />
+                            <UserX size={14} strokeWidth={2.5} />
                             <span>{language === 'ar' ? 'متوقف' : 'Stopped'}</span>
                           </button>
                         </div>
@@ -3332,27 +3335,30 @@ export function AdminAcademicPathScreen() {
             </div>
 
             {/* Modal Actions Footer */}
-            <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="text-xs text-slate-500 font-medium">
-                {language === 'ar'
-                  ? `سيتم ترحيل ${groupStudentsList.filter((s) => (studentDecisions[s.id] || 'pass') === 'pass').length} من أصل ${groupStudentsList.length} طلاب إلى المستوى ${targetLevel}`
-                  : `${groupStudentsList.filter((s) => (studentDecisions[s.id] || 'pass') === 'pass').length} of ${groupStudentsList.length} students will advance to level ${targetLevel}`}
+            <div className="p-5 sm:p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-850/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+                <span>
+                  {language === 'ar'
+                    ? `سيتم ترحيل ${groupStudentsList.filter((s) => (studentDecisions[s.id] || 'pass') === 'pass').length} من أصل ${groupStudentsList.length} طلاب إلى المستوى ${targetLevel}`
+                    : `${groupStudentsList.filter((s) => (studentDecisions[s.id] || 'pass') === 'pass').length} of ${groupStudentsList.length} students will advance to level ${targetLevel}`}
+                </span>
               </div>
 
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-3 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsUpgradeModalOpen(false)}
-                  className="px-5 h-11 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm transition-colors cursor-pointer"
+                  className="px-6 h-12 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm transition-colors cursor-pointer whitespace-nowrap shadow-2xs"
                 >
                   {language === 'ar' ? 'إلغاء' : 'Cancel'}
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirmUpgradeGroup}
-                  className="px-6 h-11 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-emerald-600/20 transition-all cursor-pointer active:scale-95"
+                  className="px-7 h-12 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md shadow-emerald-600/25 transition-all cursor-pointer active:scale-95 whitespace-nowrap"
                 >
-                  <GraduationCap size={18} />
+                  <GraduationCap size={20} />
                   <span>{language === 'ar' ? 'تأكيد وترقية الفوج للمستوى التالي 🎓' : 'Confirm & Upgrade Group 🎓'}</span>
                 </button>
               </div>
