@@ -48,7 +48,13 @@ export default function RootLayout({
                   var origConsoleError = console.error;
                   console.error = function() {
                     var args = Array.prototype.slice.call(arguments).join(' ');
-                    if (args.indexOf('chrome-extension:') !== -1 || args.indexOf('moz-extension:') !== -1 || args.indexOf('M_ID') !== -1) {
+                    if (
+                      args.indexOf('chrome-extension:') !== -1 ||
+                      args.indexOf('moz-extension:') !== -1 ||
+                      args.indexOf('M_ID') !== -1 ||
+                      args.indexOf('bis_skin_checked') !== -1 ||
+                      (args.indexOf('hydrated but some attributes') !== -1 && args.indexOf('bis_skin_checked') !== -1)
+                    ) {
                       return;
                     }
                     origConsoleError.apply(console, arguments);
