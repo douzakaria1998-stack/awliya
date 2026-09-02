@@ -35,6 +35,8 @@ import {
   Download,
   School,
   Save,
+  RotateCcw,
+  UserX,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -56,6 +58,8 @@ export function AdminAcademicPathScreen() {
     updateLessonProgress,
     studentLevelScores,
     updateStudentLevelScore,
+    updateGroup,
+    updateStudent,
   } = useAdmin();
   const { isRTL, language } = useLanguage();
 
@@ -202,6 +206,123 @@ export function AdminAcademicPathScreen() {
   const [isStudentScoreModalOpen, setIsStudentScoreModalOpen] = useState(false);
   const [editStudentScore, setEditStudentScore] = useState<number>(93);
   const [editStudentHonors, setEditStudentHonors] = useState<string>('تقدير: ممتاز مرتفع (مع مرتبة الشرف)');
+
+  // Group Level Upgrade State
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [targetLevel, setTargetLevel] = useState<'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'>('A2');
+  const [targetGroupName, setTargetGroupName] = useState('');
+  const [targetGroupCode, setTargetGroupCode] = useState('');
+  const [studentDecisions, setStudentDecisions] = useState<Record<string, 'pass' | 'repeat' | 'stopped'>>({});
+  const [upgradeSuccessMessage, setUpgradeSuccessMessage] = useState<string | null>(null);
+
+  // Helper to open upgrade modal
+  const handleOpenUpgradeModal = () => {
+    if (!activeProgressGroup) return;
+
+    const nextLevelMap: Record<string, 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'> = {
+      A1: 'A2',
+      A2: 'B1',
+      B1: 'B2',
+      B2: 'C1',
+      C1: 'C2',
+      C2: 'C2',
+    };
+    const nextLvl = nextLevelMap[activeProgressGroup.level] || 'A2';
+    setTargetLevel(nextLvl);
+
+    const updatedName = activeProgressGroup.name.replace(activeProgressGroup.level, nextLvl);
+    const updatedCode = activeProgressGroup.code.replace(activeProgressGroup.level, nextLvl);
+    setTargetGroupName(updatedName);
+    setTargetGroupCode(updatedCode);
+
+    const initialDecisions: Record<string, 'pass' | 'repeat' | 'stopped'> = {};
+    groupStudentsList.forEach((s) => {
+      if (s.status === 'inactive') {
+        initialDecisions[s.id] = 'stopped';
+      } else if (s.overallProgress >= 70) {
+        initialDecisions[s.id] = 'pass';
+      } else {
+        initialDecisions[s.id] = 'repeat';
+      }
+    });
+    setStudentDecisions(initialDecisions);
+    setIsUpgradeModalOpen(true);
+  };
+
+  // Helper to execute group upgrade and student outcomes
+  const handleConfirmUpgradeGroup = () => {
+    if (!activeProgressGroup) return;
+
+    const levelMap: Record<string, number> = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5, C2: 6 };
+    const nextLevelNum = levelMap[targetLevel] || 2;
+    const currentLevelNum = levelMap[activeProgressGroup.level] || 1;
+
+    const passingStudents = groupStudentsList.filter((s) => (studentDecisions[s.id] || 'pass') === 'pass');
+    const repeatingStudents = groupStudentsList.filter((s) => studentDecisions[s.id] === 'repeat');
+    const stoppedStudents = groupStudentsList.filter((s) => studentDecisions[s.id] === 'stopped');
+
+    // 1. Process Passing Students
+    passingStudents.forEach((s) => {
+      updateStudent(s.id, {
+        currentLevel: nextLevelNum,
+        cefrLevel: targetLevel,
+        groupName: targetGroupName,
+        groupId: activeProgressGroup.id,
+        overallProgress: 0,
+        completedLessonsCount: 0,
+        status: 'active',
+      });
+
+      updateStudentLevelScore(
+        s.id,
+        currentLevelNum,
+        95,
+        language === 'ar' ? 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)' : 'Honors: High Distinction'
+      );
+    });
+
+    // 2. Process Repeating Students
+    repeatingStudents.forEach((s) => {
+      updateStudent(s.id, {
+        overallProgress: 0,
+        completedLessonsCount: 0,
+        status: 'active',
+        groupId: '',
+        groupName: language === 'ar' ? `إعادة المستوى (${activeProgressGroup.level}) - بانتظار التسكين` : `Repeating (${activeProgressGroup.level}) - Unassigned`,
+      });
+    });
+
+    // 3. Process Stopped Students
+    stoppedStudents.forEach((s) => {
+      updateStudent(s.id, {
+        status: 'inactive',
+        groupId: '',
+        groupName: language === 'ar' ? 'منقطع عن الدراسة' : 'Stopped / Paused',
+      });
+    });
+
+    // 4. Update the Group itself
+    updateGroup(activeProgressGroup.id, {
+      level: targetLevel,
+      name: targetGroupName,
+      code: targetGroupCode,
+      studentIds: passingStudents.map((s) => s.id),
+      averageProgress: 0,
+    });
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('awliya-data-sync'));
+    }
+
+    setIsUpgradeModalOpen(false);
+
+    const msg =
+      language === 'ar'
+        ? `تهانينا! تمت ترقية الفوج بنجاح إلى (${targetLevel})، وتم ترحيل ${passingStudents.length} طلاب، وتحديد ${repeatingStudents.length} للإعادة و ${stoppedStudents.length} متوقفين.`
+        : `Congratulations! Group successfully upgraded to (${targetLevel}). ${passingStudents.length} students advanced, ${repeatingStudents.length} repeating, and ${stoppedStudents.length} stopped.`;
+    setUpgradeSuccessMessage(msg);
+    setTimeout(() => setUpgradeSuccessMessage(null), 6000);
+  };
 
   // Filtered Groups for Level 1
   const filteredProgressGroups = useMemo(() => {
@@ -1497,17 +1618,45 @@ export function AdminAcademicPathScreen() {
           {progressViewMode === 'group_detail' && activeProgressGroup && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               {/* Back Button */}
-              <div>
+              {/* Header Bar with Back Button + Upgrade Group Button */}
+              <div className="flex items-center justify-between gap-4 flex-wrap">
                 <button
                   type="button"
                   onClick={handleBackToGroups}
-                  className="self-start flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer shadow-2xs"
+                  className="flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer shadow-2xs"
                   style={{ padding: '9px 18px' }}
                 >
                   {isRTL ? <ArrowRight size={15} /> : <ArrowLeft size={15} />}
                   <span>{language === 'ar' ? 'العودة لقائمة الأفواج' : 'Back to Groups'}</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={handleOpenUpgradeModal}
+                  className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ padding: '10px 22px' }}
+                >
+                  <GraduationCap size={18} />
+                  <span>{language === 'ar' ? 'ترقية الفوج للمستوى التالي 🎓' : 'Upgrade Group to Next Level 🎓'}</span>
+                </button>
               </div>
+
+              {/* Upgrade Success Notification Banner */}
+              {upgradeSuccessMessage && (
+                <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 font-bold text-xs sm:text-sm flex items-center justify-between gap-3 shadow-xs animate-fade-in">
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+                    <span>{upgradeSuccessMessage}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setUpgradeSuccessMessage(null)}
+                    className="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 p-1 cursor-pointer"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
 
               {/* Container 1: Group Summary Card */}
               <div
@@ -2914,6 +3063,299 @@ export function AdminAcademicPathScreen() {
                 <Check size={16} strokeWidth={2.5} />
                 <span>{language === 'ar' ? 'حفظ واعتماد الدرجة' : 'Save & Certify Mark'}</span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modal: Upgrade Group to Next Level & Student Outcomes Selection */}
+      {isUpgradeModalOpen && activeProgressGroup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
+          <div className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up flex flex-col overflow-hidden max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-emerald-50/60 via-teal-50/30 to-transparent dark:from-emerald-950/20 dark:via-teal-950/10">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
+                  <GraduationCap size={24} />
+                </div>
+                <div>
+                  <h3 className="font-black text-lg sm:text-xl text-slate-900 dark:text-white leading-tight">
+                    {language === 'ar' ? 'ترقية وترحيل الفوج للمستوى التالي 🎓' : 'Upgrade Group to Next Level'}
+                  </h3>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 block font-medium mt-0.5">
+                    {language === 'ar' ? 'الفوج الحالي:' : 'Current Group:'} {activeProgressGroup.name} ({activeProgressGroup.code}) • {language === 'ar' ? 'المستوى الحالي:' : 'Current Level:'} {activeProgressGroup.level}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsUpgradeModalOpen(false)}
+                className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 cursor-pointer transition-colors"
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div className="p-6 overflow-y-auto space-y-6 flex-1">
+              {/* Step 1: Target Level & New Group Information */}
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 space-y-4">
+                <div className="flex items-center gap-2">
+                  <TrendingUp size={16} className="text-emerald-600 dark:text-emerald-400" />
+                  <h4 className="font-black text-sm text-slate-900 dark:text-white">
+                    {language === 'ar' ? 'بيانات المستوى والفوج بعد الترقية' : 'New Level & Group Details'}
+                  </h4>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Target CEFR Level */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      {language === 'ar' ? 'المستوى الجديد المستهدف:' : 'Target Next Level:'}
+                    </label>
+                    <select
+                      value={targetLevel}
+                      onChange={(e) => {
+                        const newLvl = e.target.value as any;
+                        setTargetLevel(newLvl);
+                        setTargetGroupName(activeProgressGroup.name.replace(activeProgressGroup.level, newLvl));
+                        setTargetGroupCode(activeProgressGroup.code.replace(activeProgressGroup.level, newLvl));
+                      }}
+                      className="w-full h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 cursor-pointer"
+                    >
+                      {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((lvl) => (
+                        <option key={lvl} value={lvl}>
+                          {lvl} {lvl === 'A1' ? '(Beginner)' : lvl === 'A2' ? '(Elementary)' : lvl === 'B1' ? '(Intermediate)' : lvl === 'B2' ? '(Upper Int.)' : '(Advanced)'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Target Group Name */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      {language === 'ar' ? 'اسم الفوج المحدث:' : 'Updated Group Name:'}
+                    </label>
+                    <input
+                      type="text"
+                      value={targetGroupName}
+                      onChange={(e) => setTargetGroupName(e.target.value)}
+                      className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                    />
+                  </div>
+
+                  {/* Target Group Code */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      {language === 'ar' ? 'رمز الفوج الجديد:' : 'Updated Group Code:'}
+                    </label>
+                    <input
+                      type="text"
+                      value={targetGroupCode}
+                      onChange={(e) => setTargetGroupCode(e.target.value)}
+                      className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2: Student Decision Controls */}
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-2">
+                      <Users size={16} className="text-indigo-600" />
+                      <span>{language === 'ar' ? 'تحديد مصير كل طالب في الفوج' : 'Set Outcome for Each Student'}</span>
+                      <span className="text-xs text-slate-400 font-normal">({groupStudentsList.length} {language === 'ar' ? 'طلاب' : 'students'})</span>
+                    </h4>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {language === 'ar'
+                        ? 'حدد للطلاب: الانتقال للمستوى الجديد، أو إعادة المستوى، أو التوقف عن الدراسة.'
+                        : 'Choose whether each student passes to the next level, repeats the current level, or stops.'}
+                    </p>
+                  </div>
+
+                  {/* Quick Preset Actions */}
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated: Record<string, 'pass' | 'repeat' | 'stopped'> = {};
+                        groupStudentsList.forEach((s) => (updated[s.id] = 'pass'));
+                        setStudentDecisions(updated);
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] border border-emerald-300 dark:border-emerald-800 transition-colors cursor-pointer"
+                    >
+                      {language === 'ar' ? 'تحديد الكل ناجحين ✓' : 'All Pass ✓'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated: Record<string, 'pass' | 'repeat' | 'stopped'> = {};
+                        groupStudentsList.forEach((s) => (updated[s.id] = 'repeat'));
+                        setStudentDecisions(updated);
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold text-[11px] border border-amber-300 dark:border-amber-800 transition-colors cursor-pointer"
+                    >
+                      {language === 'ar' ? 'تحديد الكل إعادة 🔁' : 'All Repeat 🔁'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated: Record<string, 'pass' | 'repeat' | 'stopped'> = {};
+                        groupStudentsList.forEach((s) => {
+                          if (s.status === 'inactive') updated[s.id] = 'stopped';
+                          else if (s.overallProgress >= 70) updated[s.id] = 'pass';
+                          else updated[s.id] = 'repeat';
+                        });
+                        setStudentDecisions(updated);
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-[11px] border border-indigo-300 dark:border-indigo-800 transition-colors cursor-pointer"
+                    >
+                      {language === 'ar' ? 'تحديد ذكي تلقائي ✨' : 'Auto-detect ✨'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Summary Metrics Bar */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-center">
+                    <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 block">
+                      {language === 'ar' ? 'المنتقلون للمستوى الجديد 🎓' : 'Passing to Next Level 🎓'}
+                    </span>
+                    <span className="font-mono font-black text-xl text-emerald-800 dark:text-emerald-200">
+                      {groupStudentsList.filter((s) => (studentDecisions[s.id] || 'pass') === 'pass').length}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-center">
+                    <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 block">
+                      {language === 'ar' ? 'المعيدون لنفس المستوى 🔁' : 'Repeating Level 🔁'}
+                    </span>
+                    <span className="font-mono font-black text-xl text-amber-800 dark:text-amber-200">
+                      {groupStudentsList.filter((s) => studentDecisions[s.id] === 'repeat').length}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 text-center">
+                    <span className="text-[11px] font-bold text-rose-700 dark:text-rose-300 block">
+                      {language === 'ar' ? 'المتوقفون عن الدراسة ⛔' : 'Stopped / Paused ⛔'}
+                    </span>
+                    <span className="font-mono font-black text-xl text-rose-800 dark:text-rose-200">
+                      {groupStudentsList.filter((s) => studentDecisions[s.id] === 'stopped').length}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Students List with Decisions */}
+                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl divide-y divide-slate-100 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900 shadow-2xs">
+                  {groupStudentsList.map((st) => {
+                    const currentDecision = studentDecisions[st.id] || 'pass';
+
+                    return (
+                      <div
+                        key={st.id}
+                        className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3.5 hover:bg-slate-50/70 dark:hover:bg-slate-850/60 transition-colors"
+                      >
+                        {/* Student Name & Current Status */}
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                            {st.fullNameAr.slice(0, 1)}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white block">
+                                {st.fullNameAr}
+                              </span>
+                              <span className="font-mono text-[11px] text-slate-400">
+                                ({st.fullNameEn})
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2.5 mt-0.5">
+                              <span className="text-[11px] text-slate-400 font-mono">
+                                ID: {st.id}
+                              </span>
+                              <span>•</span>
+                              <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 font-mono">
+                                {language === 'ar' ? 'الإنجاز:' : 'Progress:'} {st.overallProgress || 0}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 3 Decision Radio Buttons / Pills */}
+                        <div className="flex items-center gap-1.5 shrink-0 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl self-start md:self-auto">
+                          {/* 1. Pass */}
+                          <button
+                            type="button"
+                            onClick={() => setStudentDecisions((prev) => ({ ...prev, [st.id]: 'pass' }))}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                              currentDecision === 'pass'
+                                ? 'bg-emerald-600 text-white shadow-xs'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300'
+                            }`}
+                          >
+                            <Check size={13} strokeWidth={3} />
+                            <span>{language === 'ar' ? 'ناجح (للمستوى الجديد)' : 'Pass (Next Level)'}</span>
+                          </button>
+
+                          {/* 2. Repeat */}
+                          <button
+                            type="button"
+                            onClick={() => setStudentDecisions((prev) => ({ ...prev, [st.id]: 'repeat' }))}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                              currentDecision === 'repeat'
+                                ? 'bg-amber-500 text-white shadow-xs'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-300'
+                            }`}
+                          >
+                            <RotateCcw size={13} strokeWidth={2.5} />
+                            <span>{language === 'ar' ? 'إعادة المستوى' : 'Repeat'}</span>
+                          </button>
+
+                          {/* 3. Stopped */}
+                          <button
+                            type="button"
+                            onClick={() => setStudentDecisions((prev) => ({ ...prev, [st.id]: 'stopped' }))}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                              currentDecision === 'stopped'
+                                ? 'bg-rose-600 text-white shadow-xs'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-rose-700 dark:hover:text-rose-300'
+                            }`}
+                          >
+                            <UserX size={13} strokeWidth={2.5} />
+                            <span>{language === 'ar' ? 'متوقف' : 'Stopped'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions Footer */}
+            <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="text-xs text-slate-500 font-medium">
+                {language === 'ar'
+                  ? `سيتم ترحيل ${groupStudentsList.filter((s) => (studentDecisions[s.id] || 'pass') === 'pass').length} من أصل ${groupStudentsList.length} طلاب إلى المستوى ${targetLevel}`
+                  : `${groupStudentsList.filter((s) => (studentDecisions[s.id] || 'pass') === 'pass').length} of ${groupStudentsList.length} students will advance to level ${targetLevel}`}
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setIsUpgradeModalOpen(false)}
+                  className="px-5 h-11 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm transition-colors cursor-pointer"
+                >
+                  {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmUpgradeGroup}
+                  className="px-6 h-11 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-emerald-600/20 transition-all cursor-pointer active:scale-95"
+                >
+                  <GraduationCap size={18} />
+                  <span>{language === 'ar' ? 'تأكيد وترقية الفوج للمستوى التالي 🎓' : 'Confirm & Upgrade Group 🎓'}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
