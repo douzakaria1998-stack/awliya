@@ -2749,19 +2749,20 @@ export function AdminAcademicPathScreen() {
       {isStudentScoreModalOpen && activeProgressStudent && studentCurriculumLevel && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
           <div
-            className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up"
-            style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '18px' }}
+            className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up"
+            style={{ padding: '28px 32px', display: 'flex', flexDirection: 'column', gap: '22px' }}
           >
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3.5">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <Award size={20} />
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800" style={{ paddingBottom: '18px' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
+                  <Award size={22} />
                 </div>
                 <div>
-                  <h3 className="font-black text-base text-slate-900 dark:text-white">
+                  <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white leading-tight">
                     {language === 'ar' ? 'تعديل درجة الاجتياز النهائية للطالب' : 'Change Final Passing Mark'}
                   </h3>
-                  <span className="text-xs text-slate-400 block font-medium">
+                  <span className="text-xs text-slate-400 block font-medium mt-1">
                     {activeProgressStudent.fullNameAr} • {studentCurriculumLevel.nameAr}
                   </span>
                 </div>
@@ -2769,16 +2770,17 @@ export function AdminAcademicPathScreen() {
               <button
                 type="button"
                 onClick={() => setIsStudentScoreModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 cursor-pointer transition-colors"
+                className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 cursor-pointer transition-colors shrink-0"
               >
-                <X size={16} />
+                <X size={17} />
               </button>
             </div>
 
-            <div className="space-y-4">
+            {/* Body Form */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Score Input */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300" style={{ marginBottom: '8px' }}>
                   {language === 'ar' ? 'الدرجة النهائية (%)' : 'Final Mark (%)'}
                 </label>
                 <div className="relative">
@@ -2788,38 +2790,40 @@ export function AdminAcademicPathScreen() {
                     max="100"
                     value={editStudentScore}
                     onChange={(e) => setEditStudentScore(Number(e.target.value))}
-                    className="w-full h-11 px-3.5 pr-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+                    className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white text-lg font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
+                    style={{ paddingRight: '18px', paddingLeft: '44px' }}
                   />
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm font-mono pointer-events-none">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-base font-mono pointer-events-none select-none">
                     %
                   </span>
                 </div>
-              </div>
 
-              {/* Quick Presets */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[11px] font-bold text-slate-400 shrink-0">
-                  {language === 'ar' ? 'علامات شائعة:' : 'Common marks:'}
-                </span>
-                {[98, 95, 93, 90, 85, 80].map((scoreVal) => (
-                  <button
-                    key={scoreVal}
-                    type="button"
-                    onClick={() => setEditStudentScore(scoreVal)}
-                    className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
-                      editStudentScore === scoreVal
-                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                        : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-emerald-400'
-                    }`}
-                  >
-                    {scoreVal}%
-                  </button>
-                ))}
+                {/* Quick Score Presets */}
+                <div className="flex items-center gap-2 flex-wrap" style={{ marginTop: '12px' }}>
+                  <span className="text-xs font-bold text-slate-400 shrink-0">
+                    {language === 'ar' ? 'علامات شائعة:' : 'Common marks:'}
+                  </span>
+                  {[98, 95, 93, 90, 85, 80].map((scoreVal) => (
+                    <button
+                      key={scoreVal}
+                      type="button"
+                      onClick={() => setEditStudentScore(scoreVal)}
+                      className={`text-xs font-mono font-bold transition-all cursor-pointer ${
+                        editStudentScore === scoreVal
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                          : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-emerald-400 hover:bg-slate-200/70'
+                      }`}
+                      style={{ padding: '6px 14px', borderRadius: '10px', border: '1px solid' }}
+                    >
+                      {scoreVal}%
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Honors / Grade Label */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300" style={{ marginBottom: '8px' }}>
                   {language === 'ar' ? 'التقدير / مرتبة الشرف' : 'Honors / Grade Assessment'}
                 </label>
                 <input
@@ -2827,45 +2831,51 @@ export function AdminAcademicPathScreen() {
                   value={editStudentHonors}
                   onChange={(e) => setEditStudentHonors(e.target.value)}
                   placeholder="تقدير: ممتاز مرتفع (مع مرتبة الشرف)"
-                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+                  className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors"
+                  style={{ paddingLeft: '18px', paddingRight: '18px' }}
                 />
-              </div>
 
-              {/* Quick Preset Labels */}
-              <div className="space-y-1">
-                <span className="text-[11px] font-bold text-slate-400 block">
-                  {language === 'ar' ? 'خيارات التقدير السريعة:' : 'Quick Grade Presets:'}
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {[
-                    'تقدير: ممتاز مرتفع (مع مرتبة الشرف)',
-                    'تقدير: ممتاز (A)',
-                    'تقدير: جيد جداً مرتفع (B+)',
-                    'تقدير: جيد جداً (B)',
-                  ].map((labelPreset, lpIdx) => (
-                    <button
-                      key={lpIdx}
-                      type="button"
-                      onClick={() => setEditStudentHonors(labelPreset)}
-                      className={`text-[10px] font-medium px-2 py-1 rounded-md border transition-all cursor-pointer ${
-                        editStudentHonors === labelPreset
-                          ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 text-emerald-700 dark:text-emerald-300 font-bold'
-                          : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-700'
-                      }`}
-                    >
-                      {labelPreset}
-                    </button>
-                  ))}
+                {/* Quick Preset Labels */}
+                <div style={{ marginTop: '12px' }}>
+                  <span className="text-xs font-bold text-slate-400 block" style={{ marginBottom: '8px' }}>
+                    {language === 'ar' ? 'خيارات التقدير السريعة:' : 'Quick Grade Presets:'}
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      'تقدير: ممتاز مرتفع (مع مرتبة الشرف)',
+                      'تقدير: ممتاز (A)',
+                      'تقدير: جيد جداً مرتفع (B+)',
+                      'تقدير: جيد جداً (B)',
+                    ].map((labelPreset, lpIdx) => (
+                      <button
+                        key={lpIdx}
+                        type="button"
+                        onClick={() => setEditStudentHonors(labelPreset)}
+                        className={`text-xs font-medium transition-all cursor-pointer ${
+                          editStudentHonors === labelPreset
+                            ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-400 text-emerald-700 dark:text-emerald-300 font-bold shadow-2xs'
+                            : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-300'
+                        }`}
+                        style={{ padding: '7px 13px', borderRadius: '10px', border: '1px solid', lineHeight: '1.3' }}
+                      >
+                        {labelPreset}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Modal Actions */}
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
+            {/* Modal Actions Footer */}
+            <div
+              className="border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3"
+              style={{ paddingTop: '20px' }}
+            >
               <button
                 type="button"
                 onClick={() => setIsStudentScoreModalOpen(false)}
-                className="px-4 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+                className="rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs sm:text-sm whitespace-nowrap transition-colors cursor-pointer"
+                style={{ padding: '11px 24px', minHeight: '44px' }}
               >
                 {language === 'ar' ? 'إلغاء' : 'Cancel'}
               </button>
@@ -2880,7 +2890,8 @@ export function AdminAcademicPathScreen() {
                   );
                   setIsStudentScoreModalOpen(false);
                 }}
-                className="px-5 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md transition-all cursor-pointer active:scale-95"
+                className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm whitespace-nowrap inline-flex items-center gap-2 shadow-md shadow-emerald-600/20 transition-all cursor-pointer active:scale-95"
+                style={{ padding: '11px 26px', minHeight: '44px' }}
               >
                 <Check size={16} strokeWidth={2.5} />
                 <span>{language === 'ar' ? 'حفظ واعتماد الدرجة' : 'Save & Certify Mark'}</span>
