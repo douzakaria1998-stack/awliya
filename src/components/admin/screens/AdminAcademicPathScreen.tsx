@@ -3184,27 +3184,30 @@ export function AdminAcademicPathScreen() {
               </div>
 
               {/* Step 2: Student Decision Controls Container */}
-              <div className="space-y-5">
-                {/* Header & Quick Actions */}
-                <div className="space-y-3">
-                  <div>
-                    <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-2">
-                      <Users size={18} className="text-indigo-600" />
-                      <span>{language === 'ar' ? 'تحديد مصير كل طالب في الفوج' : 'Set Outcome for Each Student'}</span>
-                      <span className="text-xs text-slate-400 font-normal">({groupStudentsList.length} {language === 'ar' ? 'طلاب' : 'students'})</span>
-                    </h4>
-                    <p className="text-xs text-slate-400 mt-1">
-                      {language === 'ar'
-                        ? 'حدد للطلاب: الانتقال للمستوى الجديد، أو إعادة المستوى، أو التوقف عن الدراسة.'
-                        : 'Choose whether each student passes to the next level, repeats the current level, or stops.'}
-                    </p>
-                  </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+                {/* Header & Subtitle */}
+                <div>
+                  <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                    <Users size={19} className="text-indigo-600 dark:text-indigo-400" />
+                    <span>{language === 'ar' ? 'تحديد مصير كل طالب في الفوج' : 'Set Outcome for Each Student'}</span>
+                    <span className="text-xs text-slate-400 font-normal">({groupStudentsList.length} {language === 'ar' ? 'طلاب' : 'students'})</span>
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400" style={{ marginTop: '6px' }}>
+                    {language === 'ar'
+                      ? 'حدد للطلاب: الانتقال للمستوى الجديد، أو إعادة المستوى، أو التوقف عن الدراسة.'
+                      : 'Choose whether each student passes to the next level, repeats the current level, or stops.'}
+                  </p>
+                </div>
 
-                  {/* Quick Preset Actions Toolbar */}
-                  <div className="flex items-center gap-2.5 flex-wrap pt-1.5 pb-0.5">
-                    <span className="text-xs font-bold text-slate-400 shrink-0">
-                      {language === 'ar' ? 'إجراءات سريعة:' : 'Quick Actions:'}
-                    </span>
+                {/* Quick Preset Actions Toolbar */}
+                <div
+                  className="flex items-center gap-3 flex-wrap rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60"
+                  style={{ padding: '10px 16px' }}
+                >
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400 shrink-0">
+                    {language === 'ar' ? 'إجراءات التحديد السريع:' : 'Quick Actions:'}
+                  </span>
+                  <div className="flex items-center gap-2 flex-wrap">
                     <button
                       type="button"
                       onClick={() => {
@@ -3212,7 +3215,8 @@ export function AdminAcademicPathScreen() {
                         groupStudentsList.forEach((s) => (updated[s.id] = 'pass'));
                         setStudentDecisions(updated);
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-bold text-xs border border-emerald-300 dark:border-emerald-800 transition-colors cursor-pointer shadow-2xs"
+                      className="rounded-xl bg-white dark:bg-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold text-xs border border-emerald-300 dark:border-emerald-700 transition-colors cursor-pointer shadow-2xs"
+                      style={{ padding: '6px 14px' }}
                     >
                       {language === 'ar' ? 'تحديد الكل ناجحين ✓' : 'All Pass ✓'}
                     </button>
@@ -3223,7 +3227,8 @@ export function AdminAcademicPathScreen() {
                         groupStudentsList.forEach((s) => (updated[s.id] = 'repeat'));
                         setStudentDecisions(updated);
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold text-xs border border-amber-300 dark:border-amber-800 transition-colors cursor-pointer shadow-2xs"
+                      className="rounded-xl bg-white dark:bg-slate-700 hover:bg-amber-50 dark:hover:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-xs border border-amber-300 dark:border-amber-700 transition-colors cursor-pointer shadow-2xs"
+                      style={{ padding: '6px 14px' }}
                     >
                       {language === 'ar' ? 'تحديد الكل إعادة 🔁' : 'All Repeat 🔁'}
                     </button>
@@ -3238,7 +3243,8 @@ export function AdminAcademicPathScreen() {
                         });
                         setStudentDecisions(updated);
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs border border-indigo-300 dark:border-indigo-800 transition-colors cursor-pointer shadow-2xs"
+                      className="rounded-xl bg-white dark:bg-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs border border-indigo-300 dark:border-indigo-700 transition-colors cursor-pointer shadow-2xs"
+                      style={{ padding: '6px 14px' }}
                     >
                       {language === 'ar' ? 'تحديد ذكي تلقائي ✨' : 'Auto-detect ✨'}
                     </button>
@@ -3246,63 +3252,71 @@ export function AdminAcademicPathScreen() {
                 </div>
 
                 {/* Summary Metrics Bar Container */}
-                <div className="grid grid-cols-3 gap-3.5 pt-1">
-                  <div className="p-3.5 sm:p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-center shadow-2xs">
-                    <span className="text-[11px] sm:text-xs font-bold text-emerald-700 dark:text-emerald-300 block mb-1">
+                <div className="grid grid-cols-3 gap-4">
+                  <div
+                    className="rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-center shadow-2xs"
+                    style={{ padding: '14px 18px' }}
+                  >
+                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 block" style={{ marginBottom: '4px' }}>
                       {language === 'ar' ? 'المنتقلون للمستوى الجديد 🎓' : 'Passing 🎓'}
                     </span>
-                    <span className="font-mono font-black text-xl sm:text-2xl text-emerald-800 dark:text-emerald-200">
+                    <span className="font-mono font-black text-2xl text-emerald-800 dark:text-emerald-200">
                       {groupStudentsList.filter((s) => (studentDecisions[s.id] || 'pass') === 'pass').length}
                     </span>
                   </div>
-                  <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-center shadow-2xs">
-                    <span className="text-[11px] sm:text-xs font-bold text-amber-700 dark:text-amber-300 block mb-1">
+                  <div
+                    className="rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-center shadow-2xs"
+                    style={{ padding: '14px 18px' }}
+                  >
+                    <span className="text-xs font-bold text-amber-700 dark:text-amber-300 block" style={{ marginBottom: '4px' }}>
                       {language === 'ar' ? 'المعيدون لنفس المستوى 🔁' : 'Repeating 🔁'}
                     </span>
-                    <span className="font-mono font-black text-xl sm:text-2xl text-amber-800 dark:text-amber-200">
+                    <span className="font-mono font-black text-2xl text-amber-800 dark:text-amber-200">
                       {groupStudentsList.filter((s) => studentDecisions[s.id] === 'repeat').length}
                     </span>
                   </div>
-                  <div className="p-3.5 sm:p-4 rounded-2xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 text-center shadow-2xs">
-                    <span className="text-[11px] sm:text-xs font-bold text-rose-700 dark:text-rose-300 block mb-1">
+                  <div
+                    className="rounded-2xl bg-rose-50/90 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 text-center shadow-2xs"
+                    style={{ padding: '14px 18px' }}
+                  >
+                    <span className="text-xs font-bold text-rose-700 dark:text-rose-300 block" style={{ marginBottom: '4px' }}>
                       {language === 'ar' ? 'المتوقفون عن الدراسة ⛔' : 'Stopped ⛔'}
                     </span>
-                    <span className="font-mono font-black text-xl sm:text-2xl text-rose-800 dark:text-rose-200">
+                    <span className="font-mono font-black text-2xl text-rose-800 dark:text-rose-200">
                       {groupStudentsList.filter((s) => studentDecisions[s.id] === 'stopped').length}
                     </span>
                   </div>
                 </div>
 
                 {/* Students List with Individual Spaced Cards */}
-                <div className="space-y-3 pt-2">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '4px' }}>
                   {groupStudentsList.map((st) => {
                     const currentDecision = studentDecisions[st.id] || 'pass';
 
                     return (
                       <div
                         key={st.id}
-                        className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-850/70 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-all shadow-2xs"
+                        className="rounded-2xl bg-slate-50/90 dark:bg-slate-850/70 border border-slate-200/90 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition-all shadow-2xs"
+                        style={{ padding: '16px 20px' }}
                       >
                         {/* Student Name & Current Status */}
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-2xs">
                             {st.fullNameAr.slice(0, 1)}
                           </div>
                           <div className="min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-sm text-slate-900 dark:text-white truncate">
                                 {st.fullNameAr}
                               </span>
-                              <span className="font-mono text-[11px] text-slate-400 truncate">
+                              <span className="font-mono text-xs text-slate-400 truncate">
                                 ({st.fullNameEn})
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 mt-0.5 text-[11px]">
-                              <span className="text-slate-400 font-mono">
-                                ID: {st.id}
-                              </span>
+                            <div className="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400" style={{ marginTop: '3px' }}>
+                              <span className="font-mono text-[11px]">ID: {st.id}</span>
                               <span className="text-slate-300">•</span>
-                              <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                              <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono text-xs">
                                 {language === 'ar' ? 'نسبة الإنجاز:' : 'Progress:'} {st.overallProgress || 0}%
                               </span>
                             </div>
@@ -3310,18 +3324,22 @@ export function AdminAcademicPathScreen() {
                         </div>
 
                         {/* 3 Decision Radio Buttons in a compact grid */}
-                        <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-slate-200/70 dark:bg-slate-800 w-full sm:w-auto shrink-0 shadow-inner">
+                        <div
+                          className="grid grid-cols-3 gap-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 w-full sm:w-auto shrink-0 shadow-inner"
+                          style={{ padding: '4px 6px' }}
+                        >
                           {/* 1. Pass */}
                           <button
                             type="button"
                             onClick={() => setStudentDecisions((prev) => ({ ...prev, [st.id]: 'pass' }))}
-                            className={`flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                            className={`flex items-center justify-center gap-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                               currentDecision === 'pass'
-                                ? 'bg-emerald-600 text-white shadow-xs'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300'
+                                ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-500/20'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-slate-300/50'
                             }`}
+                            style={{ padding: '7px 12px' }}
                           >
-                            <Check size={12} strokeWidth={3} />
+                            <Check size={13} strokeWidth={3} />
                             <span>{language === 'ar' ? 'ناجح 🎓' : 'Pass 🎓'}</span>
                           </button>
 
@@ -3329,13 +3347,14 @@ export function AdminAcademicPathScreen() {
                           <button
                             type="button"
                             onClick={() => setStudentDecisions((prev) => ({ ...prev, [st.id]: 'repeat' }))}
-                            className={`flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                            className={`flex items-center justify-center gap-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                               currentDecision === 'repeat'
-                                ? 'bg-amber-500 text-white shadow-xs'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-300'
+                                ? 'bg-amber-500 text-white shadow-xs ring-2 ring-amber-500/20'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-slate-300/50'
                             }`}
+                            style={{ padding: '7px 12px' }}
                           >
-                            <RotateCcw size={12} strokeWidth={2.5} />
+                            <RotateCcw size={13} strokeWidth={2.5} />
                             <span>{language === 'ar' ? 'إعادة 🔁' : 'Repeat 🔁'}</span>
                           </button>
 
@@ -3343,13 +3362,14 @@ export function AdminAcademicPathScreen() {
                           <button
                             type="button"
                             onClick={() => setStudentDecisions((prev) => ({ ...prev, [st.id]: 'stopped' }))}
-                            className={`flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                            className={`flex items-center justify-center gap-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                               currentDecision === 'stopped'
-                                ? 'bg-rose-600 text-white shadow-xs'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-rose-700 dark:hover:text-rose-300'
+                                ? 'bg-rose-600 text-white shadow-xs ring-2 ring-rose-500/20'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-rose-700 dark:hover:text-rose-300 hover:bg-slate-300/50'
                             }`}
+                            style={{ padding: '7px 12px' }}
                           >
-                            <UserX size={12} strokeWidth={2.5} />
+                            <UserX size={13} strokeWidth={2.5} />
                             <span>{language === 'ar' ? 'متوقف ⛔' : 'Stopped ⛔'}</span>
                           </button>
                         </div>
@@ -3361,9 +3381,12 @@ export function AdminAcademicPathScreen() {
             </div>
 
             {/* Modal Actions Footer */}
-            <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-850/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-2 truncate">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+            <div
+              className="border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              style={{ padding: '18px 28px' }}
+            >
+              <div className="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2 truncate">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
                 <span className="truncate">
                   {language === 'ar'
                     ? `ترحيل ${groupStudentsList.filter((s) => (studentDecisions[s.id] || 'pass') === 'pass').length} من أصل ${groupStudentsList.length} طلاب إلى المستوى ${targetLevel}`
@@ -3371,20 +3394,22 @@ export function AdminAcademicPathScreen() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-2.5 shrink-0 justify-end w-full sm:w-auto">
+              <div className="flex items-center gap-3 shrink-0 justify-end w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={() => setIsUpgradeModalOpen(false)}
-                  className="flex-1 sm:flex-initial px-5 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm transition-colors cursor-pointer whitespace-nowrap"
+                  className="rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm transition-colors cursor-pointer whitespace-nowrap shadow-2xs"
+                  style={{ minWidth: '100px', height: '44px', padding: '0 20px' }}
                 >
                   {language === 'ar' ? 'إلغاء' : 'Cancel'}
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirmUpgradeGroup}
-                  className="flex-1 sm:flex-initial px-5 h-10 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all cursor-pointer active:scale-95 whitespace-nowrap"
+                  className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all cursor-pointer active:scale-95 whitespace-nowrap"
+                  style={{ minWidth: '180px', height: '44px', padding: '0 24px' }}
                 >
-                  <GraduationCap size={17} />
+                  <GraduationCap size={18} />
                   <span>{language === 'ar' ? 'تأكيد وترقية الفوج 🎓' : 'Confirm Upgrade 🎓'}</span>
                 </button>
               </div>
