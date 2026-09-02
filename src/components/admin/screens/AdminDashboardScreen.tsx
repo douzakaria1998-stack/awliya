@@ -29,6 +29,7 @@ export function AdminDashboardScreen() {
     parents,
     teachers,
     groups,
+    curricula,
     pendingApprovals,
     attendanceSessions,
     setActiveTab,
@@ -54,23 +55,21 @@ export function AdminDashboardScreen() {
   const pendingCount = pendingApprovals.filter((a) => a.status === 'pending').length;
   const fallingBehindStudents = visibleStudents.filter((s) => s.isFallingBehind || s.attendanceRate < 75 || s.overallProgress < 50);
 
-  // Level Progress Distribution (CEFR Levels) - Dynamically calculated from real student data
-  const cefrDefinitions = [
-    { level: 'A1', nameAr: 'المبتدئ والتأسيس', nameEn: 'Beginner A1' },
-    { level: 'A2', nameAr: 'الأساسي والتطبيق', nameEn: 'Elementary A2' },
-    { level: 'B1', nameAr: 'المتوسط والاستقلالية', nameEn: 'Intermediate B1' },
-    { level: 'B2', nameAr: 'فوق المتوسط والطلاقة', nameEn: 'Upper Intermediate B2' },
-    { level: 'C1', nameAr: 'المتقدم والاحترافي', nameEn: 'Advanced C1' },
-  ];
-
-  const levelProgressData = cefrDefinitions.map((item) => {
-    const studentsInLevel = visibleStudents.filter((s) => s.cefrLevel === item.level);
+  // Level Progress Distribution (derived strictly from active curriculum levels)
+  const levelProgressData = curricula.map((curricLevel) => {
+    const studentsInLevel = visibleStudents.filter(
+      (s) => s.cefrLevel === curricLevel.cefrCode || s.currentLevel === curricLevel.levelNumber
+    );
     const count = studentsInLevel.length;
     const progress = count > 0
       ? Math.round(studentsInLevel.reduce((sum, s) => sum + (s.overallProgress || 0), 0) / count)
       : 0;
     return {
-      ...item,
+      level: curricLevel.cefrCode,
+      levelNumber: curricLevel.levelNumber,
+      nameAr: curricLevel.nameAr,
+      nameEn: curricLevel.nameEn,
+      language: curricLevel.language,
       count,
       progress,
     };
@@ -355,24 +354,47 @@ export function AdminDashboardScreen() {
               </button>
             </div>
 
-            <div className="space-y-7">
-              {levelProgressData.map((item) => (
-                <div key={item.level} className="space-y-3">
-                  <div className="flex items-center justify-between text-xs sm:text-sm font-bold">
-                    <span className="text-slate-700 dark:text-slate-200 font-mono text-sm sm:text-base">
-                      {item.level} — {language === 'ar' ? item.nameAr : item.nameEn} ({item.count} {language === 'ar' ? 'طلاب' : 'students'})
-                    </span>
-                    <span className="font-mono font-black text-indigo-600 text-sm sm:text-base">{item.progress}%</span>
-                  </div>
-                  <div className="w-full h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200/40 dark:border-slate-700/40">
-                    <div
-                      className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-purple-600 rounded-full transition-all"
-                      style={{ width: `${item.progress}%` }}
-                    />
-                  </div>
+            {levelProgressData.length === 0 ? (
+              <div className="py-12 flex flex-col items-center justify-center text-center">
+                <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 dark:text-indigo-400 flex items-center justify-center mb-3">
+                  <TrendingUp size={28} />
                 </div>
-              ))}
-            </div>
+                <p className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-1">
+                  {language === 'ar' ? 'لا توجد مستويات أكاديمية مضافة' : 'No curriculum levels added yet'}
+                </p>
+                <p className="text-xs text-slate-400 max-w-xs mb-4">
+                  {language === 'ar'
+                    ? 'قم بإضافة المستويات والوحدات والدروس من شاشة المسار الأكاديمي للبدء في تتبع الإنجاز.'
+                    : 'Add levels, units, and lessons in Academic Path to start tracking progress.'}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('academic')}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors cursor-pointer"
+                >
+                  {language === 'ar' ? 'إضافة مستوى أكاديمي' : 'Add Academic Level'}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-7">
+                {levelProgressData.map((item) => (
+                  <div key={`${item.level}-${item.levelNumber}-${item.language}`} className="space-y-3">
+                    <div className="flex items-center justify-between text-xs sm:text-sm font-bold">
+                      <span className="text-slate-700 dark:text-slate-200 font-mono text-sm sm:text-base">
+                        {item.level} — {language === 'ar' ? item.nameAr : item.nameEn} ({item.count} {language === 'ar' ? 'طلاب' : 'students'})
+                      </span>
+                      <span className="font-mono font-black text-indigo-600 text-sm sm:text-base">{item.progress}%</span>
+                    </div>
+                    <div className="w-full h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200/40 dark:border-slate-700/40">
+                      <div
+                        className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-purple-600 rounded-full transition-all"
+                        style={{ width: `${item.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -501,36 +523,44 @@ export function AdminDashboardScreen() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {visibleGroups.map((grp) => (
-                <tr key={grp.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
-                  <td className="py-7 px-6 font-bold text-slate-900 dark:text-white">
-                    <div className="flex items-center gap-4">
-                      <span
-                        className="rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-xs font-black text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80"
-                        style={{ padding: '6px 14px' }}
-                      >
-                        {grp.code}
-                      </span>
-                      <span className="text-sm sm:text-base font-bold">{grp.name}</span>
-                    </div>
-                  </td>
-                  <td className="py-7 px-6 text-center font-medium text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
-                    {grp.teacherName}
-                  </td>
-                  <td className="py-7 px-6 text-center font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
-                    {grp.studentIds.length} / {grp.maxCapacity}
-                  </td>
-                  <td className="py-7 px-6 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-base">
-                    {grp.attendanceRate}%
-                  </td>
-                  <td className="py-7 px-6 text-center font-mono font-black text-blue-600 dark:text-blue-400 text-base">
-                    {grp.averageProgress}%
-                  </td>
-                  <td className="py-7 px-6 text-center font-mono font-black text-purple-600 dark:text-purple-400 text-base">
-                    {grp.averagePerformance}%
+              {visibleGroups.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-slate-400 font-medium text-xs sm:text-sm">
+                    {language === 'ar' ? 'لا توجد أفواج تعليمية مضافة حالياً' : 'No class groups available'}
                   </td>
                 </tr>
-              ))}
+              ) : (
+                visibleGroups.map((grp) => (
+                  <tr key={grp.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
+                    <td className="py-7 px-6 font-bold text-slate-900 dark:text-white">
+                      <div className="flex items-center gap-4">
+                        <span
+                          className="rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-xs font-black text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80"
+                          style={{ padding: '6px 14px' }}
+                        >
+                          {grp.code}
+                        </span>
+                        <span className="text-sm sm:text-base font-bold">{grp.name}</span>
+                      </div>
+                    </td>
+                    <td className="py-7 px-6 text-center font-medium text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+                      {grp.teacherName || '—'}
+                    </td>
+                    <td className="py-7 px-6 text-center font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
+                      {grp.studentIds.length} / {grp.maxCapacity}
+                    </td>
+                    <td className="py-7 px-6 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-base">
+                      {grp.attendanceRate}%
+                    </td>
+                    <td className="py-7 px-6 text-center font-mono font-black text-blue-600 dark:text-blue-400 text-base">
+                      {grp.averageProgress}%
+                    </td>
+                    <td className="py-7 px-6 text-center font-mono font-black text-purple-600 dark:text-purple-400 text-base">
+                      {grp.averagePerformance}%
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
