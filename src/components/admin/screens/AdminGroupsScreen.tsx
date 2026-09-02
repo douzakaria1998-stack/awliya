@@ -235,8 +235,8 @@ export function AdminGroupsScreen() {
 
                   <td className="py-3.5 px-4 text-center">
                     <span
-                      className="rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs"
-                      style={{ padding: '4px 10px' }}
+                      className="inline-flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs select-none"
+                      style={{ padding: '5px 14px', minWidth: '46px', lineHeight: '1.2' }}
                     >
                       {grp.level}
                     </span>

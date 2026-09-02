@@ -1378,7 +1378,15 @@ export function AdminAcademicPathScreen() {
                               }}
                             >
                               <div className="flex items-center gap-3">
-                                <span className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-black text-xs flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                <span
+                                  className="inline-flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-black text-xs shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-2xs"
+                                  style={{
+                                    minWidth: '40px',
+                                    height: '34px',
+                                    padding: '0 10px',
+                                    letterSpacing: '0.04em',
+                                  }}
+                                >
                                   {grp.level}
                                 </span>
                                 <div>
@@ -1401,8 +1409,15 @@ export function AdminAcademicPathScreen() {
 
                             <td className="py-4 px-6 text-center">
                               <span
-                                className="inline-flex items-center justify-center text-white font-mono font-bold text-xs shadow-2xs whitespace-nowrap"
-                                style={{ backgroundColor: levelColor, padding: '4px 14px', borderRadius: '9999px', lineHeight: '1.2' }}
+                                className="inline-flex items-center justify-center text-white font-mono font-extrabold text-xs shadow-2xs whitespace-nowrap select-none"
+                                style={{
+                                  backgroundColor: levelColor,
+                                  padding: '5px 18px',
+                                  minWidth: '56px',
+                                  borderRadius: '12px',
+                                  lineHeight: '1.2',
+                                  letterSpacing: '0.04em',
+                                }}
                               >
                                 {grp.level}
                               </span>
@@ -1501,7 +1516,10 @@ export function AdminAcademicPathScreen() {
               >
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className="px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white font-mono font-black text-xs shadow-xs">
+                    <span
+                      className="rounded-xl bg-indigo-600 text-white font-mono font-black text-xs shadow-xs inline-flex items-center justify-center select-none"
+                      style={{ padding: '5px 16px', minWidth: '48px', lineHeight: '1.2' }}
+                    >
                       {activeProgressGroup.level}
                     </span>
                     <h3 className="font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
