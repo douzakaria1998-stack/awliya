@@ -300,7 +300,13 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
 
             return (
               <div key={catIdx}>
-                <div className="px-2.5 text-[10px] font-black text-slate-400 dark:text-slate-400/80 uppercase tracking-wider mb-1.5">
+                <div
+                  className="text-[10px] font-black text-slate-400 dark:text-slate-400/80 uppercase tracking-wider mb-1.5"
+                  style={{
+                    paddingRight: isRTL ? '14px' : '8px',
+                    paddingLeft: isRTL ? '8px' : '14px',
+                  }}
+                >
                   {language === 'ar' ? cat.titleAr : language === 'fr' ? cat.titleFr : cat.titleEn}
                 </div>
 
