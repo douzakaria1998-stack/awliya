@@ -106,6 +106,15 @@ interface AdminContextType {
     levelNumber?: number
   ) => void;
 
+  studentLevelScores: Record<string, { score: number; honorsDegreeAr?: string; completedDate?: string }>;
+  updateStudentLevelScore: (
+    studentId: string,
+    levelNumber: number,
+    score: number,
+    honorsDegreeAr?: string,
+    completedDate?: string
+  ) => void;
+
   recordAttendance: (sessionId: string, records: { studentId: string; status: 'present' | 'late' | 'absent' | 'excused'; note?: string }[]) => void;
   
   createHomework: (hwData: Partial<AdminHomeworkAssignment>) => void;
@@ -146,6 +155,7 @@ const ADMIN_STORAGE_KEYS = {
   NOTIFICATIONS: 'myschool_admin_notifications_v2',
   APPROVALS: 'myschool_admin_approvals_v2',
   LESSON_PROGRESS: 'myschool_admin_lesson_progress_v2',
+  STUDENT_LEVEL_SCORES: 'myschool_admin_student_level_scores_v2',
 };
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
@@ -160,6 +170,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [teachers, setTeachers] = useState<AdminTeacher[]>(mockAdminTeachers);
   const [groups, setGroups] = useState<AdminGroup[]>(mockAdminGroups);
   const [curricula, setCurricula] = useState<CurriculumLevel[]>(mockCurricula);
+  const [studentLevelScores, setStudentLevelScores] = useState<
+    Record<string, { score: number; honorsDegreeAr?: string; completedDate?: string }>
+  >(() => {
+    return (
+      getItem<Record<string, { score: number; honorsDegreeAr?: string; completedDate?: string }>>(
+        ADMIN_STORAGE_KEYS.STUDENT_LEVEL_SCORES
+      ) || {}
+    );
+  });
   const [lessonProgressRecords, setLessonProgressRecords] = useState<Record<string, LessonProgressStatus>>({});
   const [attendanceSessions, setAttendanceSessions] = useState<AttendanceSession[]>(mockAttendanceSessions);
   const [homeworkList, setHomeworkList] = useState<AdminHomeworkAssignment[]>(mockAdminHomework);
@@ -250,6 +269,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
       const liveStudents = getItem<AdminStudent[]>(ADMIN_STORAGE_KEYS.STUDENTS);
       if (liveStudents?.length) setStudents(liveStudents);
+
+      const liveScores = getItem<Record<string, { score: number; honorsDegreeAr?: string; completedDate?: string }>>(
+        ADMIN_STORAGE_KEYS.STUDENT_LEVEL_SCORES
+      );
+      if (liveScores) setStudentLevelScores(liveScores);
     };
 
     if (typeof window !== 'undefined') {
@@ -1034,6 +1058,43 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     [curricula, logAudit]
   );
 
+  const updateStudentLevelScore = useCallback(
+    (
+      studentId: string,
+      levelNumber: number,
+      score: number,
+      honorsDegreeAr?: string,
+      completedDate?: string
+    ) => {
+      setStudentLevelScores((prev) => {
+        const key = `${studentId}_level_${levelNumber}`;
+        const updated = {
+          ...prev,
+          [key]: {
+            score,
+            honorsDegreeAr: honorsDegreeAr || 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)',
+            completedDate: completedDate || new Date().toISOString().split('T')[0],
+          },
+        };
+        setItem(ADMIN_STORAGE_KEYS.STUDENT_LEVEL_SCORES, updated);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('awliya-data-sync'));
+        }
+        return updated;
+      });
+
+      logAudit(
+        `تحديث درجة الاجتياز والاعتماد للطالب: ${studentId}`,
+        `Updated level ${levelNumber} final score for student ${studentId} to ${score}%`,
+        'curriculum',
+        studentId,
+        `Level ${levelNumber}`,
+        `Score: ${score}% - ${honorsDegreeAr || ''}`
+      );
+    },
+    [logAudit]
+  );
+
   // ==========================================
   // Attendance Actions
   // ==========================================
@@ -1418,6 +1479,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         deleteCurriculumLevel,
         lessonProgressRecords,
         updateLessonProgress,
+        studentLevelScores,
+        updateStudentLevelScore,
         recordAttendance,
         createHomework,
         evaluateHomework,

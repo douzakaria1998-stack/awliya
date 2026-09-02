@@ -270,6 +270,15 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   const [lessonProgress, setLessonProgress] = useState<Record<string, LessonProgressStatus>>(() => {
     return getItem<Record<string, LessonProgressStatus>>(STORAGE_KEYS.ADMIN_LESSON_PROGRESS) || {};
   });
+  const [studentLevelScores, setStudentLevelScores] = useState<
+    Record<string, { score: number; honorsDegreeAr?: string; completedDate?: string }>
+  >(() => {
+    return (
+      getItem<Record<string, { score: number; honorsDegreeAr?: string; completedDate?: string }>>(
+        STORAGE_KEYS.ADMIN_STUDENT_LEVEL_SCORES
+      ) || {}
+    );
+  });
 
   // Sync on parent change and listen to window/storage sync events
   useEffect(() => {
@@ -279,8 +288,13 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       syncParentStudents();
       const freshCurricula = getItem<CurriculumLevel[]>(STORAGE_KEYS.ADMIN_CURRICULA) || mockCurricula;
       const freshProgress = getItem<Record<string, LessonProgressStatus>>(STORAGE_KEYS.ADMIN_LESSON_PROGRESS) || {};
+      const freshScores =
+        getItem<Record<string, { score: number; honorsDegreeAr?: string; completedDate?: string }>>(
+          STORAGE_KEYS.ADMIN_STUDENT_LEVEL_SCORES
+        ) || {};
       setCurricula(freshCurricula);
       setLessonProgress(freshProgress);
+      setStudentLevelScores(freshScores);
     };
 
     if (typeof window !== 'undefined') {
@@ -502,8 +516,13 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       const yearOffset = Math.max(1, currentLevelNum - lvl.levelNumber);
       const completedDate =
         status === 'studied' ? `2024-0${Math.min(9, Math.max(1, 10 - yearOffset * 3))}-15` : undefined;
-      const score = status === 'studied' ? (lvl.passingScore || 93) : undefined;
-      const honorsDegree = lvl.honorsDegreeAr || 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)';
+      const scoreRecord = studentLevelScores[`${activeStudent.id}_level_${lvl.levelNumber}`];
+      const finalScore = scoreRecord?.score ?? (lvl.passingScore || 93);
+      const finalHonors = scoreRecord?.honorsDegreeAr || lvl.honorsDegreeAr || 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)';
+      const finalCompletedDate = scoreRecord?.completedDate || completedDate;
+
+      const score = status === 'studied' ? finalScore : undefined;
+      const honorsDegree = finalHonors;
 
       return {
         level: lvl.levelNumber as LevelId,
@@ -515,7 +534,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         status,
         subjects: subjects.length > 0 ? subjects : [lvl.nameAr],
         modules,
-        completedDate,
+        completedDate: finalCompletedDate,
         score,
         honorsDegree,
         certificateAvailable: status === 'studied',
@@ -528,7 +547,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         totalLessonsCount: totalLessons,
       };
     });
-  }, [curricula, lessonProgress, activeStudent]);
+  }, [curricula, lessonProgress, studentLevelScores, activeStudent]);
 
   const homeworkList = useMemo(() => {
     if (!activeStudent.id) return [];

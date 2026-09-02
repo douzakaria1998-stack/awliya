@@ -54,6 +54,8 @@ export function AdminAcademicPathScreen() {
     deleteCurriculumLevel,
     lessonProgressRecords,
     updateLessonProgress,
+    studentLevelScores,
+    updateStudentLevelScore,
   } = useAdmin();
   const { isRTL, language } = useLanguage();
 
@@ -182,6 +184,24 @@ export function AdminAcademicPathScreen() {
       curricula[0]
     );
   }, [activeProgressStudent, curricula]);
+
+  // Derived student score record for activeProgressStudent
+  const currentStudentScoreRecord = useMemo(() => {
+    if (!activeProgressStudent || !studentCurriculumLevel) return undefined;
+    return studentLevelScores[`${activeProgressStudent.id}_level_${studentCurriculumLevel.levelNumber}`];
+  }, [activeProgressStudent, studentCurriculumLevel, studentLevelScores]);
+
+  const currentStudentFinalScore =
+    currentStudentScoreRecord?.score ?? (studentCurriculumLevel?.passingScore || 93);
+  const currentStudentFinalHonors =
+    currentStudentScoreRecord?.honorsDegreeAr ||
+    studentCurriculumLevel?.honorsDegreeAr ||
+    'تقدير: ممتاز مرتفع (مع مرتبة الشرف)';
+
+  // Modal State for Changing Student Mark
+  const [isStudentScoreModalOpen, setIsStudentScoreModalOpen] = useState(false);
+  const [editStudentScore, setEditStudentScore] = useState<number>(93);
+  const [editStudentHonors, setEditStudentHonors] = useState<string>('تقدير: ممتاز مرتفع (مع مرتبة الشرف)');
 
   // Filtered Groups for Level 1
   const filteredProgressGroups = useMemo(() => {
@@ -1794,20 +1814,60 @@ export function AdminAcademicPathScreen() {
                   </div>
                 </div>
 
-                {/* Calculated Overall Progress Card */}
-                <div
-                  className="bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center gap-4 shrink-0 shadow-2xs"
-                  style={{ padding: '16px 24px' }}
-                >
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-400 block">
-                      {language === 'ar' ? 'التقدم الأكاديمي الإجمالي' : 'Overall Progress'}
-                    </span>
-                    <span className="text-2xl sm:text-3xl font-black font-mono text-indigo-600 dark:text-indigo-400 block mt-0.5">
-                      {activeProgressStudent.overallProgress || 0}%
-                    </span>
-                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block mt-0.5">
-                      {language === 'ar' ? 'محتسب تلقائياً من الدروس المنجزة ✓' : 'Auto-calculated from lessons ✓'}
+                {/* Right: Two Linked Cards Side-by-Side (Overall Progress + Final Passing Mark) */}
+                <div className="flex items-center gap-3.5 flex-wrap shrink-0">
+                  {/* Card 1: Overall Progress (Image 2) */}
+                  <div
+                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex items-center gap-4 shrink-0 shadow-2xs"
+                    style={{ padding: '16px 24px' }}
+                  >
+                    <div>
+                      <span className="text-[11px] font-bold text-slate-400 block">
+                        {language === 'ar' ? 'التقدم الأكاديمي الإجمالي' : 'Overall Progress'}
+                      </span>
+                      <span className="text-2xl sm:text-3xl font-black font-mono text-indigo-600 dark:text-indigo-400 block mt-0.5">
+                        {activeProgressStudent.overallProgress || 0}%
+                      </span>
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block mt-0.5">
+                        {language === 'ar' ? 'محتسب تلقائياً من الدروس المنجزة ✓' : 'Auto-calculated from lessons ✓'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Final Passing Score with Change Mark Access (Image 1) */}
+                  <div
+                    className="bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 rounded-2xl flex flex-col justify-between shrink-0 shadow-2xs relative group transition-all"
+                    style={{ padding: '14px 22px', minWidth: '220px' }}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
+                        <Award size={16} className="shrink-0" />
+                        <span>{language === 'ar' ? 'درجة الاجتياز النهائية' : 'Final Passing Score'}</span>
+                      </div>
+
+                      {/* Edit / Change Mark Button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditStudentScore(currentStudentFinalScore);
+                          setEditStudentHonors(currentStudentFinalHonors);
+                          setIsStudentScoreModalOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1 rounded-lg bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] border border-emerald-300/80 dark:border-emerald-700/80 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                        style={{ padding: '3px 8px' }}
+                        title={language === 'ar' ? 'تعديل درجة الطالب والاعتماد' : 'Change Mark & Honors'}
+                      >
+                        <Pencil size={11} />
+                        <span>{language === 'ar' ? 'تعديل الدرجة' : 'Change'}</span>
+                      </button>
+                    </div>
+
+                    <div className="text-2xl sm:text-3xl font-black text-emerald-800 dark:text-emerald-200 font-mono tracking-tight my-1">
+                      {currentStudentFinalScore}%
+                    </div>
+
+                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold truncate block">
+                      {currentStudentFinalHonors}
                     </span>
                   </div>
                 </div>
@@ -2076,20 +2136,35 @@ export function AdminAcademicPathScreen() {
                       </div>
                     </div>
 
-                    {/* Preview Card matching user screenshot */}
+                    {/* Preview Card matching user screenshot with edit access */}
                     <div
                       className="w-full lg:w-80 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 flex flex-col justify-between shadow-2xs select-none shrink-0"
                       style={{ padding: '24px 28px', minHeight: '130px' }}
                     >
-                      <div className="flex items-center gap-2.5 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-bold">
-                        <Award size={18} className="shrink-0" />
-                        <span>{language === 'ar' ? 'درجة الاجتياز النهائية' : 'Final Passing Score'}</span>
+                      <div className="flex items-center justify-between gap-2 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-bold">
+                        <div className="flex items-center gap-2.5">
+                          <Award size={18} className="shrink-0" />
+                          <span>{language === 'ar' ? 'درجة الاجتياز النهائية' : 'Final Passing Score'}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditStudentScore(currentStudentFinalScore);
+                            setEditStudentHonors(currentStudentFinalHonors);
+                            setIsStudentScoreModalOpen(true);
+                          }}
+                          className="inline-flex items-center gap-1 rounded-lg bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 text-emerald-700 dark:text-emerald-300 font-bold text-xs border border-emerald-300 dark:border-emerald-700 transition-all cursor-pointer shadow-2xs"
+                          style={{ padding: '3px 10px' }}
+                        >
+                          <Pencil size={12} />
+                          <span>{language === 'ar' ? 'تعديل الدرجة' : 'Change'}</span>
+                        </button>
                       </div>
                       <div className="text-3xl sm:text-4xl font-black text-emerald-800 dark:text-emerald-200 font-mono tracking-tight my-2">
-                        {studentCurriculumLevel.passingScore || 93}%
+                        {currentStudentFinalScore}%
                       </div>
                       <span className="text-xs text-emerald-600 dark:text-emerald-400 block font-semibold">
-                        {studentCurriculumLevel.honorsDegreeAr || (language === 'ar' ? 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)' : 'Honors Degree')}
+                        {currentStudentFinalHonors}
                       </span>
                     </div>
                   </div>
@@ -2668,6 +2743,150 @@ export function AdminAcademicPathScreen() {
               </div>
             </div>
           )}
+        </div>
+      )}
+      {/* Modal: Change Student Final Mark & Honors */}
+      {isStudentScoreModalOpen && activeProgressStudent && studentCurriculumLevel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
+          <div
+            className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up"
+            style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '18px' }}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <Award size={20} />
+                </div>
+                <div>
+                  <h3 className="font-black text-base text-slate-900 dark:text-white">
+                    {language === 'ar' ? 'تعديل درجة الاجتياز النهائية للطالب' : 'Change Final Passing Mark'}
+                  </h3>
+                  <span className="text-xs text-slate-400 block font-medium">
+                    {activeProgressStudent.fullNameAr} • {studentCurriculumLevel.nameAr}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsStudentScoreModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 cursor-pointer transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Score Input */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  {language === 'ar' ? 'الدرجة النهائية (%)' : 'Final Mark (%)'}
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={editStudentScore}
+                    onChange={(e) => setEditStudentScore(Number(e.target.value))}
+                    className="w-full h-11 px-3.5 pr-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+                  />
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm font-mono pointer-events-none">
+                    %
+                  </span>
+                </div>
+              </div>
+
+              {/* Quick Presets */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] font-bold text-slate-400 shrink-0">
+                  {language === 'ar' ? 'علامات شائعة:' : 'Common marks:'}
+                </span>
+                {[98, 95, 93, 90, 85, 80].map((scoreVal) => (
+                  <button
+                    key={scoreVal}
+                    type="button"
+                    onClick={() => setEditStudentScore(scoreVal)}
+                    className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                      editStudentScore === scoreVal
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                        : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-emerald-400'
+                    }`}
+                  >
+                    {scoreVal}%
+                  </button>
+                ))}
+              </div>
+
+              {/* Honors / Grade Label */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  {language === 'ar' ? 'التقدير / مرتبة الشرف' : 'Honors / Grade Assessment'}
+                </label>
+                <input
+                  type="text"
+                  value={editStudentHonors}
+                  onChange={(e) => setEditStudentHonors(e.target.value)}
+                  placeholder="تقدير: ممتاز مرتفع (مع مرتبة الشرف)"
+                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+                />
+              </div>
+
+              {/* Quick Preset Labels */}
+              <div className="space-y-1">
+                <span className="text-[11px] font-bold text-slate-400 block">
+                  {language === 'ar' ? 'خيارات التقدير السريعة:' : 'Quick Grade Presets:'}
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    'تقدير: ممتاز مرتفع (مع مرتبة الشرف)',
+                    'تقدير: ممتاز (A)',
+                    'تقدير: جيد جداً مرتفع (B+)',
+                    'تقدير: جيد جداً (B)',
+                  ].map((labelPreset, lpIdx) => (
+                    <button
+                      key={lpIdx}
+                      type="button"
+                      onClick={() => setEditStudentHonors(labelPreset)}
+                      className={`text-[10px] font-medium px-2 py-1 rounded-md border transition-all cursor-pointer ${
+                        editStudentHonors === labelPreset
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 text-emerald-700 dark:text-emerald-300 font-bold'
+                          : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      {labelPreset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setIsStudentScoreModalOpen(false)}
+                className="px-4 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+              >
+                {language === 'ar' ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  updateStudentLevelScore(
+                    activeProgressStudent.id,
+                    studentCurriculumLevel.levelNumber,
+                    Number(editStudentScore),
+                    editStudentHonors.trim() || 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)'
+                  );
+                  setIsStudentScoreModalOpen(false);
+                }}
+                className="px-5 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md transition-all cursor-pointer active:scale-95"
+              >
+                <Check size={16} strokeWidth={2.5} />
+                <span>{language === 'ar' ? 'حفظ واعتماد الدرجة' : 'Save & Certify Mark'}</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
