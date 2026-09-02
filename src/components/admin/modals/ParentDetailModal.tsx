@@ -610,9 +610,15 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
 
                               <div className="flex items-center gap-2.5 shrink-0">
                                 <span
-                                  className={`px-2.5 py-1 rounded-lg font-mono text-[11px] font-bold ${
+                                  className={`inline-flex items-center justify-center font-mono text-xs font-bold transition-all ${
                                     isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
                                   }`}
+                                  style={{
+                                    padding: '4px 12px',
+                                    minWidth: '38px',
+                                    borderRadius: '8px',
+                                    lineHeight: '1.2',
+                                  }}
                                 >
                                   {s.cefrLevel}
                                 </span>

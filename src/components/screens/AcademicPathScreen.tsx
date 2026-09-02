@@ -233,7 +233,14 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
                           {t.stage} {lvl.level}
                         </span>
                         {lvl.cefrCode && (
-                          <span className="px-2 py-0.5 rounded-md text-[11px] font-black tracking-wide font-mono bg-indigo-50 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60">
+                          <span
+                            className="inline-flex items-center justify-center rounded-lg text-xs font-black tracking-wide font-mono bg-indigo-50 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800/60 shadow-2xs select-none"
+                            style={{
+                              padding: '3px 10px',
+                              minWidth: '36px',
+                              lineHeight: '1.2',
+                            }}
+                          >
                             {lvl.cefrCode}
                           </span>
                         )}
