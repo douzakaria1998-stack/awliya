@@ -175,6 +175,9 @@ export interface CurriculumLevel {
   color: string;
   language: 'English' | 'French';
   units: CurriculumUnit[];
+  passingScore?: number; // e.g. 93
+  honorsDegreeAr?: string; // e.g. "تقدير: ممتاز مرتفع (مع مرتبة الشرف)"
+  honorsDegreeEn?: string; // e.g. "Honors: High Distinction"
 }
 
 // Student Academic Lesson Progress (Back Office Spec)

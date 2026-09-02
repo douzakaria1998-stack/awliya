@@ -559,6 +559,9 @@ export const mockCurricula: CurriculumLevel[] = [
     descriptionEn: 'Basic vocabulary, simple sentence construction, greetings and self-introductions.',
     color: '#3B82F6', // Blue
     language: 'English',
+    passingScore: 93,
+    honorsDegreeAr: 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)',
+    honorsDegreeEn: 'Honors: High Distinction',
     units: [
       {
         id: 'u-a1-01',
@@ -665,6 +668,9 @@ export const mockCurricula: CurriculumLevel[] = [
     descriptionEn: 'Past experiences, shopping, ordering food, and past simple descriptions.',
     color: '#8B5CF6', // Purple
     language: 'English',
+    passingScore: 93,
+    honorsDegreeAr: 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)',
+    honorsDegreeEn: 'Honors: High Distinction',
     units: [
       {
         id: 'u-a2-01',
@@ -723,6 +729,9 @@ export const mockCurricula: CurriculumLevel[] = [
     descriptionEn: 'Expressing opinions, short essay writing, dealing with real-life travel situations.',
     color: '#10B981', // Emerald
     language: 'English',
+    passingScore: 93,
+    honorsDegreeAr: 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)',
+    honorsDegreeEn: 'Honors: High Distinction',
     units: [
       {
         id: 'u-b1-01',

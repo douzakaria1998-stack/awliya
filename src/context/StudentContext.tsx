@@ -502,7 +502,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       const yearOffset = Math.max(1, currentLevelNum - lvl.levelNumber);
       const completedDate =
         status === 'studied' ? `2024-0${Math.min(9, Math.max(1, 10 - yearOffset * 3))}-15` : undefined;
-      const score = status === 'studied' ? 90 + ((lvl.levelNumber * 3) % 10) : undefined;
+      const score = status === 'studied' ? (lvl.passingScore || 93) : undefined;
+      const honorsDegree = lvl.honorsDegreeAr || 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)';
 
       return {
         level: lvl.levelNumber as LevelId,
@@ -516,6 +517,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         modules,
         completedDate,
         score,
+        honorsDegree,
         certificateAvailable: status === 'studied',
         descriptionAr: lvl.descriptionAr,
         descriptionEn: lvl.descriptionEn,

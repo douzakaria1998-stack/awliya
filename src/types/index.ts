@@ -94,6 +94,7 @@ export interface AcademicLevel {
   modules?: LevelModule[];
   completedDate?: string; // ISO date string
   score?: number; // Score percentage if completed
+  honorsDegree?: string; // e.g. "تقدير: ممتاز مرتفع (مع مرتبة الشرف)"
   certificateAvailable?: boolean;
   descriptionAr?: string;
   descriptionEn?: string;

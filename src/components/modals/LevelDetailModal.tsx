@@ -210,10 +210,10 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
                   <span>{t.finalPassingScore}</span>
                 </div>
                 <div className="text-3xl sm:text-4xl font-black text-emerald-800 dark:text-emerald-200 font-mono tracking-tight" style={{ margin: '4px 0 8px 0' }}>
-                  {level.score || 95}%
+                  {level.score ?? 93}%
                 </div>
                 <span className="text-xs text-emerald-600 dark:text-emerald-400 block font-semibold">
-                  {t.honorsDegree}
+                  {level.honorsDegree || t.honorsDegree}
                 </span>
               </div>
 

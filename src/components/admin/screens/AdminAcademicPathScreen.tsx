@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   BookOpen,
   Settings,
@@ -34,6 +34,7 @@ import {
   Award,
   Download,
   School,
+  Save,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -122,6 +123,36 @@ export function AdminAcademicPathScreen() {
   const toggleUnit = (unitId: string) => {
     setExpandedUnitId((prev) => (prev === unitId ? null : unitId));
   };
+
+  // Passing Score & Honors Degree state for activeLevel (at the end of the level in Tab 1)
+  const [passingScoreInput, setPassingScoreInput] = useState<number>(93);
+  const [honorsDegreeInput, setHonorsDegreeInput] = useState<string>('تقدير: ممتاز مرتفع (مع مرتبة الشرف)');
+  const [passingScoreSaved, setPassingScoreSaved] = useState<boolean>(false);
+
+  // Sync with activeLevel
+  useEffect(() => {
+    if (activeLevel) {
+      setPassingScoreInput(activeLevel.passingScore || 93);
+      setHonorsDegreeInput(activeLevel.honorsDegreeAr || 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)');
+      setPassingScoreSaved(false);
+    }
+  }, [activeLevel]);
+
+  const handleSavePassingScore = () => {
+    if (!activeLevel) return;
+    const updatedLevel: CurriculumLevel = {
+      ...activeLevel,
+      passingScore: Number(passingScoreInput),
+      honorsDegreeAr: honorsDegreeInput.trim() || 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)',
+    };
+    updateCurriculumLevel(activeLevel.levelNumber, activeLevel.language, updatedLevel);
+    setPassingScoreSaved(true);
+    setTimeout(() => setPassingScoreSaved(false), 3000);
+  };
+
+  // State for Add/Edit Modal
+  const [newLevelPassingScore, setNewLevelPassingScore] = useState<number>(93);
+  const [newLevelHonorsDegree, setNewLevelHonorsDegree] = useState<string>('تقدير: ممتاز مرتفع (مع مرتبة الشرف)');
 
   // Tab 2: Derived Data & Helpers
   const activeProgressGroup = useMemo(() => {
@@ -235,6 +266,8 @@ export function AdminAcademicPathScreen() {
     setNewLevelDescAr('');
     setNewLevelDescEn('');
     setNewUnitsCount(3);
+    setNewLevelPassingScore(93);
+    setNewLevelHonorsDegree('تقدير: ممتاز مرتفع (مع مرتبة الشرف)');
     setUnitsDraft([]);
     setModalStep('basic');
     setIsAddLevelOpen(true);
@@ -251,6 +284,8 @@ export function AdminAcademicPathScreen() {
     setNewLevelDescAr(level.descriptionAr || '');
     setNewLevelDescEn(level.descriptionEn || '');
     setNewUnitsCount(level.units.length);
+    setNewLevelPassingScore(level.passingScore || 93);
+    setNewLevelHonorsDegree(level.honorsDegreeAr || 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)');
 
     const mappedDraft: UnitDraft[] = level.units.map((u, uIdx) => ({
       id: u.id || `draft-unit-${uIdx + 1}-${Date.now()}`,
@@ -464,6 +499,8 @@ export function AdminAcademicPathScreen() {
         color: newLevelColor || '#3B82F6',
         language: newLevelLanguage,
         units: formattedUnits,
+        passingScore: Number(newLevelPassingScore) || 93,
+        honorsDegreeAr: newLevelHonorsDegree.trim() || 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)',
       };
 
       updateCurriculumLevel(editingLevelNumber, selectedCurriculumLanguage, updatedLevel);
@@ -488,6 +525,8 @@ export function AdminAcademicPathScreen() {
         color: newLevelColor || '#3B82F6',
         language: newLevelLanguage,
         units: formattedUnits,
+        passingScore: Number(newLevelPassingScore) || 93,
+        honorsDegreeAr: newLevelHonorsDegree.trim() || 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)',
       };
 
       addCurriculumLevel(newLevel);
@@ -887,6 +926,143 @@ export function AdminAcademicPathScreen() {
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Section: Final Passing Score & Honors Degree (At the end of the level in Backoffice) */}
+              <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex flex-col lg:flex-row items-stretch gap-6">
+                  {/* Left: Input Form Controls */}
+                  <div className="flex-1 bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <Award size={18} />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white">
+                          {language === 'ar' ? 'إعداد درجة الاجتياز والتقدير النهائي للمستوى' : 'Level Final Passing Score & Honors'}
+                        </h4>
+                        <span className="text-xs text-slate-400">
+                          {language === 'ar' ? 'تحديد درجة النجاح والتقدير الشرفي الذي يظهر في بوابة أولياء الأمور عند إتمام هذا المستوى' : 'Configure score & honors degree shown to parents upon level completion'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                      {/* Score Input */}
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                          {language === 'ar' ? 'درجة الاجتياز النهائية (%)' : 'Final Passing Score (%)'}
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={passingScoreInput}
+                            onChange={(e) => {
+                              setPassingScoreInput(Number(e.target.value));
+                              setPassingScoreSaved(false);
+                            }}
+                            className="w-full h-11 px-3.5 pr-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+                          />
+                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-xs font-mono pointer-events-none">
+                            %
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Honors / Grade Input */}
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                          {language === 'ar' ? 'التقدير / مرتبة الشرف' : 'Honors / Grade Assessment'}
+                        </label>
+                        <input
+                          type="text"
+                          value={honorsDegreeInput}
+                          onChange={(e) => {
+                            setHonorsDegreeInput(e.target.value);
+                            setPassingScoreSaved(false);
+                          }}
+                          placeholder={language === 'ar' ? 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)' : 'Honors: High Distinction'}
+                          className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Quick Presets */}
+                    <div className="flex items-center gap-2 flex-wrap pt-1">
+                      <span className="text-[11px] font-bold text-slate-400 shrink-0">
+                        {language === 'ar' ? 'خيارات سريعة:' : 'Quick Presets:'}
+                      </span>
+                      {[
+                        { score: 93, label: 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)' },
+                        { score: 90, label: 'تقدير: ممتاز (A)' },
+                        { score: 85, label: 'تقدير: جيد جداً مرتفع (B+)' },
+                        { score: 80, label: 'تقدير: جيد جداً (B)' },
+                      ].map((preset, pIdx) => (
+                        <button
+                          key={pIdx}
+                          type="button"
+                          onClick={() => {
+                            setPassingScoreInput(preset.score);
+                            setHonorsDegreeInput(preset.label);
+                            setPassingScoreSaved(false);
+                          }}
+                          className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-400 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
+                        >
+                          {preset.score}%
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Save Button */}
+                    <div className="pt-2 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={handleSavePassingScore}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-md active:scale-95"
+                        style={{ padding: '9px 20px', minHeight: '38px' }}
+                      >
+                        {passingScoreSaved ? (
+                          <>
+                            <Check size={16} strokeWidth={3} />
+                            <span>{language === 'ar' ? 'تم الحفظ والاعتماد بنجاح ✓' : 'Saved & Certified ✓'}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Save size={15} />
+                            <span>{language === 'ar' ? 'حفظ درجة الاجتياز والتقدير' : 'Save Passing Score'}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Right: Exact Card Preview Matching Screenshot */}
+                  <div className="w-full lg:w-80 shrink-0 flex flex-col justify-center">
+                    <span className="text-[11px] font-bold text-slate-400 mb-2 block">
+                      {language === 'ar' ? 'معاينة المظهر في بوابة أولياء الأمور:' : 'Parent Portal Live Preview:'}
+                    </span>
+                    <div
+                      className="rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 flex flex-col justify-between shadow-2xs select-none"
+                      style={{
+                        padding: '24px 28px',
+                        minHeight: '140px',
+                      }}
+                    >
+                      <div className="flex items-center gap-2.5 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-bold">
+                        <Award size={18} className="shrink-0" />
+                        <span>{language === 'ar' ? 'درجة الاجتياز النهائية' : 'Final Passing Score'}</span>
+                      </div>
+                      <div className="text-3xl sm:text-4xl font-black text-emerald-800 dark:text-emerald-200 font-mono tracking-tight my-2">
+                        {passingScoreInput}%
+                      </div>
+                      <span className="text-xs text-emerald-600 dark:text-emerald-400 block font-semibold">
+                        {honorsDegreeInput || (language === 'ar' ? 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)' : 'Honors Degree')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -1867,6 +2043,57 @@ export function AdminAcademicPathScreen() {
                   );
                 })}
                 </div>
+
+                {/* Final Level Passing Assessment Card (at the end of student's level in Tab 2) */}
+                <div
+                  className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-xs overflow-hidden"
+                  style={{ padding: '24px 28px' }}
+                >
+                  <div className="flex flex-col lg:flex-row items-stretch gap-6">
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                          <Award size={18} />
+                        </div>
+                        <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white">
+                          {language === 'ar' ? 'درجة الاجتياز والاعتماد الأكاديمي للطالب' : 'Student Final Passing Certification'}
+                        </h4>
+                      </div>
+                      <p className="text-xs text-slate-400 leading-relaxed">
+                        {language === 'ar'
+                          ? `الدرجة النهائية المعتمدة لهذا المستوى (${studentCurriculumLevel.nameAr}) والممنوحة للطالب في الشهادة وبوابة ولي الأمر.`
+                          : `Certified grade for this level (${studentCurriculumLevel.nameEn}) awarded to the student in portal & certificate.`}
+                      </p>
+                      <div className="flex items-center gap-3 pt-1">
+                        <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                          {language === 'ar' ? 'حالة المستوى:' : 'Level Status:'}
+                        </span>
+                        <span className="font-bold text-xs px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300">
+                          {activeProgressStudent.overallProgress === 100
+                            ? (language === 'ar' ? 'مكتمل بنجاح ✓' : 'Successfully Completed ✓')
+                            : (language === 'ar' ? 'قيد الدراسة والمتابعة' : 'In Progress')}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Preview Card matching user screenshot */}
+                    <div
+                      className="w-full lg:w-80 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 flex flex-col justify-between shadow-2xs select-none shrink-0"
+                      style={{ padding: '24px 28px', minHeight: '130px' }}
+                    >
+                      <div className="flex items-center gap-2.5 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-bold">
+                        <Award size={18} className="shrink-0" />
+                        <span>{language === 'ar' ? 'درجة الاجتياز النهائية' : 'Final Passing Score'}</span>
+                      </div>
+                      <div className="text-3xl sm:text-4xl font-black text-emerald-800 dark:text-emerald-200 font-mono tracking-tight my-2">
+                        {studentCurriculumLevel.passingScore || 93}%
+                      </div>
+                      <span className="text-xs text-emerald-600 dark:text-emerald-400 block font-semibold">
+                        {studentCurriculumLevel.honorsDegreeAr || (language === 'ar' ? 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)' : 'Honors Degree')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -2034,6 +2261,37 @@ export function AdminAcademicPathScreen() {
                     <span className="font-mono text-xs font-bold text-slate-600 dark:text-slate-400">
                       {newLevelColor}
                     </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                      {language === 'ar' ? 'درجة الاجتياز (%)' : 'Passing Score (%)'}
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={newLevelPassingScore}
+                      onChange={(e) => setNewLevelPassingScore(Number(e.target.value))}
+                      className="w-full h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
+                      style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                      {language === 'ar' ? 'تقدير مرتبة الشرف' : 'Honors Label'}
+                    </label>
+                    <input
+                      type="text"
+                      value={newLevelHonorsDegree}
+                      onChange={(e) => setNewLevelHonorsDegree(e.target.value)}
+                      placeholder="تقدير: ممتاز مرتفع (مع مرتبة الشرف)"
+                      className="w-full h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold focus:outline-none focus:border-indigo-500 transition-colors"
+                      style={{ paddingLeft: '14px', paddingRight: '14px' }}
+                    />
                   </div>
                 </div>
 
