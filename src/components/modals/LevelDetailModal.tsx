@@ -239,43 +239,7 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
             </div>
           )}
 
-          {/* Subjects List */}
-          <div>
-            <h4
-              className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2"
-              style={{ marginBottom: '12px' }}
-            >
-              <BookOpen size={18} className="text-slate-500 shrink-0" />
-              <span>{t.syllabusTopics} ({level.subjects.length}):</span>
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {level.subjects.map((subj, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/90 border border-slate-100 dark:border-slate-800 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 select-none"
-                  style={{
-                    padding: '14px 20px',
-                    minHeight: '52px',
-                  }}
-                >
-                  <span
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-2xs"
-                    style={{
-                      backgroundColor:
-                        level.status === 'studied'
-                          ? '#16A34A'
-                          : level.status === 'current'
-                          ? theme.primary
-                          : '#9CA3AF',
-                    }}
-                  >
-                    {idx + 1}
-                  </span>
-                  <span className="truncate">{translateSubject(subj, language)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+
 
           {/* Units / Modules & Lessons */}
           {level.modules && level.modules.length > 0 && (
