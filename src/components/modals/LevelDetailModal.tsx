@@ -289,15 +289,16 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
                   {language === 'ar' ? 'الوحدات الدراسية المعتمدة' : 'Certified Units'} ({level.modules.length}):
                 </span>
               </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {level.modules.map((mod, idx) => (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-850 p-4 shadow-2xs select-none transition-all"
+                    className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-850 shadow-2xs select-none transition-all"
+                    style={{ padding: '20px 24px' }}
                   >
                     {/* Unit Header */}
-                    <div className="flex items-center justify-between gap-3 mb-2">
-                      <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center justify-between gap-4 mb-1">
+                      <div className="flex items-center gap-3.5 min-w-0">
                         <div
                           className={`w-7 h-7 min-w-[28px] min-h-[28px] rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-2xs ${
                             mod.isCompleted ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
@@ -309,14 +310,24 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
                           {translateSubject(mod.titleAr, language)}
                         </span>
                       </div>
-                      <span className="text-xs font-bold text-slate-400 shrink-0">
+                      <span
+                        className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-full shrink-0 select-none flex items-center justify-center"
+                        style={{
+                          padding: '4px 14px',
+                          minHeight: '26px',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
                         {mod.lessonsCount} {language === 'ar' ? 'دروس' : 'lessons'}
                       </span>
                     </div>
 
                     {/* Unit Lessons list (if available) */}
                     {mod.lessons && mod.lessons.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 space-y-2">
+                      <div
+                        className="border-t border-slate-100 dark:border-slate-800/80 space-y-2.5"
+                        style={{ marginTop: '16px', paddingTop: '16px' }}
+                      >
                         {mod.lessons.map((lesson) => {
                           const isDone = lesson.status === 'completed';
                           const isInProg = lesson.status === 'in_progress';
@@ -324,30 +335,39 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
                           return (
                             <div
                               key={lesson.id}
-                              className="flex items-center justify-between gap-2.5 py-1.5 px-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 text-xs"
+                              className="flex items-center justify-between gap-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800/60 text-xs sm:text-sm transition-colors"
+                              style={{
+                                padding: '10px 16px',
+                                minHeight: '42px',
+                              }}
                             >
-                              <div className="flex items-center gap-2 min-w-0">
+                              <div className="flex items-center gap-3 min-w-0">
                                 <span
-                                  className={`w-2 h-2 rounded-full shrink-0 ${
+                                  className={`w-2.5 h-2.5 rounded-full shrink-0 ${
                                     isDone
-                                      ? 'bg-emerald-500'
+                                      ? 'bg-emerald-500 ring-2 ring-emerald-200 dark:ring-emerald-900'
                                       : isInProg
-                                      ? 'bg-amber-500 animate-pulse'
+                                      ? 'bg-amber-500 animate-pulse ring-2 ring-amber-200 dark:ring-amber-900'
                                       : 'bg-slate-300 dark:bg-slate-600'
                                   }`}
                                 />
-                                <span className={`truncate font-semibold ${isDone ? 'text-slate-700 dark:text-slate-300' : 'text-slate-500 dark:text-slate-400'}`}>
+                                <span className={`truncate font-bold ${isDone ? 'text-slate-800 dark:text-slate-200' : 'text-slate-600 dark:text-slate-400'}`}>
                                   {lesson.titleAr}
                                 </span>
                               </div>
                               <span
-                                className={`text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 ${
+                                className={`font-bold rounded-lg shrink-0 text-xs flex items-center justify-center ${
                                   isDone
-                                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                                    ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60'
                                     : isInProg
-                                    ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
-                                    : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                                    ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60'
+                                    : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60'
                                 }`}
+                                style={{
+                                  padding: '5px 14px',
+                                  minHeight: '28px',
+                                  whiteSpace: 'nowrap',
+                                }}
                               >
                                 {isDone
                                   ? (language === 'ar' ? 'مكتمل' : 'Completed')
