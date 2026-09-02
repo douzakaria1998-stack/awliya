@@ -12,6 +12,7 @@ import {
   ChevronRight,
   TrendingUp,
   X,
+  Archive,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -23,6 +24,7 @@ export function AdminGroupsScreen() {
   const { isRTL, language } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'archived'>('all');
   const [selectedGroup, setSelectedGroup] = useState<AdminGroup | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -41,14 +43,20 @@ export function AdminGroupsScreen() {
   const filteredGroups = useMemo(() => {
     return visibleGroups.filter((g) => {
       const q = searchQuery.toLowerCase();
-      return (
+      const matchesSearch =
         g.name.toLowerCase().includes(q) ||
         g.code.toLowerCase().includes(q) ||
         g.teacherName.toLowerCase().includes(q) ||
-        g.language.toLowerCase().includes(q)
-      );
+        g.language.toLowerCase().includes(q);
+
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'active' && g.status !== 'archived') ||
+        (statusFilter === 'archived' && g.status === 'archived');
+
+      return matchesSearch && matchesStatus;
     });
-  }, [visibleGroups, searchQuery]);
+  }, [visibleGroups, searchQuery, statusFilter]);
 
   const handleOpenGroup = (group: AdminGroup) => {
     setSelectedGroup(group);
@@ -164,6 +172,17 @@ export function AdminGroupsScreen() {
           />
         </div>
 
+        {/* Status Filter */}
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as any)}
+          className="h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500 cursor-pointer shadow-2xs shrink-0"
+        >
+          <option value="all">{language === 'ar' ? 'جميع الأفواج (All)' : 'All Groups'}</option>
+          <option value="active">{language === 'ar' ? 'الأفواج النشطة 🟢' : 'Active Groups 🟢'}</option>
+          <option value="archived">{language === 'ar' ? 'الأفواج المؤرشفة 📁' : 'Archived Groups 📁'}</option>
+        </select>
+
         <div className="text-xs sm:text-sm font-bold text-slate-400 shrink-0">
           {language === 'ar' ? `العدد: ${filteredGroups.length} أفواج` : `Total: ${filteredGroups.length} groups`}
         </div>
@@ -193,6 +212,7 @@ export function AdminGroupsScreen() {
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'المعلم المشرف' : 'Assigned Teacher'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الأيام والتوقيت' : 'Schedule'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الطلاب / السعة' : 'Capacity'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الحالة' : 'Status'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
                 <th
@@ -255,6 +275,20 @@ export function AdminGroupsScreen() {
 
                   <td className="py-3.5 px-4 text-center font-mono font-bold text-purple-600 dark:text-purple-400 text-xs">
                     {grp.studentIds.length} / {grp.maxCapacity}
+                  </td>
+
+                  <td className="py-3.5 px-4 text-center">
+                    {grp.status === 'archived' ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-[11px] border border-amber-300/80 dark:border-amber-800 shadow-2xs whitespace-nowrap">
+                        <Archive size={12} className="shrink-0" />
+                        <span>{language === 'ar' ? 'مؤرشف 📁' : 'Archived 📁'}</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] border border-emerald-300/80 dark:border-emerald-800 shadow-2xs whitespace-nowrap">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                        <span>{language === 'ar' ? 'نشط 🟢' : 'Active 🟢'}</span>
+                      </span>
+                    )}
                   </td>
 
                   <td className="py-3.5 px-4 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm">

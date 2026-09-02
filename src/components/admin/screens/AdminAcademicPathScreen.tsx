@@ -37,10 +37,11 @@ import {
   Save,
   RotateCcw,
   UserX,
+  Archive,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { CurriculumLevel, LessonProgressStatus } from '@/types/admin';
+import { CurriculumLevel, LessonProgressStatus, AdminGroup } from '@/types/admin';
 
 export function AdminAcademicPathScreen() {
   const {
@@ -58,6 +59,7 @@ export function AdminAcademicPathScreen() {
     updateLessonProgress,
     studentLevelScores,
     updateStudentLevelScore,
+    addGroup,
     updateGroup,
     updateStudent,
   } = useAdmin();
@@ -76,6 +78,7 @@ export function AdminAcademicPathScreen() {
   const [groupSearchQuery, setGroupSearchQuery] = useState('');
   const [groupLanguageFilter, setGroupLanguageFilter] = useState<'all' | 'English' | 'French'>('all');
   const [groupLevelFilter, setGroupLevelFilter] = useState<string>('all');
+  const [groupStatusFilter, setGroupStatusFilter] = useState<'all' | 'active' | 'archived'>('all');
   const [studentSearchQuery, setStudentSearchQuery] = useState('');
   const [studentStatusFilter, setStudentStatusFilter] = useState<'all' | 'in_progress' | 'completed' | 'not_started'>('all');
 
@@ -130,8 +133,6 @@ export function AdminAcademicPathScreen() {
     setExpandedUnitId((prev) => (prev === unitId ? null : unitId));
   };
 
-
-
   // State for Add/Edit Modal
   const [newLevelPassingScore, setNewLevelPassingScore] = useState<number>(93);
   const [newLevelHonorsDegree, setNewLevelHonorsDegree] = useState<string>('تقدير: ممتاز مرتفع (مع مرتبة الشرف)');
@@ -154,16 +155,60 @@ export function AdminAcademicPathScreen() {
 
   const studentCurriculumLevel = useMemo(() => {
     if (!activeProgressStudent) return null;
-    return (
-      curricula.find(
+
+    // 1. If currently in a group, prioritize matching the group's exact level number and CEFR code
+    if (activeProgressGroup) {
+      const matchByGroupExact = curricula.find(
         (c) =>
-          (c.levelNumber === activeProgressStudent.currentLevel || c.cefrCode === activeProgressStudent.cefrLevel) &&
-          c.language === (activeProgressStudent.language === 'French' ? 'French' : 'English')
-      ) ||
+          c.levelNumber === activeProgressGroup.levelNumber &&
+          c.cefrCode === activeProgressGroup.level &&
+          c.language === (activeProgressGroup.language === 'French' ? 'French' : 'English')
+      );
+      if (matchByGroupExact) return matchByGroupExact;
+
+      const matchByGroupLevelNum = curricula.find(
+        (c) =>
+          c.levelNumber === activeProgressGroup.levelNumber &&
+          c.language === (activeProgressGroup.language === 'French' ? 'French' : 'English')
+      );
+      if (matchByGroupLevelNum) return matchByGroupLevelNum;
+
+      const matchByGroupCefr = curricula.find(
+        (c) =>
+          c.cefrCode === activeProgressGroup.level &&
+          c.language === (activeProgressGroup.language === 'French' ? 'French' : 'English')
+      );
+      if (matchByGroupCefr) return matchByGroupCefr;
+    }
+
+    // 2. Otherwise match student current level number and CEFR code
+    const matchByStudentExact = curricula.find(
+      (c) =>
+        c.levelNumber === activeProgressStudent.currentLevel &&
+        c.cefrCode === activeProgressStudent.cefrLevel &&
+        c.language === (activeProgressStudent.language === 'French' ? 'French' : 'English')
+    );
+    if (matchByStudentExact) return matchByStudentExact;
+
+    const matchByStudentNum = curricula.find(
+      (c) =>
+        c.levelNumber === activeProgressStudent.currentLevel &&
+        c.language === (activeProgressStudent.language === 'French' ? 'French' : 'English')
+    );
+    if (matchByStudentNum) return matchByStudentNum;
+
+    const matchByStudentCefr = curricula.find(
+      (c) =>
+        c.cefrCode === activeProgressStudent.cefrLevel &&
+        c.language === (activeProgressStudent.language === 'French' ? 'French' : 'English')
+    );
+    if (matchByStudentCefr) return matchByStudentCefr;
+
+    return (
       curricula.find((c) => c.language === (activeProgressStudent.language === 'French' ? 'French' : 'English')) ||
       curricula[0]
     );
-  }, [activeProgressStudent, curricula]);
+  }, [activeProgressStudent, activeProgressGroup, curricula]);
 
   // Derived student score record for activeProgressStudent
   const currentStudentScoreRecord = useMemo(() => {
@@ -258,7 +303,22 @@ export function AdminAcademicPathScreen() {
     const repeatingStudents = groupStudentsList.filter((s) => studentDecisions[s.id] === 'repeat');
     const stoppedStudents = groupStudentsList.filter((s) => studentDecisions[s.id] === 'stopped');
 
-    // 1. Process Passing Students
+    // 1. Archive the Old Group Data (Holding the completed level snapshot)
+    const archivedGroupId = `grp-archive-${activeProgressGroup.id}-${Date.now()}`;
+    const archivedGroup: AdminGroup = {
+      ...activeProgressGroup,
+      id: archivedGroupId,
+      name: `${activeProgressGroup.name} (${language === 'ar' ? 'أرشيف' : 'Archived'})`,
+      code: `${activeProgressGroup.code}-ARC`,
+      level: activeProgressGroup.level,
+      levelNumber: activeProgressGroup.levelNumber || currentLevelNum,
+      status: 'archived',
+      averageProgress: activeProgressGroup.averageProgress || 100,
+      studentIds: activeProgressGroup.studentIds || [],
+    };
+    addGroup(archivedGroup);
+
+    // 2. Process Passing Students -> Move to new level & reset progress to 0%
     passingStudents.forEach((s) => {
       updateStudent(s.id, {
         currentLevel: nextLevelNum,
@@ -270,6 +330,7 @@ export function AdminAcademicPathScreen() {
         status: 'active',
       });
 
+      // Save certified passing mark for the completed level in archive/certificate
       updateStudentLevelScore(
         s.id,
         currentLevelNum,
@@ -278,7 +339,7 @@ export function AdminAcademicPathScreen() {
       );
     });
 
-    // 2. Process Repeating Students
+    // 3. Process Repeating Students
     repeatingStudents.forEach((s) => {
       updateStudent(s.id, {
         overallProgress: 0,
@@ -289,7 +350,7 @@ export function AdminAcademicPathScreen() {
       });
     });
 
-    // 3. Process Stopped Students
+    // 4. Process Stopped Students
     stoppedStudents.forEach((s) => {
       updateStudent(s.id, {
         status: 'inactive',
@@ -298,13 +359,16 @@ export function AdminAcademicPathScreen() {
       });
     });
 
-    // 4. Update the Group itself
+    // 5. Update the Group itself with new level data & reset progress
     updateGroup(activeProgressGroup.id, {
-      level: targetLevel,
+      level: finalTargetCefr,
+      levelNumber: nextLevelNum,
       name: targetGroupName,
       code: targetGroupCode,
       studentIds: passingStudents.map((s) => s.id),
       averageProgress: 0,
+      completedLessonsCount: 0,
+      status: 'active',
     });
 
     if (typeof window !== 'undefined') {
@@ -315,8 +379,8 @@ export function AdminAcademicPathScreen() {
 
     const msg =
       language === 'ar'
-        ? `تهانينا! تمت ترقية الفوج بنجاح إلى (${targetLevel})، وتم ترحيل ${passingStudents.length} طلاب، وتحديد ${repeatingStudents.length} للإعادة و ${stoppedStudents.length} متوقفين.`
-        : `Congratulations! Group successfully upgraded to (${targetLevel}). ${passingStudents.length} students advanced, ${repeatingStudents.length} repeating, and ${stoppedStudents.length} stopped.`;
+        ? `تهانينا! تمت ترقية الفوج بنجاح إلى (${finalTargetCefr}) وأرشفة بيانات المستوى السابق (${activeProgressGroup.level})، وتم ترحيل ${passingStudents.length} طلاب، وتحديد ${repeatingStudents.length} للإعادة و ${stoppedStudents.length} متوقفين.`
+        : `Congratulations! Group successfully upgraded to (${finalTargetCefr}) and previous level (${activeProgressGroup.level}) archived. ${passingStudents.length} students advanced, ${repeatingStudents.length} repeating, and ${stoppedStudents.length} stopped.`;
     setUpgradeSuccessMessage(msg);
     setTimeout(() => setUpgradeSuccessMessage(null), 6000);
   };
@@ -337,9 +401,14 @@ export function AdminAcademicPathScreen() {
 
       const matchesLevel = groupLevelFilter === 'all' || grp.level === groupLevelFilter;
 
-      return matchesSearch && matchesLang && matchesLevel;
+      const matchesStatus =
+        groupStatusFilter === 'all' ||
+        (groupStatusFilter === 'active' && grp.status !== 'archived') ||
+        (groupStatusFilter === 'archived' && grp.status === 'archived');
+
+      return matchesSearch && matchesLang && matchesLevel && matchesStatus;
     });
-  }, [visibleGroups, groupSearchQuery, groupLanguageFilter, groupLevelFilter]);
+  }, [visibleGroups, groupSearchQuery, groupLanguageFilter, groupLevelFilter, groupStatusFilter]);
 
   // Filtered Students for Level 2 (Group Detail)
   const filteredGroupStudents = useMemo(() => {
@@ -1255,6 +1324,17 @@ export function AdminAcademicPathScreen() {
                     <option value="B2">B2 — Vantage</option>
                     <option value="C1">C1 — Proficiency</option>
                   </select>
+
+                  {/* Group Status Filter (Active vs Archived) */}
+                  <select
+                    value={groupStatusFilter}
+                    onChange={(e) => setGroupStatusFilter(e.target.value as any)}
+                    className="h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500 cursor-pointer shadow-2xs"
+                  >
+                    <option value="all">{language === 'ar' ? 'جميع الأفواج (All)' : 'All Groups'}</option>
+                    <option value="active">{language === 'ar' ? 'الأفواج النشطة 🟢' : 'Active Groups 🟢'}</option>
+                    <option value="archived">{language === 'ar' ? 'الأفواج المؤرشفة 📁' : 'Archived Groups 📁'}</option>
+                  </select>
                 </div>
               </div>
 
@@ -1313,6 +1393,9 @@ export function AdminAcademicPathScreen() {
                         </th>
                         <th className="py-4 px-6 font-extrabold text-center">
                           {language === 'ar' ? 'الطلاب (Students)' : 'Students'}
+                        </th>
+                        <th className="py-4 px-6 font-extrabold text-center">
+                          {language === 'ar' ? 'الحالة (Status)' : 'Status'}
                         </th>
                         <th className="py-4 px-8 font-extrabold text-center">
                           {language === 'ar' ? 'متوسط التقدم (Progress)' : 'Progress'}
@@ -1422,6 +1505,20 @@ export function AdminAcademicPathScreen() {
                               </span>
                             </td>
 
+                            <td className="py-4 px-6 text-center">
+                              {grp.status === 'archived' ? (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-[11px] border border-amber-300/80 dark:border-amber-800 shadow-2xs whitespace-nowrap">
+                                  <Archive size={12} className="shrink-0" />
+                                  <span>{language === 'ar' ? 'مؤرشف 📁' : 'Archived 📁'}</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] border border-emerald-300/80 dark:border-emerald-800 shadow-2xs whitespace-nowrap">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                                  <span>{language === 'ar' ? 'نشط 🟢' : 'Active 🟢'}</span>
+                                </span>
+                              )}
+                            </td>
+
                             <td className="py-4 px-8 text-center">
                               <div className="flex items-center justify-center gap-3 min-w-[140px]">
                                 <div className="flex-1 h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
@@ -1490,15 +1587,25 @@ export function AdminAcademicPathScreen() {
                   <span>{language === 'ar' ? 'العودة لقائمة الأفواج' : 'Back to Groups'}</span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={handleOpenUpgradeModal}
-                  className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
-                  style={{ padding: '10px 22px' }}
-                >
-                  <GraduationCap size={18} />
-                  <span>{language === 'ar' ? 'ترقية الفوج للمستوى التالي 🎓' : 'Upgrade Group to Next Level 🎓'}</span>
-                </button>
+                {activeProgressGroup.status === 'archived' ? (
+                  <div
+                    className="flex items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 font-bold text-xs sm:text-sm shadow-xs select-none"
+                    style={{ padding: '9px 18px' }}
+                  >
+                    <Archive size={16} className="text-amber-600 dark:text-amber-400" />
+                    <span>{language === 'ar' ? 'فوج مؤرشف (سجل تاريخي مكتمل) 📁' : 'Archived Group (Completed) 📁'}</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleOpenUpgradeModal}
+                    className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                    style={{ padding: '10px 22px' }}
+                  >
+                    <GraduationCap size={18} />
+                    <span>{language === 'ar' ? 'ترقية الفوج للمستوى التالي 🎓' : 'Upgrade Group to Next Level 🎓'}</span>
+                  </button>
+                )}
               </div>
 
               {/* Upgrade Success Notification Banner */}
@@ -1537,6 +1644,19 @@ export function AdminAcademicPathScreen() {
                     <span className="text-xs text-slate-400 font-mono font-medium">
                       ({activeProgressGroup.code})
                     </span>
+
+                    {/* Show status of the group: whether it's active or archived */}
+                    {activeProgressGroup.status === 'archived' ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-bold text-xs border border-amber-300 dark:border-amber-700 shadow-2xs">
+                        <Archive size={13} className="shrink-0" />
+                        <span>{language === 'ar' ? 'فوج مؤرشف 📁' : 'Archived 📁'}</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold text-xs border border-emerald-300 dark:border-emerald-700 shadow-2xs">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                        <span>{language === 'ar' ? 'فوج نشط 🟢' : 'Active 🟢'}</span>
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-5 text-xs font-bold text-slate-500 dark:text-slate-400 pt-1">
