@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
@@ -27,8 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
-      <head>
-        <script
+      <body
+        className="font-sans antialiased select-none selection:bg-rose-500 selection:text-white"
+        suppressHydrationWarning
+      >
+        <Script
+          id="theme-initializer"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -60,7 +66,7 @@ export default function RootLayout({
                     origConsoleError.apply(console, arguments);
                   };
 
-                  var mode = localStorage.getItem('awliya_theme_mode_v4');
+                  var mode = localStorage.getItem('awliya_theme_mode_v10') || localStorage.getItem('awliya_theme_mode_v4');
                   var isDark = mode ? mode === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
                   if (isDark) {
                     document.documentElement.classList.add('dark');
@@ -71,11 +77,6 @@ export default function RootLayout({
             `,
           }}
         />
-      </head>
-      <body
-        className="font-sans antialiased select-none selection:bg-rose-500 selection:text-white"
-        suppressHydrationWarning
-      >
         <LanguageProvider>
           <ThemeProvider>
             <AuthProvider>
