@@ -55,13 +55,15 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
   const [parentName, setParentName] = useState(parent.fullNameAr);
   const [parentPhone, setParentPhone] = useState(parent.phone);
   const [parentEmail, setParentEmail] = useState(parent.email);
+  const [parentAddress, setParentAddress] = useState(parent.address || '');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   React.useEffect(() => {
     setParentName(parent.fullNameAr);
     setParentPhone(parent.phone);
     setParentEmail(parent.email);
-  }, [parent.fullNameAr, parent.phone, parent.email]);
+    setParentAddress(parent.address || '');
+  }, [parent.fullNameAr, parent.phone, parent.email, parent.address]);
 
   const handleSaveParent = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,10 +71,11 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
       fullNameAr: parentName,
       phone: parentPhone,
       email: parentEmail,
+      address: parentAddress,
     });
     setIsEditingParent(false);
     setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2000);
+    setTimeout(() => setSaveSuccess(false), 2500);
   };
 
   const handleToggleNotif = (key: keyof typeof notificationSettings) => {
@@ -133,11 +136,24 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                   paddingLeft: '20px',
                 }}
               >
-                {language === 'ar' ? theme.shortNameAr : `${t.level} ${activeStudent.currentLevel}`}
+                {students.length > 0 ? (language === 'ar' ? theme.shortNameAr : `${t.level} ${activeStudent.currentLevel}`) : (language === 'ar' ? 'بانتظار الربط' : 'Pending Link')}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 text-xs sm:text-sm">
+            {students.length === 0 ? (
+              <div
+                className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 text-center space-y-1.5"
+                style={{ padding: '32px 24px', borderRadius: '20px' }}
+              >
+                <p className="font-bold text-slate-800 dark:text-slate-200 text-sm">
+                  {language === 'ar' ? 'لا يوجد ملف طالب مرتبط بحسابك حالياً' : 'No student profile currently linked'}
+                </p>
+                <p className="text-xs text-slate-400 font-medium">
+                  {language === 'ar' ? 'ستظهر كافة البيانات والمستويات الأكاديمية تلقائياً فور ربط الأبناء من طرف إدارة المدرسة.' : 'Academic records will appear here once linked by school administration.'}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 text-xs sm:text-sm">
               <div
                 className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
                 style={{ padding: '22px 28px', borderRadius: '20px' }}
@@ -222,8 +238,9 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 </span>
               </div>
             </div>
-          </div>
+          )}
         </div>
+      </div>
 
         {/* Module 2: Parent Information */}
         <div
@@ -267,42 +284,45 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
 
             {isEditingParent ? (
               <form onSubmit={handleSaveParent} className="space-y-6" style={{ marginTop: '8px' }}>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                   <div
                     className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '22px 28px', borderRadius: '20px' }}
+                    style={{ padding: '20px 24px', borderRadius: '20px' }}
                   >
                     <label className="block text-xs font-bold text-slate-500 dark:text-slate-400" style={{ marginBottom: '10px' }}>
                       {language === 'ar' ? 'اسم ولي الأمر:' : language === 'fr' ? 'Nom du Parent :' : 'Parent Full Name:'}
                     </label>
                     <input
                       type="text"
+                      required
                       value={parentName}
                       onChange={(e) => setParentName(e.target.value)}
                       className="w-full text-sm font-bold text-slate-900 dark:text-white bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
-                      style={{ padding: '14px 20px' }}
+                      style={{ padding: '12px 16px' }}
                     />
                   </div>
 
                   <div
                     className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '22px 28px', borderRadius: '20px' }}
+                    style={{ padding: '20px 24px', borderRadius: '20px' }}
                   >
                     <label className="block text-xs font-bold text-slate-500 dark:text-slate-400" style={{ marginBottom: '10px' }}>
                       {t.phoneNumber}:
                     </label>
                     <input
                       type="tel"
+                      required
                       value={parentPhone}
                       onChange={(e) => setParentPhone(e.target.value)}
                       className="w-full text-sm font-bold text-slate-900 dark:text-white bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
-                      style={{ padding: '14px 20px' }}
+                      style={{ padding: '12px 16px' }}
+                      dir="ltr"
                     />
                   </div>
 
                   <div
                     className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '22px 28px', borderRadius: '20px' }}
+                    style={{ padding: '20px 24px', borderRadius: '20px' }}
                   >
                     <label className="block text-xs font-bold text-slate-500 dark:text-slate-400" style={{ marginBottom: '10px' }}>
                       {t.emailAddress}:
@@ -312,7 +332,24 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                       value={parentEmail}
                       onChange={(e) => setParentEmail(e.target.value)}
                       className="w-full text-sm font-bold text-slate-900 dark:text-white bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
-                      style={{ padding: '14px 20px' }}
+                      style={{ padding: '12px 16px' }}
+                      dir="ltr"
+                    />
+                  </div>
+
+                  <div
+                    className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800"
+                    style={{ padding: '20px 24px', borderRadius: '20px' }}
+                  >
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400" style={{ marginBottom: '10px' }}>
+                      {language === 'ar' ? 'العنوان السكني:' : language === 'fr' ? 'Adresse :' : 'Address:'}
+                    </label>
+                    <input
+                      type="text"
+                      value={parentAddress}
+                      onChange={(e) => setParentAddress(e.target.value)}
+                      className="w-full text-sm font-bold text-slate-900 dark:text-white bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
+                      style={{ padding: '12px 16px' }}
                     />
                   </div>
                 </div>
@@ -348,7 +385,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 </div>
               </form>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 text-xs sm:text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 text-xs sm:text-sm">
                 <div
                   className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
                   style={{ padding: '22px 28px', borderRadius: '20px' }}
@@ -374,6 +411,17 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                   <span className="text-xs text-slate-400 font-semibold block">{t.emailAddress}</span>
                   <span className="font-mono font-bold text-slate-900 dark:text-white truncate block text-sm" dir="ltr">
                     {parent.email}
+                  </span>
+                </div>
+                <div
+                  className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-2"
+                  style={{ padding: '22px 28px', borderRadius: '20px' }}
+                >
+                  <span className="text-xs text-slate-400 font-semibold block">
+                    {language === 'ar' ? 'العنوان السكني' : language === 'fr' ? 'Adresse' : 'Address'}
+                  </span>
+                  <span className="font-bold text-slate-900 dark:text-white truncate block text-sm">
+                    {parent.address || (language === 'ar' ? 'الجزائر العاصمة' : 'Algiers')}
                   </span>
                 </div>
               </div>

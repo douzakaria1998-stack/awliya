@@ -115,7 +115,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
             </span>
           </div>
           <span className="text-sm font-bold text-slate-500 dark:text-slate-400">
-            {completedCount} / 10 {t.levelsCompleted} ({Math.round((completedCount / 10) * 100)}%)
+            {completedCount} / {academicLevels.length} {t.levelsCompleted} ({Math.round((completedCount / (academicLevels.length || 1)) * 100)}%)
           </span>
         </div>
 
@@ -139,11 +139,15 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
           </div>
 
           <div className="flex items-center justify-between text-xs sm:text-sm font-semibold text-slate-400">
-            <span>{t.levelMilestone1}</span>
+            <span>{academicLevels.length > 0 ? `${t.level} ${academicLevels[0].level} (${academicLevels[0].cefrCode || 'A1'})` : t.levelMilestone1}</span>
             <span style={{ color: theme.primary }} className="font-bold">
               {t.levelMilestoneCurrent} ({activeStudent.currentLevel})
             </span>
-            <span>{t.levelMilestone10}</span>
+            <span>
+              {academicLevels.length > 0
+                ? `${t.level} ${academicLevels[academicLevels.length - 1].level} (${academicLevels[academicLevels.length - 1].cefrCode || 'C2'})`
+                : t.levelMilestone10}
+            </span>
           </div>
         </div>
 
@@ -159,7 +163,9 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
           </div>
           <div className="flex items-center gap-2 text-slate-400">
             <span className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0" />
-            <span>{t.statusLocked} ({10 - completedCount - 1})</span>
+            <span>
+              {t.statusLocked} ({Math.max(0, academicLevels.length - completedCount - (academicLevels.some((l) => l.status === 'current') ? 1 : 0))})
+            </span>
           </div>
         </div>
       </div>
@@ -222,9 +228,21 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
                     </div>
 
                     <div className="min-w-0">
-                      <span className="text-xs font-bold text-slate-400 block mb-1">
-                        {t.stage} {lvl.level}
-                      </span>
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-xs font-bold text-slate-400 block">
+                          {t.stage} {lvl.level}
+                        </span>
+                        {lvl.cefrCode && (
+                          <span className="px-2 py-0.5 rounded-md text-[11px] font-black tracking-wide font-mono bg-indigo-50 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60">
+                            {lvl.cefrCode}
+                          </span>
+                        )}
+                        {lvl.modules && (
+                          <span className="text-xs font-semibold text-slate-400">
+                            • {lvl.modules.length} {language === 'ar' ? 'وحدات معتمدة' : 'units'}
+                          </span>
+                        )}
+                      </div>
                       <h3
                         className={`text-lg sm:text-xl font-bold truncate ${
                           isCurrent
@@ -268,7 +286,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
                           fontSize: '13px',
                         }}
                       >
-                        {t.statusCurrent} ({activeStudent.currentLevelProgress}%)
+                        {t.statusCurrent} ({lvl.progress !== undefined ? lvl.progress : activeStudent.currentLevelProgress}%)
                       </span>
                     )}
 
@@ -301,18 +319,23 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
                     <div className="flex items-center justify-between text-xs sm:text-sm font-bold">
                       <span className="text-slate-700 dark:text-slate-200">{t.currentProgressRate}</span>
                       <span style={{ color: theme.primary }} className="font-mono text-base sm:text-lg font-bold">
-                        {activeStudent.currentLevelProgress}%
+                        {lvl.progress !== undefined ? lvl.progress : activeStudent.currentLevelProgress}%
                       </span>
                     </div>
                     <div className="w-full h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-700"
                         style={{
-                          width: `${activeStudent.currentLevelProgress}%`,
+                          width: `${lvl.progress !== undefined ? lvl.progress : activeStudent.currentLevelProgress}%`,
                           backgroundColor: theme.primary,
                         }}
                       />
                     </div>
+                    {lvl.completedLessonsCount !== undefined && lvl.totalLessonsCount !== undefined && lvl.totalLessonsCount > 0 && (
+                      <div className="text-xs text-slate-400 font-semibold text-right">
+                        {lvl.completedLessonsCount} / {lvl.totalLessonsCount} {language === 'ar' ? 'دروس مكتملة' : 'lessons completed'}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

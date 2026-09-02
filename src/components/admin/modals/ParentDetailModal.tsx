@@ -22,11 +22,16 @@ import {
   EyeOff,
   ShieldCheck,
   Search,
+  Edit2,
+  Save,
+  ExternalLink,
 } from 'lucide-react';
-import { AdminParent, AdminStudent } from '@/types/admin';
+import { AdminParent, AdminStudent, EntityStatus } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { generateAutoPassword } from '@/lib/utils';
+import { setItem } from '@/lib/localStorage';
+import { STORAGE_KEYS } from '@/lib/constants';
 
 interface ParentDetailModalProps {
   parent: AdminParent | null;
@@ -45,7 +50,36 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
   const [isCopied, setIsCopied] = useState(false);
   const [isFullCopied, setIsFullCopied] = useState(false);
 
+  // Edit Parent Details State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editNameAr, setEditNameAr] = useState('');
+  const [editNameEn, setEditNameEn] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editAddress, setEditAddress] = useState('');
+  const [editStatus, setEditStatus] = useState<EntityStatus>('active');
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
   const currentParent = parents.find((p) => p.id === parent?.id) || parent;
+
+  React.useEffect(() => {
+    if (currentParent) {
+      setEditNameAr(currentParent.fullNameAr);
+      setEditNameEn(currentParent.fullNameEn || '');
+      setEditPhone(currentParent.phone);
+      setEditEmail(currentParent.email);
+      setEditAddress(currentParent.address || '');
+      setEditStatus(currentParent.status || 'active');
+    }
+  }, [
+    currentParent?.id,
+    currentParent?.fullNameAr,
+    currentParent?.fullNameEn,
+    currentParent?.phone,
+    currentParent?.email,
+    currentParent?.address,
+    currentParent?.status,
+  ]);
 
   if (!isOpen || !currentParent) return null;
 
@@ -72,6 +106,40 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
     setSelectedStudentToLink('');
     setStudentSearchTerm('');
     setIsLinkingOpen(false);
+  };
+
+  const handleSaveParentDetails = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editNameAr.trim() || !editPhone.trim()) return;
+
+    updateParent(currentParent.id, {
+      fullNameAr: editNameAr.trim(),
+      fullNameEn: editNameEn.trim() || editNameAr.trim(),
+      phone: editPhone.trim(),
+      email: editEmail.trim() || currentParent.email,
+      address: editAddress.trim() || currentParent.address,
+      status: editStatus,
+    });
+
+    setIsEditing(false);
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 2500);
+  };
+
+  const handleOpenParentPortalSession = () => {
+    const parentAuthObj = {
+      id: currentParent.id,
+      fullNameAr: currentParent.fullNameAr,
+      fullNameEn: currentParent.fullNameEn,
+      phone: currentParent.phone,
+      email: currentParent.email,
+      password: currentParent.password || 'Awliya@2026',
+      address: currentParent.address,
+      linkedStudentIds: currentParent.linkedStudentIds,
+    };
+    setItem(STORAGE_KEYS.AUTH_USER, parentAuthObj);
+    setItem(STORAGE_KEYS.AUTH_STATUS, 'logged_in');
+    window.open('/', '_blank');
   };
 
   return (
@@ -111,35 +179,188 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
           <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
             {/* 1. Personal Information */}
             <div>
-              <h4
-                className="text-xs font-black text-slate-400 dark:text-slate-400 uppercase tracking-wider block"
-                style={{ marginBottom: '14px' }}
-              >
-                {language === 'ar' ? 'البيانات الشخصية لولي الأمر (Personal Information)' : 'Personal Information'}
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div
-                  className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800"
-                  style={{ padding: '18px 22px' }}
+              <div className="flex items-center justify-between" style={{ marginBottom: '14px' }}>
+                <h4
+                  className="text-xs font-black text-slate-400 dark:text-slate-400 uppercase tracking-wider block"
                 >
-                  <span className="text-xs text-slate-400 block mb-1.5 font-bold">{language === 'ar' ? 'رقم الهاتف:' : 'Phone Number:'}</span>
-                  <span className="font-mono font-black text-slate-900 dark:text-white text-sm" dir="ltr">{currentParent.phone}</span>
-                </div>
-                <div
-                  className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800"
-                  style={{ padding: '18px 22px' }}
-                >
-                  <span className="text-xs text-slate-400 block mb-1.5 font-bold">{language === 'ar' ? 'البريد الإلكتروني:' : 'Email:'}</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-white text-xs truncate block">{currentParent.email}</span>
-                </div>
-                <div
-                  className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800"
-                  style={{ padding: '18px 22px' }}
-                >
-                  <span className="text-xs text-slate-400 block mb-1.5 font-bold">{language === 'ar' ? 'العنوان السكني:' : 'Address:'}</span>
-                  <span className="font-bold text-slate-900 dark:text-white text-xs truncate block">{currentParent.address || 'الجزائر العاصمة'}</span>
+                  {language === 'ar' ? 'البيانات الشخصية لولي الأمر (Personal Information)' : 'Personal Information'}
+                </h4>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleOpenParentPortalSession}
+                    className="rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/50 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                    style={{ height: '36px', padding: '0 14px' }}
+                    title={language === 'ar' ? 'فتح بوابة ولي الأمر بهذا الحساب' : 'Open portal as this parent'}
+                  >
+                    <ExternalLink size={14} />
+                    <span>{language === 'ar' ? 'معاينة البوابة كولي أمر' : 'Open as Parent'}</span>
+                  </button>
+
+                  {!isEditing && (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      className="rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                      style={{ height: '36px', padding: '0 14px' }}
+                    >
+                      <Edit2 size={13} />
+                      <span>{language === 'ar' ? 'تعديل البيانات' : 'Edit Info'}</span>
+                    </button>
+                  )}
                 </div>
               </div>
+
+              {saveSuccess && (
+                <div className="p-3 mb-4 rounded-2xl bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center gap-2">
+                  <Check size={16} />
+                  <span>{language === 'ar' ? 'تم حفظ ومزامنة بيانات ولي الأمر بنجاح مع بوابة أولياء الأمور!' : 'Parent details saved and synced with Parent Portal!'}</span>
+                </div>
+              )}
+
+              {isEditing ? (
+                <form onSubmit={handleSaveParentDetails} className="space-y-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 p-5 animate-fade-in">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                        {language === 'ar' ? 'الاسم بالعربية *' : 'Full Name (Arabic) *'}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={editNameAr}
+                        onChange={(e) => setEditNameAr(e.target.value)}
+                        className="w-full text-xs sm:text-sm font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                        style={{ padding: '11px 18px', minHeight: '44px' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                        {language === 'ar' ? 'الاسم بالإنجليزية' : 'Full Name (English)'}
+                      </label>
+                      <input
+                        type="text"
+                        value={editNameEn}
+                        onChange={(e) => setEditNameEn(e.target.value)}
+                        className="w-full text-xs sm:text-sm font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                        style={{ padding: '11px 18px', minHeight: '44px' }}
+                        dir="ltr"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                        {language === 'ar' ? 'رقم الهاتف *' : 'Phone Number *'}
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        value={editPhone}
+                        onChange={(e) => setEditPhone(e.target.value)}
+                        className="w-full text-xs sm:text-sm font-bold font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                        style={{ padding: '11px 18px', minHeight: '44px' }}
+                        dir="ltr"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                        {language === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}
+                      </label>
+                      <input
+                        type="email"
+                        value={editEmail}
+                        onChange={(e) => setEditEmail(e.target.value)}
+                        className="w-full text-xs sm:text-sm font-bold font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                        style={{ padding: '11px 18px', minHeight: '44px' }}
+                        dir="ltr"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                        {language === 'ar' ? 'العنوان السكني' : 'Address'}
+                      </label>
+                      <input
+                        type="text"
+                        value={editAddress}
+                        onChange={(e) => setEditAddress(e.target.value)}
+                        className="w-full text-xs sm:text-sm font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                        style={{ padding: '11px 18px', minHeight: '44px' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                        {language === 'ar' ? 'حالة الحساب' : 'Account Status'}
+                      </label>
+                      <select
+                        value={editStatus}
+                        onChange={(e) => setEditStatus(e.target.value as EntityStatus)}
+                        className="w-full text-xs sm:text-sm font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                        style={{ padding: '11px 18px', minHeight: '44px' }}
+                      >
+                        <option value="active">{language === 'ar' ? 'نشط (Active)' : 'Active'}</option>
+                        <option value="inactive">{language === 'ar' ? 'غير نشط (Inactive)' : 'Inactive'}</option>
+                        <option value="pending">{language === 'ar' ? 'قيد الانتظار (Pending)' : 'Pending'}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div
+                    className="flex items-center justify-end gap-3.5 border-t border-slate-200/80 dark:border-slate-700/80"
+                    style={{ marginTop: '24px', paddingTop: '18px' }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(false)}
+                      className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs sm:text-sm cursor-pointer transition-colors flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs"
+                      style={{
+                        padding: '10px 24px',
+                        borderRadius: '12px',
+                        minHeight: '42px',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-all hover:opacity-95 active:scale-98 shrink-0"
+                      style={{
+                        padding: '10px 28px',
+                        borderRadius: '12px',
+                        minHeight: '42px',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <Save size={16} className="shrink-0" />
+                      <span>{language === 'ar' ? 'حفظ التعديلات' : 'Save Changes'}</span>
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div
+                    className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800"
+                    style={{ padding: '18px 22px' }}
+                  >
+                    <span className="text-xs text-slate-400 block mb-1.5 font-bold">{language === 'ar' ? 'رقم الهاتف:' : 'Phone Number:'}</span>
+                    <span className="font-mono font-black text-slate-900 dark:text-white text-sm" dir="ltr">{currentParent.phone}</span>
+                  </div>
+                  <div
+                    className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800"
+                    style={{ padding: '18px 22px' }}
+                  >
+                    <span className="text-xs text-slate-400 block mb-1.5 font-bold">{language === 'ar' ? 'البريد الإلكتروني:' : 'Email:'}</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white text-xs truncate block">{currentParent.email}</span>
+                  </div>
+                  <div
+                    className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800"
+                    style={{ padding: '18px 22px' }}
+                  >
+                    <span className="text-xs text-slate-400 block mb-1.5 font-bold">{language === 'ar' ? 'العنوان السكني:' : 'Address:'}</span>
+                    <span className="font-bold text-slate-900 dark:text-white text-xs truncate block">{currentParent.address || 'الجزائر العاصمة'}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 2. Account Login Credentials Card */}

@@ -15,8 +15,11 @@ import {
   Notification,
   NotificationSettings,
   LevelId,
+  LevelModule,
+  LevelLessonItem,
+  LevelStatus,
 } from '@/types';
-import { AdminStudent, AdminParent } from '@/types/admin';
+import { AdminStudent, AdminParent, CurriculumLevel, LessonProgressStatus } from '@/types/admin';
 import { getItem, setItem } from '@/lib/localStorage';
 import { STORAGE_KEYS, SHOW_FINANCIALS_TAB } from '@/lib/constants';
 import {
@@ -32,7 +35,7 @@ import {
   mockNotificationSettings,
   getFinancialSummaryForStudent,
 } from '@/data/mock';
-import { mockAdminStudents, mockAdminParents } from '@/data/adminMock';
+import { mockAdminStudents, mockAdminParents, mockCurricula } from '@/data/adminMock';
 import { useTheme } from './ThemeContext';
 import { useAuth } from './AuthContext';
 
@@ -153,7 +156,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   // Dynamically resolve students belonging to the authenticated parent
   const syncParentStudents = useCallback(() => {
     // Check latest parent session
-    const currentAuthUser = getItem<any>('awliya_auth_user');
+    const currentAuthUser = getItem<any>(STORAGE_KEYS.AUTH_USER) || getItem<any>('awliya_auth_user');
     const activeParent = currentAuthUser || parent;
 
     if (!activeParent) {
@@ -164,7 +167,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     const combinedParentsMap = new Map<string, AdminParent>();
     mockAdminParents.forEach((p) => combinedParentsMap.set(p.id, p));
-    const storedAdminParents = getItem<AdminParent[]>('myschool_admin_parents_v2') || [];
+    const storedAdminParents = getItem<AdminParent[]>(STORAGE_KEYS.ADMIN_PARENTS) || [];
     storedAdminParents.forEach((p) => combinedParentsMap.set(p.id, p));
     const allAdminParents = Array.from(combinedParentsMap.values());
 
@@ -190,7 +193,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     const combinedAdminStudentsMap = new Map<string, AdminStudent>();
     mockAdminStudents.forEach((st) => combinedAdminStudentsMap.set(st.id, st));
-    const storedAdminStudents = getItem<AdminStudent[]>('myschool_admin_students_v2') || [];
+    const storedAdminStudents = getItem<AdminStudent[]>(STORAGE_KEYS.ADMIN_STUDENTS) || [];
     storedAdminStudents.forEach((st) => combinedAdminStudentsMap.set(st.id, st));
     const allAdminStudents = Array.from(combinedAdminStudentsMap.values());
 
@@ -229,6 +232,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           status: adminStu.status as any,
           enrollmentDate: adminStu.enrollmentDate,
           age: 10,
+          language: adminStu.language,
+          cefrLevel: adminStu.cefrLevel,
         });
       }
     });
@@ -258,12 +263,24 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     }
   }, [parent, activeStudentId, setLevel]);
 
+  // Curricula & Lesson Progress states synced with Backoffice
+  const [curricula, setCurricula] = useState<CurriculumLevel[]>(() => {
+    return getItem<CurriculumLevel[]>(STORAGE_KEYS.ADMIN_CURRICULA) || mockCurricula;
+  });
+  const [lessonProgress, setLessonProgress] = useState<Record<string, LessonProgressStatus>>(() => {
+    return getItem<Record<string, LessonProgressStatus>>(STORAGE_KEYS.ADMIN_LESSON_PROGRESS) || {};
+  });
+
   // Sync on parent change and listen to window/storage sync events
   useEffect(() => {
     syncParentStudents();
 
     const handleSync = () => {
       syncParentStudents();
+      const freshCurricula = getItem<CurriculumLevel[]>(STORAGE_KEYS.ADMIN_CURRICULA) || mockCurricula;
+      const freshProgress = getItem<Record<string, LessonProgressStatus>>(STORAGE_KEYS.ADMIN_LESSON_PROGRESS) || {};
+      setCurricula(freshCurricula);
+      setLessonProgress(freshProgress);
     };
 
     if (typeof window !== 'undefined') {
@@ -398,10 +415,118 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     [activeStudentId, setLevel]
   );
 
-  // Computed data for active student
-  const academicLevels = useMemo(() => {
-    return getAcademicLevelsForStudent(activeStudent.currentLevel);
-  }, [activeStudent.currentLevel]);
+  // Computed data for active student: dynamic mapping from Backoffice Curricula
+  const academicLevels = useMemo<AcademicLevel[]>(() => {
+    if (!activeStudent || !activeStudent.id) {
+      return getAcademicLevelsForStudent(activeStudent?.currentLevel || 1);
+    }
+
+    // Determine language track: French if explicitly French or enrolled path indicates French, else English
+    const isFrench =
+      activeStudent.language === 'French' ||
+      activeStudent.enrolledPathAr?.includes('فرنسية') ||
+      activeStudent.enrolledPathAr?.toLowerCase().includes('french');
+    const studentLang = isFrench ? 'French' : 'English';
+
+    // Filter curriculum levels for this language, ordered by levelNumber
+    const list = Array.isArray(curricula) && curricula.length > 0 ? curricula : mockCurricula;
+    const studentCurricula = list
+      .filter((c) => c && c.language === studentLang)
+      .sort((a, b) => a.levelNumber - b.levelNumber);
+
+    if (studentCurricula.length === 0) {
+      return getAcademicLevelsForStudent(activeStudent.currentLevel);
+    }
+
+    const currentLevelNum = Number(activeStudent.currentLevel) || 1;
+
+    return studentCurricula.map((lvl) => {
+      const allLessons = lvl.units.flatMap((u) => u.lessons);
+      const totalLessons = allLessons.length;
+      const completedLessons = allLessons.filter(
+        (l) => lessonProgress[`${activeStudent.id}_${l.id}`] === 'completed'
+      ).length;
+
+      // Status determination
+      let status: LevelStatus = 'locked';
+      if (lvl.levelNumber < currentLevelNum || (totalLessons > 0 && completedLessons === totalLessons)) {
+        status = 'studied';
+      } else if (lvl.levelNumber === currentLevelNum) {
+        status = 'current';
+      } else {
+        status = 'locked';
+      }
+
+      const progress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+
+      // Map units to LevelModule with lessons and progress
+      const modules: LevelModule[] = lvl.units.map((u) => {
+        const uLessons: LevelLessonItem[] = u.lessons.map((l) => {
+          let lStatus: 'completed' | 'in_progress' | 'not_started' = 'not_started';
+          if (lessonProgress[`${activeStudent.id}_${l.id}`]) {
+            lStatus = lessonProgress[`${activeStudent.id}_${l.id}`] as any;
+          } else if (status === 'studied') {
+            lStatus = 'completed';
+          }
+
+          return {
+            id: l.id,
+            lessonNumber: l.lessonNumber,
+            titleAr: l.titleAr,
+            titleEn: l.titleEn,
+            status: lStatus,
+            exercisesCount: l.exercisesCount,
+            hasAssessment: l.hasAssessment,
+          };
+        });
+
+        const isUnitCompleted =
+          uLessons.length > 0
+            ? uLessons.every((l) => l.status === 'completed')
+            : status === 'studied';
+
+        return {
+          id: u.id,
+          unitNumber: u.unitNumber,
+          titleAr: u.titleAr,
+          titleEn: u.titleEn,
+          isCompleted: isUnitCompleted,
+          lessonsCount: u.lessons.length,
+          lessons: uLessons,
+        };
+      });
+
+      // Extract subject topics
+      const subjects = lvl.units.flatMap((u) => u.lessons.map((l) => l.titleAr));
+
+      const yearOffset = Math.max(1, currentLevelNum - lvl.levelNumber);
+      const completedDate =
+        status === 'studied' ? `2024-0${Math.min(9, Math.max(1, 10 - yearOffset * 3))}-15` : undefined;
+      const score = status === 'studied' ? 90 + ((lvl.levelNumber * 3) % 10) : undefined;
+
+      return {
+        level: lvl.levelNumber as LevelId,
+        cefrCode: lvl.cefrCode,
+        nameAr: lvl.nameAr,
+        nameEn: lvl.nameEn,
+        stageAr: lvl.descriptionAr || `المرحلة ${lvl.levelNumber}`,
+        stageEn: lvl.descriptionEn || `Stage ${lvl.levelNumber}`,
+        status,
+        subjects: subjects.length > 0 ? subjects : [lvl.nameAr],
+        modules,
+        completedDate,
+        score,
+        certificateAvailable: status === 'studied',
+        descriptionAr: lvl.descriptionAr,
+        descriptionEn: lvl.descriptionEn,
+        color: lvl.color,
+        language: lvl.language,
+        progress,
+        completedLessonsCount: completedLessons,
+        totalLessonsCount: totalLessons,
+      };
+    });
+  }, [curricula, lessonProgress, activeStudent]);
 
   const homeworkList = useMemo(() => {
     if (!activeStudent.id) return [];

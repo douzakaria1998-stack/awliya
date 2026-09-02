@@ -25,6 +25,8 @@ export const STORAGE_KEYS = {
   VIEWPORT_MODE: 'awliya_viewport_mode_v4',
   ADMIN_PARENTS: 'myschool_admin_parents_v2',
   ADMIN_STUDENTS: 'myschool_admin_students_v2',
+  ADMIN_CURRICULA: 'myschool_admin_curricula_v2',
+  ADMIN_LESSON_PROGRESS: 'myschool_admin_lesson_progress_v2',
 } as const;
 
 // Navigation tabs

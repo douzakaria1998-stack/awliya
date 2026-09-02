@@ -85,17 +85,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (storedParent) {
         // Refresh with latest parent record from admin parents if available
         const storedAdminParents = getItem<AdminParent[]>(STORAGE_KEYS.ADMIN_PARENTS) || [];
-        const matchingAdminParent = storedAdminParents.find((p) => p.id === storedParent.id);
+        const matchingAdminParent =
+          storedAdminParents.find((p) => p.id === storedParent.id) ||
+          mockAdminParents.find((p) => p.id === storedParent.id) ||
+          storedAdminParents.find(
+            (p) =>
+              (storedParent.email && p.email?.toLowerCase() === storedParent.email.toLowerCase()) ||
+              (storedParent.phone && p.phone === storedParent.phone)
+          );
         if (matchingAdminParent) {
           const synced: Parent = {
             ...storedParent,
+            id: matchingAdminParent.id,
             fullNameAr: matchingAdminParent.fullNameAr,
             fullNameEn: matchingAdminParent.fullNameEn,
             email: matchingAdminParent.email,
             phone: matchingAdminParent.phone,
             password: matchingAdminParent.password || storedParent.password,
-            address: matchingAdminParent.address,
-            linkedStudentIds: matchingAdminParent.linkedStudentIds || [],
+            address: matchingAdminParent.address || storedParent.address,
+            linkedStudentIds: matchingAdminParent.linkedStudentIds || storedParent.linkedStudentIds || [],
           };
           setParent(synced);
         } else {
@@ -174,8 +182,76 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateParent = useCallback((data: Partial<Parent>) => {
     setParent((prev) => {
-      const updated = { ...prev, ...data };
+      const updated: Parent = { ...prev, ...data };
       setItem(STORAGE_KEYS.AUTH_USER, updated);
+
+      // 1. Sync into Backoffice Admin Parents (myschool_admin_parents_v2)
+      const storedAdminParents = getItem<AdminParent[]>(STORAGE_KEYS.ADMIN_PARENTS) || [];
+      const parentIndex = storedAdminParents.findIndex(
+        (p) =>
+          p.id === updated.id ||
+          (updated.email && p.email?.toLowerCase() === updated.email.toLowerCase()) ||
+          (updated.phone && p.phone.replace(/\D/g, '') === (updated.phone || '').replace(/\D/g, ''))
+      );
+
+      let newAdminParents = [...storedAdminParents];
+      if (parentIndex !== -1) {
+        newAdminParents[parentIndex] = {
+          ...newAdminParents[parentIndex],
+          fullNameAr: updated.fullNameAr || newAdminParents[parentIndex].fullNameAr,
+          fullNameEn: updated.fullNameEn || newAdminParents[parentIndex].fullNameEn,
+          phone: updated.phone || newAdminParents[parentIndex].phone,
+          email: updated.email || newAdminParents[parentIndex].email,
+          address: updated.address !== undefined ? updated.address : newAdminParents[parentIndex].address,
+        };
+        setItem(STORAGE_KEYS.ADMIN_PARENTS, newAdminParents);
+      } else {
+        // If not yet in storedAdminParents, check mockAdminParents to seed and update
+        const matchedMock = mockAdminParents.find(
+          (p) =>
+            p.id === updated.id ||
+            (updated.email && p.email?.toLowerCase() === updated.email.toLowerCase()) ||
+            (updated.phone && p.phone.replace(/\D/g, '') === (updated.phone || '').replace(/\D/g, ''))
+        );
+        if (matchedMock) {
+          const syncedMock: AdminParent = {
+            ...matchedMock,
+            fullNameAr: updated.fullNameAr || matchedMock.fullNameAr,
+            fullNameEn: updated.fullNameEn || matchedMock.fullNameEn,
+            phone: updated.phone || matchedMock.phone,
+            email: updated.email || matchedMock.email,
+            address: updated.address !== undefined ? updated.address : matchedMock.address,
+          };
+          newAdminParents.push(syncedMock);
+          setItem(STORAGE_KEYS.ADMIN_PARENTS, newAdminParents);
+        }
+      }
+
+      // 2. Sync linked students' parentName, parentPhone, parentEmail in Admin Students
+      const storedAdminStudents = getItem<any[]>(STORAGE_KEYS.ADMIN_STUDENTS);
+      if (storedAdminStudents && storedAdminStudents.length > 0) {
+        const updatedStudents = storedAdminStudents.map((st) => {
+          const isLinked =
+            st.parentId === updated.id ||
+            (updated.linkedStudentIds && updated.linkedStudentIds.includes(st.id));
+          if (isLinked) {
+            return {
+              ...st,
+              parentName: updated.fullNameAr || st.parentName,
+              parentPhone: updated.phone || st.parentPhone,
+              parentEmail: updated.email !== undefined ? updated.email : st.parentEmail,
+            };
+          }
+          return st;
+        });
+        setItem(STORAGE_KEYS.ADMIN_STUDENTS, updatedStudents);
+      }
+
+      // 3. Dispatch cross-context synchronization event
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
       return updated;
     });
   }, []);

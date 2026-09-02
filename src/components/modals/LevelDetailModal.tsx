@@ -94,6 +94,20 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
                 {t.level} {level.level}
               </span>
 
+              {level.cefrCode && (
+                <span
+                  className="inline-flex items-center rounded-full font-black bg-white/25 backdrop-blur-md text-white border border-white/30 whitespace-nowrap font-mono select-none"
+                  style={{
+                    height: '32px',
+                    paddingRight: '14px',
+                    paddingLeft: '14px',
+                    fontSize: '13px',
+                  }}
+                >
+                  {level.cefrCode}
+                </span>
+              )}
+
               {level.status === 'studied' && (
                 <span
                   className="inline-flex items-center rounded-full font-bold bg-white text-emerald-800 shadow-2xs whitespace-nowrap select-none"
@@ -263,38 +277,89 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
             </div>
           </div>
 
-          {/* Units / Modules */}
+          {/* Units / Modules & Lessons */}
           {level.modules && level.modules.length > 0 && (
             <div>
               <h4
                 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2"
-                style={{ marginBottom: '12px' }}
+                style={{ marginBottom: '14px' }}
               >
                 <FileCheck size={18} className="text-slate-500 shrink-0" />
-                <span>{t.certifiedUnits} ({level.modules.length}):</span>
+                <span>
+                  {language === 'ar' ? 'الوحدات الدراسية المعتمدة' : 'Certified Units'} ({level.modules.length}):
+                </span>
               </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {level.modules.map((mod, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-850 text-xs sm:text-sm shadow-2xs select-none"
-                    style={{
-                      padding: '16px 22px',
-                      minHeight: '56px',
-                    }}
+                    className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-850 p-4 shadow-2xs select-none transition-all"
                   >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <div
-                        className={`w-7 h-7 min-w-[28px] min-h-[28px] rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-2xs ${
-                          mod.isCompleted ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700 text-slate-600'
-                        }`}
-                      >
-                        {mod.isCompleted ? <Check size={16} strokeWidth={3} /> : idx + 1}
+                    {/* Unit Header */}
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className={`w-7 h-7 min-w-[28px] min-h-[28px] rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-2xs ${
+                            mod.isCompleted ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                          }`}
+                        >
+                          {mod.isCompleted ? <Check size={16} strokeWidth={3} /> : idx + 1}
+                        </div>
+                        <span className="font-bold text-slate-900 dark:text-slate-100 text-sm sm:text-base truncate">
+                          {translateSubject(mod.titleAr, language)}
+                        </span>
                       </div>
-                      <span className="font-bold text-slate-800 dark:text-slate-200 truncate">
-                        {translateSubject(mod.titleAr, language)}
+                      <span className="text-xs font-bold text-slate-400 shrink-0">
+                        {mod.lessonsCount} {language === 'ar' ? 'دروس' : 'lessons'}
                       </span>
                     </div>
+
+                    {/* Unit Lessons list (if available) */}
+                    {mod.lessons && mod.lessons.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 space-y-2">
+                        {mod.lessons.map((lesson) => {
+                          const isDone = lesson.status === 'completed';
+                          const isInProg = lesson.status === 'in_progress';
+
+                          return (
+                            <div
+                              key={lesson.id}
+                              className="flex items-center justify-between gap-2.5 py-1.5 px-2.5 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 text-xs"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span
+                                  className={`w-2 h-2 rounded-full shrink-0 ${
+                                    isDone
+                                      ? 'bg-emerald-500'
+                                      : isInProg
+                                      ? 'bg-amber-500 animate-pulse'
+                                      : 'bg-slate-300 dark:bg-slate-600'
+                                  }`}
+                                />
+                                <span className={`truncate font-semibold ${isDone ? 'text-slate-700 dark:text-slate-300' : 'text-slate-500 dark:text-slate-400'}`}>
+                                  {lesson.titleAr}
+                                </span>
+                              </div>
+                              <span
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 ${
+                                  isDone
+                                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                                    : isInProg
+                                    ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
+                                    : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                                }`}
+                              >
+                                {isDone
+                                  ? (language === 'ar' ? 'مكتمل' : 'Completed')
+                                  : isInProg
+                                  ? (language === 'ar' ? 'قيد الدراسة' : 'In Progress')
+                                  : (language === 'ar' ? 'لم يبدأ بعد' : 'Pending')}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

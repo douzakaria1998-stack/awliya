@@ -17,6 +17,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Calendar,
+  UserPlus,
+  Link2,
+  Search,
 } from 'lucide-react';
 import { AdminStudent } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
@@ -31,11 +34,43 @@ interface StudentDetailModalProps {
 type StudentTabKey = 'overview' | 'academic' | 'attendance' | 'homework' | 'assessment' | 'feedback';
 
 export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailModalProps) {
-  const { homeworkList, assessments, feedbackList, attendanceSessions } = useAdmin();
+  const {
+    homeworkList,
+    assessments,
+    feedbackList,
+    attendanceSessions,
+    students,
+    parents,
+    linkStudentToParent,
+    unlinkStudentFromParent,
+  } = useAdmin();
   const { isRTL, language } = useLanguage();
   const [activeTab, setActiveTab] = useState<StudentTabKey>('overview');
+  const [isLinkingParent, setIsLinkingParent] = useState(false);
+  const [parentSearchQuery, setParentSearchQuery] = useState('');
 
   if (!isOpen || !student) return null;
+
+  // Resolve live student record from context
+  const currentStudent = students.find((s) => s.id === student.id) || student;
+  const hasParent = Boolean(
+    currentStudent.parentId &&
+    currentStudent.parentName &&
+    currentStudent.parentId.trim() !== ''
+  );
+
+  const isSearchingParent = parentSearchQuery.trim().length > 0;
+  const filteredParentsToLink = isSearchingParent
+    ? parents.filter((p) => {
+        const q = parentSearchQuery.trim().toLowerCase();
+        return (
+          p.fullNameAr.toLowerCase().includes(q) ||
+          (p.fullNameEn && p.fullNameEn.toLowerCase().includes(q)) ||
+          p.phone.toLowerCase().includes(q) ||
+          p.email.toLowerCase().includes(q)
+        );
+      })
+    : [];
 
   const studentHomework = homeworkList.filter((h) => h.studentIds.includes(student.id) || h.groupId === student.groupId);
   const studentAssessments = assessments.filter((a) => a.studentId === student.id);
@@ -157,18 +192,162 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                     <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{student.teacherName}</span>
                   </div>
                   <div
-                    className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
+                    className={`${hasParent ? 'bg-slate-50 dark:bg-slate-800/60 border-slate-100 dark:border-slate-800' : 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-200/80 dark:border-amber-900/50'} rounded-2xl border`}
                     style={{ padding: '14px 18px' }}
                   >
-                    <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'ولي الأمر المربوط:' : 'Linked Parent:'}</span>
-                    <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{student.parentName} ({student.relationship})</span>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`text-xs block font-bold ${hasParent ? 'text-slate-400' : 'text-amber-700/80 dark:text-amber-400/80'}`}>
+                        {language === 'ar' ? 'ولي الأمر المربوط:' : 'Linked Parent:'}
+                      </span>
+                      {hasParent && (
+                        <button
+                          type="button"
+                          onClick={() => unlinkStudentFromParent(currentStudent.parentId, currentStudent.id)}
+                          className="text-[10px] font-bold text-rose-500 hover:text-rose-700 dark:text-rose-400 cursor-pointer transition-colors"
+                          title={language === 'ar' ? 'إلغاء ربط ولي الأمر' : 'Unlink Parent'}
+                        >
+                          {language === 'ar' ? 'إلغاء الربط' : 'Unlink'}
+                        </button>
+                      )}
+                    </div>
+
+                    {hasParent ? (
+                      <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm block truncate">
+                        {currentStudent.parentName} {currentStudent.relationship ? `(${currentStudent.relationship})` : ''}
+                      </span>
+                    ) : isLinkingParent ? (
+                      <div className="space-y-2 mt-2 animate-fade-in">
+                        {/* Search Input Bar */}
+                        <div className="relative">
+                          <Search
+                            size={15}
+                            className={`absolute top-1/2 -translate-y-1/2 text-amber-600 dark:text-amber-400 pointer-events-none ${
+                              isRTL ? 'right-3.5' : 'left-3.5'
+                            }`}
+                          />
+                          <input
+                            type="text"
+                            autoFocus
+                            value={parentSearchQuery}
+                            onChange={(e) => setParentSearchQuery(e.target.value)}
+                            placeholder={language === 'ar' ? 'ابحث بالاسم أو رقم الهاتف...' : 'Search by name or phone...'}
+                            className="w-full text-xs font-bold bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all shadow-2xs"
+                            style={{
+                              paddingTop: '9px',
+                              paddingBottom: '9px',
+                              paddingRight: isRTL ? '36px' : '14px',
+                              paddingLeft: isRTL ? '14px' : '36px',
+                              minHeight: '38px',
+                            }}
+                          />
+                          {parentSearchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setParentSearchQuery('')}
+                              className={`absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer ${
+                                isRTL ? 'left-3' : 'right-3'
+                              }`}
+                            >
+                              <X size={14} />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Search Results Dropdown List (only shown when typing a search query) */}
+                        {isSearchingParent && (
+                          <div
+                            className="bg-white dark:bg-slate-900 rounded-xl border border-amber-300/80 dark:border-amber-700/80 shadow-lg divide-y divide-slate-100 dark:divide-slate-800 overflow-y-auto animate-fade-in"
+                            style={{ maxHeight: '180px' }}
+                          >
+                            {filteredParentsToLink.length === 0 ? (
+                              <div className="py-3.5 px-4 text-center text-xs text-slate-400 font-bold">
+                                {language === 'ar' ? 'لا يوجد ولي أمر مطابق للبحث' : 'No matching parents found'}
+                              </div>
+                            ) : (
+                              filteredParentsToLink.map((p) => (
+                                <div
+                                  key={p.id}
+                                  className="p-3 hover:bg-amber-50/80 dark:hover:bg-amber-950/40 flex items-center justify-between gap-3 transition-colors cursor-pointer"
+                                  onClick={() => {
+                                    linkStudentToParent(p.id, currentStudent.id);
+                                    setIsLinkingParent(false);
+                                    setParentSearchQuery('');
+                                  }}
+                                >
+                                  <div className="min-w-0">
+                                    <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                                      {p.fullNameAr} {p.fullNameEn ? `(${p.fullNameEn})` : ''}
+                                    </div>
+                                    <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate" dir="ltr">
+                                      {p.phone}
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      linkStudentToParent(p.id, currentStudent.id);
+                                      setIsLinkingParent(false);
+                                      setParentSearchQuery('');
+                                    }}
+                                    className="rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-colors cursor-pointer whitespace-nowrap shadow-2xs shrink-0 flex items-center justify-center"
+                                    style={{ padding: '6px 14px', minHeight: '30px' }}
+                                  >
+                                    {language === 'ar' ? 'ربط' : 'Link'}
+                                  </button>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
+
+                        {/* Cancel Button */}
+                        <div className="flex items-center justify-end pt-0.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsLinkingParent(false);
+                              setParentSearchQuery('');
+                            }}
+                            className="rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800 text-xs font-bold transition-colors cursor-pointer"
+                            style={{ padding: '5px 12px', minHeight: '30px', whiteSpace: 'nowrap' }}
+                          >
+                            {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-bold text-amber-700 dark:text-amber-300 text-xs flex items-center gap-1.5 min-w-0">
+                          <UserPlus size={14} className="shrink-0 text-amber-600" />
+                          <span className="truncate">{language === 'ar' ? 'إضافة ولي أمر للربط' : 'Add parent to link'}</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsLinkingParent(true);
+                            setParentSearchQuery('');
+                          }}
+                          className="rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-all cursor-pointer hover:scale-102 active:scale-98 shrink-0 flex items-center justify-center shadow-xs"
+                          style={{
+                            padding: '6px 16px',
+                            minHeight: '32px',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {language === 'ar' ? 'ربط الآن' : 'Link'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div
                     className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
                     style={{ padding: '14px 18px' }}
                   >
                     <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'هاتف التواصل:' : 'Parent Phone:'}</span>
-                    <span className="font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm" dir="ltr">{student.parentPhone}</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm" dir="ltr">
+                      {hasParent ? (currentStudent.parentPhone || '—') : (language === 'ar' ? 'غير محدد' : 'Not set')}
+                    </span>
                   </div>
                   <div
                     className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"

@@ -89,7 +89,9 @@ export function AppLayout() {
           }}
         >
           <div className="w-full max-w-5xl">
-            {students.length === 0 ? (
+            {activeTab === 'profile' ? (
+              <ProfileScreen onOpenAddStudent={() => setIsAddStudentOpen(true)} />
+            ) : students.length === 0 ? (
               <NoLinkedStudentsScreen />
             ) : (
               <>
@@ -113,10 +115,6 @@ export function AppLayout() {
 
                 {activeTab === 'financials' && (
                   <FinancialsScreen onOpenAddStudent={() => setIsAddStudentOpen(true)} />
-                )}
-
-                {activeTab === 'profile' && (
-                  <ProfileScreen onOpenAddStudent={() => setIsAddStudentOpen(true)} />
                 )}
               </>
             )}

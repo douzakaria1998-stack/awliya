@@ -54,21 +54,41 @@ export interface Student {
   status?: 'active' | 'pending';
   enrollmentDate: string;
   age: number;
+  language?: 'English' | 'French' | 'Dual';
+  cefrLevel?: string;
 }
 
 // ---------- Academic Path ----------
 export type LevelStatus = 'studied' | 'current' | 'locked';
 
-export interface LevelModule {
+export interface LevelLessonItem {
+  id: string;
+  lessonNumber: number;
   titleAr: string;
+  titleEn?: string;
+  status: 'completed' | 'in_progress' | 'not_started';
+  durationMinutes?: number;
+  exercisesCount?: number;
+  hasAssessment?: boolean;
+}
+
+export interface LevelModule {
+  id?: string;
+  unitNumber?: number;
+  titleAr: string;
+  titleEn?: string;
   isCompleted: boolean;
   lessonsCount: number;
+  lessons?: LevelLessonItem[];
 }
 
 export interface AcademicLevel {
   level: LevelId;
+  cefrCode?: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | string;
   nameAr: string;
+  nameEn?: string;
   stageAr: string;
+  stageEn?: string;
   status: LevelStatus;
   subjects: string[];
   modules?: LevelModule[];
@@ -76,6 +96,12 @@ export interface AcademicLevel {
   score?: number; // Score percentage if completed
   certificateAvailable?: boolean;
   descriptionAr?: string;
+  descriptionEn?: string;
+  color?: string;
+  language?: 'English' | 'French';
+  progress?: number; // 0 to 100
+  completedLessonsCount?: number;
+  totalLessonsCount?: number;
 }
 
 // ---------- Homework ----------

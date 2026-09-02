@@ -40,6 +40,7 @@ import {
 import { getItem, setItem } from '@/lib/localStorage';
 import { generateAutoPassword } from '@/lib/utils';
 import { useStudent } from '@/context/StudentContext';
+import { STORAGE_KEYS } from '@/lib/constants';
 
 interface AdminContextType {
   // Current user & role
@@ -80,6 +81,7 @@ interface AdminContextType {
   
   addParent: (parentData: Partial<AdminParent>) => void;
   updateParent: (parentId: string, updates: Partial<AdminParent>) => void;
+  deleteParent: (parentId: string) => void;
   linkStudentToParent: (parentId: string, studentId: string) => void;
   unlinkStudentFromParent: (parentId: string, studentId: string) => void;
 
@@ -240,6 +242,27 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
     const sApprovals = getItem<PendingStudentApproval[]>(ADMIN_STORAGE_KEYS.APPROVALS);
     if (sApprovals?.length) setPendingApprovals(sApprovals);
+
+    // Dynamic sync listener for cross-context / Parent Portal updates
+    const handleSync = () => {
+      const liveParents = getItem<AdminParent[]>(ADMIN_STORAGE_KEYS.PARENTS);
+      if (liveParents?.length) setParents(liveParents);
+
+      const liveStudents = getItem<AdminStudent[]>(ADMIN_STORAGE_KEYS.STUDENTS);
+      if (liveStudents?.length) setStudents(liveStudents);
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('awliya-data-sync', handleSync);
+      window.addEventListener('storage', handleSync);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('awliya-data-sync', handleSync);
+        window.removeEventListener('storage', handleSync);
+      }
+    };
   }, []);
 
   const currentAdmin = useMemo(() => {
@@ -448,6 +471,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return updated;
       });
 
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
       logAudit(`إضافة ولي أمر جديد: ${newParent.fullNameAr}`, `Added new parent: ${newParent.fullNameEn}`, 'parent');
     },
     [logAudit]
@@ -461,10 +488,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return updated;
       });
 
-      // If phone/email changed, sync linked students
+      // If phone/email/name changed, sync linked students in admin database
       if (updates.fullNameAr || updates.phone || updates.email) {
-        setStudents((prev) =>
-          prev.map((s) => {
+        setStudents((prev) => {
+          const updatedStudents = prev.map((s) => {
             if (s.parentId === parentId) {
               return {
                 ...s,
@@ -474,15 +501,31 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
               };
             }
             return s;
-          })
-        );
+          });
+          setItem(ADMIN_STORAGE_KEYS.STUDENTS, updatedStudents);
+          return updatedStudents;
+        });
       }
 
       // Sync active auth user session in Parent Portal if matching
-      const currentAuthUser = getItem<any>('awliya_auth_user_v4');
-      if (currentAuthUser && currentAuthUser.id === parentId) {
-        const updatedAuth = { ...currentAuthUser, ...updates };
-        setItem('awliya_auth_user_v4', updatedAuth);
+      const currentAuthUser = getItem<any>(STORAGE_KEYS.AUTH_USER) || getItem<any>('awliya_auth_user_v4');
+      if (
+        currentAuthUser &&
+        (currentAuthUser.id === parentId ||
+          (updates.email && currentAuthUser.email?.toLowerCase() === updates.email.toLowerCase()) ||
+          (updates.phone && (currentAuthUser.phone || '').replace(/\D/g, '') === (updates.phone || '').replace(/\D/g, '')))
+      ) {
+        const updatedAuth = {
+          ...currentAuthUser,
+          ...updates,
+          fullNameAr: updates.fullNameAr || currentAuthUser.fullNameAr,
+          fullNameEn: updates.fullNameEn || currentAuthUser.fullNameEn,
+          phone: updates.phone || currentAuthUser.phone,
+          email: updates.email || currentAuthUser.email,
+          address: updates.address !== undefined ? updates.address : currentAuthUser.address,
+          password: updates.password || currentAuthUser.password,
+        };
+        setItem(STORAGE_KEYS.AUTH_USER, updatedAuth);
       }
 
       if (typeof window !== 'undefined') {
@@ -490,6 +533,41 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       }
 
       logAudit(`تحديث بيانات ولي الأمر: ${parentId}`, `Updated parent details: ${parentId}`, 'parent');
+    },
+    [logAudit]
+  );
+
+  const deleteParent = useCallback(
+    (parentId: string) => {
+      setParents((prev) => {
+        const updated = prev.filter((p) => p.id !== parentId);
+        setItem(ADMIN_STORAGE_KEYS.PARENTS, updated);
+        return updated;
+      });
+
+      // Clear student's parent reference for any students linked to this parent
+      setStudents((prev) => {
+        const updated = prev.map((s) => {
+          if (s.parentId === parentId) {
+            return {
+              ...s,
+              parentId: '',
+              parentName: '',
+              parentPhone: '',
+              parentEmail: '',
+            };
+          }
+          return s;
+        });
+        setItem(ADMIN_STORAGE_KEYS.STUDENTS, updated);
+        return updated;
+      });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
+      logAudit(`حذف ولي الأمر: ${parentId}`, `Deleted parent: ${parentId}`, 'parent');
     },
     [logAudit]
   );
@@ -519,13 +597,18 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Sync active auth session if current user is this parent
-      const currentAuthUser = getItem<any>('awliya_auth_user');
-      if (currentAuthUser && currentAuthUser.id === parentId) {
+      const currentAuthUser = getItem<any>(STORAGE_KEYS.AUTH_USER) || getItem<any>('awliya_auth_user_v4');
+      if (
+        currentAuthUser &&
+        (currentAuthUser.id === parentId ||
+          (parentObj && currentAuthUser.email?.toLowerCase() === parentObj.email.toLowerCase()) ||
+          (parentObj && (currentAuthUser.phone || '').replace(/\D/g, '') === (parentObj.phone || '').replace(/\D/g, '')))
+      ) {
         const updatedUser = {
           ...currentAuthUser,
           linkedStudentIds: Array.from(new Set([...(currentAuthUser.linkedStudentIds || []), studentId])),
         };
-        setItem('awliya_auth_user', updatedUser);
+        setItem(STORAGE_KEYS.AUTH_USER, updatedUser);
       }
 
       // Dispatch cross-context synchronization event
@@ -557,20 +640,20 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
       // Clear student's parent reference
       updateStudent(studentId, {
-        parentId: undefined,
-        parentName: undefined,
-        parentPhone: undefined,
-        parentEmail: undefined,
+        parentId: '',
+        parentName: '',
+        parentPhone: '',
+        parentEmail: '',
       });
 
       // Sync active auth session if current user is this parent
-      const currentAuthUser = getItem<any>('awliya_auth_user');
+      const currentAuthUser = getItem<any>(STORAGE_KEYS.AUTH_USER) || getItem<any>('awliya_auth_user_v4');
       if (currentAuthUser && currentAuthUser.id === parentId) {
         const updatedUser = {
           ...currentAuthUser,
           linkedStudentIds: (currentAuthUser.linkedStudentIds || []).filter((id: string) => id !== studentId),
         };
-        setItem('awliya_auth_user', updatedUser);
+        setItem(STORAGE_KEYS.AUTH_USER, updatedUser);
       }
 
       // Dispatch cross-context synchronization event
@@ -777,6 +860,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           updated = [...prev, levelData];
         }
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('awliya-data-sync'));
+        }
         return updated;
       });
 
@@ -799,6 +885,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           c.levelNumber === oldLevelNumber && c.language === lang ? levelData : c
         );
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('awliya-data-sync'));
+        }
         return updated;
       });
 
@@ -824,6 +913,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }));
         const updated = [...otherLang, ...renumbered];
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('awliya-data-sync'));
+        }
         return updated;
       });
 
@@ -845,6 +937,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         const otherLang = filtered.filter((c) => c.language !== lang);
         const updated = [...otherLang, ...sameLang];
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('awliya-data-sync'));
+        }
 
         if (target) {
           logAudit(
@@ -870,6 +965,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         const key = `${studentId}_${lessonId}`;
         const updated = { ...prev, [key]: status };
         setItem(ADMIN_STORAGE_KEYS.LESSON_PROGRESS, updated);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('awliya-data-sync'));
+        }
 
         // Recalculate student progress
         setStudents((prevStudents) => {
@@ -1305,6 +1403,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         archiveStudent,
         addParent,
         updateParent,
+        deleteParent,
         linkStudentToParent,
         unlinkStudentFromParent,
         addTeacher,

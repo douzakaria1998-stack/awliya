@@ -15,15 +15,19 @@ import {
   Check,
   UserCheck,
   ArrowRight,
+  Users,
+  Sparkles,
+  ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { InteractiveWaveBackground } from '../ui/InteractiveWaveBackground';
 import { Language } from '@/lib/translations';
+import { Parent } from '@/types';
 
 export function LoginScreen() {
-  const { login } = useAuth();
+  const { login, allRegisteredParents } = useAuth();
   const { theme, isDarkMode, toggleDarkMode } = useTheme();
   const { isRTL, language, setLanguage, t } = useLanguage();
 
@@ -34,6 +38,7 @@ export function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
 
   const langRef = useRef<HTMLDivElement>(null);
 
@@ -131,6 +136,15 @@ export function LoginScreen() {
         } z-20 flex items-center gap-2.5`}
       >
         {/* Back Office shortcut */}
+        <a
+          href="/admin"
+          className="rounded-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+          style={{ height: '44px', paddingLeft: '16px', paddingRight: '16px' }}
+        >
+          <ExternalLink size={14} />
+          <span>{language === 'ar' ? 'لوحة الإدارة' : 'Back Office'}</span>
+        </a>
+
         {/* Language Switcher */}
         <div ref={langRef} className="relative">
           <button
@@ -404,6 +418,105 @@ export function LoginScreen() {
               </button>
             </div>
           </form>
+        </div>
+
+        {/* Synced Backoffice Accounts Quick Access Drawer / Selector */}
+        <div
+          className="bg-white/90 dark:bg-slate-850/90 backdrop-blur-sm border border-slate-200/90 dark:border-slate-800 rounded-3xl shadow-md overflow-hidden transition-all"
+          style={{ marginTop: '20px', padding: '20px 24px' }}
+        >
+          <button
+            type="button"
+            onClick={() => setShowDemoAccounts(!showDemoAccounts)}
+            className="w-full flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Users size={16} className="text-purple-600 dark:text-purple-400" />
+              <span>
+                {language === 'ar'
+                  ? `حسابات أولياء الأمور المزامنة مع الإدارة (${allRegisteredParents.length})`
+                  : `Synced Parent Accounts (${allRegisteredParents.length})`}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-slate-400">
+              <span className="text-[11px]">
+                {showDemoAccounts ? (language === 'ar' ? 'إخفاء' : 'Hide') : (language === 'ar' ? 'عرض الحسابات' : 'Show Accounts')}
+              </span>
+              <ChevronDown
+                size={15}
+                className={`transition-transform duration-200 ${showDemoAccounts ? 'rotate-180' : ''}`}
+              />
+            </div>
+          </button>
+
+          {showDemoAccounts && (
+            <div className="space-y-2.5 animate-fade-in" style={{ marginTop: '16px', maxHeight: '280px', overflowY: 'auto' }}>
+              <p className="text-[11px] text-slate-400 font-medium">
+                {language === 'ar'
+                  ? 'اختر أي حساب ولي أمر مسجل في لوحة الإدارة لتسجيل الدخول الفوري وتجربة المزامنة:'
+                  : 'Click any registered parent to instantly populate credentials and test synchronization:'}
+              </p>
+
+              {allRegisteredParents.map((p) => {
+                const isSelected = emailOrPhone === p.phone || emailOrPhone === p.email;
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => {
+                      setEmailOrPhone(p.phone || p.email);
+                      setPassword(p.password || 'Awliya@2026');
+                      setErrorMessage('');
+                    }}
+                    className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                      isSelected
+                        ? 'bg-purple-50 dark:bg-purple-950/50 border-purple-400 dark:border-purple-600 shadow-2xs'
+                        : 'bg-slate-50/80 dark:bg-slate-800/60 hover:bg-purple-50/50 dark:hover:bg-purple-950/30 border-slate-200/70 dark:border-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold text-xs flex items-center justify-center shrink-0">
+                        {p.fullNameAr ? p.fullNameAr[0] : 'و'}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                          {p.fullNameAr} {p.fullNameEn ? `(${p.fullNameEn})` : ''}
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono truncate" dir="ltr">
+                          {p.phone} • {p.linkedStudentIds?.length || 0} {language === 'ar' ? 'أبناء' : 'students'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          setEmailOrPhone(p.phone || p.email);
+                          setPassword(p.password || 'Awliya@2026');
+                          setErrorMessage('');
+                          setIsLoading(true);
+                          try {
+                            const res = await login(p.phone || p.email, p.password || 'Awliya@2026');
+                            if (!res.success) {
+                              setErrorMessage(language === 'ar' ? 'فشل تسجيل الدخول' : 'Sign in failed');
+                            }
+                          } catch {
+                            setErrorMessage(language === 'ar' ? 'خطأ في الدخول' : 'Sign in error');
+                          } finally {
+                            setIsLoading(false);
+                          }
+                        }}
+                        className="px-2.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-[10px] transition-colors cursor-pointer whitespace-nowrap shadow-2xs"
+                      >
+                        {language === 'ar' ? 'دخول فوري' : 'Quick Login'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Footer Support Link */}
