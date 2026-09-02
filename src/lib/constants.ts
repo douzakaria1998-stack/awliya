@@ -28,6 +28,7 @@ export const STORAGE_KEYS = {
   ADMIN_CURRICULA: 'myschool_admin_curricula_v2',
   ADMIN_LESSON_PROGRESS: 'myschool_admin_lesson_progress_v2',
   ADMIN_STUDENT_LEVEL_SCORES: 'myschool_admin_student_level_scores_v2',
+  ADMIN_ATTENDANCE: 'myschool_admin_attendance_v2',
 } as const;
 
 // Navigation tabs

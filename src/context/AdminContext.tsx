@@ -12,6 +12,7 @@ import {
   CurriculumLevel,
   LessonProgressStatus,
   AttendanceSession,
+  AttendanceStudentEntry,
   AdminHomeworkAssignment,
   AdminAssessmentRecord,
   TwoWayFeedbackItem,
@@ -115,7 +116,20 @@ interface AdminContextType {
     completedDate?: string
   ) => void;
 
-  recordAttendance: (sessionId: string, records: { studentId: string; status: 'present' | 'late' | 'absent' | 'excused'; note?: string }[]) => void;
+  recordAttendance: (
+    sessionId: string,
+    records: { studentId: string; status: 'present' | 'late' | 'absent' | 'excused'; note?: string }[],
+    sessionMeta?: {
+      groupId: string;
+      groupName: string;
+      date: string;
+      dayNameAr: string;
+      dayNameEn: string;
+      sessionTime: string;
+      teacherId: string;
+      teacherName: string;
+    }
+  ) => void;
   
   createHomework: (hwData: Partial<AdminHomeworkAssignment>) => void;
   evaluateHomework: (hwId: string, studentId: string, score: number, comment: string, status: 'completed' | 'needs_revision') => void;
@@ -1099,32 +1113,135 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   // Attendance Actions
   // ==========================================
   const recordAttendance = useCallback(
-    (sessionId: string, records: { studentId: string; status: 'present' | 'late' | 'absent' | 'excused'; note?: string }[]) => {
+    (
+      sessionId: string,
+      records: { studentId: string; status: 'present' | 'late' | 'absent' | 'excused'; note?: string }[],
+      sessionMeta?: {
+        groupId: string;
+        groupName: string;
+        date: string;
+        dayNameAr: string;
+        dayNameEn: string;
+        sessionTime: string;
+        teacherId: string;
+        teacherName: string;
+      }
+    ) => {
+      let updatedSessionsResult: AttendanceSession[] = [];
+
       setAttendanceSessions((prev) => {
-        const updated = prev.map((sess) => {
-          if (sess.id === sessionId) {
-            const updatedEntries = sess.records.map((rec) => {
-              const matchingNew = records.find((r) => r.studentId === rec.studentId);
-              if (matchingNew) {
-                return { ...rec, status: matchingNew.status, note: matchingNew.note || rec.note, recordedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-              }
-              return rec;
-            });
-            return { ...sess, records: updatedEntries };
-          }
-          return sess;
-        });
-        setItem(ADMIN_STORAGE_KEYS.ATTENDANCE, updated);
-        return updated;
+        const existingIdx = prev.findIndex((sess) => sess.id === sessionId);
+
+        if (existingIdx >= 0) {
+          const updated = [...prev];
+          const currentSess = updated[existingIdx];
+          const updatedEntries = currentSess.records.map((rec) => {
+            const matchingNew = records.find((r) => r.studentId === rec.studentId);
+            if (matchingNew) {
+              return {
+                ...rec,
+                status: matchingNew.status,
+                note: matchingNew.note || rec.note,
+                recordedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              };
+            }
+            return rec;
+          });
+
+          // Include any students in this group not yet in session
+          records.forEach((newRec) => {
+            if (!updatedEntries.some((r) => r.studentId === newRec.studentId)) {
+              const studentObj = students.find((s) => s.id === newRec.studentId);
+              updatedEntries.push({
+                studentId: newRec.studentId,
+                studentNameAr: studentObj?.fullNameAr || newRec.studentId,
+                studentNameEn: studentObj?.fullNameEn || newRec.studentId,
+                status: newRec.status,
+                note: newRec.note || '',
+                recordedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              });
+            }
+          });
+
+          updated[existingIdx] = { ...currentSess, records: updatedEntries, isLocked: true };
+          updatedSessionsResult = updated;
+          setItem(ADMIN_STORAGE_KEYS.ATTENDANCE, updated);
+          return updated;
+        } else {
+          // Create new session
+          const studentEntries: AttendanceStudentEntry[] = records.map((r) => {
+            const studentObj = students.find((s) => s.id === r.studentId);
+            return {
+              studentId: r.studentId,
+              studentNameAr: studentObj?.fullNameAr || r.studentId,
+              studentNameEn: studentObj?.fullNameEn || r.studentId,
+              status: r.status,
+              note: r.note || '',
+              recordedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            };
+          });
+
+          const newSession: AttendanceSession = {
+            id: sessionId,
+            groupId: sessionMeta?.groupId || 'grp-a1-01',
+            groupName: sessionMeta?.groupName || 'Group',
+            date: sessionMeta?.date || new Date().toISOString().split('T')[0],
+            dayNameAr: sessionMeta?.dayNameAr || 'اليوم',
+            dayNameEn: sessionMeta?.dayNameEn || 'Today',
+            sessionTime: sessionMeta?.sessionTime || '04:30',
+            teacherId: sessionMeta?.teacherId || 'usr-teach-01',
+            teacherName: sessionMeta?.teacherName || 'Teacher',
+            records: studentEntries,
+            isLocked: true,
+          };
+          const updated = [newSession, ...prev];
+          updatedSessionsResult = updated;
+          setItem(ADMIN_STORAGE_KEYS.ATTENDANCE, updated);
+          return updated;
+        }
       });
 
+      // Recalculate attendance rates for all affected students
+      const studentIdsToRecalculate = records.map((r) => r.studentId);
+      setStudents((prevStudents) => {
+        const updatedStudents = prevStudents.map((st) => {
+          if (!studentIdsToRecalculate.includes(st.id)) return st;
+
+          let totalSessions = 0;
+          let attendedSessions = 0;
+
+          updatedSessionsResult.forEach((sess) => {
+            const entry = sess.records?.find((r) => r.studentId === st.id);
+            if (entry) {
+              totalSessions++;
+              if (entry.status === 'present' || entry.status === 'late' || entry.status === 'excused') {
+                attendedSessions++;
+              }
+            }
+          });
+
+          const calculatedRate = totalSessions > 0 ? Math.round((attendedSessions / totalSessions) * 100) : 0;
+          return {
+            ...st,
+            attendanceRate: calculatedRate,
+          };
+        });
+        setItem(ADMIN_STORAGE_KEYS.STUDENTS, updatedStudents);
+        return updatedStudents;
+      });
+
+      // Broadcast real-time sync event across contexts
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
       logAudit(
-        `رصد سجل الحضور للجلسة ${sessionId}`,
+        `رصد وتحديث سجل الحضور للجلسة ${sessionId}`,
         `Recorded attendance session ${sessionId}`,
         'attendance'
       );
     },
-    [logAudit]
+    [students, logAudit]
   );
 
   // ==========================================

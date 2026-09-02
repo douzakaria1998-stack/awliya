@@ -239,7 +239,22 @@ export function AdminAttendanceScreen() {
       note: studentNotesMap[st.id] || '',
     }));
 
-    recordAttendance(drawerSession?.id || `att-sess-${activeDrawerGroup.id}`, records);
+    const sessionId = drawerSession?.id || `att-sess-${activeDrawerGroup.id}-${selectedDate}`;
+
+    recordAttendance(
+      sessionId,
+      records,
+      {
+        groupId: activeDrawerGroup.id,
+        groupName: activeDrawerGroup.name,
+        date: selectedDate,
+        dayNameAr: getDayName(selectedDate),
+        dayNameEn: dayMapEn[getDayOfWeekIndex(selectedDate)],
+        sessionTime: `${activeDrawerGroup.startTime} - ${activeDrawerGroup.endTime}`,
+        teacherId: activeDrawerGroup.teacherId,
+        teacherName: activeDrawerGroup.teacherName,
+      }
+    );
     setSavedSuccess(true);
     setTimeout(() => {
       setSavedSuccess(false);

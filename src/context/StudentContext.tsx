@@ -19,7 +19,7 @@ import {
   LevelLessonItem,
   LevelStatus,
 } from '@/types';
-import { AdminStudent, AdminParent, CurriculumLevel, LessonProgressStatus } from '@/types/admin';
+import { AdminStudent, AdminParent, CurriculumLevel, LessonProgressStatus, AttendanceSession } from '@/types/admin';
 import { getItem, setItem } from '@/lib/localStorage';
 import { STORAGE_KEYS, SHOW_FINANCIALS_TAB } from '@/lib/constants';
 import {
@@ -280,6 +280,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       ) || {}
     );
   });
+  const [attendanceSessions, setAttendanceSessions] = useState<AttendanceSession[]>(() => {
+    return getItem<AttendanceSession[]>(STORAGE_KEYS.ADMIN_ATTENDANCE) || [];
+  });
 
   // Sync on parent change and listen to window/storage sync events
   useEffect(() => {
@@ -293,9 +296,11 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         getItem<Record<string, { score: number; honorsDegreeAr?: string; completedDate?: string }>>(
           STORAGE_KEYS.ADMIN_STUDENT_LEVEL_SCORES
         ) || {};
+      const freshAttendance = getItem<AttendanceSession[]>(STORAGE_KEYS.ADMIN_ATTENDANCE) || [];
       setCurricula(freshCurricula);
       setLessonProgress(freshProgress);
       setStudentLevelScores(freshScores);
+      setAttendanceSessions(freshAttendance);
     };
 
     if (typeof window !== 'undefined') {
@@ -563,7 +568,79 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       };
     }
 
-    // A student is considered new if attendanceRate is 0, or currentLevelProgress is 0 (just enrolled or upgraded)
+    // 1. Gather all recorded attendance sessions from the backoffice that contain this student
+    const studentSessionsWithRecord: { session: AttendanceSession; entry: any }[] = [];
+
+    attendanceSessions.forEach((sess) => {
+      const match = sess.records?.find((r) => r.studentId === activeStudent.id);
+      if (match) {
+        studentSessionsWithRecord.push({ session: sess, entry: match });
+      }
+    });
+
+    // 2. If backoffice sessions exist for this student, USE THEM as the live synchronized source of truth!
+    if (studentSessionsWithRecord.length > 0) {
+      // Sort sessions by date descending (newest first)
+      studentSessionsWithRecord.sort(
+        (a, b) => new Date(b.session.date).getTime() - new Date(a.session.date).getTime()
+      );
+
+      // Helper to calculate week index relative to reference week:
+      // Week 0: Feb 15 - Feb 20, 2025 (or within 6 days of session)
+      // Week 1: Feb 08 - Feb 13, 2025
+      // Week 2: Feb 01 - Feb 06, 2025
+      const parseWeekIndex = (dateStr: string) => {
+        try {
+          const date = new Date(dateStr);
+          const baseDate = new Date('2025-02-15');
+          const diffDays = Math.floor((baseDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+          if (diffDays <= 6 && diffDays >= -6) return 0; // Current week
+          if (diffDays > 6 && diffDays <= 13) return 1;  // Last week
+          return 2;                                      // Previous week
+        } catch {
+          return 0;
+        }
+      };
+
+      const records: AttendanceRecord[] = studentSessionsWithRecord.map(({ session, entry }, idx) => {
+        return {
+          id: `att-rec-${session.id}-${entry.studentId}-${idx}`,
+          studentId: entry.studentId,
+          date: session.date,
+          dayNameAr: session.dayNameAr || 'السبت',
+          subjectAr:
+            session.groupName?.toLowerCase().includes('fr') || session.groupName?.includes('فرنسي')
+              ? 'اللغة الفرنسية'
+              : 'اللغة الإنجليزية',
+          status: entry.status,
+          noteAr: entry.note || undefined,
+          sessionTimeAr: session.sessionTime ? `${session.sessionTime} م` : '04:30 م',
+          weekIndex: parseWeekIndex(session.date),
+        };
+      });
+
+      const presentCount = records.filter((r) => r.status === 'present').length;
+      const lateCount = records.filter((r) => r.status === 'late').length;
+      const absentCount = records.filter((r) => r.status === 'absent').length;
+      const excusedCount = records.filter((r) => r.status === 'excused').length;
+      const total = records.length;
+      const percentage = total > 0 ? Math.round(((presentCount + lateCount) / total) * 100) : 0;
+
+      return {
+        records,
+        summary: {
+          totalDays: total,
+          presentDays: presentCount,
+          absentDays: absentCount,
+          lateDays: lateCount,
+          excusedDays: excusedCount,
+          attendancePercentage: percentage,
+        },
+      };
+    }
+
+    // 3. Fallback: If no backoffice attendance has been recorded yet for this student:
+    // If the student is new (attendanceRate === 0 or currentLevelProgress === 0), return 0% and empty records!
     const isNewStudent =
       activeStudent.attendanceRate === 0 ||
       activeStudent.currentLevelProgress === 0 ||
@@ -584,7 +661,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       };
     }
     return data;
-  }, [activeStudent]);
+  }, [activeStudent, attendanceSessions]);
 
   const assessments = useMemo(() => {
     if (!activeStudent.id) return [];
