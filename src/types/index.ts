@@ -56,6 +56,7 @@ export interface Student {
   age: number;
   language?: 'English' | 'French' | 'Dual';
   cefrLevel?: string;
+  attendanceRate?: number;
 }
 
 // ---------- Academic Path ----------

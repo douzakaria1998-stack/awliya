@@ -205,7 +205,7 @@ export function StudentsManagementScreen() {
       parentPhone,
       status: 'active',
       overallProgress: 0,
-      attendanceRate: 100,
+      attendanceRate: 0,
       averagePerformance: 80,
     });
 

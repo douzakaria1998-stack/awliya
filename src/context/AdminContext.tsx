@@ -417,7 +417,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         enrollmentDate: new Date().toISOString().substring(0, 10),
         status: data.status || 'active',
         overallProgress: data.overallProgress || 0,
-        attendanceRate: data.attendanceRate || 100,
+        attendanceRate: data.attendanceRate !== undefined ? data.attendanceRate : 0,
         averagePerformance: data.averagePerformance || 80,
         completedLessonsCount: 0,
         totalLessonsCount: 20,

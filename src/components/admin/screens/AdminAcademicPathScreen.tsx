@@ -363,6 +363,7 @@ export function AdminAcademicPathScreen() {
         groupId: activeProgressGroup.id,
         overallProgress: 0,
         completedLessonsCount: 0,
+        attendanceRate: 0,
         status: 'active',
       });
 

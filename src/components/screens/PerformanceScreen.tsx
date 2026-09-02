@@ -451,8 +451,12 @@ export function PerformanceScreen({
                 <div className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white font-mono">
                   {attendanceData.summary.attendancePercentage}%
                 </div>
-                <span className="text-xs font-bold text-emerald-600 block">
-                  {language === 'ar' ? 'معدل انضباط متميز' : language === 'fr' ? 'Excellent taux de présence' : 'Excellent Discipline Rate'}
+                <span className="text-xs font-bold text-slate-400 block">
+                  {attendanceData.summary.totalDays === 0
+                    ? (language === 'ar' ? 'طالب مسجل حديثاً (لم تسجل حصص بعد)' : 'Newly enrolled student (No sessions yet)')
+                    : attendanceData.summary.attendancePercentage >= 90
+                    ? (language === 'ar' ? 'معدل انضباط متميز' : 'Excellent Discipline Rate')
+                    : (language === 'ar' ? 'معدل انضباط جيد' : 'Good Discipline Rate')}
                 </span>
               </div>
 
@@ -652,109 +656,128 @@ export function PerformanceScreen({
                     paddingLeft: '16px',
                   }}
                 >
-                  {language === 'ar' ? `نسبة الأسبوع: ${weekPercentage}%` : language === 'fr' ? `Taux hebdo: ${weekPercentage}%` : `Week Rate: ${weekPercentage}%`}
+                  {language === 'ar'
+                      ? `نسبة الأسبوع: ${currentWeekRecords.length === 0 ? 0 : weekPercentage}%`
+                      : language === 'fr'
+                      ? `Taux hebdo: ${currentWeekRecords.length === 0 ? 0 : weekPercentage}%`
+                      : `Week Rate: ${currentWeekRecords.length === 0 ? 0 : weekPercentage}%`}
                 </span>
               </div>
             </div>
 
             {/* Weekly Timetable Schedule Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" style={{ paddingBottom: '48px' }}>
-              {currentWeekRecords.map((rec) => {
-                const isPresent = rec.status === 'present';
-                const isAbsent = rec.status === 'absent';
-                const isLate = rec.status === 'late';
+            {currentWeekRecords.length === 0 ? (
+                <div
+                  className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 text-center flex flex-col items-center justify-center shadow-xs"
+                  style={{ padding: '48px 24px', marginBottom: '48px' }}
+                >
+                  <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4 shadow-sm">
+                    <CalendarDays size={30} />
+                  </div>
+                  <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white mb-1.5">
+                    {language === 'ar' ? 'طالب مسجل حديثاً — الحضور 0%' : 'Newly Enrolled Student — 0% Attendance'}
+                  </h4>
+                  <p className="text-xs sm:text-sm text-slate-400 max-w-md leading-relaxed">
+                    {language === 'ar'
+                      ? 'لم يتم تسجيل أي حصص دراسية سابقة لهذا الطالب بعد، وتبدأ نسبة الحضور في الاحتساب فور بدء الجلسات.'
+                      : 'No previous class sessions have been recorded for this student yet. Attendance will begin calculating once sessions commence.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" style={{ paddingBottom: '48px' }}>
+                  {currentWeekRecords.map((rec) => {
+                    const isPresent = rec.status === 'present';
+                    const isAbsent = rec.status === 'absent';
+                    const isLate = rec.status === 'late';
 
-                const subjectAr = rec.subjectAr || 'اللغة الإنجليزية';
-                const translatedSubject = translateSubject(subjectAr, language);
-                const dayLabel = translateDayName(rec.dayNameAr);
-                const themeStyles =
-                  SUBJECT_CONTAINER_THEMES[subjectAr] || SUBJECT_CONTAINER_THEMES['اللغة الإنجليزية'];
+                    const subjectAr = rec.subjectAr || 'اللغة الإنجليزية';
+                    const translatedSubject = translateSubject(subjectAr, language);
+                    const dayLabel = translateDayName(rec.dayNameAr);
+                    const themeStyles =
+                      SUBJECT_CONTAINER_THEMES[subjectAr] || SUBJECT_CONTAINER_THEMES['اللغة الإنجليزية'];
 
-                return (
-                  <div
-                    key={rec.id}
-                    className={`rounded-[24px] border ${themeStyles.bgClass} ${themeStyles.borderClass} flex flex-col justify-between shadow-2xs select-none transition-all hover:shadow-md`}
-                    style={{
-                      paddingTop: '22px',
-                      paddingRight: '26px',
-                      paddingLeft: '26px',
-                      paddingBottom: '26px',
-                      minHeight: '155px',
-                    }}
-                  >
-                    <div>
-                      {/* Top Row: Day Title + Status Badge */}
-                      <div className="flex items-center justify-between gap-3 mb-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                            {dayLabel}
-                          </span>
-                          <span className="text-xs text-slate-400 font-mono font-bold">
-                            {rec.date}
-                          </span>
+                    return (
+                      <div
+                        key={rec.id}
+                        className={`rounded-[24px] border ${themeStyles.bgClass} ${themeStyles.borderClass} flex flex-col justify-between shadow-2xs select-none transition-all hover:shadow-md`}
+                        style={{
+                          paddingTop: '22px',
+                          paddingRight: '26px',
+                          paddingLeft: '26px',
+                          paddingBottom: '26px',
+                          minHeight: '155px',
+                        }}
+                      >
+                        <div>
+                          {/* Top Row: Day Title + Status Badge */}
+                          <div className="flex items-center justify-between gap-3 mb-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                                {dayLabel}
+                              </span>
+                              <span className="text-xs text-slate-400 font-mono font-bold">
+                                {rec.date}
+                              </span>
+                            </div>
+
+                            <span
+                              className={`inline-flex items-center justify-center rounded-full text-xs font-black shadow-2xs select-none ${
+                                isPresent
+                                  ? 'bg-emerald-500 text-white'
+                                  : isAbsent
+                                  ? 'bg-rose-500 text-white'
+                                  : isLate
+                                  ? 'bg-amber-500 text-white'
+                                  : 'bg-blue-500 text-white'
+                              }`}
+                              style={{
+                                height: '32px',
+                                paddingRight: '16px',
+                                paddingLeft: '16px',
+                              }}
+                            >
+                              {isPresent
+                                ? `${t.present} ✓`
+                                : isAbsent
+                                ? `${t.absent} ✕`
+                                : isLate
+                                ? `${t.late} ⏱`
+                                : `${t.excused} ✉`}
+                            </span>
+                          </div>
+
+                          {/* Subject Pill */}
+                          <div className="flex items-center gap-2 mb-2">
+                            <BookOpen size={14} className="text-slate-400 shrink-0" />
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                              {translatedSubject}
+                            </span>
+                          </div>
+
+                          {/* Session Time */}
+                          <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
+                            <Clock size={13} className="shrink-0" />
+                            <span>
+                              {rec.sessionTimeAr || '04:30 م'}
+                            </span>
+                          </div>
                         </div>
 
-                        <span
-                          className={`inline-flex items-center justify-center rounded-full text-xs font-black shadow-2xs select-none ${
-                            isPresent
-                              ? 'bg-emerald-500 text-white'
-                              : isAbsent
-                              ? 'bg-rose-500 text-white'
-                              : isLate
-                              ? 'bg-amber-500 text-white'
-                              : 'bg-blue-500 text-white'
-                          }`}
-                          style={{
-                            height: '32px',
-                            paddingRight: '16px',
-                            paddingLeft: '16px',
-                          }}
-                        >
-                          {isPresent
-                            ? `${t.present} ✓`
-                            : isAbsent
-                            ? `${t.absent} ✕`
-                            : isLate
-                            ? `${t.late} ⏱`
-                            : `${t.excused} ✉`}
-                        </span>
+                        {/* Note / Excuse Footer if present */}
+                        {rec.noteAr && (
+                          <div
+                            className="mt-3 p-3 px-4 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 text-xs text-slate-700 dark:text-slate-300 font-medium"
+                            style={{ marginBottom: '2px' }}
+                          >
+                            <span className="font-bold">{language === 'ar' ? 'ملاحظة: ' : language === 'fr' ? 'Remarque : ' : 'Note: '}</span>
+                            {rec.noteAr}
+                          </div>
+                        )}
                       </div>
-
-                      {/* Middle Row: Subject Pill + Time */}
-                      <div className="flex items-center justify-between gap-2.5 my-2.5">
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full font-black text-xs shadow-2xs select-none ${themeStyles.badgeBg}`}
-                          style={{
-                            height: '34px',
-                            paddingRight: '16px',
-                            paddingLeft: '16px',
-                          }}
-                        >
-                          <BookOpen size={14} className="shrink-0" />
-                          <span>{translatedSubject}</span>
-                        </span>
-
-                        <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-300 font-bold flex items-center gap-1.5">
-                          <Clock size={14} />
-                          <span>{rec.sessionTimeAr || '04:30 PM'}</span>
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Note / Excuse Footer if present */}
-                    {rec.noteAr && (
-                      <div
-                        className="mt-3 p-3 px-4 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 text-xs text-slate-700 dark:text-slate-300 font-medium"
-                        style={{ marginBottom: '2px' }}
-                      >
-                        <span className="font-bold">{language === 'ar' ? 'ملاحظة: ' : language === 'fr' ? 'Remarque : ' : 'Note: '}</span>
-                        {rec.noteAr}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                    );
+                  })}
+                </div>
+              )}
           </div>
         </div>
       )}

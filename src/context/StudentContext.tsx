@@ -234,6 +234,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           age: 10,
           language: adminStu.language,
           cefrLevel: adminStu.cefrLevel,
+          attendanceRate: adminStu.attendanceRate !== undefined ? adminStu.attendanceRate : (adminStu.overallProgress === 0 ? 0 : 0),
         });
       }
     });
@@ -561,7 +562,21 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         summary: emptyAttendanceSummary,
       };
     }
-    const data = getAttendanceDataForStudent(activeStudent.id);
+
+    // A student is considered new if attendanceRate is 0, or currentLevelProgress is 0 (just enrolled or upgraded)
+    const isNewStudent =
+      activeStudent.attendanceRate === 0 ||
+      activeStudent.currentLevelProgress === 0 ||
+      (activeStudent as any).overallProgress === 0;
+
+    if (isNewStudent) {
+      return {
+        records: [],
+        summary: emptyAttendanceSummary,
+      };
+    }
+
+    const data = getAttendanceDataForStudent(activeStudent.id, isNewStudent);
     if (!data || data.records.length === 0) {
       return {
         records: [],
@@ -569,7 +584,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       };
     }
     return data;
-  }, [activeStudent.id]);
+  }, [activeStudent]);
 
   const assessments = useMemo(() => {
     if (!activeStudent.id) return [];

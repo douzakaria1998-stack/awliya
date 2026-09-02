@@ -42,16 +42,17 @@ export const mockStudents: Student[] = [
     schoolLevelAr: 'السنة الخامسة ابتدائي',
     nicknameAr: 'يوسف',
     enrolledPathAr: 'مسار اللغة الإنجليزية المكثف (Intensive English Path)',
-    currentLevel: 4 as LevelId,
-    currentLevelProgress: 68,
+    currentLevel: 1 as LevelId,
+    currentLevelProgress: 0,
     studentIdNumber: 'STD-2024-0042',
     academicYearAr: '1446-1447هـ (2024-2025)',
     branchAr: 'فرع الروضة - الرياض',
     timingAr: 'خلال أيام الأسبوع (Weekdays)',
     gender: 'male',
     status: 'active',
-    enrollmentDate: '2023-09-01',
+    enrollmentDate: '2025-02-01',
     age: 11,
+    attendanceRate: 0,
   },
   {
     id: 'student-002',
@@ -391,10 +392,31 @@ export const mockHomeworkMap: Record<string, Homework[]> = {
 };
 
 // ---------- Attendance Data Generator ----------
-export function getAttendanceDataForStudent(studentId: string): {
+export function getAttendanceDataForStudent(studentId: string, isNewStudent?: boolean): {
   records: AttendanceRecord[];
   summary: AttendanceSummary;
 } {
+  // If the student is new, attendance is strictly 0% with 0 recorded days
+  if (
+    isNewStudent ||
+    studentId === 'student-001' ||
+    studentId.startsWith('student-new') ||
+    studentId.includes('new') ||
+    !studentId
+  ) {
+    return {
+      records: [],
+      summary: {
+        totalDays: 0,
+        presentDays: 0,
+        absentDays: 0,
+        lateDays: 0,
+        excusedDays: 0,
+        attendancePercentage: 0,
+      },
+    };
+  }
+
   const dates = [
     // Week 0: الأسبوع الحالي (15 - 20 فبراير 2025)
     { date: '2025-02-15', day: 'السبت', subject: 'محادثة إنجليزية', status: 'present' as const, time: '04:30 م', weekIndex: 0 },
