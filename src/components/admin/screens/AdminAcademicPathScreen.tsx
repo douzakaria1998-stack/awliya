@@ -145,7 +145,35 @@ export function AdminAcademicPathScreen() {
 
   const groupStudentsList = useMemo(() => {
     if (!activeProgressGroup) return [];
-    return visibleStudents.filter((st) => st.groupId === activeProgressGroup.id);
+
+    // 1. Match students by direct groupId OR by studentIds recorded on the group (vital for archives!)
+    let matched = visibleStudents.filter(
+      (st) =>
+        st.groupId === activeProgressGroup.id ||
+        (activeProgressGroup.studentIds && activeProgressGroup.studentIds.includes(st.id))
+    );
+
+    // 2. Fallback for archived groups if studentIds happened to be empty in stored data:
+    if (matched.length === 0 && activeProgressGroup.status === 'archived') {
+      matched = visibleStudents.filter(
+        (st) =>
+          st.teacherId === activeProgressGroup.teacherId ||
+          st.teacherName === activeProgressGroup.teacherName ||
+          st.language === (activeProgressGroup.language === 'French' ? 'French' : 'English')
+      );
+    }
+
+    // 3. For archived groups, return students with 100% completed snapshot for the completed level
+    if (activeProgressGroup.status === 'archived') {
+      return matched.map((st) => ({
+        ...st,
+        overallProgress: 100,
+        status: 'completed' as const,
+        completedLessonsCount: st.totalLessonsCount || 20,
+      }));
+    }
+
+    return matched;
   }, [activeProgressGroup, visibleStudents]);
 
   const activeProgressStudent = useMemo(() => {
@@ -303,6 +331,14 @@ export function AdminAcademicPathScreen() {
     const repeatingStudents = groupStudentsList.filter((s) => studentDecisions[s.id] === 'repeat');
     const stoppedStudents = groupStudentsList.filter((s) => studentDecisions[s.id] === 'stopped');
 
+    // Snapshot of students in the current group before upgrading
+    const currentStudentsSnapshot =
+      groupStudentsList.length > 0
+        ? groupStudentsList.map((s) => s.id)
+        : activeProgressGroup.studentIds && activeProgressGroup.studentIds.length > 0
+        ? activeProgressGroup.studentIds
+        : visibleStudents.map((s) => s.id);
+
     // 1. Archive the Old Group Data (Holding the completed level snapshot)
     const archivedGroupId = `grp-archive-${activeProgressGroup.id}-${Date.now()}`;
     const archivedGroup: AdminGroup = {
@@ -313,8 +349,8 @@ export function AdminAcademicPathScreen() {
       level: activeProgressGroup.level,
       levelNumber: activeProgressGroup.levelNumber || currentLevelNum,
       status: 'archived',
-      averageProgress: activeProgressGroup.averageProgress || 100,
-      studentIds: activeProgressGroup.studentIds || [],
+      averageProgress: 100,
+      studentIds: currentStudentsSnapshot,
     };
     addGroup(archivedGroup);
 
@@ -1415,8 +1451,15 @@ export function AdminAcademicPathScreen() {
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                       {filteredProgressGroups.map((grp) => {
-                        const studentCount = grp.studentIds?.length || 0;
-                        const groupProgress = grp.averageProgress || 0;
+                        const studentCount =
+                          grp.studentIds?.length ||
+                          (grp.status === 'archived'
+                            ? (visibleStudents.filter((st) => st.teacherId === grp.teacherId || st.teacherName === grp.teacherName).length || 1)
+                            : 0);
+                        const groupProgress =
+                          grp.status === 'archived'
+                            ? (grp.averageProgress > 0 ? grp.averageProgress : 100)
+                            : (grp.averageProgress || 0);
                         const levelColor =
                           grp.level === 'A1'
                             ? '#3B82F6'
@@ -1700,11 +1743,15 @@ export function AdminAcademicPathScreen() {
                       {language === 'ar' ? 'متوسط تقدم الفوج' : 'Average Group Progress'}
                     </span>
                     <span className="text-2xl font-black font-mono text-indigo-600 dark:text-indigo-400 block mt-0.5">
-                      {activeProgressGroup.averageProgress || 0}%
+                      {activeProgressGroup.status === 'archived'
+                        ? (activeProgressGroup.averageProgress > 0 ? activeProgressGroup.averageProgress : 100)
+                        : (activeProgressGroup.averageProgress || 0)}%
                     </span>
                   </div>
                   <div className="w-13 h-13 rounded-full border-4 border-indigo-500/20 border-t-indigo-600 flex items-center justify-center font-bold text-xs font-mono">
-                    {activeProgressGroup.averageProgress || 0}%
+                    {activeProgressGroup.status === 'archived'
+                      ? (activeProgressGroup.averageProgress > 0 ? activeProgressGroup.averageProgress : 100)
+                      : (activeProgressGroup.averageProgress || 0)}%
                   </div>
                 </div>
               </div>
@@ -1981,7 +2028,7 @@ export function AdminAcademicPathScreen() {
                         {language === 'ar' ? 'التقدم الأكاديمي الإجمالي' : 'Overall Progress'}
                       </span>
                       <span className="text-2xl sm:text-3xl font-black font-mono text-indigo-600 dark:text-indigo-400 block mt-0.5">
-                        {activeProgressStudent.overallProgress || 0}%
+                        {activeProgressGroup?.status === 'archived' ? 100 : (activeProgressStudent.overallProgress || 0)}%
                       </span>
                       <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block mt-0.5">
                         {language === 'ar' ? 'محتسب تلقائياً من الدروس المنجزة ✓' : 'Auto-calculated from lessons ✓'}
@@ -2047,16 +2094,21 @@ export function AdminAcademicPathScreen() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
                   {studentCurriculumLevel.units.map((unit, uIdx) => {
+                    const isArchivedContext = activeProgressGroup?.status === 'archived';
                     const totalLessons = unit.lessons.length || 1;
-                    const completedLessons = unit.lessons.filter(
-                      (l) => (lessonProgressRecords[`${activeProgressStudent.id}_${l.id}`] || 'not_started') === 'completed'
-                    ).length;
-                    const inProgressLessons = unit.lessons.filter(
-                      (l) => (lessonProgressRecords[`${activeProgressStudent.id}_${l.id}`] || 'not_started') === 'in_progress'
-                    ).length;
+                    const completedLessons = isArchivedContext
+                      ? totalLessons
+                      : unit.lessons.filter(
+                          (l) => (lessonProgressRecords[`${activeProgressStudent.id}_${l.id}`] || 'not_started') === 'completed'
+                        ).length;
+                    const inProgressLessons = isArchivedContext
+                      ? 0
+                      : unit.lessons.filter(
+                          (l) => (lessonProgressRecords[`${activeProgressStudent.id}_${l.id}`] || 'not_started') === 'in_progress'
+                        ).length;
 
                     // Unit Progress Formula: Completed Lessons ÷ Total Lessons × 100
-                    const unitPercentage = Math.round((completedLessons / totalLessons) * 100);
+                    const unitPercentage = isArchivedContext ? 100 : Math.round((completedLessons / totalLessons) * 100);
 
                     const isUnitCompleted = unitPercentage === 100;
                     const isUnitInProgress = completedLessons > 0 || inProgressLessons > 0;
@@ -2126,7 +2178,9 @@ export function AdminAcademicPathScreen() {
                         <div className="divide-y divide-slate-100 dark:divide-slate-800">
                           {unit.lessons.map((lesson, lIdx) => {
                             const currentStatus =
-                              lessonProgressRecords[`${activeProgressStudent.id}_${lesson.id}`] || 'not_started';
+                              isArchivedContext
+                                ? 'completed'
+                                : lessonProgressRecords[`${activeProgressStudent.id}_${lesson.id}`] || 'not_started';
 
                             return (
                               <div
