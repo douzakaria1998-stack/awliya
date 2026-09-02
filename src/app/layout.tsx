@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import Script from 'next/script';
 import './globals.css';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
@@ -32,51 +31,6 @@ export default function RootLayout({
         className="font-sans antialiased select-none selection:bg-rose-500 selection:text-white"
         suppressHydrationWarning
       >
-        <Script
-          id="theme-initializer"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var suppressExtensionError = function(e) {
-                    var source = (e && (e.filename || (e.error && e.error.stack) || (e.reason && (e.reason.stack || e.reason.message)) || '')) + '';
-                    if (source.indexOf('chrome-extension:') !== -1 || source.indexOf('moz-extension:') !== -1 || source.indexOf('M_ID') !== -1) {
-                      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-                      if (e.stopPropagation) e.stopPropagation();
-                      if (e.preventDefault) e.preventDefault();
-                      return true;
-                    }
-                  };
-                  window.addEventListener('error', suppressExtensionError, true);
-                  window.addEventListener('unhandledrejection', suppressExtensionError, true);
-
-                  var origConsoleError = console.error;
-                  console.error = function() {
-                    var args = Array.prototype.slice.call(arguments).join(' ');
-                    if (
-                      args.indexOf('chrome-extension:') !== -1 ||
-                      args.indexOf('moz-extension:') !== -1 ||
-                      args.indexOf('M_ID') !== -1 ||
-                      args.indexOf('bis_skin_checked') !== -1 ||
-                      (args.indexOf('hydrated but some attributes') !== -1 && args.indexOf('bis_skin_checked') !== -1)
-                    ) {
-                      return;
-                    }
-                    origConsoleError.apply(console, arguments);
-                  };
-
-                  var mode = localStorage.getItem('awliya_theme_mode_v10') || localStorage.getItem('awliya_theme_mode_v4');
-                  var isDark = mode ? mode === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  if (isDark) {
-                    document.documentElement.classList.add('dark');
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                  }
-                } catch(e) {}
-              })();
-            `,
-          }}
-        />
         <LanguageProvider>
           <ThemeProvider>
             <AuthProvider>

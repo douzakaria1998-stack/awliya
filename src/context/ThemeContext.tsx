@@ -18,7 +18,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [currentLevel, setCurrentLevel] = useState<LevelId>(mockStudent.currentLevel);
+  const [currentLevel, setCurrentLevel] = useState<LevelId>(mockStudent?.currentLevel || (1 as LevelId));
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   const setLevel = useCallback((level: LevelId) => {
@@ -48,8 +48,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize theme from storage and system preference
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const suppressExtensionError = (e: any) => {
+        const source = (e && (e.filename || (e.error && e.error.stack) || (e.reason && (e.reason.stack || e.reason.message)) || '')) + '';
+        if (source.includes('chrome-extension:') || source.includes('moz-extension:') || source.includes('M_ID')) {
+          if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+          if (e.stopPropagation) e.stopPropagation();
+          if (e.preventDefault) e.preventDefault();
+          return true;
+        }
+      };
+      window.addEventListener('error', suppressExtensionError, true);
+      window.addEventListener('unhandledrejection', suppressExtensionError, true);
+    }
+
     const storedLevel = getItem<LevelId>(STORAGE_KEYS.CURRENT_LEVEL);
-    const level = storedLevel || mockStudent.currentLevel;
+    const level = storedLevel || mockStudent?.currentLevel || (1 as LevelId);
     setCurrentLevel(level);
     applyThemeCSS(level);
 
