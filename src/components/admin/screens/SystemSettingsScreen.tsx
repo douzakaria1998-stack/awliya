@@ -122,7 +122,7 @@ export function SystemSettingsScreen() {
             إعدادات الأكاديمية والشهادات
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
-            تخصيص بيانات مدرسة My School، معايير CEFR، ونماذج الشهادات الرسمية.
+            تخصيص بيانات مدرسة My School، المعايير الأكاديمية، ونماذج الشهادات الرسمية.
           </p>
         </div>
 
@@ -323,7 +323,7 @@ export function SystemSettingsScreen() {
             <ul className="list-disc list-inside space-y-1.5 text-slate-500 dark:text-slate-400 leading-relaxed pr-2">
               <li>الإطار الهندسي الملون (Guilloche & Geometric Frame) بحجم A4 Landscape.</li>
               <li>شعار My School الرسمي مع شارة الإنجاز وتوقيع الإدارة الأكاديمية المعتمد.</li>
-              <li>الترميز اللغوي الدولي المعياري CEFR (من المستوى A1.1 حتى C2).</li>
+              <li>المستويات الأكاديمية المعتمدة والتصنيف المرحلي للمناهج.</li>
             </ul>
           </div>
         </div>

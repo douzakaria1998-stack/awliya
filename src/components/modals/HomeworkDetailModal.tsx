@@ -191,7 +191,7 @@ export function HomeworkDetailModal({ homework, isOpen, onClose }: HomeworkDetai
                 >
                   <span className="text-xs text-slate-400 font-semibold mb-1.5 block">{t.scoreLabel}</span>
                   <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white font-mono">
-                    {homework.score} / {homework.totalScore || 100}
+                    {homework.score} / {homework.totalScore || (homework as any).maxScore || 20}
                   </span>
                 </div>
               )}

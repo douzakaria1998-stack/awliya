@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   Plus,
@@ -13,14 +13,25 @@ import {
   TrendingUp,
   X,
   Archive,
+  Trash2,
+  ArrowLeft,
+  ArrowRight,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdminGroup } from '@/types/admin';
 import { GroupDetailModal } from '../modals/GroupDetailModal';
+import { SearchableSelect } from '@/components/common/SearchableSelect';
+
+interface ScheduleSlot {
+  id: string;
+  day: string;
+  time: string;
+  period: 'AM' | 'PM';
+}
 
 export function AdminGroupsScreen() {
-  const { visibleGroups, teachers, students, addGroup } = useAdmin();
+  const { visibleGroups, teachers, students, addGroup, curricula, attendanceSessions } = useAdmin();
   const { isRTL, language } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,12 +44,93 @@ export function AdminGroupsScreen() {
   const [newName, setNewName] = useState('');
   const [newCode, setNewCode] = useState('');
   const [newLanguage, setNewLanguage] = useState<'English' | 'French' | 'Dual'>('English');
-  const [newLevel, setNewLevel] = useState<'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'>('A1');
+  const [newLevel, setNewLevel] = useState<string>('A1');
   const [newTeacherId, setNewTeacherId] = useState(teachers[0]?.id || '');
-  const [newDaysAr, setNewDaysAr] = useState('الأحد + الثلاثاء');
-  const [newStartTime, setNewStartTime] = useState('18:00');
-  const [newEndTime, setNewEndTime] = useState('20:00');
-  const [newCapacity, setNewCapacity] = useState(20);
+  const [newStartDate, setNewStartDate] = useState('2025-02-01');
+  const [newTotalSessions, setNewTotalSessions] = useState<number | string>(24);
+
+  // Derive available levels dynamically from the Curriculum (Path Tab 1)
+  const availableLevels = useMemo(() => {
+    const langCurricula =
+      newLanguage === 'Dual'
+        ? curricula
+        : curricula.filter((c) => c.language === newLanguage);
+
+    if (langCurricula && langCurricula.length > 0) {
+      const seen = new Set<string>();
+      const list: { code: string; nameAr?: string; nameEn?: string; levelNumber?: number }[] = [];
+      const sorted = [...langCurricula].sort((a, b) => (a.levelNumber || 0) - (b.levelNumber || 0));
+
+      sorted.forEach((c) => {
+        const levelName = language === 'ar'
+          ? (c.nameAr || `المستوى ${c.levelNumber}`)
+          : (c.nameEn || c.nameAr || `Level ${c.levelNumber}`);
+
+        if (!seen.has(levelName)) {
+          seen.add(levelName);
+          list.push({
+            code: levelName,
+            nameAr: c.nameAr || `المستوى ${c.levelNumber}`,
+            nameEn: c.nameEn || `Level ${c.levelNumber}`,
+            levelNumber: c.levelNumber,
+          });
+        }
+      });
+      return list;
+    }
+
+    // Default fallback if no curriculum levels exist
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((lvl) => ({
+      code: language === 'ar' ? `المستوى ${lvl}` : `Level ${lvl}`,
+      nameAr: `المستوى ${lvl}`,
+      nameEn: `Level ${lvl}`,
+      levelNumber: lvl,
+    }));
+  }, [curricula, newLanguage, language]);
+
+  // Keep newLevel valid when language or availableLevels change
+  useEffect(() => {
+    if (availableLevels.length > 0) {
+      const exists = availableLevels.some((l) => l.code === newLevel);
+      if (!exists) {
+        setNewLevel(availableLevels[0].code);
+      }
+    }
+  }, [availableLevels, newLevel]);
+
+  // Dynamic schedules (Day + Time + AM/PM)
+  const [schedules, setSchedules] = useState<ScheduleSlot[]>([
+    { id: '1', day: 'الأحد', time: '06:00', period: 'PM' },
+    { id: '2', day: 'الثلاثاء', time: '06:00', period: 'PM' },
+  ]);
+
+  const DAYS_LIST = [
+    { value: 'الأحد', labelAr: 'الأحد', labelEn: 'Sunday' },
+    { value: 'الإثنين', labelAr: 'الإثنين', labelEn: 'Monday' },
+    { value: 'الثلاثاء', labelAr: 'الثلاثاء', labelEn: 'Tuesday' },
+    { value: 'الأربعاء', labelAr: 'الأربعاء', labelEn: 'Wednesday' },
+    { value: 'الخميس', labelAr: 'الخميس', labelEn: 'Thursday' },
+    { value: 'الجمعة', labelAr: 'الجمعة', labelEn: 'Friday' },
+    { value: 'السبت', labelAr: 'السبت', labelEn: 'Saturday' },
+  ];
+
+  const handleAddSchedule = () => {
+    setSchedules((prev) => [
+      ...prev,
+      { id: Date.now().toString(), day: 'الأربعاء', time: '06:00', period: 'PM' },
+    ]);
+  };
+
+  const handleRemoveSchedule = (id: string) => {
+    if (schedules.length <= 1) return;
+    setSchedules((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const handleUpdateSchedule = (id: string, field: keyof ScheduleSlot, value: string) => {
+    setSchedules((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, [field]: value } : s))
+    );
+  };
 
   const filteredGroups = useMemo(() => {
     return visibleGroups.filter((g) => {
@@ -68,52 +160,107 @@ export function AdminGroupsScreen() {
     if (!newName || !newCode) return;
 
     const teacherObj = teachers.find((t) => t.id === newTeacherId) || teachers[0];
+    const daysArFormatted = schedules.map((s) => s.day).join(' + ');
+    const daysEnFormatted = schedules
+      .map((s) => DAYS_LIST.find((d) => d.value === s.day)?.labelEn || s.day)
+      .join(' + ');
+    const startTimeFormatted = schedules
+      .map((s) => `${s.time} ${s.period}`)
+      .join(' / ');
 
     addGroup({
       name: newName,
       code: newCode.toUpperCase().trim(),
       language: newLanguage,
-      level: newLevel,
+      level: newLevel as any,
       teacherId: teacherObj?.id || 'usr-teach-01',
       teacherName: teacherObj?.fullNameAr || 'Sarah Benali',
-      daysAr: newDaysAr,
-      daysEn: newDaysAr,
-      startTime: newStartTime,
-      endTime: newEndTime,
-      maxCapacity: Number(newCapacity),
+      daysAr: daysArFormatted,
+      daysEn: daysEnFormatted,
+      startTime: startTimeFormatted,
+      endTime: '20:00',
+      schedules: schedules.map((s) => ({ day: s.day, time: s.time, period: s.period })),
+      startDate: newStartDate,
+      totalSessions: Number(newTotalSessions) || 24,
+      maxCapacity: 20,
       studentIds: [],
       status: 'active',
     });
 
     setNewName('');
     setNewCode('');
+    setNewStartDate('2025-02-01');
+    setNewTotalSessions(24);
+    setSchedules([
+      { id: '1', day: 'الأحد', time: '06:00', period: 'PM' },
+      { id: '2', day: 'الثلاثاء', time: '06:00', period: 'PM' },
+    ]);
     setIsAddGroupOpen(false);
   };
 
-  const getDaysAbbreviation = (daysAr: string) => {
-    if (language === 'ar') {
-      if (daysAr.includes('الأحد') && daysAr.includes('الثلاثاء')) return 'أحد • ثلاثاء';
-      if (daysAr.includes('الإثنين') && daysAr.includes('الأربعاء')) return 'إثنين • أربعاء';
-      if (daysAr.includes('السبت') && daysAr.includes('الخميس')) return 'سبت • خميس';
-      if (daysAr.includes('السبت') && daysAr.includes('الإثنين')) return 'سبت • إثنين';
-      if (daysAr.includes('الجمعة') && daysAr.includes('السبت')) return 'جمعة • سبت';
-      return daysAr;
+  const renderGroupSchedule = (grp: AdminGroup) => {
+    // 1. If group has structured schedules array
+    if (grp.schedules && grp.schedules.length > 0) {
+      return (
+        <div className="flex flex-col items-center gap-1">
+          {grp.schedules.map((s, idx) => (
+            <div key={idx} className="flex items-center gap-1.5 whitespace-nowrap text-xs">
+              <span className="font-bold text-slate-800 dark:text-slate-200">{s.day}</span>
+              <span className="text-slate-400 font-bold">:</span>
+              <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[11px]" dir="ltr">
+                {s.time} {s.period || ''}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
     }
-    if (language === 'fr') {
-      if (daysAr.includes('الأحد') && daysAr.includes('الثلاثاء')) return 'Dim / Mar';
-      if (daysAr.includes('الإثنين') && daysAr.includes('الأربعاء')) return 'Lun / Mer';
-      if (daysAr.includes('السبت') && daysAr.includes('الخميس')) return 'Sam / Jeu';
-      if (daysAr.includes('السبت') && daysAr.includes('الإثنين')) return 'Sam / Lun';
-      if (daysAr.includes('الجمعة') && daysAr.includes('السبت')) return 'Ven / Sam';
-      return daysAr;
+
+    // 2. Parse from daysAr (e.g. "الأحد + الثلاثاء") and startTime (e.g. "06:00 PM / 06:00 PM" or "18:00")
+    const days = grp.daysAr ? grp.daysAr.split(/\s*[\+\•\/,]\s*/).filter(Boolean) : [];
+    const times = grp.startTime ? grp.startTime.split(/\s*[\/]\s*/).filter(Boolean) : [];
+
+    if (days.length > 0) {
+      return (
+        <div className="flex flex-col items-center gap-1">
+          {days.map((day, idx) => {
+            const timeVal = times[idx] || times[0] || grp.startTime || '06:00 PM';
+            return (
+              <div key={idx} className="flex items-center gap-1.5 whitespace-nowrap text-xs">
+                <span className="font-bold text-slate-800 dark:text-slate-200">{day.trim()}</span>
+                <span className="text-slate-400 font-bold">:</span>
+                <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[11px]" dir="ltr">
+                  {timeVal.trim()}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      );
     }
-    // English default
-    if (daysAr.includes('الأحد') && daysAr.includes('الثلاثاء')) return 'Sun / Tue';
-    if (daysAr.includes('الإثنين') && daysAr.includes('الأربعاء')) return 'Mon / Wed';
-    if (daysAr.includes('السبت') && daysAr.includes('الخميس')) return 'Sat / Thu';
-    if (daysAr.includes('السبت') && daysAr.includes('الإثنين')) return 'Sat / Mon';
-    if (daysAr.includes('الجمعة') && daysAr.includes('السبت')) return 'Fri / Sat';
-    return daysAr;
+
+    return <span className="text-slate-400 text-xs">—</span>;
+  };
+
+  const getGroupAttendanceRate = (grp: AdminGroup) => {
+    const groupConfirmedSessions = attendanceSessions.filter(
+      (a) => a.groupId === grp.id && (a.isLocked || (a.records && a.records.length > 0))
+    );
+    if (!grp.studentIds || grp.studentIds.length === 0 || groupConfirmedSessions.length === 0) return 0;
+
+    let totalPossible = 0;
+    let totalAttended = 0;
+
+    groupConfirmedSessions.forEach((sess) => {
+      sess.records?.forEach((rec) => {
+        totalPossible++;
+        if (rec.status === 'present' || rec.status === 'late' || rec.status === 'excused') {
+          totalAttended++;
+        }
+      });
+    });
+
+    return totalPossible > 0 ? Math.round((totalAttended / totalPossible) * 100) : 0;
   };
 
   return (
@@ -211,7 +358,7 @@ export function AdminGroupsScreen() {
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'اللغة والمستوى' : 'Language & Level'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'المعلم المشرف' : 'Assigned Teacher'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الأيام والتوقيت' : 'Schedule'}</th>
-                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الطلاب / السعة' : 'Capacity'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'عدد الطلاب' : 'Students'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الحالة' : 'Status'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
@@ -242,10 +389,13 @@ export function AdminGroupsScreen() {
                       paddingRight: isRTL ? '28px' : '20px',
                     }}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black text-[10px] shrink-0 font-mono shadow-xs">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className="inline-flex items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-mono font-black text-xs sm:text-sm border border-amber-200/80 dark:border-amber-800/60 shrink-0 shadow-xs"
+                        style={{ padding: '5px 12px', minWidth: '42px', height: '32px' }}
+                      >
                         {grp.code}
-                      </div>
+                      </span>
                       <div>
                         <div className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm leading-snug">{grp.name}</div>
                         <div className="text-[11px] text-slate-400 font-medium mt-0.5">{grp.language} Track</div>
@@ -267,14 +417,11 @@ export function AdminGroupsScreen() {
                   </td>
 
                   <td className="py-3.5 px-4 text-center text-xs">
-                    <div className="font-bold text-slate-900 dark:text-white tracking-wide">
-                      {getDaysAbbreviation(grp.daysAr)}
-                    </div>
-                    <div className="font-mono text-slate-400 text-[11px] mt-0.5">{grp.startTime}–{grp.endTime}</div>
+                    {renderGroupSchedule(grp)}
                   </td>
 
-                  <td className="py-3.5 px-4 text-center font-mono font-bold text-purple-600 dark:text-purple-400 text-xs">
-                    {grp.studentIds.length} / {grp.maxCapacity}
+                  <td className="py-3.5 px-4 text-center font-mono font-bold text-purple-600 dark:text-purple-400 text-xs sm:text-sm">
+                    {grp.studentIds.length}
                   </td>
 
                   <td className="py-3.5 px-4 text-center">
@@ -296,11 +443,11 @@ export function AdminGroupsScreen() {
                   </td>
 
                   <td className="py-3.5 px-4 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm">
-                    {grp.attendanceRate}%
+                    {getGroupAttendanceRate(grp)}%
                   </td>
 
                   <td className="py-3.5 px-4 text-center font-mono font-black text-blue-600 dark:text-blue-400 text-xs sm:text-sm">
-                    {grp.averageProgress}%
+                    {grp.studentIds.length === 0 ? '0%' : `${grp.averageProgress}%`}
                   </td>
 
                   <td
@@ -314,10 +461,11 @@ export function AdminGroupsScreen() {
                     <button
                       type="button"
                       onClick={() => handleOpenGroup(grp)}
-                      className="rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold text-xs transition-colors cursor-pointer"
-                      style={{ padding: '6px 14px' }}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold text-xs transition-colors cursor-pointer border border-amber-200/60 dark:border-amber-800/60 shadow-2xs"
+                      style={{ padding: '6px 14px', lineHeight: '1.2' }}
                     >
-                      {language === 'ar' ? 'عرض الفوج' : 'View Group'} →
+                      <span>{language === 'ar' ? 'عرض الفوج' : 'View Group'}</span>
+                      {isRTL ? <ArrowLeft size={13} className="shrink-0" /> : <ArrowRight size={13} className="shrink-0" />}
                     </button>
                   </td>
                 </tr>
@@ -329,55 +477,68 @@ export function AdminGroupsScreen() {
 
       {/* Modal: Create Group (Section 12) */}
       {isAddGroupOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-5 animate-fade-in-up">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="font-black text-lg text-slate-900 dark:text-white">
-                {language === 'ar' ? 'إنشاء فوج دراسي جديد (Create Group)' : 'Create New Class Group'}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
+          <div
+            className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-[22px] shadow-2xl border border-slate-200 dark:border-slate-800 animate-fade-in-up my-auto max-h-[92vh] overflow-y-auto"
+            style={{ padding: '20px 24px' }}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5 mb-3.5">
+              <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white tracking-tight">
+                {language === 'ar' ? 'إنشاء فوج دراسي جديد' : 'Create New Class Group'}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsAddGroupOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 cursor-pointer"
+                className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors cursor-pointer shrink-0"
               >
-                <X size={16} />
+                <X size={15} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateGroup} className="space-y-4 text-xs font-bold">
+            <form onSubmit={handleCreateGroup} className="flex flex-col gap-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">اسم الفوج *</label>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-700 dark:text-slate-300 font-bold text-[11px]">
+                    {language === 'ar' ? 'اسم الفوج *' : 'Group Name *'}
+                  </label>
                   <input
                     type="text"
+                    dir="auto"
                     required
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    placeholder="مثال: Group A2 — Elementary"
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                    placeholder={language === 'ar' ? 'مثال: الفوج A2 — المتوسط' : 'e.g. Group A2 — Elementary'}
+                    style={{ paddingLeft: '14px', paddingRight: '14px' }}
+                    className="w-full h-9 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/20"
                   />
                 </div>
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">رمز الفوج (Code) *</label>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-700 dark:text-slate-300 font-bold text-[11px]">
+                    {language === 'ar' ? 'رمز الفوج *' : 'Group Code *'}
+                  </label>
                   <input
                     type="text"
+                    dir="ltr"
                     required
                     value={newCode}
                     onChange={(e) => setNewCode(e.target.value)}
                     placeholder="مثال: A2-03"
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono"
-                    dir="ltr"
+                    style={{ paddingLeft: '14px', paddingRight: '14px' }}
+                    className="w-full h-9 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/20"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">اللغة</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-700 dark:text-slate-300 font-bold text-[11px]">
+                    {language === 'ar' ? 'اللغة' : 'Language'}
+                  </label>
                   <select
                     value={newLanguage}
                     onChange={(e) => setNewLanguage(e.target.value as any)}
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                    style={{ paddingLeft: '14px', paddingRight: '14px' }}
+                    className="w-full h-9 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/20"
                   >
                     <option value="English">English</option>
                     <option value="French">French</option>
@@ -385,86 +546,194 @@ export function AdminGroupsScreen() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">المستوى (Level)</label>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-700 dark:text-slate-300 font-bold text-[11px]">
+                    {language === 'ar' ? 'المستوى' : 'Level'}
+                  </label>
                   <select
                     value={newLevel}
-                    onChange={(e) => setNewLevel(e.target.value as any)}
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono"
+                    onChange={(e) => setNewLevel(e.target.value)}
+                    style={{ paddingLeft: '14px', paddingRight: '14px' }}
+                    className="w-full h-9 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/20"
                   >
-                    <option value="A1">A1</option>
-                    <option value="A2">A2</option>
-                    <option value="B1">B1</option>
-                    <option value="B2">B2</option>
-                    <option value="C1">C1</option>
+                    {availableLevels.map((lvl) => (
+                      <option key={lvl.code} value={lvl.code}>
+                        {lvl.code}
+                      </option>
+                    ))}
                   </select>
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">السعة القصوى</label>
+              <div className="flex flex-col gap-1">
+                <label className="text-slate-700 dark:text-slate-300 font-bold text-[11px]">
+                  {language === 'ar' ? 'المعلم المشرف' : 'Supervising Teacher'}
+                </label>
+                <SearchableSelect
+                  options={teachers.map((t) => ({
+                    value: t.id,
+                    label: t.fullNameAr,
+                    subLabel: t.specialization,
+                  }))}
+                  value={newTeacherId}
+                  onChange={(val) => setNewTeacherId(val)}
+                  themeColor="amber"
+                  placeholder={language === 'ar' ? 'اختر المعلم المشرف...' : 'Select teacher...'}
+                  searchPlaceholder={language === 'ar' ? 'ابحث باسم المعلم أو التخصص...' : 'Search teacher or subject...'}
+                  emptyText={language === 'ar' ? 'لا يوجد معلم بهذا الاسم' : 'No matching teachers found'}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-700 dark:text-slate-300 font-bold text-[11px] flex items-center gap-1.5">
+                    <Calendar size={13} className="text-amber-500" />
+                    <span>{language === 'ar' ? 'تاريخ بداية الفوج' : 'Start Date'}</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={newStartDate}
+                    onChange={(e) => setNewStartDate(e.target.value)}
+                    style={{ paddingLeft: '14px', paddingRight: '14px' }}
+                    className="w-full h-9 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/20"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-700 dark:text-slate-300 font-bold text-[11px] flex items-center gap-1.5">
+                    <Clock size={13} className="text-amber-500" />
+                    <span>{language === 'ar' ? 'عدد الحصص الإجمالي' : 'Total Sessions'}</span>
+                  </label>
                   <input
                     type="number"
-                    value={newCapacity}
-                    onChange={(e) => setNewCapacity(Number(e.target.value))}
-                    min={5}
-                    max={40}
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono"
+                    min={1}
+                    max={200}
+                    value={newTotalSessions}
+                    onChange={(e) => setNewTotalSessions(e.target.value)}
+                    placeholder="24"
+                    style={{ paddingLeft: '14px', paddingRight: '14px' }}
+                    className="w-full h-9 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/20"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 mb-1">المعلم المشرف</label>
-                <select
-                  value={newTeacherId}
-                  onChange={(e) => setNewTeacherId(e.target.value)}
-                  className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                >
-                  {teachers.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.fullNameAr} ({t.specialization})
-                    </option>
+              {/* Dynamic Schedules (Days & Times) */}
+              <div className="flex flex-col gap-2 pt-0.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-700 dark:text-slate-300 font-bold text-[11px] flex items-center gap-1.5">
+                    <Calendar size={13} className="text-amber-500" />
+                    <span>{language === 'ar' ? 'مواعيد وأوقات الحصص' : 'Class Days & Schedule Times'}</span>
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-medium">
+                    {language === 'ar' ? `${schedules.length} حصص أسبوعياً` : `${schedules.length} sessions/week`}
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  {schedules.map((slot, index) => (
+                    <div
+                      key={slot.id}
+                      style={{ padding: '10px 12px' }}
+                      className="rounded-xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80"
+                    >
+                      <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2.5 items-end">
+                        {/* Day Selector */}
+                        <div className="flex flex-col gap-1 min-w-0">
+                          <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                            {language === 'ar' ? `اليوم (${index + 1})` : `Day (${index + 1})`}
+                          </label>
+                          <select
+                            value={slot.day}
+                            onChange={(e) => handleUpdateSchedule(slot.id, 'day', e.target.value)}
+                            style={{ paddingLeft: '12px', paddingRight: '12px' }}
+                            className="w-full h-9 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/20"
+                          >
+                            {DAYS_LIST.map((d) => (
+                              <option key={d.value} value={d.value}>
+                                {language === 'ar' ? d.labelAr : d.labelEn}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Time Section with Clock icon, 00:00 input, and AM/PM */}
+                        <div className="flex flex-col gap-1 min-w-0">
+                          <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                            {language === 'ar' ? 'وقت الحصة' : 'Session Time'}
+                          </label>
+                          <div
+                            dir="ltr"
+                            className="h-9 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-between focus-within:ring-2 focus-within:ring-amber-500/20"
+                            style={{ paddingLeft: '10px', paddingRight: '4px', gap: '6px' }}
+                          >
+                            {/* Clock Icon */}
+                            <Clock size={14} className="text-amber-500 shrink-0" />
+
+                            {/* Time Input: "00:00" */}
+                            <input
+                              type="text"
+                              value={slot.time}
+                              onChange={(e) => handleUpdateSchedule(slot.id, 'time', e.target.value)}
+                              placeholder="06:00"
+                              style={{ width: '65px' }}
+                              className="bg-transparent text-center font-mono font-bold text-xs text-slate-800 dark:text-slate-200 outline-none"
+                            />
+
+                            {/* AM / PM Toggle Pill */}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleUpdateSchedule(slot.id, 'period', slot.period === 'AM' ? 'PM' : 'AM')
+                              }
+                              style={{ paddingLeft: '8px', paddingRight: '8px', height: '26px' }}
+                              className={`rounded-md font-mono font-black text-[10px] transition-all cursor-pointer shrink-0 select-none flex items-center justify-center ${
+                                slot.period === 'PM'
+                                  ? 'bg-amber-500 text-slate-950 hover:bg-amber-600'
+                                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                              }`}
+                            >
+                              {slot.period}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Delete Slot Button */}
+                        {schedules.length > 1 && (
+                          <div className="flex flex-col gap-1 items-end sm:items-center">
+                            <span className="text-[11px] font-bold text-transparent select-none hidden sm:block">.</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSchedule(slot.id)}
+                              className="w-9 h-9 rounded-lg bg-rose-50 hover:bg-rose-100 active:scale-95 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 flex items-center justify-center cursor-pointer transition-all shrink-0 border border-rose-200/60 dark:border-rose-800/40"
+                              title={language === 'ar' ? 'حذف هذا التوقيت' : 'Remove schedule'}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   ))}
-                </select>
+                </div>
+
+                {/* Button to Add Day and Time */}
+                <button
+                  type="button"
+                  onClick={handleAddSchedule}
+                  style={{ paddingLeft: '14px', paddingRight: '14px', gap: '6px' }}
+                  className="w-full h-9 rounded-xl border border-dashed border-amber-300 dark:border-amber-700/80 bg-amber-50/60 dark:bg-amber-950/30 hover:bg-amber-100/70 dark:hover:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold text-xs flex items-center justify-center transition-all cursor-pointer active:scale-98"
+                >
+                  <Plus size={14} className="shrink-0" />
+                  <span>{language === 'ar' ? 'إضافة يوم ووقت آخر' : 'Add Another Day & Time'}</span>
+                </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">الأيام</label>
-                  <input
-                    type="text"
-                    value={newDaysAr}
-                    onChange={(e) => setNewDaysAr(e.target.value)}
-                    placeholder="الأحد + الثلاثاء"
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">وقت البدء</label>
-                  <input
-                    type="text"
-                    value={newStartTime}
-                    onChange={(e) => setNewStartTime(e.target.value)}
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">وقت الانتهاء</label>
-                  <input
-                    type="text"
-                    value={newEndTime}
-                    onChange={(e) => setNewEndTime(e.target.value)}
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-2">
+              <div className="pt-1">
                 <button
                   type="submit"
-                  className="w-full h-11 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl shadow-md transition-colors cursor-pointer text-sm"
+                  className="w-full h-10 bg-amber-500 hover:bg-amber-600 active:scale-98 text-slate-950 font-black rounded-xl shadow-md shadow-amber-500/20 transition-all cursor-pointer text-xs sm:text-sm flex items-center justify-center gap-2"
                 >
-                  إنشاء وتفعيل الفوج
+                  <span>{language === 'ar' ? 'إنشاء وتفعيل الفوج' : 'Create & Activate Group'}</span>
                 </button>
               </div>
             </form>

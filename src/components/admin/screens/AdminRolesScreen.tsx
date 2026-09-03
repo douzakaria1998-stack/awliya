@@ -40,7 +40,7 @@ export function AdminRolesScreen() {
     { id: 'parents', labelAr: 'أولياء الأمور والتواصل', labelEn: 'Parents & Contact' },
     { id: 'teachers', labelAr: 'هيئة التدريس والمعلمين', labelEn: 'Teachers & Staff' },
     { id: 'groups', labelAr: 'الأفواج والمجموعات', labelEn: 'Groups & Schedules' },
-    { id: 'academic', labelAr: 'المسار والمنهج التعليمي', labelEn: 'Academic Path & CEFR' },
+    { id: 'academic', labelAr: 'المسار والمنهج التعليمي', labelEn: 'Academic Path & Curriculum' },
     { id: 'attendance', labelAr: 'رصد الحضور والغياب', labelEn: 'Attendance Sessions' },
     { id: 'performance', labelAr: 'الواجبات والأداء المنزلي', labelEn: 'Homework & Performance' },
     { id: 'assessments', labelAr: 'تقييم المهارات والاختبارات', labelEn: 'Skills & Assessments' },

@@ -233,7 +233,7 @@ export function AdminParentsScreen() {
                     </td>
 
                     <td className="py-3.5 px-4 text-center font-mono font-black text-purple-600 dark:text-purple-400 text-xs sm:text-sm">
-                      {par.linkedStudentIds.length} {language === 'ar' ? 'أبناء' : 'children'}
+                      {students.filter((s) => (par.linkedStudentIds && par.linkedStudentIds.includes(s.id)) || s.parentId === par.id || ((par.phone && s.parentPhone) && s.parentPhone.replace(/\D/g, '') === par.phone.replace(/\D/g, ''))).length} {language === 'ar' ? 'أبناء' : 'children'}
                     </td>
 
                     <td className="py-3.5 px-4 text-center">

@@ -128,11 +128,35 @@ interface AdminContextType {
       sessionTime: string;
       teacherId: string;
       teacherName: string;
+      isCoveringSession?: boolean;
+      coveringType?: 'counted' | 'not_counted';
+      coveringReason?: string;
     }
   ) => void;
+  addCoveringSession: (sessionData: {
+    groupId: string;
+    groupName: string;
+    date: string;
+    dayNameAr: string;
+    dayNameEn: string;
+    sessionTime: string;
+    teacherId: string;
+    teacherName: string;
+    coveringType: 'counted' | 'not_counted';
+    coveringReason?: string;
+  }) => void;
   
   createHomework: (hwData: Partial<AdminHomeworkAssignment>) => void;
   evaluateHomework: (hwId: string, studentId: string, score: number, comment: string, status: 'completed' | 'needs_revision') => void;
+  batchEvaluateHomework: (
+    hwId: string,
+    evaluations: {
+      studentId: string;
+      score: number;
+      teacherComment?: string;
+      completionStatus: 'completed' | 'needs_revision' | 'pending';
+    }[]
+  ) => void;
 
   recordAssessment: (asmData: Partial<AdminAssessmentRecord>) => void;
   
@@ -351,6 +375,33 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     [adminUsers]
   );
 
+  // Helper to dispatch instant parent notification into parent portal
+  const notifyParentPortal = useCallback(
+    (notif: {
+      studentId?: string;
+      type: 'homework' | 'payment' | 'attendance' | 'feedback' | 'general';
+      titleAr: string;
+      messageAr: string;
+      routeTo?: string;
+      actionPayload?: { tab?: string; level?: any; itemId?: string };
+    }) => {
+      try {
+        const existing = getItem<any[]>(STORAGE_KEYS.NOTIFICATIONS) || [];
+        const newNotif = {
+          id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          date: new Date().toISOString().substring(0, 10),
+          isRead: false,
+          ...notif,
+        };
+        const updated = [newNotif, ...existing];
+        setItem(STORAGE_KEYS.NOTIFICATIONS, updated);
+      } catch (err) {
+        console.error('Error dispatching parent notification:', err);
+      }
+    },
+    []
+  );
+
   // RBAC Filtered entities (Teacher only sees own groups and students)
   const teacherAssignedGroupIds = useMemo(() => {
     if (currentRole !== 'teacher') return [];
@@ -432,10 +483,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         status: data.status || 'active',
         overallProgress: data.overallProgress || 0,
         attendanceRate: data.attendanceRate !== undefined ? data.attendanceRate : 0,
-        averagePerformance: data.averagePerformance || 80,
+        averagePerformance: data.averagePerformance ?? 0,
         completedLessonsCount: 0,
         totalLessonsCount: 20,
-        skills: data.skills || { listening: 75, speaking: 70, reading: 75, writing: 70, overall: 72 },
+        skills: data.skills || { listening: 0, speaking: 0, reading: 0, writing: 0, overall: 0 },
       };
 
       setStudents((prev) => {
@@ -718,6 +769,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         fullNameAr: data.fullNameAr || 'معلم جديد',
         fullNameEn: data.fullNameEn || 'New Teacher',
         username: data.username || `teacher_${Date.now().toString().slice(-4)}`,
+        password: data.password || generateAutoPassword(),
         email: data.email || 'teacher@myschool.edu',
         phone: data.phone || '+213 770 000 000',
         languagesTaught: data.languagesTaught || ['English'],
@@ -775,8 +827,33 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         setItem(ADMIN_STORAGE_KEYS.TEACHERS, updated);
         return updated;
       });
+
+      setAdminUsers((prev) => {
+        const updated = prev.map((u) => {
+          if (u.id === teacherId) {
+            return {
+              ...u,
+              fullNameAr: updates.fullNameAr || u.fullNameAr,
+              fullNameEn: updates.fullNameEn || u.fullNameEn,
+              username: updates.username || u.username,
+              email: updates.email || u.email,
+              phone: updates.phone || u.phone,
+              languagesTaught: updates.languagesTaught || u.languagesTaught,
+            };
+          }
+          return u;
+        });
+        setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
+        return updated;
+      });
+
+      logAudit(
+        `تحديث بيانات المعلم: ${updates.fullNameAr || teacherId}${updates.password ? ' (تم تغيير كلمة المرور)' : ''}`,
+        `Updated teacher details for ${teacherId}`,
+        'teacher'
+      );
     },
-    []
+    [logAudit]
   );
 
   // ==========================================
@@ -797,11 +874,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         daysEn: data.daysEn || 'Sunday + Tuesday',
         startTime: data.startTime || '18:00',
         endTime: data.endTime || '20:00',
+        schedules: data.schedules || [],
         maxCapacity: data.maxCapacity || 20,
         studentIds: data.studentIds || [],
-        attendanceRate: 100,
+        attendanceRate: 0,
         averageProgress: 0,
-        averagePerformance: 80,
+        averagePerformance: 0,
         completedLessonsCount: 0,
         totalLessonsCount: 20,
         status: data.status || 'active',
@@ -829,8 +907,38 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         setItem(ADMIN_STORAGE_KEYS.GROUPS, updated);
         return updated;
       });
+
+      // Update student denormalized fields if group name, level, or teacher changed
+      if (updates.name || updates.level || updates.teacherName || updates.teacherId) {
+        setStudents((prev) => {
+          const updated = prev.map((s) => {
+            if (s.groupId === groupId) {
+              return {
+                ...s,
+                groupName: updates.name || s.groupName,
+                cefrLevel: (updates.level as any) || s.cefrLevel,
+                teacherName: updates.teacherName || s.teacherName,
+                teacherId: updates.teacherId || s.teacherId,
+              };
+            }
+            return s;
+          });
+          setItem(ADMIN_STORAGE_KEYS.STUDENTS, updated);
+          return updated;
+        });
+      }
+
+      if (typeof window !== 'undefined') {
+        setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
+      }
+
+      logAudit(
+        `تعديل بيانات الفوج: ${updates.name || groupId}`,
+        `Updated group details for ${groupId}`,
+        'group'
+      );
     },
-    []
+    [logAudit]
   );
 
   const assignStudentToGroup = useCallback(
@@ -898,11 +1006,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           updated = [...prev, levelData];
         }
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('awliya-data-sync'));
-        }
         return updated;
       });
+
+      if (typeof window !== 'undefined') {
+        setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
+      }
 
       logAudit(
         `إضافة مستوى ومنهاج جديد: ${levelData.nameAr} (${levelData.cefrCode})`,
@@ -923,11 +1032,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           c.levelNumber === oldLevelNumber && c.language === lang ? levelData : c
         );
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('awliya-data-sync'));
-        }
         return updated;
       });
+
+      if (typeof window !== 'undefined') {
+        setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
+      }
 
       logAudit(
         `تعديل بيانات المنهاج: ${levelData.nameAr} (${levelData.cefrCode})`,
@@ -951,11 +1061,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }));
         const updated = [...otherLang, ...renumbered];
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('awliya-data-sync'));
-        }
         return updated;
       });
+
+      if (typeof window !== 'undefined') {
+        setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
+      }
 
       logAudit(
         `إعادة ترتيب مستويات المنهاج (${lang})`,
@@ -968,26 +1079,28 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const deleteCurriculumLevel = useCallback(
     (lvlNum: number, lang: 'English' | 'French') => {
+      let target: CurriculumLevel | undefined;
       setCurricula((prev) => {
-        const target = prev.find((c) => c.levelNumber === lvlNum && c.language === lang);
+        target = prev.find((c) => c.levelNumber === lvlNum && c.language === lang);
         const filtered = prev.filter((c) => !(c.levelNumber === lvlNum && c.language === lang));
         const sameLang = filtered.filter((c) => c.language === lang).map((lvl, idx) => ({ ...lvl, levelNumber: idx + 1 }));
         const otherLang = filtered.filter((c) => c.language !== lang);
         const updated = [...otherLang, ...sameLang];
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('awliya-data-sync'));
-        }
-
-        if (target) {
-          logAudit(
-            `حذف مستوى من المنهاج: ${target.nameAr}`,
-            `Deleted curriculum level: ${target.nameEn}`,
-            'curriculum'
-          );
-        }
         return updated;
       });
+
+      if (typeof window !== 'undefined') {
+        setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
+      }
+
+      if (target) {
+        logAudit(
+          `حذف مستوى من المنهاج: ${target.nameAr}`,
+          `Deleted curriculum level: ${target.nameEn}`,
+          'curriculum'
+        );
+      }
     },
     [logAudit]
   );
@@ -999,69 +1112,72 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       status: LessonProgressStatus,
       levelNumber?: number
     ) => {
+      const key = `${studentId}_${lessonId}`;
+
       setLessonProgressRecords((prev) => {
-        const key = `${studentId}_${lessonId}`;
         const updated = { ...prev, [key]: status };
         setItem(ADMIN_STORAGE_KEYS.LESSON_PROGRESS, updated);
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('awliya-data-sync'));
-        }
+        return updated;
+      });
 
-        // Recalculate student progress
-        setStudents((prevStudents) => {
-          const student = prevStudents.find((s) => s.id === studentId);
-          if (!student) return prevStudents;
+      setStudents((prevStudents) => {
+        const student = prevStudents.find((s) => s.id === studentId);
+        if (!student) return prevStudents;
 
-          const studentLevelNum = levelNumber || student.currentLevel || 1;
-          const studentCurriculum =
-            curricula.find(
-              (c) =>
-                (c.levelNumber === studentLevelNum || c.cefrCode === student.cefrLevel) &&
-                c.language === (student.language === 'French' ? 'French' : 'English')
-            ) || curricula[0];
+        const studentLevelNum = levelNumber || student.currentLevel || 1;
+        const studentCurriculum =
+          curricula.find(
+            (c) =>
+              (c.levelNumber === studentLevelNum || c.cefrCode === student.cefrLevel) &&
+              c.language === (student.language === 'French' ? 'French' : 'English')
+          ) || curricula[0];
 
-          const allLessons = studentCurriculum ? studentCurriculum.units.flatMap((u) => u.lessons) : [];
-          const totalLessons = allLessons.length || 1;
+        const allLessons = studentCurriculum ? studentCurriculum.units.flatMap((u) => u.lessons) : [];
+        const totalLessons = allLessons.length || 1;
 
-          const completedCount = allLessons.filter((l) =>
-            l.id === lessonId ? status === 'completed' : updated[`${studentId}_${l.id}`] === 'completed'
-          ).length;
+        const currentRecords = getItem<Record<string, LessonProgressStatus>>(ADMIN_STORAGE_KEYS.LESSON_PROGRESS) || {};
+        const completedCount = allLessons.filter((l) =>
+          l.id === lessonId ? status === 'completed' : currentRecords[`${studentId}_${l.id}`] === 'completed'
+        ).length;
 
-          const newProgress = Math.round((completedCount / totalLessons) * 100);
+        const newProgress = Math.round((completedCount / totalLessons) * 100);
 
-          const updatedStudents = prevStudents.map((s) =>
-            s.id === studentId
-              ? {
-                  ...s,
-                  overallProgress: newProgress,
-                  completedLessonsCount: completedCount,
-                  totalLessonsCount: totalLessons,
-                }
-              : s
-          );
-          setItem(ADMIN_STORAGE_KEYS.STUDENTS, updatedStudents);
+        const updatedStudents = prevStudents.map((s) =>
+          s.id === studentId
+            ? {
+                ...s,
+                overallProgress: newProgress,
+                completedLessonsCount: completedCount,
+                totalLessonsCount: totalLessons,
+              }
+            : s
+        );
+        setItem(ADMIN_STORAGE_KEYS.STUDENTS, updatedStudents);
 
-          // Update Group Average Progress
-          if (student.groupId) {
+        if (student.groupId) {
+          const gId = student.groupId;
+          setTimeout(() => {
             setGroups((prevGroups) => {
-              const groupStudents = updatedStudents.filter((s) => s.groupId === student.groupId);
+              const groupStudents = updatedStudents.filter((s) => s.groupId === gId);
               if (groupStudents.length === 0) return prevGroups;
               const avg = Math.round(
                 groupStudents.reduce((acc, st) => acc + (st.overallProgress || 0), 0) / groupStudents.length
               );
               const updatedGroups = prevGroups.map((g) =>
-                g.id === student.groupId ? { ...g, averageProgress: avg } : g
+                g.id === gId ? { ...g, averageProgress: avg } : g
               );
               setItem(ADMIN_STORAGE_KEYS.GROUPS, updatedGroups);
               return updatedGroups;
             });
-          }
+          }, 0);
+        }
 
-          return updatedStudents;
-        });
-
-        return updated;
+        return updatedStudents;
       });
+
+      if (typeof window !== 'undefined') {
+        setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
+      }
 
       logAudit(
         `تحديث حالة الدرس للطالب (${studentId}): ${status}`,
@@ -1091,11 +1207,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           },
         };
         setItem(ADMIN_STORAGE_KEYS.STUDENT_LEVEL_SCORES, updated);
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('awliya-data-sync'));
-        }
         return updated;
       });
+
+      if (typeof window !== 'undefined') {
+        setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
+      }
 
       logAudit(
         `تحديث درجة الاجتياز والاعتماد للطالب: ${studentId}`,
@@ -1214,7 +1331,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             const entry = sess.records?.find((r) => r.studentId === st.id);
             if (entry) {
               totalSessions++;
-              if (entry.status === 'present' || entry.status === 'late' || entry.status === 'excused') {
+              if (entry.status === 'present' || entry.status === 'late') {
                 attendedSessions++;
               }
             }
@@ -1230,9 +1347,69 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return updatedStudents;
       });
 
+      // Recalculate group attendance rate and completed sessions count
+      const targetGroupId = sessionMeta?.groupId;
+      if (targetGroupId) {
+        setGroups((prevGroups) => {
+          const updatedGroups = prevGroups.map((g) => {
+            if (g.id !== targetGroupId) return g;
+
+            const groupSessions = updatedSessionsResult.filter(
+              (s) => s.groupId === targetGroupId && (s.isLocked || (s.records && s.records.length > 0))
+            );
+
+            let totalEntries = 0;
+            let attendedEntries = 0;
+
+            groupSessions.forEach((sess) => {
+              sess.records?.forEach((rec) => {
+                totalEntries++;
+                if (rec.status === 'present' || rec.status === 'late') {
+                  attendedEntries++;
+                }
+              });
+            });
+
+            const newRate = totalEntries > 0 ? Math.round((attendedEntries / totalEntries) * 100) : 0;
+            return {
+              ...g,
+              attendanceRate: newRate,
+              completedLessonsCount: groupSessions.length,
+            };
+          });
+          setItem(ADMIN_STORAGE_KEYS.GROUPS, updatedGroups);
+          return updatedGroups;
+        });
+      }
+
+      // Send Parent Portal Notifications for absent / late students
+      records.forEach((rec) => {
+        const sObj = students.find((s) => s.id === rec.studentId);
+        const sName = sObj?.fullNameAr || rec.studentId;
+        if (rec.status === 'absent') {
+          notifyParentPortal({
+            studentId: rec.studentId,
+            type: 'attendance',
+            titleAr: `تنبيه تسجيل غياب: ${sName}`,
+            messageAr: `تم تسجيل غياب الطالب ${sName} عن حصة (${sessionMeta?.groupName || 'المسار التعليمي'}) بتاريخ ${sessionMeta?.date || new Date().toISOString().substring(0, 10)}.`,
+            routeTo: 'performance',
+            actionPayload: { tab: 'attendance', itemId: sessionId },
+          });
+        } else if (rec.status === 'late') {
+          notifyParentPortal({
+            studentId: rec.studentId,
+            type: 'attendance',
+            titleAr: `تنبيه تسجيل تأخر: ${sName}`,
+            messageAr: `تم تسجيل تأخر الطالب ${sName} عن الحصة ${rec.note ? `(${rec.note})` : ''} بتاريخ ${sessionMeta?.date || new Date().toISOString().substring(0, 10)}.`,
+            routeTo: 'performance',
+            actionPayload: { tab: 'attendance', itemId: sessionId },
+          });
+        }
+      });
+
       // Broadcast real-time sync event across contexts
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+        setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
       }
 
       logAudit(
@@ -1241,7 +1418,82 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         'attendance'
       );
     },
-    [students, logAudit]
+    [students, notifyParentPortal, logAudit]
+  );
+
+  const addCoveringSession = useCallback(
+    (sessionData: {
+      groupId: string;
+      groupName: string;
+      date: string;
+      dayNameAr: string;
+      dayNameEn: string;
+      sessionTime: string;
+      teacherId: string;
+      teacherName: string;
+      coveringType: 'counted' | 'not_counted';
+      coveringReason?: string;
+    }) => {
+      const newSessionId = `att-sess-cov-${sessionData.groupId}-${sessionData.date}-${Date.now()}`;
+      const targetGroup = groups.find((g) => g.id === sessionData.groupId);
+      const studentEntries: AttendanceStudentEntry[] = (targetGroup?.studentIds || []).map((stId) => {
+        const studentObj = students.find((s) => s.id === stId);
+        return {
+          studentId: stId,
+          studentNameAr: studentObj?.fullNameAr || stId,
+          studentNameEn: studentObj?.fullNameEn || stId,
+          status: 'present',
+          note: '',
+          recordedAt: '',
+        };
+      });
+
+      const newSession: AttendanceSession = {
+        id: newSessionId,
+        groupId: sessionData.groupId,
+        groupName: sessionData.groupName,
+        date: sessionData.date,
+        dayNameAr: sessionData.dayNameAr,
+        dayNameEn: sessionData.dayNameEn,
+        sessionTime: sessionData.sessionTime,
+        teacherId: sessionData.teacherId,
+        teacherName: sessionData.teacherName,
+        records: studentEntries,
+        isLocked: false,
+        isCoveringSession: true,
+        coveringType: sessionData.coveringType,
+        coveringReason: sessionData.coveringReason || '',
+      };
+
+      setAttendanceSessions((prev) => {
+        const updated = [newSession, ...prev];
+        setItem(ADMIN_STORAGE_KEYS.ATTENDANCE, updated);
+        return updated;
+      });
+
+      // Send notification to students of this group
+      (targetGroup?.studentIds || []).forEach((stId) => {
+        notifyParentPortal({
+          studentId: stId,
+          type: 'attendance',
+          titleAr: `جدولة حصة استدراكية: ${sessionData.groupName}`,
+          messageAr: `تمت إضافة حصة استدراكية جديدة للفوج ${sessionData.groupName} يوم ${sessionData.dayNameAr} (${sessionData.date}) في التوقيت ${sessionData.sessionTime}.`,
+          routeTo: 'performance',
+          actionPayload: { tab: 'attendance', itemId: newSessionId },
+        });
+      });
+
+      if (typeof window !== 'undefined') {
+        setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
+      }
+
+      logAudit(
+        `إضافة حصة استدراكية للفوج ${sessionData.groupName} (${sessionData.coveringType === 'counted' ? 'محسوبة' : 'غير محسوبة / إضافية'})`,
+        `Added covering session for group ${sessionData.groupName} (${sessionData.coveringType})`,
+        'attendance'
+      );
+    },
+    [groups, students, notifyParentPortal, logAudit]
   );
 
   // ==========================================
@@ -1280,20 +1532,41 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return updated;
       });
 
+      // Send Parent Portal Notifications for new homework
+      (hwData.studentIds || []).forEach((sId) => {
+        notifyParentPortal({
+          studentId: sId,
+          type: 'homework',
+          titleAr: `واجب منزلي جديد: ${newHw.assignmentNameAr}`,
+          messageAr: `تم إسناد واجب جديد (${newHw.assignmentNameAr}) للفوج ${newHw.groupName}. تاريخ الاستحقاق: ${newHw.dueDate}.`,
+          routeTo: 'performance',
+          actionPayload: { tab: 'homework', itemId: newHw.id },
+        });
+      });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
       logAudit(
         `إسناد واجب جديد: ${newHw.assignmentNameAr} للفوج ${newHw.groupName}`,
         `Created homework: ${newHw.assignmentNameEn}`,
         'homework'
       );
     },
-    [students, logAudit]
+    [students, notifyParentPortal, logAudit]
   );
 
   const evaluateHomework = useCallback(
     (hwId: string, studentId: string, score: number, comment: string, status: 'completed' | 'needs_revision') => {
+      let targetHwTitle = 'الواجب المنزلي';
+      let targetHwMaxScore = 20;
+
       setHomeworkList((prev) => {
         const updated = prev.map((hw) => {
           if (hw.id === hwId) {
+            targetHwTitle = hw.assignmentNameAr;
+            targetHwMaxScore = hw.totalScore || 20;
             const updatedEvals = hw.evaluations.map((ev) => {
               if (ev.studentId === studentId) {
                 return {
@@ -1315,13 +1588,95 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return updated;
       });
 
+      const sObj = students.find((s) => s.id === studentId);
+      notifyParentPortal({
+        studentId,
+        type: 'homework',
+        titleAr: `تصحيح وتقييم الواجب: ${targetHwTitle}`,
+        messageAr: `حصل الطالب ${sObj?.fullNameAr || studentId} على درجة (${score}/${targetHwMaxScore}) ${comment ? `مع ملاحظة: "${comment}"` : ''}.`,
+        routeTo: 'performance',
+        actionPayload: { tab: 'homework', itemId: hwId },
+      });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
       logAudit(
         `تقييم واجب الطالب ${studentId} بدرجة (${score})`,
         `Graded homework for student ${studentId} with score (${score})`,
         'homework'
       );
     },
-    [logAudit]
+    [students, notifyParentPortal, logAudit]
+  );
+
+  const batchEvaluateHomework = useCallback(
+    (
+      hwId: string,
+      evaluations: {
+        studentId: string;
+        score: number;
+        teacherComment?: string;
+        completionStatus: 'completed' | 'needs_revision' | 'pending';
+      }[]
+    ) => {
+      let targetHwTitle = 'الواجب المنزلي';
+      let targetHwMaxScore = 20;
+
+      setHomeworkList((prev) => {
+        const updated = prev.map((hw) => {
+          if (hw.id === hwId) {
+            targetHwTitle = hw.assignmentNameAr;
+            targetHwMaxScore = hw.totalScore || 20;
+            const evalMap = new Map(evaluations.map((e) => [e.studentId, e]));
+
+            const updatedEvals = hw.evaluations.map((ev) => {
+              const match = evalMap.get(ev.studentId);
+              if (match) {
+                return {
+                  ...ev,
+                  score: match.score,
+                  teacherComment: match.teacherComment,
+                  completionStatus: match.completionStatus,
+                  submittedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                  parentNotified: true,
+                };
+              }
+              return ev;
+            });
+            return { ...hw, evaluations: updatedEvals };
+          }
+          return hw;
+        });
+        setItem(ADMIN_STORAGE_KEYS.HOMEWORK, updated);
+        return updated;
+      });
+
+      // Send Parent Portal notifications for evaluated students
+      evaluations.forEach((item) => {
+        const sObj = students.find((s) => s.id === item.studentId);
+        notifyParentPortal({
+          studentId: item.studentId,
+          type: 'homework',
+          titleAr: `تصحيح وتقييم الواجب: ${targetHwTitle}`,
+          messageAr: `حصل الطالب ${sObj?.fullNameAr || item.studentId} على درجة (${item.score}/${targetHwMaxScore}) ${item.teacherComment ? `مع ملاحظة: "${item.teacherComment}"` : ''}.`,
+          routeTo: 'performance',
+          actionPayload: { tab: 'homework', itemId: hwId },
+        });
+      });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
+      logAudit(
+        `تقييم وتسجيل واجب الفوج: ${targetHwTitle} لعدد (${evaluations.length}) طالب`,
+        `Batch graded homework: ${targetHwTitle} for (${evaluations.length}) students`,
+        'homework'
+      );
+    },
+    [students, notifyParentPortal, logAudit]
   );
 
   // ==========================================
@@ -1339,7 +1694,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         level: data.level || 'A2',
         assessmentType: data.assessmentType || 'periodic',
         date: data.date || new Date().toISOString().substring(0, 10),
-        scores: data.scores || { listening: 80, speaking: 80, reading: 80, writing: 80, overall: 80 },
+        scores: data.scores || { listening: 0, speaking: 0, reading: 0, writing: 0, overall: 0 },
         gradeLetterAr: data.gradeLetterAr || 'ممتاز (A)',
         gradeLetterEn: data.gradeLetterEn || 'A (Distinction)',
         teacherComment: data.teacherComment || '',
@@ -1353,13 +1708,42 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return updated;
       });
 
+      if (newAsm.studentId) {
+        setStudents((prev) => {
+          const updated = prev.map((s) =>
+            s.id === newAsm.studentId
+              ? {
+                  ...s,
+                  skills: newAsm.scores,
+                  averagePerformance: newAsm.scores.overall,
+                }
+              : s
+          );
+          setItem(ADMIN_STORAGE_KEYS.STUDENTS, updated);
+          return updated;
+        });
+      }
+
+      notifyParentPortal({
+        studentId: newAsm.studentId,
+        type: 'feedback',
+        titleAr: `رصد تقييم مهارات: ${newAsm.gradeLetterAr}`,
+        messageAr: `تم تسجيل نتائج تقييم المهارات اللغوية للطالب ${newAsm.studentNameAr} بنسبة (${newAsm.scores.overall}%).`,
+        routeTo: 'performance',
+        actionPayload: { tab: 'assessments', itemId: newAsm.id },
+      });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
       logAudit(
         `رصد اختبار وتقييم مهارات للطالب ${newAsm.studentNameAr}`,
         `Recorded 4-skill assessment for student ${newAsm.studentNameEn}`,
         'assessment'
       );
     },
-    [currentAdmin, logAudit]
+    [currentAdmin, notifyParentPortal, logAudit]
   );
 
   // ==========================================
@@ -1387,13 +1771,26 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return updated;
       });
 
+      notifyParentPortal({
+        studentId: newFb.studentId,
+        type: 'feedback',
+        titleAr: `توجيه تربوي من الأستاذ (${newFb.teacherName})`,
+        messageAr: `أرسل الأستاذ ${newFb.teacherName} توجيهاً تربوياً للطالب ${newFb.studentNameAr}. اضغط للاطلاع والمتابعة.`,
+        routeTo: 'performance',
+        actionPayload: { tab: 'feedback', itemId: newFb.id },
+      });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
       logAudit(
         `إرسال توجيه وملاحظة معلم للطالب ${newFb.studentNameAr}`,
         `Sent teacher feedback for student ${newFb.studentNameEn}`,
         'homework'
       );
     },
-    [students, currentAdmin, logAudit]
+    [students, currentAdmin, notifyParentPortal, logAudit]
   );
 
   const replyParentFeedback = useCallback(
@@ -1500,13 +1897,25 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         });
       }
 
+      notifyParentPortal({
+        studentId: approval.studentId,
+        type: 'general',
+        titleAr: `قبول واعتماد تسجيل الطالب: ${approval.studentNameAr}`,
+        messageAr: `تمت الموافقة على طلب تسجيل الطالب ${approval.studentNameAr} واعتماده في المستوى ${level} بنجاح.`,
+        routeTo: 'dashboard',
+      });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
       logAudit(
         `قبول طلب تسجيل الطالب ${approval.studentNameAr} وتسكينه في المستوى ${level}`,
         `Approved student registration: ${approval.studentNameAr}`,
         'student'
       );
     },
-    [pendingApprovals, approveInStudentContext, updateInStudentContext, logAudit]
+    [pendingApprovals, approveInStudentContext, updateInStudentContext, notifyParentPortal, logAudit]
   );
 
   const rejectStudentRegistration = useCallback(
@@ -1599,8 +2008,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         studentLevelScores,
         updateStudentLevelScore,
         recordAttendance,
+        addCoveringSession,
         createHomework,
         evaluateHomework,
+        batchEvaluateHomework,
         recordAssessment,
         addTeacherFeedback,
         replyParentFeedback,

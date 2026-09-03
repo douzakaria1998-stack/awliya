@@ -43,11 +43,20 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
     parents,
     linkStudentToParent,
     unlinkStudentFromParent,
+    updateStudent,
+    recordAssessment,
   } = useAdmin();
   const { isRTL, language } = useLanguage();
   const [activeTab, setActiveTab] = useState<StudentTabKey>('overview');
   const [isLinkingParent, setIsLinkingParent] = useState(false);
   const [parentSearchQuery, setParentSearchQuery] = useState('');
+
+  // 4-Skill Assessment Editing State
+  const [isEditingSkills, setIsEditingSkills] = useState(false);
+  const [editListening, setEditListening] = useState(0);
+  const [editSpeaking, setEditSpeaking] = useState(0);
+  const [editReading, setEditReading] = useState(0);
+  const [editWriting, setEditWriting] = useState(0);
 
   if (!isOpen || !student) return null;
 
@@ -110,8 +119,11 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                 <h3 className="text-base sm:text-lg font-black text-white truncate">
                   {student.fullNameAr} ({student.fullNameEn})
                 </h3>
-                <span className="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold font-mono">
-                  {student.cefrLevel} — Level {student.currentLevel}
+                <span
+                  className="inline-flex items-center justify-center rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold font-mono tracking-wide"
+                  style={{ padding: '4px 12px', lineHeight: '1.2' }}
+                >
+                  {language === 'ar' ? `المستوى ${student.currentLevel}` : `Level ${student.currentLevel}`}
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-medium mt-0.5 truncate">
@@ -370,7 +382,10 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                       <Sparkles size={15} className="text-blue-600" />
                       <span>{language === 'ar' ? 'نتيجة اختبار تحديد المستوى (Placement Test)' : 'Placement Test Result'}</span>
                     </h5>
-                    <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white font-mono font-bold text-xs">
+                    <span
+                      className="inline-flex items-center justify-center rounded-full bg-blue-600 text-white font-mono font-bold text-xs"
+                      style={{ padding: '4px 12px', lineHeight: '1.2' }}
+                    >
                       {student.placementTest.score}% — Level {student.placementTest.recommendedLevel}
                     </span>
                   </div>
@@ -416,7 +431,10 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
               </div>
 
               {studentAttendanceRecords.length === 0 ? (
-                <div className="py-8 text-center text-slate-400 text-xs font-semibold">
+                <div
+                  className="text-center text-slate-400 dark:text-slate-400 text-xs sm:text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-center"
+                  style={{ padding: '28px 24px', minHeight: '80px', lineHeight: '1.6' }}
+                >
                   {language === 'ar' ? 'لا توجد سجلات حضور مسجلة حتى الآن' : 'No attendance records yet'}
                 </div>
               ) : (
@@ -461,7 +479,10 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                 {language === 'ar' ? 'سجل الواجبات والتسليمات' : 'Homework & Submissions'}
               </h4>
               {studentHomework.length === 0 ? (
-                <div className="py-10 text-center text-slate-400 text-xs font-semibold bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div
+                  className="text-center text-slate-400 dark:text-slate-400 text-xs sm:text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-center"
+                  style={{ padding: '28px 24px', minHeight: '80px', lineHeight: '1.6' }}
+                >
                   {language === 'ar' ? 'لا توجد واجبات مسندة لهذا الطالب بعد' : 'No homework assignments recorded yet'}
                 </div>
               ) : (
@@ -502,27 +523,147 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
           {activeTab === 'assessment' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <h4 className="text-sm font-black text-slate-900 dark:text-white">
-                  {language === 'ar' ? 'تقييم المهارات اللغوية الأربعة (4 Language Skills)' : '4-Skill Language Assessment'}
-                </h4>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-                  {[
-                    { name: 'الاستماع (Listening)', score: student.skills?.listening || 0, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50/80 dark:bg-blue-950/40' },
-                    { name: 'المحادثة (Speaking)', score: student.skills?.speaking || 0, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50/80 dark:bg-emerald-950/40' },
-                    { name: 'القراءة (Reading)', score: student.skills?.reading || 0, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50/80 dark:bg-purple-950/40' },
-                    { name: 'الكتابة (Writing)', score: student.skills?.writing || 0, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50/80 dark:bg-amber-950/40' },
-                  ].map((sk, idx) => (
-                    <div
-                      key={idx}
-                      className={`${sk.bg} rounded-2xl text-center border border-slate-100 dark:border-slate-800/80`}
-                      style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-black text-slate-900 dark:text-white">
+                    {language === 'ar' ? 'تقييم المهارات اللغوية الأربعة (4 Language Skills)' : '4-Skill Language Assessment'}
+                  </h4>
+                  {!isEditingSkills ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditListening(currentStudent.skills?.listening || 0);
+                        setEditSpeaking(currentStudent.skills?.speaking || 0);
+                        setEditReading(currentStudent.skills?.reading || 0);
+                        setEditWriting(currentStudent.skills?.writing || 0);
+                        setIsEditingSkills(true);
+                      }}
+                      className="inline-flex items-center justify-center rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 border border-purple-200 dark:border-purple-800/60 text-purple-700 dark:text-purple-300 text-xs font-bold transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98"
+                      style={{ padding: '8px 18px', minHeight: '36px', lineHeight: '1.4' }}
                     >
-                      <span className="text-xs font-bold text-slate-600 dark:text-slate-300 block">{sk.name}</span>
-                      <span className={`text-2xl font-black font-mono ${sk.color}`}>{sk.score}%</span>
+                      {language === 'ar' ? 'تعديل التقييم' : 'Edit Skills'}
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingSkills(false)}
+                        className="inline-flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold transition-colors cursor-pointer"
+                        style={{ padding: '8px 16px', minHeight: '36px', lineHeight: '1.4' }}
+                      >
+                        {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const l = Math.min(100, Math.max(0, Number(editListening) || 0));
+                          const s = Math.min(100, Math.max(0, Number(editSpeaking) || 0));
+                          const r = Math.min(100, Math.max(0, Number(editReading) || 0));
+                          const w = Math.min(100, Math.max(0, Number(editWriting) || 0));
+                          const overall = Math.round((l + s + r + w) / 4);
+                          const updatedSkills = {
+                            listening: l,
+                            speaking: s,
+                            reading: r,
+                            writing: w,
+                            overall,
+                          };
+
+                          updateStudent(currentStudent.id, {
+                            skills: updatedSkills,
+                            averagePerformance: overall,
+                          });
+
+                          recordAssessment({
+                            studentId: currentStudent.id,
+                            studentNameAr: currentStudent.fullNameAr,
+                            studentNameEn: currentStudent.fullNameEn,
+                            groupId: currentStudent.groupId,
+                            groupName: currentStudent.groupName,
+                            level: currentStudent.cefrLevel,
+                            assessmentType: 'periodic',
+                            scores: updatedSkills,
+                            gradeLetterAr: overall >= 90 ? 'ممتاز (A+)' : overall >= 80 ? 'جيد جداً (B+)' : overall >= 60 ? 'مقبول (C)' : 'يحتاج تحسين (D)',
+                            gradeLetterEn: overall >= 90 ? 'A+ (Distinction)' : overall >= 80 ? 'B+ (Very Good)' : overall >= 60 ? 'C (Pass)' : 'D (Needs Improvement)',
+                            teacherComment: language === 'ar' ? 'تحديث مباشر لتقييم المهارات اللغوية الأربعة' : 'Direct update of 4-skill assessment',
+                          });
+
+                          setIsEditingSkills(false);
+                        }}
+                        className="inline-flex items-center justify-center rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                        style={{ padding: '8px 20px', minHeight: '36px', lineHeight: '1.4' }}
+                      >
+                        {language === 'ar' ? 'حفظ التقييم' : 'Save Skills'}
+                      </button>
                     </div>
-                  ))}
+                  )}
                 </div>
+
+                {!isEditingSkills ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                    {[
+                      { name: 'الاستماع (Listening)', score: currentStudent.skills?.listening || 0, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50/80 dark:bg-blue-950/40' },
+                      { name: 'المحادثة (Speaking)', score: currentStudent.skills?.speaking || 0, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50/80 dark:bg-emerald-950/40' },
+                      { name: 'القراءة (Reading)', score: currentStudent.skills?.reading || 0, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50/80 dark:bg-purple-950/40' },
+                      { name: 'الكتابة (Writing)', score: currentStudent.skills?.writing || 0, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50/80 dark:bg-amber-950/40' },
+                    ].map((sk, idx) => (
+                      <div
+                        key={idx}
+                        className={`${sk.bg} rounded-2xl text-center border border-slate-100 dark:border-slate-800/80`}
+                        style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}
+                      >
+                        <span className="text-xs font-bold text-slate-600 dark:text-slate-300 block">{sk.name}</span>
+                        <span className={`text-2xl font-black font-mono ${sk.color}`}>{sk.score}%</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <div>
+                      <label className="block text-slate-500 mb-1 text-[11px] font-bold">الاستماع (Listening)</label>
+                      <input
+                        type="number"
+                        value={editListening}
+                        onChange={(e) => setEditListening(Number(e.target.value))}
+                        min={0}
+                        max={100}
+                        className="w-full h-10 px-2 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-mono font-bold text-blue-600 dark:text-blue-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-500 mb-1 text-[11px] font-bold">المحادثة (Speaking)</label>
+                      <input
+                        type="number"
+                        value={editSpeaking}
+                        onChange={(e) => setEditSpeaking(Number(e.target.value))}
+                        min={0}
+                        max={100}
+                        className="w-full h-10 px-2 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-mono font-bold text-emerald-600 dark:text-emerald-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-500 mb-1 text-[11px] font-bold">القراءة (Reading)</label>
+                      <input
+                        type="number"
+                        value={editReading}
+                        onChange={(e) => setEditReading(Number(e.target.value))}
+                        min={0}
+                        max={100}
+                        className="w-full h-10 px-2 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-mono font-bold text-purple-600 dark:text-purple-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-500 mb-1 text-[11px] font-bold">الكتابة (Writing)</label>
+                      <input
+                        type="number"
+                        value={editWriting}
+                        onChange={(e) => setEditWriting(Number(e.target.value))}
+                        min={0}
+                        max={100}
+                        className="w-full h-10 px-2 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-mono font-bold text-amber-600 dark:text-amber-400"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Assessment History */}
@@ -531,7 +672,10 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                   {language === 'ar' ? 'سجل الاختبارات الدورية' : 'Assessment History'}
                 </h5>
                 {studentAssessments.length === 0 ? (
-                  <div className="py-8 text-center text-slate-400 text-xs font-semibold bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800">
+                  <div
+                    className="text-center text-slate-400 dark:text-slate-400 text-xs sm:text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-center"
+                    style={{ padding: '28px 24px', minHeight: '80px', lineHeight: '1.6' }}
+                  >
                     {language === 'ar' ? 'لا توجد اختبارات مسجلة لهذا الطالب بعد' : 'No assessments recorded yet'}
                   </div>
                 ) : (
@@ -563,7 +707,10 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
               </h4>
 
               {studentFeedback.length === 0 ? (
-                <div className="py-10 text-center text-slate-400 text-xs font-semibold bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div
+                  className="text-center text-slate-400 dark:text-slate-400 text-xs sm:text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-center"
+                  style={{ padding: '28px 24px', minHeight: '80px', lineHeight: '1.6' }}
+                >
                   {language === 'ar' ? 'لا توجد ملاحظات أو توجيهات مسجلة بعد' : 'No teacher feedback recorded yet'}
                 </div>
               ) : (

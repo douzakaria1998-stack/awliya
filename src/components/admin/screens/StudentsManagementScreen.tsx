@@ -43,7 +43,7 @@ import { generateAutoPassword } from '@/lib/utils';
 import { StudentDetailModal } from '../modals/StudentDetailModal';
 
 export function StudentsManagementScreen() {
-  const { visibleStudents, groups, teachers, parents, addStudent, addParent, updateStudent, archiveStudent } = useAdmin();
+  const { visibleStudents, groups, teachers, parents, addStudent, addParent, updateStudent, archiveStudent, curricula } = useAdmin();
   const { isRTL, language } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -59,6 +59,29 @@ export function StudentsManagementScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
 
+  // Available Curriculum Levels with dynamic custom names
+  const availableCurriculumLevels = useMemo(() => {
+    if (curricula && curricula.length > 0) {
+      const seen = new Set<number>();
+      const list: { levelNumber: number; name: string }[] = [];
+      const sorted = [...curricula].sort((a, b) => (a.levelNumber || 0) - (b.levelNumber || 0));
+      sorted.forEach((c) => {
+        if (!seen.has(c.levelNumber)) {
+          seen.add(c.levelNumber);
+          list.push({
+            levelNumber: c.levelNumber,
+            name: language === 'ar' ? (c.nameAr || `المستوى ${c.levelNumber}`) : (c.nameEn || c.nameAr || `Level ${c.levelNumber}`),
+          });
+        }
+      });
+      return list;
+    }
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((lvl) => ({
+      levelNumber: lvl,
+      name: language === 'ar' ? `المستوى ${lvl}` : `Level ${lvl}`,
+    }));
+  }, [curricula, language]);
+
   // New Student Form State (First Name, Last Name, Birthday, Link to Parent, etc.)
   const [firstNameAr, setFirstNameAr] = useState('');
   const [lastNameAr, setLastNameAr] = useState('');
@@ -67,7 +90,7 @@ export function StudentsManagementScreen() {
   const [birthDate, setBirthDate] = useState('2015-05-15');
   const [newGender, setNewGender] = useState<'male' | 'female'>('male');
   const [newLanguage, setNewLanguage] = useState<'English' | 'French'>('English');
-  const [newCefrLevel, setNewCefrLevel] = useState<'A1' | 'A2' | 'B1' | 'B2' | 'C1'>('A1');
+  const [newLevel, setNewLevel] = useState<number>(1);
   const [newGroupId, setNewGroupId] = useState<string>(groups[0]?.id || 'grp-a1-01');
 
   // Link to Parent Mode State
@@ -103,7 +126,10 @@ export function StudentsManagementScreen() {
           s.parentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
           s.groupName.toLowerCase().includes(searchQuery.toLowerCase());
 
-        const matchesLevel = selectedLevel === 'all' || s.cefrLevel === selectedLevel;
+        const matchesLevel =
+          selectedLevel === 'all' ||
+          s.currentLevel.toString() === selectedLevel ||
+          s.cefrLevel === selectedLevel;
         const matchesGroup = selectedGroup === 'all' || s.groupId === selectedGroup;
         const matchesTeacher = selectedTeacher === 'all' || s.teacherId === selectedTeacher;
         const matchesLanguage = selectedLanguage === 'all' || s.language === selectedLanguage;
@@ -194,10 +220,10 @@ export function StudentsManagementScreen() {
       fullNameEn,
       gender: newGender,
       language: newLanguage,
-      cefrLevel: newCefrLevel,
-      currentLevel: newCefrLevel === 'A1' ? 1 : newCefrLevel === 'A2' ? 2 : newCefrLevel === 'B1' ? 3 : newCefrLevel === 'B2' ? 4 : 5,
+      cefrLevel: 'A1',
+      currentLevel: newLevel,
       groupId: matchedGroup?.id || 'grp-a1-01',
-      groupName: matchedGroup?.name || 'Group A1 — Beginner',
+      groupName: matchedGroup?.name || 'Group 1',
       teacherId: matchedTeacher?.id || 'usr-teach-01',
       teacherName: matchedTeacher?.fullNameEn || 'Sarah Benali',
       parentId,
@@ -333,11 +359,11 @@ export function StudentsManagementScreen() {
               className="w-full h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 px-3 cursor-pointer focus:outline-none focus:border-purple-500"
             >
               <option value="all">{language === 'ar' ? 'جميع المستويات' : 'All Levels'}</option>
-              <option value="A1">A1 — Beginner</option>
-              <option value="A2">A2 — Elementary</option>
-              <option value="B1">B1 — Intermediate</option>
-              <option value="B2">B2 — Upper Intermediate</option>
-              <option value="C1">C1 — Advanced</option>
+              {availableCurriculumLevels.map((lvl) => (
+                <option key={lvl.levelNumber} value={lvl.levelNumber.toString()}>
+                  {lvl.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -495,10 +521,10 @@ export function StudentsManagementScreen() {
                     {/* Level */}
                     <td className="py-3.5 px-4 text-center">
                       <span
-                        className="rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs"
+                        className="rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs"
                         style={{ padding: '5px 10px' }}
                       >
-                        {st.cefrLevel} (L{st.currentLevel})
+                        {language === 'ar' ? `المستوى ${st.currentLevel}` : `Level ${st.currentLevel}`}
                       </span>
                     </td>
 
@@ -1057,16 +1083,16 @@ export function StudentsManagementScreen() {
                     {language === 'ar' ? 'المستوى (Level)' : 'Level'}
                   </label>
                   <select
-                    value={newCefrLevel}
-                    onChange={(e) => setNewCefrLevel(e.target.value as any)}
+                    value={newLevel}
+                    onChange={(e) => setNewLevel(Number(e.target.value))}
                     className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
                     style={{ height: '42px', padding: '8px 12px' }}
                   >
-                    <option value="A1">A1 (Level 1)</option>
-                    <option value="A2">A2 (Level 2)</option>
-                    <option value="B1">B1 (Level 3)</option>
-                    <option value="B2">B2 (Level 4)</option>
-                    <option value="C1">C1 (Level 5)</option>
+                    {availableCurriculumLevels.map((lvl) => (
+                      <option key={lvl.levelNumber} value={lvl.levelNumber}>
+                        {lvl.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

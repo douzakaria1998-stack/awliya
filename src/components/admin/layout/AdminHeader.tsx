@@ -153,11 +153,15 @@ export function AdminHeader({ onOpenMobileMenu }: AdminHeaderProps) {
 
             {isLangOpen && (
               <div
-                className={`absolute top-full mt-2 min-w-[200px] bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 ${
+                className={`absolute top-full mt-2.5 min-w-[210px] bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 ${
                   isRTL ? 'left-0 text-right' : 'right-0 text-left'
                 }`}
+                style={{
+                  padding: '8px',
+                  borderRadius: '20px',
+                }}
               >
-                <div className="space-y-1">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {languagesList.map((item) => (
                     <button
                       key={item.code}
@@ -166,13 +170,17 @@ export function AdminHeader({ onOpenMobileMenu }: AdminHeaderProps) {
                         setLanguage(item.code);
                         setIsLangOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                      className={`w-full flex items-center justify-between text-xs font-bold transition-colors cursor-pointer ${
                         language === item.code
                           ? 'bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 font-black'
                           : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                       }`}
+                      style={{
+                        padding: '10px 16px',
+                        borderRadius: '14px',
+                      }}
                     >
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-3">
                         <img
                           src={item.flagUrl}
                           alt={item.label}

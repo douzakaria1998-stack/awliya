@@ -83,8 +83,18 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
 
   if (!isOpen || !currentParent) return null;
 
-  const linkedStudents = students.filter((s) => currentParent.linkedStudentIds.includes(s.id));
-  const availableStudentsToLink = students.filter((s) => !currentParent.linkedStudentIds.includes(s.id));
+  const parentPhoneClean = (currentParent.phone || '').replace(/\D/g, '');
+  const parentNameClean = (currentParent.fullNameAr || '').trim().toLowerCase();
+
+  const linkedStudents = students.filter((s) => {
+    if (currentParent.linkedStudentIds && currentParent.linkedStudentIds.includes(s.id)) return true;
+    if (s.parentId && s.parentId === currentParent.id) return true;
+    if (parentPhoneClean && s.parentPhone && s.parentPhone.replace(/\D/g, '') === parentPhoneClean) return true;
+    if (parentNameClean && s.parentName && s.parentName.trim().toLowerCase() === parentNameClean) return true;
+    return false;
+  });
+
+  const availableStudentsToLink = students.filter((s) => !linkedStudents.some((ls) => ls.id === s.id));
 
   const filteredAvailableStudents = availableStudentsToLink.filter((s) => {
     const q = studentSearchTerm.trim().toLowerCase();
@@ -549,88 +559,83 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                   )}
                 </div>
 
-                {/* Filtered Students List: ONLY SHOWN WHEN USER TYPES */}
-                {studentSearchTerm.trim().length > 0 && (
+                {/* Available Students List: Shown immediately */}
+                <div
+                  className="max-h-56 overflow-y-auto rounded-2xl border border-purple-200/90 dark:border-purple-800/70 bg-white dark:bg-slate-900 shadow-sm animate-fade-in"
+                  style={{ padding: '14px 16px', marginTop: '4px' }}
+                >
                   <div
-                    className="max-h-56 overflow-y-auto rounded-2xl border border-purple-200/90 dark:border-purple-800/70 bg-white dark:bg-slate-900 shadow-sm animate-fade-in"
-                    style={{ padding: '14px 16px', marginTop: '4px' }}
+                    className="text-[11px] font-bold text-slate-400 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between"
+                    style={{ paddingBottom: '10px', marginBottom: '12px' }}
                   >
-                    <div
-                      className="text-[11px] font-bold text-slate-400 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between"
-                      style={{ paddingBottom: '10px', marginBottom: '12px' }}
-                    >
-                      <span>{language === 'ar' ? 'نتائج البحث المطابقة:' : 'Matching Search Results:'}</span>
-                      <span className="font-mono text-purple-600 dark:text-purple-400 font-bold">{filteredAvailableStudents.length}</span>
-                    </div>
-
-                    {filteredAvailableStudents.length === 0 ? (
-                      <div className="py-8 text-center text-xs font-bold text-slate-400">
-                        {language === 'ar' ? 'لا يوجد أي طالب مطابق لبحثك' : 'No students matching your search'}
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {filteredAvailableStudents.map((s) => {
-                          const isSelected = selectedStudentToLink === s.id;
-                          return (
-                            <button
-                              key={s.id}
-                              type="button"
-                              onClick={() => {
-                                setSelectedStudentToLink(isSelected ? '' : s.id);
-                                if (!isSelected) {
-                                  setStudentSearchTerm('');
-                                }
-                              }}
-                              className={`w-full flex items-center justify-between transition-all cursor-pointer ${
-                                isRTL ? 'text-right' : 'text-left'
-                              } ${
-                                isSelected
-                                  ? 'bg-purple-600 text-white shadow-xs'
-                                  : 'hover:bg-purple-50 dark:hover:bg-purple-950/60 text-slate-800 dark:text-slate-200 bg-slate-50/70 dark:bg-slate-850/60'
-                              }`}
-                              style={{ padding: '12px 14px', borderRadius: '14px' }}
-                            >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <div
-                                  className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
-                                    isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300'
-                                  }`}
-                                >
-                                  {s.fullNameAr[0]}
-                                </div>
-                                <div className="min-w-0">
-                                  <span className="font-black text-xs sm:text-sm block truncate">
-                                    {s.fullNameAr} ({s.fullNameEn})
-                                  </span>
-                                  <span className={`text-[11px] block truncate font-medium mt-0.5 ${isSelected ? 'text-purple-100' : 'text-slate-400'}`}>
-                                    {s.groupName} • {s.teacherName}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-2.5 shrink-0">
-                                <span
-                                  className={`inline-flex items-center justify-center font-mono text-xs font-bold transition-all ${
-                                    isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
-                                  }`}
-                                  style={{
-                                    padding: '4px 12px',
-                                    minWidth: '38px',
-                                    borderRadius: '8px',
-                                    lineHeight: '1.2',
-                                  }}
-                                >
-                                  {s.cefrLevel}
-                                </span>
-                                {isSelected && <Check size={16} strokeWidth={3} className="text-white" />}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
+                    <span>{language === 'ar' ? 'الطلاب المتاحين للربط:' : 'Available Students to Link:'}</span>
+                    <span className="font-mono text-purple-600 dark:text-purple-400 font-bold">{filteredAvailableStudents.length}</span>
                   </div>
-                )}
+
+                  {filteredAvailableStudents.length === 0 ? (
+                    <div className="py-8 text-center text-xs font-bold text-slate-400">
+                      {language === 'ar' ? 'لا يوجد طلاب متاحين للربط أو مطابقين للبحث' : 'No available students to link'}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {filteredAvailableStudents.map((s) => {
+                        const isSelected = selectedStudentToLink === s.id;
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedStudentToLink(isSelected ? '' : s.id);
+                            }}
+                            className={`w-full flex items-center justify-between transition-all cursor-pointer ${
+                              isRTL ? 'text-right' : 'text-left'
+                            } ${
+                              isSelected
+                                ? 'bg-purple-600 text-white shadow-xs'
+                                : 'hover:bg-purple-50 dark:hover:bg-purple-950/60 text-slate-800 dark:text-slate-200 bg-slate-50/70 dark:bg-slate-850/60'
+                            }`}
+                            style={{ padding: '12px 14px', borderRadius: '14px' }}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div
+                                className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
+                                  isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300'
+                                }`}
+                              >
+                                {s.fullNameAr[0]}
+                              </div>
+                              <div className="min-w-0">
+                                <span className="font-black text-xs sm:text-sm block truncate">
+                                  {s.fullNameAr} ({s.fullNameEn})
+                                </span>
+                                <span className={`text-[11px] block truncate font-medium mt-0.5 ${isSelected ? 'text-purple-100' : 'text-slate-400'}`}>
+                                  {s.groupName} • {s.teacherName}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2.5 shrink-0">
+                              <span
+                                className={`inline-flex items-center justify-center font-mono text-xs font-bold transition-all ${
+                                  isSelected ? 'bg-white/20 text-white' : 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
+                                }`}
+                                style={{
+                                  padding: '4px 12px',
+                                  minWidth: '38px',
+                                  borderRadius: '8px',
+                                  lineHeight: '1.2',
+                                }}
+                              >
+                                {s.cefrLevel}
+                              </span>
+                              {isSelected && <Check size={16} strokeWidth={3} className="text-white" />}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
 
                 {/* Selected Action Bar */}
                 {selectedStudentObj && (
@@ -675,49 +680,60 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
               </div>
             )}
 
-            {/* Linked Students Cards (Section 7 in PDF: Level, Group, Teacher, Progress, Attendance) */}
+            {/* Linked Students Cards */}
             <div className="space-y-3">
-              {linkedStudents.map((st) => (
-                <div
-                  key={st.id}
-                  className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-base text-slate-900 dark:text-white">
-                        {st.fullNameAr} ({st.fullNameEn})
-                      </span>
-                      <span className="px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-mono font-bold text-xs">
-                        Level: {st.cefrLevel}
-                      </span>
-                    </div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400 space-y-0.5">
-                      <div>• Group: <span className="font-semibold text-slate-800 dark:text-slate-200">{st.groupName}</span></div>
-                      <div>• Teacher: <span className="font-semibold text-slate-800 dark:text-slate-200">{st.teacherName}</span></div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="text-center p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 min-w-[80px]">
-                      <span className="text-[10px] text-slate-400 block font-bold">{language === 'ar' ? 'التقدم' : 'Progress'}</span>
-                      <span className="font-mono font-black text-sm text-purple-600">{st.overallProgress}%</span>
-                    </div>
-                    <div className="text-center p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 min-w-[80px]">
-                      <span className="text-[10px] text-slate-400 block font-bold">{language === 'ar' ? 'الحضور' : 'Attendance'}</span>
-                      <span className="font-mono font-black text-sm text-emerald-600">{st.attendanceRate}%</span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => unlinkStudentFromParent(currentParent.id, st.id)}
-                      className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-                      title={language === 'ar' ? 'إلغاء ربط الطالب' : 'Unlink student'}
-                    >
-                      <Unlink size={16} />
-                    </button>
-                  </div>
+              {linkedStudents.length === 0 ? (
+                <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-dashed border-slate-200 dark:border-slate-700 text-center space-y-2">
+                  <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                    {language === 'ar' ? 'لا يوجد أي طالب مربوط بهذا الحساب حالياً.' : 'No students linked to this parent account yet.'}
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    {language === 'ar' ? 'اضغط على زر "ربط طالب جديد" أعلاه لاختيار وربط الطلاب مباشرة.' : 'Click "Link Student" above to select and link students directly.'}
+                  </p>
                 </div>
-              ))}
+              ) : (
+                linkedStudents.map((st) => (
+                  <div
+                    key={st.id}
+                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-slate-900 dark:text-white">
+                          {st.fullNameAr} ({st.fullNameEn})
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-mono font-bold text-[11px]">
+                          Level: {st.cefrLevel}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
+                        <div>• Group: <span className="font-semibold text-slate-800 dark:text-slate-200">{st.groupName}</span></div>
+                        <div>• Teacher: <span className="font-semibold text-slate-800 dark:text-slate-200">{st.teacherName}</span></div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="text-center p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 min-w-[70px]">
+                        <span className="text-[10px] text-slate-400 block font-bold">{language === 'ar' ? 'التقدم' : 'Progress'}</span>
+                        <span className="font-mono font-bold text-xs text-purple-600">{st.overallProgress}%</span>
+                      </div>
+                      <div className="text-center p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 min-w-[70px]">
+                        <span className="text-[10px] text-slate-400 block font-bold">{language === 'ar' ? 'الحضور' : 'Attendance'}</span>
+                        <span className="font-mono font-bold text-xs text-emerald-600">{st.attendanceRate}%</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => unlinkStudentFromParent(currentParent.id, st.id)}
+                        className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                        title={language === 'ar' ? 'إلغاء ربط الطالب' : 'Unlink student'}
+                      >
+                        <Unlink size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

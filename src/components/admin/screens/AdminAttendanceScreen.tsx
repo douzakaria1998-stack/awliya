@@ -18,20 +18,42 @@ import {
   User,
   Users,
   Sparkles,
+  Plus,
+  CalendarPlus,
+  Info,
+  BookOpen,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 
 export function AdminAttendanceScreen() {
-  const { visibleGroups, visibleStudents, attendanceSessions, recordAttendance } = useAdmin();
+  const { visibleGroups, visibleStudents, teachers, attendanceSessions, recordAttendance, addCoveringSession } = useAdmin();
   const { isRTL, language } = useLanguage();
 
-  const [selectedDate, setSelectedDate] = useState('2025-02-22');
+  const getTodayDateStr = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const [selectedDate, setSelectedDate] = useState(getTodayDateStr);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   // Slide-over Drawer State
   const [activeDrawerGroup, setActiveDrawerGroup] = useState<(typeof visibleGroups)[0] | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Covering Session Modal State
+  const [isCoveringModalOpen, setIsCoveringModalOpen] = useState(false);
+  const [coveringGroupId, setCoveringGroupId] = useState('');
+  const [coveringDate, setCoveringDate] = useState(getTodayDateStr);
+  const [coveringStartTime, setCoveringStartTime] = useState('10:00');
+  const [coveringEndTime, setCoveringEndTime] = useState('12:00');
+  const [coveringTeacherId, setCoveringTeacherId] = useState('');
+  const [coveringType, setCoveringType] = useState<'counted' | 'not_counted'>('counted');
+  const [coveringReason, setCoveringReason] = useState('');
 
   // Day mapping helpers
   const dayMapEn: Record<number, string> = {
@@ -80,9 +102,46 @@ export function AdminAttendanceScreen() {
 
   const doesGroupStudyOnDate = (group: (typeof visibleGroups)[0], dateStr: string) => {
     if (!group || !dateStr) return false;
+
+    // 0. Covering session or already registered session on this date: ALWAYS show the group
+    const sessionOnThisDate = attendanceSessions.find(
+      (s) => s.groupId === group.id && s.date === dateStr
+    );
+    if (sessionOnThisDate) {
+      return true;
+    }
+
+    // 1. Start date constraint: Group only appears on or after its start date
+    if (group.startDate && dateStr < group.startDate) {
+      return false;
+    }
+
+    // 2. Archived check: Archived groups don't appear unless already recorded on this date
+    if (group.status === 'archived') {
+      return false;
+    }
+
+    // 3. Session limit constraint: Stop appearing after totalSessions is reached
+    const maxSessions = group.totalSessions || 24;
+    const priorRecordedSessions = attendanceSessions.filter(
+      (s) => s.groupId === group.id && s.date < dateStr && (!s.isCoveringSession || s.coveringType === 'counted')
+    );
+    if (priorRecordedSessions.length >= maxSessions) {
+      return false;
+    }
+
+    // 4. Weekday schedule check
     const dayIdx = getDayOfWeekIndex(dateStr);
     const enDay = dayMapEn[dayIdx].toLowerCase();
     const arDay = dayMapAr[dayIdx];
+
+    if (group.schedules && group.schedules.length > 0) {
+      const matchSchedule = group.schedules.some((s) => {
+        const d = (s.day || '').toLowerCase();
+        return d.includes(enDay) || d.includes(arDay);
+      });
+      if (matchSchedule) return true;
+    }
 
     const daysEn = (group.daysEn || '').toLowerCase();
     const daysAr = group.daysAr || '';
@@ -90,10 +149,69 @@ export function AdminAttendanceScreen() {
     return daysEn.includes(enDay) || daysAr.includes(arDay);
   };
 
+  const handleOpenCoveringModal = () => {
+    const firstGroup = visibleGroups[0];
+    setCoveringDate(selectedDate);
+    if (firstGroup) {
+      setCoveringGroupId(firstGroup.id);
+      setCoveringTeacherId(firstGroup.teacherId);
+      setCoveringStartTime(firstGroup.startTime || '10:00');
+      setCoveringEndTime(firstGroup.endTime || '12:00');
+    }
+    setCoveringType('counted');
+    setCoveringReason('');
+    setIsCoveringModalOpen(true);
+  };
+
+  const handleGroupSelectChange = (grpId: string) => {
+    setCoveringGroupId(grpId);
+    const grp = visibleGroups.find((g) => g.id === grpId);
+    if (grp) {
+      setCoveringTeacherId(grp.teacherId);
+      if (grp.startTime) setCoveringStartTime(grp.startTime);
+      if (grp.endTime) setCoveringEndTime(grp.endTime);
+    }
+  };
+
+  const handleSaveCoveringSession = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!coveringGroupId) return;
+
+    const grp = visibleGroups.find((g) => g.id === coveringGroupId);
+    if (!grp) return;
+
+    const tObj = teachers.find((t) => t.id === coveringTeacherId) || teachers.find((t) => t.id === grp.teacherId);
+    const teacherName = tObj?.fullNameAr || grp.teacherName;
+    const teacherId = tObj?.id || grp.teacherId;
+
+    const dayNameAr = getDayName(coveringDate);
+    const dayIdx = getDayOfWeekIndex(coveringDate);
+    const dayNameEn = dayMapEn[dayIdx];
+
+    const sessionTime = `${coveringStartTime} - ${coveringEndTime}`;
+
+    addCoveringSession({
+      groupId: grp.id,
+      groupName: grp.name,
+      date: coveringDate,
+      dayNameAr,
+      dayNameEn,
+      sessionTime,
+      teacherId,
+      teacherName,
+      coveringType,
+      coveringReason,
+    });
+
+    setSelectedDate(coveringDate);
+    setIsCoveringModalOpen(false);
+    setCoveringReason('');
+  };
+
   // Filter groups that study on the selected date
   const dayGroups = useMemo(() => {
     return visibleGroups.filter((g) => doesGroupStudyOnDate(g, selectedDate));
-  }, [visibleGroups, selectedDate]);
+  }, [visibleGroups, selectedDate, attendanceSessions]);
 
   // Drawer selected students
   const drawerStudents = useMemo(() => {
@@ -250,9 +368,12 @@ export function AdminAttendanceScreen() {
         date: selectedDate,
         dayNameAr: getDayName(selectedDate),
         dayNameEn: dayMapEn[getDayOfWeekIndex(selectedDate)],
-        sessionTime: `${activeDrawerGroup.startTime} - ${activeDrawerGroup.endTime}`,
-        teacherId: activeDrawerGroup.teacherId,
-        teacherName: activeDrawerGroup.teacherName,
+        sessionTime: drawerSession?.sessionTime || `${activeDrawerGroup.startTime} - ${activeDrawerGroup.endTime}`,
+        teacherId: drawerSession?.teacherId || activeDrawerGroup.teacherId,
+        teacherName: drawerSession?.teacherName || activeDrawerGroup.teacherName,
+        isCoveringSession: drawerSession?.isCoveringSession,
+        coveringType: drawerSession?.coveringType,
+        coveringReason: drawerSession?.coveringReason,
       }
     );
     setSavedSuccess(true);
@@ -322,55 +443,76 @@ export function AdminAttendanceScreen() {
             </div>
           </div>
 
-          {/* Right: Prominent Big Day Name & Day Switcher */}
+          {/* Right: Prominent Big Day Name, Covering Session Button & Day Switcher */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            {/* Big Day Name Display */}
-            <div
-              className="flex items-center gap-3.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/80 dark:border-emerald-800/80 rounded-2xl shadow-2xs"
+            {/* Covering Session Action Button */}
+            <button
+              type="button"
+              onClick={handleOpenCoveringModal}
+              className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs rounded-xl shadow-xs shadow-amber-500/20 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
               style={{
-                paddingTop: '12px',
-                paddingBottom: '12px',
-                paddingLeft: '24px',
-                paddingRight: '24px',
+                paddingTop: '8px',
+                paddingBottom: '8px',
+                paddingLeft: '14px',
+                paddingRight: '14px',
               }}
             >
-              <Calendar size={20} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span className="text-base sm:text-lg font-black text-emerald-950 dark:text-emerald-100">
+              <Plus size={16} className="stroke-[2.5]" />
+              <span>{language === 'ar' ? 'إضافة حصة استدراكية' : 'Add Covering Session'}</span>
+            </button>
+
+            {/* Big Day Name Display */}
+            <div
+              className="flex items-center gap-2.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/80 dark:border-emerald-800/80 rounded-xl shadow-2xs"
+              style={{
+                paddingTop: '7px',
+                paddingBottom: '7px',
+                paddingLeft: '14px',
+                paddingRight: '14px',
+              }}
+            >
+              <Calendar size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span className="text-xs sm:text-sm font-black text-emerald-950 dark:text-emerald-100">
                 {getDayName(selectedDate)}
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-              <span className="text-xs sm:text-sm font-mono font-extrabold text-emerald-700 dark:text-emerald-300">
+              <span className="w-1 h-1 rounded-full bg-emerald-400 shrink-0" />
+              <span className="text-[11px] sm:text-xs font-mono font-extrabold text-emerald-700 dark:text-emerald-300">
                 {dayGroups.length} {language === 'ar' ? 'أفواج نشطة' : language === 'fr' ? 'groupes' : 'active groups'}
               </span>
             </div>
 
             {/* Day Switcher Controls (< Date Picker >) */}
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-2 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+            <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 p-1 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
               <button
                 type="button"
                 onClick={handlePrevDay}
-                className="w-10 h-10 rounded-xl hover:bg-white dark:hover:bg-slate-850 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
-                title="Previous Day"
+                className="w-8 h-8 rounded-lg hover:bg-white dark:hover:bg-slate-850 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                title={language === 'ar' ? 'اليوم السابق' : 'Previous Day'}
               >
-                <ChevronLeft size={18} />
+                {isRTL ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
               </button>
 
-              <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-850 rounded-xl border border-slate-200/60 dark:border-slate-750 font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white shadow-2xs">
+              <div
+                className="flex items-center justify-center bg-white dark:bg-slate-850 rounded-lg border border-slate-200/80 dark:border-slate-750 font-mono font-bold text-slate-900 dark:text-white shadow-2xs"
+                style={{ padding: '4px 10px' }}
+              >
                 <input
                   type="date"
+                  dir="ltr"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="bg-transparent focus:outline-none cursor-pointer text-xs sm:text-sm font-mono font-bold"
+                  style={{ padding: '2px 4px', minWidth: '135px' }}
+                  className="bg-transparent focus:outline-none cursor-pointer text-xs font-mono font-black tracking-wide"
                 />
               </div>
 
               <button
                 type="button"
                 onClick={handleNextDay}
-                className="w-10 h-10 rounded-xl hover:bg-white dark:hover:bg-slate-850 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
-                title="Next Day"
+                className="w-8 h-8 rounded-lg hover:bg-white dark:hover:bg-slate-850 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                title={language === 'ar' ? 'اليوم التالي' : 'Next Day'}
               >
-                <ChevronRight size={18} />
+                {isRTL ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
               </button>
             </div>
           </div>
@@ -436,9 +578,12 @@ export function AdminAttendanceScreen() {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {dayGroups.map((grp) => {
                   const studentCount = grp.studentIds.length || 0;
-                  const isRecorded = attendanceSessions.some(
+                  const sessionRecord = attendanceSessions.find(
                     (s) => s.groupId === grp.id && s.date === selectedDate
                   );
+                  const isRecorded = !!sessionRecord && (sessionRecord.isLocked || (sessionRecord.records && sessionRecord.records.length > 0));
+                  const isCovering = sessionRecord?.isCoveringSession;
+                  const covType = sessionRecord?.coveringType;
 
                   return (
                     <tr
@@ -448,63 +593,110 @@ export function AdminAttendanceScreen() {
                     >
                       {/* Group & Level */}
                       <td
-                        className="py-7 font-bold text-slate-900 dark:text-white"
+                        className="py-12 font-bold text-slate-900 dark:text-white"
                         style={{
                           paddingLeft: isRTL ? '24px' : '40px',
                           paddingRight: isRTL ? '40px' : '24px',
                         }}
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="px-2.5 py-1 rounded-xl bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-mono font-black text-xs">
+                        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap whitespace-nowrap">
+                          <span className="px-3.5 py-1.5 rounded-xl bg-indigo-100/90 dark:bg-indigo-950/90 text-indigo-700 dark:text-indigo-300 font-mono font-black text-sm tracking-wider shadow-2xs border border-indigo-200/80 dark:border-indigo-800/80 shrink-0 text-center min-w-[58px]">
                             {grp.code}
                           </span>
-                          <div>
-                            <div className="font-black text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">
-                              {grp.name}
-                            </div>
-                            <div className="text-xs text-slate-400 font-normal mt-0.5">
-                              {grp.level} • {grp.language}
-                            </div>
-                          </div>
+                          <span className="font-black text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">
+                            {grp.name}
+                          </span>
+                          <span className="text-xs sm:text-sm text-slate-400 font-medium">
+                            • {grp.level}
+                          </span>
+                          <span
+                            className={`text-xs font-bold rounded-lg border px-2.5 py-0.5 inline-flex items-center gap-1 shadow-2xs ${
+                              grp.language?.toLowerCase().includes('french') || grp.language?.includes('فرنسية')
+                                ? 'bg-red-100/80 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200/80 dark:border-red-800/80'
+                                : grp.language?.toLowerCase().includes('spanish') || grp.language?.includes('إسبانية')
+                                ? 'bg-orange-100/80 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border-orange-200/80 dark:border-orange-800/80'
+                                : grp.language?.toLowerCase().includes('german') || grp.language?.includes('ألمانية')
+                                ? 'bg-yellow-100/80 dark:bg-yellow-950/60 text-yellow-800 dark:text-yellow-200 border-yellow-300/80 dark:border-yellow-700/80'
+                                : 'bg-blue-100/80 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200/80 dark:border-blue-800/80'
+                            }`}
+                          >
+                            <BookOpen size={12} className="shrink-0" />
+                            <span>{grp.language}</span>
+                          </span>
+                          {isCovering ? (
+                            covType === 'counted' ? (
+                              <span
+                                className="text-[11px] font-bold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap inline-flex items-center gap-1.5 shadow-2xs"
+                                style={{ padding: '3px 10px' }}
+                              >
+                                <Sparkles size={12} className="text-amber-500 shrink-0" />
+                                <span>{language === 'ar' ? 'حصة استدراكية (محسوبة)' : 'Covering (Counted)'}</span>
+                              </span>
+                            ) : (
+                              <span
+                                className="text-[11px] font-bold rounded-full bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 whitespace-nowrap inline-flex items-center gap-1.5 shadow-2xs"
+                                style={{ padding: '3px 10px' }}
+                              >
+                                <Sparkles size={12} className="text-purple-500 shrink-0" />
+                                <span>{language === 'ar' ? 'حصة استدراكية (إضافية)' : 'Covering (Extra)'}</span>
+                              </span>
+                            )
+                          ) : (
+                            <span
+                              className="text-xs font-bold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap shadow-2xs inline-flex items-center gap-1.5"
+                              style={{ padding: '3px 12px' }}
+                            >
+                              <span>{language === 'ar' ? 'الحصة' : 'Session'}</span>
+                              <span dir="ltr" className="font-mono font-black tracking-wide">
+                                {attendanceSessions.filter((s) => s.groupId === grp.id && s.date <= selectedDate).length || 1} / {grp.totalSessions || 24}
+                              </span>
+                            </span>
+                          )}
                         </div>
                       </td>
 
                       {/* Teacher */}
-                      <td className="py-7 px-6 font-bold text-slate-800 dark:text-slate-200">
+                      <td className="py-12 px-6 font-bold text-slate-800 dark:text-slate-200">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-black text-xs flex items-center justify-center shrink-0">
+                          <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-black text-sm flex items-center justify-center shrink-0 shadow-2xs">
                             {grp.teacherName[0]}
                           </div>
-                          <span>{grp.teacherName}</span>
+                          <span className="text-xs sm:text-sm">{grp.teacherName}</span>
                         </div>
                       </td>
 
                       {/* Timing */}
-                      <td className="py-7 px-6 font-mono font-bold text-slate-700 dark:text-slate-300">
+                      <td className="py-12 px-6 font-mono font-bold text-slate-700 dark:text-slate-300 text-xs sm:text-sm">
                         <div className="flex items-center gap-2">
-                          <Clock size={16} className="text-indigo-600 shrink-0" />
+                          <Clock size={17} className="text-indigo-600 shrink-0" />
                           <span>{grp.startTime} - {grp.endTime}</span>
                         </div>
                       </td>
 
                       {/* Enrolled Students */}
-                      <td className="py-7 px-6 font-bold text-slate-800 dark:text-slate-200">
+                      <td className="py-12 px-6 font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
                         <div className="flex items-center gap-2">
-                          <Users size={16} className="text-purple-600 shrink-0" />
+                          <Users size={17} className="text-purple-600 shrink-0" />
                           <span>{studentCount} {language === 'ar' ? 'طلاب' : language === 'fr' ? 'élèves' : 'students'}</span>
                         </div>
                       </td>
 
                       {/* Attendance Status */}
-                      <td className="py-7 px-6">
+                      <td className="py-12 px-6">
                         {isRecorded ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-black text-xs border border-emerald-200/60 dark:border-emerald-800/60 shadow-2xs">
-                            <CheckCircle2 size={15} />
+                          <span
+                            className="inline-flex items-center gap-2 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 font-black text-xs border border-emerald-300/80 dark:border-emerald-700/80 shadow-2xs whitespace-nowrap"
+                            style={{ padding: '5px 14px' }}
+                          >
+                            <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
                             <span>{language === 'ar' ? 'تم الرصد' : language === 'fr' ? 'Enregistré' : 'Recorded'}</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 font-bold text-xs border border-amber-200/60 dark:border-amber-800/60 shadow-2xs">
-                            <Clock size={15} />
+                          <span
+                            className="inline-flex items-center gap-2 rounded-full bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 font-black text-xs border border-amber-300/80 dark:border-amber-700/80 shadow-2xs whitespace-nowrap"
+                            style={{ padding: '5px 14px' }}
+                          >
+                            <Clock size={15} className="text-amber-600 dark:text-amber-400 shrink-0" />
                             <span>{language === 'ar' ? 'بانتظار التسجيل' : language === 'fr' ? 'En attente' : 'Pending'}</span>
                           </span>
                         )}
@@ -512,7 +704,7 @@ export function AdminAttendanceScreen() {
 
                       {/* Action Button */}
                       <td
-                        className="py-7"
+                        className="py-12"
                         style={{
                           paddingRight: isRTL ? '40px' : '24px',
                           paddingLeft: isRTL ? '24px' : '40px',
@@ -669,7 +861,7 @@ export function AdminAttendanceScreen() {
                             <tr key={st.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
                               {/* 1. Student Name */}
                               <td
-                                className="py-3.5 font-bold text-slate-900 dark:text-white"
+                                className="py-6 font-bold text-slate-900 dark:text-white"
                                 style={{
                                   paddingLeft: isRTL ? '14px' : '18px',
                                   paddingRight: isRTL ? '18px' : '14px',
@@ -691,7 +883,7 @@ export function AdminAttendanceScreen() {
                               </td>
 
                               {/* 2. Action Status Single-Letter Buttons ("P, L, A, E") */}
-                              <td className="py-3.5 px-3">
+                              <td className="py-6 px-3">
                                 <div className="flex items-center justify-center gap-2">
                                   {/* P = Present */}
                                   <button
@@ -708,25 +900,24 @@ export function AdminAttendanceScreen() {
                                   </button>
 
                                   {/* L = Late */}
-                                  <div className="relative inline-flex flex-col items-center">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleStatusChange(st.id, 'late')}
-                                      title={currentStatus === 'late' ? `Late (${lateTime}) - Click to change` : 'L = Late (متأخر)'}
-                                      className={`w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center transition-all cursor-pointer ${
-                                        currentStatus === 'late'
-                                          ? 'bg-amber-500 text-slate-950 shadow-sm ring-2 ring-amber-400/40 scale-105'
-                                          : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600'
-                                      }`}
-                                    >
-                                      L
-                                    </button>
+                                  <button
+                                    type="button"
+                                    dir="ltr"
+                                    onClick={() => handleStatusChange(st.id, 'late')}
+                                    title={currentStatus === 'late' ? `Late (${lateTime}) - Click to change` : 'L = Late (متأخر)'}
+                                    className={`h-8 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                                      currentStatus === 'late'
+                                        ? 'bg-amber-500 text-slate-950 shadow-sm ring-2 ring-amber-400/40 px-3.5 min-w-14'
+                                        : 'w-8 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600'
+                                    }`}
+                                  >
+                                    <span>L</span>
                                     {currentStatus === 'late' && (
-                                      <span className="absolute -bottom-2 px-1 py-0.1 bg-amber-950 text-amber-300 dark:bg-amber-300 dark:text-slate-950 text-[8px] font-black rounded font-mono shadow-xs border border-amber-400/30 whitespace-nowrap">
+                                      <span className="text-[10px] font-bold font-mono text-slate-950">
                                         {lateTime}
                                       </span>
                                     )}
-                                  </div>
+                                  </button>
 
                                   {/* A = Absent */}
                                   <button
@@ -760,7 +951,7 @@ export function AdminAttendanceScreen() {
 
                               {/* 3. Comment / Teacher Note Input beside actions */}
                               <td
-                                className="py-3.5"
+                                className="py-6"
                                 style={{
                                   paddingRight: isRTL ? '18px' : '14px',
                                   paddingLeft: isRTL ? '14px' : '18px',
@@ -839,24 +1030,27 @@ export function AdminAttendanceScreen() {
 
       {/* 4. Time of Lateness Modal Popup */}
       {lateModalStudent && (
-        <div className="fixed inset-0 z-60 overflow-hidden flex items-center justify-center p-4 select-none">
+        <div className="fixed inset-0 z-60 overflow-y-auto flex items-center justify-center p-4 sm:p-6 select-none bg-slate-950/70 backdrop-blur-sm animate-fade-in">
           <div
-            className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0"
             onClick={() => setLateModalStudent(null)}
           />
 
-          <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-7 space-y-5 animate-in zoom-in-95 duration-200">
+          <div
+            className="relative w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[28px] shadow-2xl overflow-hidden my-auto animate-fade-in-up"
+            style={{ padding: '28px 32px' }}
+          >
             {/* Modal Header */}
-            <div className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black shrink-0 shadow-xs">
-                  <Clock size={20} />
+            <div className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4 mb-5">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-500 dark:text-amber-400 flex items-center justify-center font-black shrink-0 shadow-xs border border-amber-500/20">
+                  <Clock size={22} />
                 </div>
                 <div>
-                  <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">
+                  <h3 className="font-black text-lg sm:text-xl text-slate-900 dark:text-white">
                     {language === 'ar' ? 'تحديد مدة التأخير' : language === 'fr' ? 'Durée du retard' : 'Set Lateness Time'}
                   </h3>
-                  <p className="text-xs text-slate-400 font-bold">
+                  <p className="text-xs sm:text-sm text-slate-400 font-bold mt-0.5">
                     {lateModalStudent.fullNameAr} • {lateModalStudent.fullNameEn}
                   </p>
                 </div>
@@ -865,87 +1059,348 @@ export function AdminAttendanceScreen() {
               <button
                 type="button"
                 onClick={() => setLateModalStudent(null)}
-                className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center cursor-pointer transition-colors shrink-0"
               >
                 <X size={16} />
               </button>
             </div>
 
-            {/* Presets Grid */}
-            <div>
-              <label className="text-xs font-bold text-slate-400 block mb-2">
-                {language === 'ar' ? 'خيارات سريعة للمدة:' : language === 'fr' ? 'Durées rapides:' : 'Quick Presets:'}
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {['5', '10', '15', '20', '30', '45'].map((mins) => (
-                  <button
-                    key={mins}
-                    type="button"
-                    onClick={() => setLateMinutesInput(mins)}
-                    className={`py-2.5 px-3 rounded-xl font-black text-xs transition-all cursor-pointer border ${
-                      lateMinutesInput === mins
-                        ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-sm scale-102 font-black'
-                        : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-amber-400'
+            {/* Modal Body with clear container gaps */}
+            <div className="flex flex-col gap-5">
+              {/* Presets Grid */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                  {language === 'ar' ? 'خيارات سريعة للمدة:' : language === 'fr' ? 'Durées rapides:' : 'Quick Presets:'}
+                </label>
+                <div className="grid grid-cols-3 gap-2.5">
+                  {['5', '10', '15', '20', '30', '45'].map((mins) => (
+                    <button
+                      key={mins}
+                      type="button"
+                      onClick={() => setLateMinutesInput(mins)}
+                      style={{ padding: '10px 12px' }}
+                      className={`rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer border flex items-center justify-center ${
+                        lateMinutesInput === mins
+                          ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md font-black scale-102'
+                          : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-amber-400/60 hover:bg-amber-500/5'
+                      }`}
+                    >
+                      +{mins} {language === 'ar' ? 'دقيقة' : 'min'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Input */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                  {language === 'ar' ? 'أو أدخل عدد الدقائق يدوياً:' : language === 'fr' ? 'Ou entrez les minutes:' : 'Or enter minutes manually:'}
+                </label>
+                <div className="relative flex items-center">
+                  <input
+                    type="number"
+                    min="1"
+                    max="180"
+                    value={lateMinutesInput}
+                    onChange={(e) => setLateMinutesInput(e.target.value)}
+                    style={{
+                      paddingLeft: isRTL ? '64px' : '16px',
+                      paddingRight: isRTL ? '16px' : '64px',
+                    }}
+                    className="w-full h-12 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+                  />
+                  <span
+                    className={`absolute text-xs font-bold text-slate-400 pointer-events-none ${
+                      isRTL ? 'left-4' : 'right-4'
                     }`}
                   >
-                    +{mins} {language === 'ar' ? 'دقيقة' : 'min'}
-                  </button>
-                ))}
+                    {language === 'ar' ? 'دقيقة' : 'min'}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {/* Custom Input */}
-            <div>
-              <label className="text-xs font-bold text-slate-400 block mb-1.5">
-                {language === 'ar' ? 'أو أدخل عدد الدقائق يدوياً:' : language === 'fr' ? 'Ou entrez les minutes:' : 'Or enter minutes manually:'}
-              </label>
-              <div className="flex items-center gap-2">
+              {/* Optional Reason / Note */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                  {language === 'ar' ? 'سبب التأخير (اختياري):' : language === 'fr' ? 'Motif du retard (optionnel):' : 'Lateness Reason (optional):'}
+                </label>
                 <input
-                  type="number"
-                  min="1"
-                  max="180"
-                  value={lateMinutesInput}
-                  onChange={(e) => setLateMinutesInput(e.target.value)}
-                  className="flex-1 h-11 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold font-mono text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 shadow-2xs"
+                  type="text"
+                  value={lateCustomNote}
+                  onChange={(e) => setLateCustomNote(e.target.value)}
+                  placeholder={language === 'ar' ? 'مثال: ازدحام مروري، موعد طبي...' : 'e.g. Traffic, doctor appointment...'}
+                  style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                  className="w-full h-12 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all placeholder:text-slate-400"
                 />
-                <span className="text-xs font-bold text-slate-500 shrink-0">
-                  {language === 'ar' ? 'دقيقة' : 'minutes'}
-                </span>
+              </div>
+
+              {/* Modal Actions */}
+              <div
+                className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 mt-2"
+              >
+                <button
+                  type="button"
+                  onClick={() => setLateModalStudent(null)}
+                  className="rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+                  style={{ padding: '10px 20px' }}
+                >
+                  {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmLateness}
+                  className="rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-98 text-slate-950 text-xs sm:text-sm font-black shadow-md shadow-amber-500/20 cursor-pointer flex items-center gap-2 transition-all"
+                  style={{ padding: '10px 24px' }}
+                >
+                  <Check size={16} />
+                  <span>{language === 'ar' ? 'تثبيت التأخير' : 'Confirm Lateness'}</span>
+                </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* 5. Add Covering Session Modal Dialog */}
+      {isCoveringModalOpen && (
+        <div className="fixed inset-0 z-60 overflow-y-auto flex items-center justify-center p-4 sm:p-6 select-none bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+          <div
+            className="fixed inset-0"
+            onClick={() => setIsCoveringModalOpen(false)}
+          />
 
-            {/* Optional Reason / Note */}
-            <div>
-              <label className="text-xs font-bold text-slate-400 block mb-1.5">
-                {language === 'ar' ? 'سبب التأخير (اختياري):' : language === 'fr' ? 'Motif du retard (optionnel):' : 'Lateness Reason (optional):'}
-              </label>
-              <input
-                type="text"
-                value={lateCustomNote}
-                onChange={(e) => setLateCustomNote(e.target.value)}
-                placeholder={language === 'ar' ? 'مثال: ازدحام مروري، موعد طبي...' : 'e.g. Traffic, doctor appointment...'}
-                className="w-full h-11 px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 shadow-2xs"
-              />
-            </div>
+          <div
+            className="relative w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[28px] shadow-2xl overflow-hidden my-auto animate-fade-in-up"
+            style={{ padding: '30px 34px' }}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4 mb-6">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black shrink-0 shadow-xs border border-amber-500/30">
+                  <CalendarPlus size={24} />
+                </div>
+                <div>
+                  <h3 className="font-black text-lg sm:text-xl text-slate-900 dark:text-white">
+                    {language === 'ar' ? 'إضافة حصة استدراكية / تعويضية' : 'Add Covering Session'}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">
+                    {language === 'ar'
+                      ? 'جدولة حصة استدراكية لفوج معين وتحديد نوع الحساب'
+                      : 'Schedule a covering session and configure quota calculation'}
+                  </p>
+                </div>
+              </div>
 
-            {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-2.5 pt-2">
               <button
                 type="button"
-                onClick={() => setLateModalStudent(null)}
-                className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer transition-colors"
+                onClick={() => setIsCoveringModalOpen(false)}
+                className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center cursor-pointer transition-colors shrink-0"
               >
-                {language === 'ar' ? 'إلغاء' : 'Cancel'}
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmLateness}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black shadow-md hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5 transition-all"
-              >
-                <Check size={16} />
-                <span>{language === 'ar' ? 'تثبيت التأخير' : 'Confirm Lateness'}</span>
+                <X size={18} />
               </button>
             </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleSaveCoveringSession} className="flex flex-col gap-5">
+              {/* Target Group Selector */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                  {language === 'ar' ? 'الفوج المستهدف (Target Group):' : 'Target Study Group:'}
+                </label>
+                <select
+                  value={coveringGroupId}
+                  onChange={(e) => handleGroupSelectChange(e.target.value)}
+                  className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all cursor-pointer"
+                  required
+                >
+                  <option value="" disabled>
+                    {language === 'ar' ? '-- اختر الفوج --' : '-- Select Group --'}
+                  </option>
+                  {visibleGroups.map((grp) => (
+                    <option key={grp.id} value={grp.id}>
+                      {grp.name} ({grp.code}) — {grp.level} — {grp.teacherName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Date & Time Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                {/* Date */}
+                <div className="flex flex-col gap-1.5 sm:col-span-1">
+                  <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                    {language === 'ar' ? 'تاريخ الحصة:' : 'Session Date:'}
+                  </label>
+                  <input
+                    type="date"
+                    value={coveringDate}
+                    onChange={(e) => setCoveringDate(e.target.value)}
+                    className="w-full h-12 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all cursor-pointer"
+                    required
+                  />
+                </div>
+
+                {/* Start Time */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                    {language === 'ar' ? 'وقت البدء:' : 'Start Time:'}
+                  </label>
+                  <input
+                    type="time"
+                    value={coveringStartTime}
+                    onChange={(e) => setCoveringStartTime(e.target.value)}
+                    className="w-full h-12 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all cursor-pointer"
+                    required
+                  />
+                </div>
+
+                {/* End Time */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                    {language === 'ar' ? 'وقت الانتهاء:' : 'End Time:'}
+                  </label>
+                  <input
+                    type="time"
+                    value={coveringEndTime}
+                    onChange={(e) => setCoveringEndTime(e.target.value)}
+                    className="w-full h-12 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all cursor-pointer"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Supervising Teacher */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                  {language === 'ar' ? 'الأستاذ المشرف:' : 'Supervising Teacher:'}
+                </label>
+                <select
+                  value={coveringTeacherId}
+                  onChange={(e) => setCoveringTeacherId(e.target.value)}
+                  className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all cursor-pointer"
+                  required
+                >
+                  {teachers && teachers.length > 0 ? (
+                    teachers.map((teach) => (
+                      <option key={teach.id} value={teach.id}>
+                        {teach.fullNameAr} {((teach as any).specialty || (teach as any).subject) ? `(${((teach as any).specialty || (teach as any).subject)})` : ''}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">{language === 'ar' ? 'لا يوجد معلمون متاحون' : 'No teachers available'}</option>
+                  )}
+                </select>
+              </div>
+
+              {/* Covering Session Type Radio Selector Cards */}
+              <div className="flex flex-col gap-2 pt-1">
+                <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                  {language === 'ar' ? 'نوع الحصة الاستدراكية (Session Type):' : 'Covering Session Type:'}
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {/* Type 1: Counted */}
+                  <div
+                    onClick={() => setCoveringType('counted')}
+                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
+                      coveringType === 'counted'
+                        ? 'border-amber-500 bg-amber-500/10 dark:bg-amber-500/15 shadow-xs'
+                        : 'border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="w-4 h-4 rounded-full border-2 border-amber-500 flex items-center justify-center shrink-0">
+                          {coveringType === 'counted' && <span className="w-2 h-2 rounded-full bg-amber-500" />}
+                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-bold text-xs sm:text-sm text-amber-900 dark:text-amber-200 leading-tight">
+                            {language === 'ar' ? 'حصة محسوبة' : 'Counted Session'}
+                          </span>
+                          <span className="text-[11px] text-amber-700/80 dark:text-amber-300/80 font-semibold" dir="ltr">
+                            (Counted)
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-900 dark:text-amber-200 border border-amber-500/30 whitespace-nowrap shrink-0 select-none">
+                        {language === 'ar' ? 'من النصاب' : 'From Quota'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                      {language === 'ar'
+                        ? 'تُحسب ضمن نصاب وحصص المنهاج الإجمالية للفوج (تنقص من الحصص المتبقية للبرنامج).'
+                        : 'Counts towards the total session quota of the group and decrements remaining sessions.'}
+                    </p>
+                  </div>
+
+                  {/* Type 2: Not Counted */}
+                  <div
+                    onClick={() => setCoveringType('not_counted')}
+                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
+                      coveringType === 'not_counted'
+                        ? 'border-purple-500 bg-purple-500/10 dark:bg-purple-500/15 shadow-xs'
+                        : 'border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="w-4 h-4 rounded-full border-2 border-purple-500 flex items-center justify-center shrink-0">
+                          {coveringType === 'not_counted' && <span className="w-2 h-2 rounded-full bg-purple-500" />}
+                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-bold text-xs sm:text-sm text-purple-900 dark:text-purple-200 leading-tight">
+                            {language === 'ar' ? 'غير محسوبة' : 'Not Counted'}
+                          </span>
+                          <span className="text-[11px] text-purple-700/80 dark:text-purple-300/80 font-semibold" dir="ltr">
+                            (Extra)
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-900 dark:text-purple-200 border border-purple-500/30 whitespace-nowrap shrink-0 select-none">
+                        {language === 'ar' ? 'إضافية / مجانية' : 'Extra / Free'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                      {language === 'ar'
+                        ? 'حصة تعويضية إضافية أو مجانية لا تستهلك من نصاب الحصص المقررة للفوج.'
+                        : 'An extra / free makeup session that does not consume from the group planned session quota.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Reason / Notes */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                  {language === 'ar' ? 'سبب الاستدراك وملاحظات (اختياري):' : 'Covering Reason / Notes (optional):'}
+                </label>
+                <input
+                  type="text"
+                  value={coveringReason}
+                  onChange={(e) => setCoveringReason(e.target.value)}
+                  placeholder={language === 'ar' ? 'مثال: تعويض حصة يوم الأربعاء الفائتة بسبب عطلة رسمية...' : 'e.g. Compensation for missed holiday session...'}
+                  className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all placeholder:text-slate-400"
+                />
+              </div>
+
+              {/* Form Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCoveringModalOpen(false)}
+                  className="rounded-xl text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+                  style={{ padding: '10px 20px' }}
+                >
+                  {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-98 text-slate-950 text-xs sm:text-sm font-black shadow-md shadow-amber-500/20 cursor-pointer flex items-center gap-2 transition-all"
+                  style={{ padding: '10px 24px' }}
+                >
+                  <CalendarPlus size={17} className="stroke-[2.5]" />
+                  <span>{language === 'ar' ? 'حفظ وتثبيت الحصة الاستدراكية' : 'Save Covering Session'}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

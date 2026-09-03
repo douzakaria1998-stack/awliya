@@ -274,96 +274,120 @@ export function AdminTeachersScreen() {
 
       {/* Modal: Create Teacher Account (Section 11) */}
       {isAddTeacherOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-5 animate-fade-in-up">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
+          <div
+            className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-800 my-6 overflow-hidden animate-fade-in-up"
+            style={{ padding: '24px 28px' }}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
               <div>
-                <h3 className="font-black text-lg text-slate-900 dark:text-white">
-                  {language === 'ar' ? 'إنشاء حساب معلم جديد (Create Teacher Account)' : 'Create Teacher Account'}
+                <h3 className="font-black text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">
+                  {language === 'ar' ? 'إنشاء حساب معلم جديد' : 'Create Teacher Account'}
                 </h3>
-                <p className="text-xs text-slate-400 font-medium mt-0.5">
-                  {language === 'ar' ? 'إصدار بيانات الدخول الآمنة ورابط الدعوة' : 'Issue secure login credentials and invite'}
+                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-0.5">
+                  {language === 'ar' ? 'إصدار بيانات الدخول الآمنة ورابط الدعوة' : 'Issue secure login credentials and invitation link'}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsAddTeacherOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors cursor-pointer shrink-0"
               >
                 <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateTeacher} className="space-y-4 text-xs font-bold">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">الاسم بالعربية *</label>
+            <form onSubmit={handleCreateTeacher} className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-700 dark:text-slate-300 font-bold text-xs">
+                    {language === 'ar' ? 'الاسم بالعربية *' : 'Arabic Name *'}
+                  </label>
                   <input
                     type="text"
+                    dir="auto"
                     required
                     value={newFullNameAr}
                     onChange={(e) => setNewFullNameAr(e.target.value)}
-                    placeholder="مثال: أ. حسام عثمان"
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                    placeholder={language === 'ar' ? 'مثال: أ. حسام عثمان' : 'e.g. Mr. Houssam Othman'}
+                    style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                    className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500/20"
                   />
                 </div>
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">الاسم بالإنجليزية</label>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-700 dark:text-slate-300 font-bold text-xs">
+                    {language === 'ar' ? 'الاسم بالإنجليزية' : 'English Name'}
+                  </label>
                   <input
                     type="text"
+                    dir="ltr"
                     value={newFullNameEn}
                     onChange={(e) => setNewFullNameEn(e.target.value)}
                     placeholder="Ex: Mr. Houssam Othman"
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono"
-                    dir="ltr"
+                    style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                    className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500/20"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">اسم المستخدم (Username) *</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-700 dark:text-slate-300 font-bold text-xs">
+                    {language === 'ar' ? 'اسم المستخدم *' : 'Username *'}
+                  </label>
                   <input
                     type="text"
+                    dir="ltr"
                     required
                     value={newUsername}
                     onChange={(e) => setNewUsername(e.target.value)}
                     placeholder="houssam.teacher"
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-purple-600"
-                    dir="ltr"
+                    style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                    className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold text-purple-600 dark:text-purple-400 focus:ring-2 focus:ring-purple-500/20"
                   />
                 </div>
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">رقم الهاتف *</label>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-700 dark:text-slate-300 font-bold text-xs">
+                    {language === 'ar' ? 'رقم الهاتف *' : 'Phone Number *'}
+                  </label>
                   <input
                     type="text"
+                    dir="ltr"
                     required
                     value={newPhone}
                     onChange={(e) => setNewPhone(e.target.value)}
                     placeholder="+213 770 000 000"
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono"
-                    dir="ltr"
+                    style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                    className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500/20"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 mb-1">البريد الإلكتروني المهني</label>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-slate-700 dark:text-slate-300 font-bold text-xs">
+                  {language === 'ar' ? 'البريد الإلكتروني المهني' : 'Professional Email'}
+                </label>
                 <input
                   type="email"
+                  dir="ltr"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="teacher@myschool.edu"
-                  className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono"
-                  dir="ltr"
+                  style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                  className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
 
               {/* Languages Selection */}
-              <div>
-                <label className="block text-slate-700 dark:text-slate-300 mb-1">اللغات المدرسة (Languages Taught)</label>
-                <div className="flex gap-4 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-                  <label className="flex items-center gap-2 cursor-pointer">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-slate-700 dark:text-slate-300 font-bold text-xs">
+                  {language === 'ar' ? 'اللغات المدرسة' : 'Languages Taught'}
+                </label>
+                <div
+                  className="flex items-center gap-6 min-h-11 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700"
+                  style={{ paddingLeft: '20px', paddingRight: '20px', paddingTop: '10px', paddingBottom: '10px' }}
+                >
+                  <label className="flex items-center gap-2.5 cursor-pointer text-xs font-bold text-slate-800 dark:text-slate-200 select-none">
                     <input
                       type="checkbox"
                       checked={newLanguages.includes('English')}
@@ -371,11 +395,11 @@ export function AdminTeachersScreen() {
                         if (e.target.checked) setNewLanguages([...newLanguages, 'English']);
                         else setNewLanguages(newLanguages.filter((l) => l !== 'English'));
                       }}
-                      className="rounded text-emerald-600"
+                      className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
-                    <span>اللغة الإنجليزية (English)</span>
+                    <span>{language === 'ar' ? 'اللغة الإنجليزية' : 'English'}</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
+                  <label className="flex items-center gap-2.5 cursor-pointer text-xs font-bold text-slate-800 dark:text-slate-200 select-none">
                     <input
                       type="checkbox"
                       checked={newLanguages.includes('French')}
@@ -383,33 +407,42 @@ export function AdminTeachersScreen() {
                         if (e.target.checked) setNewLanguages([...newLanguages, 'French']);
                         else setNewLanguages(newLanguages.filter((l) => l !== 'French'));
                       }}
-                      className="rounded text-emerald-600"
+                      className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
-                    <span>اللغة الفرنسية (French)</span>
+                    <span>{language === 'ar' ? 'اللغة الفرنسية' : 'French'}</span>
                   </label>
                 </div>
               </div>
 
-              {/* Password Invitation Info Box (Section 11: Auto-generated invitation, not exposed in table) */}
-              <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 space-y-1.5">
-                <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold">
-                  <KeyRound size={15} />
-                  <span>كلمة المرور المؤقتة المُنشأة تلقائياً (Auto-Generated):</span>
+              {/* Password Invitation Info Box (Section 11) */}
+              <div
+                className="rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200/90 dark:border-emerald-800/70 flex flex-col gap-3"
+                style={{ padding: '18px 20px' }}
+              >
+                <div className="flex items-center gap-2.5 text-emerald-800 dark:text-emerald-300 font-bold text-xs">
+                  <KeyRound size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+                  <span>{language === 'ar' ? 'كلمة المرور المؤقتة المُنشأة تلقائياً:' : 'Auto-Generated Temporary Password:'}</span>
                 </div>
-                <div className="font-mono font-bold text-sm text-emerald-900 dark:text-emerald-200 bg-white dark:bg-slate-900 p-2 rounded-xl border border-emerald-300 dark:border-emerald-700" dir="ltr">
+                <div
+                  className="font-mono font-black text-sm text-emerald-900 dark:text-emerald-200 bg-white dark:bg-slate-900 rounded-xl border border-emerald-300 dark:border-emerald-700 text-center shadow-xs"
+                  style={{ padding: '10px 16px' }}
+                  dir="ltr"
+                >
                   {generatedPassword}
                 </div>
-                <p className="text-[11px] text-emerald-700 dark:text-emerald-400">
-                  سيتم إرسال دعوة آمنة للمعلم ليقوم بتعيين كلمة مروره الخاصة عند أول تسجيل دخول.
+                <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium leading-relaxed">
+                  {language === 'ar'
+                    ? 'سيتم إرسال دعوة آمنة للمعلم ليقوم بتعيين كلمة مروره الخاصة عند أول تسجيل دخول.'
+                    : 'A secure invite will be sent to the teacher to set their personal password upon first login.'}
                 </p>
               </div>
 
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-colors cursor-pointer text-sm"
+                  className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black rounded-xl shadow-md shadow-emerald-600/20 transition-all cursor-pointer text-sm flex items-center justify-center gap-2"
                 >
-                  إنشاء وتفعيل حساب المعلم
+                  <span>{language === 'ar' ? 'إنشاء وتفعيل حساب المعلم' : 'Create & Activate Teacher Account'}</span>
                 </button>
               </div>
             </form>

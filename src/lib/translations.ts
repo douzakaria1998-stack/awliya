@@ -675,15 +675,15 @@ export function translateTrack(trackAr: string, lang: Language): string {
   if (lang === 'ar') return trackAr;
 
   if (lang === 'en') {
-    if (trackAr.includes('الإنجليزية')) return 'Intensive English Language Path (CEFR Framework)';
-    if (trackAr.includes('الفرنسية')) return 'Advanced French Language Path (DELF / DALF)';
+    if (trackAr.includes('الإنجليزية')) return 'Intensive English Language Path';
+    if (trackAr.includes('الفرنسية')) return 'Advanced French Language Path';
     if (trackAr.includes('المزدوج')) return 'Dual Bilingual Path: English & French';
     return trackAr;
   }
 
   if (lang === 'fr') {
-    if (trackAr.includes('الإنجليزية')) return 'Parcours Intensif de Langue Anglaise (Cadre CEFR)';
-    if (trackAr.includes('الفرنسية')) return 'Parcours Avancé de Langue Française (DELF / DALF)';
+    if (trackAr.includes('الإنجليزية')) return 'Parcours Intensif de Langue Anglaise';
+    if (trackAr.includes('الفرنسية')) return 'Parcours Avancé de Langue Française';
     if (trackAr.includes('المزدوج')) return 'Parcours Bilingue : Anglais & Français';
     return trackAr;
   }

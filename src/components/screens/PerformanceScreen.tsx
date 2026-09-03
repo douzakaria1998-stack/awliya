@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   BarChart3,
   BookOpenCheck,
@@ -30,6 +30,67 @@ import {
   translateTeacherNote,
 } from '@/lib/translations';
 
+const getLanguageBadgeTheme = (subjectOrLang: string = '') => {
+  const str = subjectOrLang.toLowerCase();
+  // French (Red)
+  if (
+    str.includes('french') ||
+    str.includes('français') ||
+    str.includes('فرنسية') ||
+    str.includes('فرنسي') ||
+    str.includes('delf') ||
+    str.includes('dalf') ||
+    str.includes('نطق')
+  ) {
+    return {
+      bgClass: 'bg-red-50/60 dark:bg-red-950/25',
+      borderClass: 'border-red-200/80 dark:border-red-800/50',
+      badgeContainer: 'bg-red-100/90 dark:bg-red-950/70 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800/70',
+      iconClass: 'text-red-600 dark:text-red-400',
+    };
+  }
+  // Spanish (Orange)
+  if (
+    str.includes('spanish') ||
+    str.includes('español') ||
+    str.includes('إسبانية') ||
+    str.includes('اسبانية') ||
+    str.includes('إسباني') ||
+    str.includes('dele')
+  ) {
+    return {
+      bgClass: 'bg-orange-50/60 dark:bg-orange-950/25',
+      borderClass: 'border-orange-200/80 dark:border-orange-800/50',
+      badgeContainer: 'bg-orange-100/90 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800/70',
+      iconClass: 'text-orange-600 dark:text-orange-400',
+    };
+  }
+  // German (Yellow)
+  if (
+    str.includes('german') ||
+    str.includes('germany') ||
+    str.includes('deutsch') ||
+    str.includes('ألمانية') ||
+    str.includes('المانية') ||
+    str.includes('ألماني') ||
+    str.includes('goethe')
+  ) {
+    return {
+      bgClass: 'bg-yellow-50/60 dark:bg-yellow-950/25',
+      borderClass: 'border-yellow-300/80 dark:border-yellow-700/50',
+      badgeContainer: 'bg-yellow-100/90 dark:bg-yellow-950/70 text-yellow-800 dark:text-yellow-200 border border-yellow-300 dark:border-yellow-700/70',
+      iconClass: 'text-yellow-600 dark:text-yellow-400',
+    };
+  }
+  // English (Blue) - Default
+  return {
+    bgClass: 'bg-blue-50/60 dark:bg-blue-950/25',
+    borderClass: 'border-blue-200/80 dark:border-blue-800/50',
+    badgeContainer: 'bg-blue-100/90 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/70',
+    iconClass: 'text-blue-600 dark:text-blue-400',
+  };
+};
+
 const SUBJECT_CONTAINER_THEMES: Record<
   string,
   {
@@ -44,19 +105,19 @@ const SUBJECT_CONTAINER_THEMES: Record<
     badgeBg: 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200',
   },
   'اللغة الفرنسية': {
-    bgClass: 'bg-purple-50/70 dark:bg-purple-950/30',
-    borderClass: 'border-purple-200/90 dark:border-purple-800/60',
-    badgeBg: 'bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-200',
+    bgClass: 'bg-red-50/70 dark:bg-red-950/30',
+    borderClass: 'border-red-200/90 dark:border-red-800/60',
+    badgeBg: 'bg-red-100 text-red-800 dark:bg-red-900/60 dark:text-red-200',
   },
   'محادثة إنجليزية': {
-    bgClass: 'bg-emerald-50/70 dark:bg-emerald-950/30',
-    borderClass: 'border-emerald-200/90 dark:border-emerald-800/60',
-    badgeBg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200',
+    bgClass: 'bg-blue-50/70 dark:bg-blue-950/30',
+    borderClass: 'border-blue-200/90 dark:border-blue-800/60',
+    badgeBg: 'bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200',
   },
   'ورشة النطق الفرنسي': {
-    bgClass: 'bg-violet-50/70 dark:bg-violet-950/30',
-    borderClass: 'border-violet-200/90 dark:border-violet-800/60',
-    badgeBg: 'bg-violet-100 text-violet-800 dark:bg-violet-900/60 dark:text-violet-200',
+    bgClass: 'bg-red-50/70 dark:bg-red-950/30',
+    borderClass: 'border-red-200/90 dark:border-red-800/60',
+    badgeBg: 'bg-red-100 text-red-800 dark:bg-red-900/60 dark:text-red-200',
   },
   'قواعد وتراكيب': {
     bgClass: 'bg-indigo-50/70 dark:bg-indigo-950/30',
@@ -103,23 +164,72 @@ export function PerformanceScreen({
   const [homeworkFilter, setHomeworkFilter] = useState<'all' | 'needs_revision' | 'completed'>('all');
   const [selectedWeekIndex, setSelectedWeekIndex] = useState<number>(0);
 
-  const WEEKS_LIST = [
+  const getDynamicWeekRange = (weeksAgo: number, lang: string) => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const diffToSaturday = (dayOfWeek + 1) % 7;
+    
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - diffToSaturday - (weeksAgo * 7));
+    
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 5);
+
+    const startDay = String(startOfWeek.getDate()).padStart(2, '0');
+    const endDay = String(endOfWeek.getDate()).padStart(2, '0');
+    
+    const monthNamesAr = [
+      'جانفي', 'فيفري', 'مارس', 'أفريل', 'ماي', 'جوان',
+      'جويلية', 'أوت', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+    ];
+    const monthNamesFr = [
+      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    ];
+    const monthNamesEn = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+
+    const startMonthIdx = startOfWeek.getMonth();
+    const endMonthIdx = endOfWeek.getMonth();
+    const year = endOfWeek.getFullYear();
+
+    if (lang === 'ar') {
+      if (startMonthIdx === endMonthIdx) {
+        return `${startDay} - ${endDay} ${monthNamesAr[endMonthIdx]} ${year}`;
+      }
+      return `${startDay} ${monthNamesAr[startMonthIdx]} - ${endDay} ${monthNamesAr[endMonthIdx]} ${year}`;
+    } else if (lang === 'fr') {
+      if (startMonthIdx === endMonthIdx) {
+        return `${startDay} - ${endDay} ${monthNamesFr[endMonthIdx]} ${year}`;
+      }
+      return `${startDay} ${monthNamesFr[startMonthIdx]} - ${endDay} ${monthNamesFr[endMonthIdx]} ${year}`;
+    } else {
+      if (startMonthIdx === endMonthIdx) {
+        return `${monthNamesEn[endMonthIdx]} ${startDay} - ${endDay}, ${year}`;
+      }
+      return `${monthNamesEn[startMonthIdx]} ${startDay} - ${monthNamesEn[endMonthIdx]} ${endDay}, ${year}`;
+    }
+  };
+
+  const WEEKS_LIST = useMemo(() => [
     {
       index: 0,
       label: t.currentWeek,
-      range: language === 'ar' ? '15 - 20 فبراير 2025' : language === 'fr' ? '15 - 20 Février 2025' : 'Feb 15 - 20, 2025',
+      range: getDynamicWeekRange(0, language),
     },
     {
       index: 1,
       label: t.lastWeek,
-      range: language === 'ar' ? '08 - 13 فبراير 2025' : language === 'fr' ? '08 - 13 Février 2025' : 'Feb 08 - 13, 2025',
+      range: getDynamicWeekRange(1, language),
     },
     {
       index: 2,
       label: t.previousWeek,
-      range: language === 'ar' ? '01 - 06 فبراير 2025' : language === 'fr' ? '01 - 06 Février 2025' : 'Feb 01 - 06, 2025',
+      range: getDynamicWeekRange(2, language),
     },
-  ];
+  ], [t, language]);
 
   const performanceTabs: { key: PerformanceTabKey; label: string }[] = [
     { key: 'homework', label: t.tabHomework },
@@ -147,6 +257,7 @@ export function PerformanceScreen({
   });
 
   const needsRevisionCount = homeworkList.filter((h) => h.status === 'needs_revision').length;
+  const completedCount = homeworkList.filter((h) => h.status === 'completed').length;
 
   const translateDayName = (dayAr?: string) => {
     if (!dayAr) return '';
@@ -176,17 +287,17 @@ export function PerformanceScreen({
     <div className={`space-y-6 animate-fade-in ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header */}
       <div
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3"
         style={{
-          marginTop: '28px',
-          marginBottom: '20px',
+          marginTop: '16px',
+          marginBottom: '14px',
         }}
       >
         <div>
-          <span className="text-xs sm:text-sm font-bold text-slate-400 block mb-0.5">
+          <span className="text-xs font-semibold text-slate-400 block mb-0.5">
             {t.performanceSubtitle}
           </span>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             {t.performanceTitle}
           </h1>
         </div>
@@ -196,10 +307,10 @@ export function PerformanceScreen({
             className="inline-flex items-center rounded-full font-bold text-white shadow-xs select-none"
             style={{
               backgroundColor: theme.primary,
-              height: '36px',
-              paddingRight: '18px',
-              paddingLeft: '18px',
-              fontSize: '13px',
+              height: '30px',
+              paddingRight: '14px',
+              paddingLeft: '14px',
+              fontSize: '12px',
             }}
           >
             {t.level} {activeStudent.currentLevel}
@@ -208,17 +319,17 @@ export function PerformanceScreen({
       </div>
 
       {/* Mobile-only student switcher */}
-      <div className="block md:hidden mb-6">
+      <div className="block md:hidden mb-4">
         <StudentSwitcher onOpenAddStudent={onOpenAddStudent} />
       </div>
 
       {/* Top Segmented Tab Navigation */}
       <div
-        className="rounded-2xl bg-slate-100 dark:bg-slate-850 flex gap-2 border border-slate-200/80 dark:border-slate-800 shadow-2xs"
+        className="rounded-xl bg-slate-100 dark:bg-slate-850 flex gap-1 border border-slate-200/80 dark:border-slate-800 shadow-2xs"
         style={{
-          marginBottom: '28px',
-          padding: '8px',
-          minHeight: '62px',
+          marginBottom: '16px',
+          padding: '3px',
+          minHeight: '38px',
         }}
       >
         {performanceTabs.map((tab) => {
@@ -230,21 +341,21 @@ export function PerformanceScreen({
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key)}
-              className={`flex-1 rounded-xl transition-all relative flex items-center justify-center gap-2.5 cursor-pointer select-none ${
+              className={`flex-1 rounded-lg transition-all relative flex items-center justify-center gap-2 cursor-pointer select-none ${
                 isActive
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-md'
+                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
                   : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
               }`}
               style={{
-                height: '46px',
-                padding: '0 16px',
-                fontSize: '15px',
+                height: '32px',
+                padding: '0 10px',
+                fontSize: '12px',
                 color: isActive ? theme.primary : undefined,
               }}
             >
               <span className="font-black tracking-tight">{tab.label}</span>
               {showBadge && (
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shrink-0 ring-2 ring-white dark:ring-slate-900" />
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0 ring-2 ring-white dark:ring-slate-900" />
               )}
             </button>
           );
@@ -255,11 +366,11 @@ export function PerformanceScreen({
       {/* TAB 1: Homework */}
       {/* ============================================================ */}
       {activeTab === 'homework' && (
-        <div className="space-y-4 animate-fade-in">
+        <div className="space-y-3.5 animate-fade-in">
           {/* Filter Pills */}
           <div
-            className="flex items-center gap-3 flex-wrap"
-            style={{ marginBottom: '24px' }}
+            className="flex items-center gap-2.5 flex-wrap"
+            style={{ marginBottom: '16px' }}
           >
             <button
               type="button"
@@ -271,9 +382,9 @@ export function PerformanceScreen({
               }`}
               style={{
                 backgroundColor: homeworkFilter === 'all' ? theme.primary : undefined,
-                height: '36px',
-                paddingRight: '18px',
-                paddingLeft: '18px',
+                height: '30px',
+                paddingRight: '14px',
+                paddingLeft: '14px',
               }}
             >
               {t.filterAll} ({homeworkList.length})
@@ -288,9 +399,9 @@ export function PerformanceScreen({
                   : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100'
               }`}
               style={{
-                height: '36px',
-                paddingRight: '18px',
-                paddingLeft: '18px',
+                height: '30px',
+                paddingRight: '14px',
+                paddingLeft: '14px',
               }}
             >
               {t.needsRevision} ({needsRevisionCount})
@@ -305,19 +416,19 @@ export function PerformanceScreen({
                   : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100'
               }`}
               style={{
-                height: '36px',
-                paddingRight: '18px',
-                paddingLeft: '18px',
+                height: '30px',
+                paddingRight: '14px',
+                paddingLeft: '14px',
               }}
             >
-              {t.completed}
+              {t.completed} ({completedCount})
             </button>
           </div>
 
           {/* Homework Items List */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             {filteredHomework.length === 0 ? (
-              <div className="text-center py-12 text-slate-400 text-sm font-semibold bg-white dark:bg-slate-850 rounded-3xl border border-slate-200/80 dark:border-slate-800">
+              <div className="text-center py-10 text-slate-400 text-xs font-semibold bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-800">
                 {t.noHomeworkFound}
               </div>
             ) : (
@@ -340,13 +451,13 @@ export function PerformanceScreen({
                         : 'bg-white dark:bg-slate-850 border-slate-200/80 dark:border-slate-800 shadow-2xs'
                     }`}
                     style={{
-                      padding: '26px 30px',
-                      borderRadius: '24px',
+                      padding: '16px 20px',
+                      borderRadius: '18px',
                     }}
                   >
                     <div>
                       {/* Top Bar */}
-                      <div className="flex items-center justify-between gap-3 mb-3">
+                      <div className="flex items-center justify-between gap-3 mb-2">
                         <span className="text-xs font-bold text-slate-400">
                           {t.level} {hw.level} • {translateSubject(hw.subjectAr, language)}
                         </span>
@@ -355,9 +466,9 @@ export function PerformanceScreen({
                           <span
                             className="inline-flex items-center rounded-full text-xs font-bold bg-amber-500 text-white shadow-xs animate-pulse"
                             style={{
-                              height: '30px',
-                              paddingRight: '14px',
-                              paddingLeft: '14px',
+                              height: '26px',
+                              paddingRight: '12px',
+                              paddingLeft: '12px',
                             }}
                           >
                             {t.needsRevision}
@@ -368,9 +479,9 @@ export function PerformanceScreen({
                           <span
                             className="inline-flex items-center rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
                             style={{
-                              height: '30px',
-                              paddingRight: '14px',
-                              paddingLeft: '14px',
+                              height: '26px',
+                              paddingRight: '12px',
+                              paddingLeft: '12px',
                             }}
                           >
                             {t.completed} ✓
@@ -381,9 +492,9 @@ export function PerformanceScreen({
                           <span
                             className="inline-flex items-center rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
                             style={{
-                              height: '30px',
-                              paddingRight: '14px',
-                              paddingLeft: '14px',
+                              height: '26px',
+                              paddingRight: '12px',
+                              paddingLeft: '12px',
                             }}
                           >
                             {t.pending}
@@ -393,8 +504,8 @@ export function PerformanceScreen({
 
                       {/* Title */}
                       <h3
-                        className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug"
-                        style={{ margin: '8px 0 12px 0' }}
+                        className="text-base font-bold text-slate-900 dark:text-white leading-snug"
+                        style={{ margin: '4px 0 8px 0' }}
                       >
                         {translateHomeworkTitle(hw.titleAr, language)}
                       </h3>
@@ -402,10 +513,10 @@ export function PerformanceScreen({
                       {/* Teacher Feedback Alert if needs revision */}
                       {hw.teacherNote && isRevision && (
                         <div
-                          className="rounded-2xl bg-amber-100/70 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800 text-xs sm:text-sm text-amber-900 dark:text-amber-200 leading-relaxed font-medium"
+                          className="rounded-xl bg-amber-100/70 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 leading-relaxed font-medium"
                           style={{
-                            padding: '14px 18px',
-                            marginTop: '12px',
+                            padding: '10px 14px',
+                            marginTop: '8px',
                           }}
                         >
                           <span className="font-bold">{t.teacherNoteLabel} </span>
@@ -415,15 +526,15 @@ export function PerformanceScreen({
                     </div>
 
                     {/* Footer */}
-                    <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 font-medium">
+                    <div className="mt-3.5 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 font-medium">
                       <span className="flex items-center gap-1.5">
-                        <Clock size={14} />
+                        <Clock size={13} />
                         {t.dueDateLabel} {hw.dueDate}
                       </span>
 
                       {hw.score !== undefined && (
-                        <span className="font-bold text-slate-800 dark:text-slate-200 text-sm font-mono">
-                          {t.scoreLabel} {hw.score} / {hw.totalScore || 100}
+                        <span className="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-mono">
+                          {t.scoreLabel} {hw.score} / {hw.totalScore || (hw as any).maxScore || 20}
                         </span>
                       )}
                     </div>
@@ -441,17 +552,17 @@ export function PerformanceScreen({
       {activeTab === 'attendance' && (
         <div className="space-y-6 animate-fade-in">
           {/* Main Attendance Percentage Hero + Stats Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5">
             <div
-              className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between"
-              style={{ padding: '24px 28px' }}
+              className="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex items-center justify-between"
+              style={{ padding: '10px 16px' }}
             >
-              <div className="space-y-1.5">
-                <span className="text-xs font-bold text-slate-400">{t.overallAttendanceRate}</span>
-                <div className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white font-mono">
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-bold text-slate-400">{t.overallAttendanceRate}</span>
+                <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono leading-none">
                   {attendanceData.summary.attendancePercentage}%
                 </div>
-                <span className="text-xs font-bold text-slate-400 block">
+                <span className="text-[10px] font-bold text-slate-400 block pt-0.5">
                   {attendanceData.summary.totalDays === 0
                     ? (language === 'ar' ? 'طالب مسجل حديثاً (لم تسجل حصص بعد)' : 'Newly enrolled student (No sessions yet)')
                     : attendanceData.summary.attendancePercentage >= 90
@@ -461,7 +572,7 @@ export function PerformanceScreen({
               </div>
 
               {/* Circular Ring Visual */}
-              <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
+              <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                   <path
                     className="text-slate-100 dark:text-slate-800"
@@ -479,58 +590,58 @@ export function PerformanceScreen({
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   />
                 </svg>
-                <div className="absolute font-black text-xs text-slate-900 dark:text-white font-mono">
+                <div className="absolute font-black text-[10px] text-slate-900 dark:text-white font-mono">
                   {attendanceData.summary.presentDays} / {attendanceData.summary.totalDays}
                 </div>
               </div>
             </div>
 
             {/* Breakdown Stats Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 lg:col-span-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 lg:col-span-2">
               <div
-                className="rounded-[22px] bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 text-center flex flex-col justify-center"
-                style={{ padding: '18px 16px' }}
+                className="rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 text-center flex flex-col justify-center"
+                style={{ padding: '8px 10px' }}
               >
-                <span className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-300">
+                <span className="text-lg sm:text-xl font-black text-emerald-700 dark:text-emerald-300 leading-tight">
                   {attendanceData.summary.presentDays}
                 </span>
-                <span className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 block mt-1.5">
+                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 block mt-0.5">
                   {t.present}
                 </span>
               </div>
 
               <div
-                className="rounded-[22px] bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/40 text-center flex flex-col justify-center"
-                style={{ padding: '18px 16px' }}
+                className="rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/40 text-center flex flex-col justify-center"
+                style={{ padding: '8px 10px' }}
               >
-                <span className="text-2xl sm:text-3xl font-black text-rose-700 dark:text-rose-300">
+                <span className="text-lg sm:text-xl font-black text-rose-700 dark:text-rose-300 leading-tight">
                   {attendanceData.summary.absentDays}
                 </span>
-                <span className="text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 block mt-1.5">
+                <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 block mt-0.5">
                   {t.absent}
                 </span>
               </div>
 
               <div
-                className="rounded-[22px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/40 text-center flex flex-col justify-center"
-                style={{ padding: '18px 16px' }}
+                className="rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/40 text-center flex flex-col justify-center"
+                style={{ padding: '8px 10px' }}
               >
-                <span className="text-2xl sm:text-3xl font-black text-amber-700 dark:text-amber-300">
+                <span className="text-lg sm:text-xl font-black text-amber-700 dark:text-amber-300 leading-tight">
                   {attendanceData.summary.lateDays}
                 </span>
-                <span className="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 block mt-1.5">
+                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 block mt-0.5">
                   {t.late}
                 </span>
               </div>
 
               <div
-                className="rounded-[22px] bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/40 text-center flex flex-col justify-center"
-                style={{ padding: '18px 16px' }}
+                className="rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/40 text-center flex flex-col justify-center"
+                style={{ padding: '8px 10px' }}
               >
-                <span className="text-2xl sm:text-3xl font-black text-blue-700 dark:text-blue-300">
+                <span className="text-lg sm:text-xl font-black text-blue-700 dark:text-blue-300 leading-tight">
                   {attendanceData.summary.excusedDays}
                 </span>
-                <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 block mt-1.5">
+                <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 block mt-0.5">
                   {t.excused}
                 </span>
               </div>
@@ -538,30 +649,30 @@ export function PerformanceScreen({
           </div>
 
           {/* Weekly Timetable Schedule Section */}
-          <div className="space-y-4" style={{ marginTop: '32px' }}>
+          <div className="space-y-10" style={{ marginTop: '36px' }}>
             {/* Week Switcher Banner */}
             <div
-              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"
+              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3"
               style={{
-                padding: '24px 28px',
-                borderRadius: '24px',
+                padding: '18px 22px',
+                borderRadius: '20px',
               }}
             >
               <div>
-                <div className="flex items-center gap-2.5 mb-1.5">
-                  <CalendarDays size={22} className="text-slate-500 shrink-0" />
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                <div className="flex items-center gap-2 mb-1">
+                  <CalendarDays size={18} className="text-slate-500 shrink-0" />
+                  <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
                     {language === 'ar' ? 'جدول الحضور الأسبوعي للدروس والحلقات' : language === 'fr' ? 'Emploi du temps hebdomadaire des séances' : 'Weekly Attendance & Class Schedule'}
                   </h3>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-400 font-medium">
+                <p className="text-[11px] sm:text-xs text-slate-400 font-medium">
                   {language === 'ar' ? 'توزيع الحصص الأسبوعية مع إمكانية التنقل بين الأسابيع' : language === 'fr' ? 'Répartition des cours avec navigation entre les semaines' : 'Weekly session distribution with week navigation'}
                 </p>
               </div>
 
               {/* Week Switcher Controls */}
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-700/60">
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-700/60">
                   {WEEKS_LIST.map((wk) => {
                     const isSelected = selectedWeekIndex === wk.index;
                     return (
@@ -569,15 +680,15 @@ export function PerformanceScreen({
                         key={wk.index}
                         type="button"
                         onClick={() => setSelectedWeekIndex(wk.index)}
-                        className={`rounded-xl font-black text-xs sm:text-sm transition-all cursor-pointer select-none ${
+                        className={`rounded-lg font-black text-xs transition-all cursor-pointer select-none ${
                           isSelected
-                            ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
+                            ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
                             : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
                         }`}
                         style={{
-                          height: '38px',
-                          paddingRight: '18px',
-                          paddingLeft: '18px',
+                          height: '32px',
+                          paddingRight: '14px',
+                          paddingLeft: '14px',
                           color: isSelected ? theme.primary : undefined,
                         }}
                       >
@@ -587,25 +698,25 @@ export function PerformanceScreen({
                   })}
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1">
                   <button
                     type="button"
                     disabled={selectedWeekIndex >= WEEKS_LIST.length - 1}
                     onClick={() => setSelectedWeekIndex((prev) => Math.min(WEEKS_LIST.length - 1, prev + 1))}
-                    className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                     title={isRTL ? 'الأسبوع السابق' : 'Previous Week'}
                   >
-                    {isRTL ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+                    {isRTL ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
                   </button>
 
                   <button
                     type="button"
                     disabled={selectedWeekIndex <= 0}
                     onClick={() => setSelectedWeekIndex((prev) => Math.max(0, prev - 1))}
-                    className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                     title={isRTL ? 'الأسبوع التالي' : 'Next Week'}
                   >
-                    {isRTL ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+                    {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
                   </button>
                 </div>
               </div>
@@ -613,22 +724,22 @@ export function PerformanceScreen({
 
             {/* Active Week Status & Date Range Bar */}
             <div
-              className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-750 flex items-center justify-between flex-wrap gap-3.5 text-xs font-bold"
+              className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-750 flex items-center justify-between flex-wrap gap-2.5 text-xs font-bold"
               style={{
-                padding: '16px 24px',
-                borderRadius: '20px',
+                padding: '12px 20px',
+                borderRadius: '16px',
               }}
             >
-              <div className="flex items-center gap-2.5 text-slate-800 dark:text-slate-200">
-                <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+              <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
+                <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white">
                   {WEEKS_LIST[selectedWeekIndex]?.label}:
                 </span>
-                <span className="font-mono text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                <span className="font-mono text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
                   ({WEEKS_LIST[selectedWeekIndex]?.range})
                 </span>
               </div>
 
-              <div className="flex items-center gap-3.5 text-xs sm:text-sm flex-wrap">
+              <div className="flex items-center gap-3 text-xs flex-wrap">
                 <span className="text-emerald-600 font-black">
                   {t.present}: {weekPresentCount} {language === 'ar' ? 'أيام' : language === 'fr' ? 'jours' : 'days'}
                 </span>
@@ -648,12 +759,12 @@ export function PerformanceScreen({
                   </span>
                 )}
                 <span
-                  className="inline-flex items-center rounded-full text-white font-black shadow-2xs select-none"
+                  className="inline-flex items-center rounded-full text-white font-black shadow-2xs select-none text-xs"
                   style={{
                     backgroundColor: theme.primary,
-                    height: '32px',
-                    paddingRight: '16px',
-                    paddingLeft: '16px',
+                    height: '28px',
+                    paddingRight: '12px',
+                    paddingLeft: '12px',
                   }}
                 >
                   {language === 'ar'
@@ -668,23 +779,23 @@ export function PerformanceScreen({
             {/* Weekly Timetable Schedule Grid */}
             {currentWeekRecords.length === 0 ? (
                 <div
-                  className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 text-center flex flex-col items-center justify-center shadow-xs"
-                  style={{ padding: '48px 24px', marginBottom: '48px' }}
+                  className="rounded-[20px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 text-center flex flex-col items-center justify-center shadow-xs"
+                  style={{ padding: '36px 20px', marginBottom: '36px' }}
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4 shadow-sm">
-                    <CalendarDays size={30} />
+                  <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3 shadow-xs">
+                    <CalendarDays size={24} />
                   </div>
-                  <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white mb-1.5">
+                  <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white mb-1">
                     {language === 'ar' ? 'طالب مسجل حديثاً — الحضور 0%' : 'Newly Enrolled Student — 0% Attendance'}
                   </h4>
-                  <p className="text-xs sm:text-sm text-slate-400 max-w-md leading-relaxed">
+                  <p className="text-xs text-slate-400 max-w-md leading-relaxed">
                     {language === 'ar'
                       ? 'لم يتم تسجيل أي حصص دراسية سابقة لهذا الطالب بعد، وتبدأ نسبة الحضور في الاحتساب فور بدء الجلسات.'
                       : 'No previous class sessions have been recorded for this student yet. Attendance will begin calculating once sessions commence.'}
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" style={{ paddingBottom: '48px' }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" style={{ paddingBottom: '36px' }}>
                   {currentWeekRecords.map((rec) => {
                     const isPresent = rec.status === 'present';
                     const isAbsent = rec.status === 'absent';
@@ -693,35 +804,32 @@ export function PerformanceScreen({
                     const subjectAr = rec.subjectAr || 'اللغة الإنجليزية';
                     const translatedSubject = translateSubject(subjectAr, language);
                     const dayLabel = translateDayName(rec.dayNameAr);
+                    const langBadge = getLanguageBadgeTheme(subjectAr);
                     const themeStyles =
-                      SUBJECT_CONTAINER_THEMES[subjectAr] || SUBJECT_CONTAINER_THEMES['اللغة الإنجليزية'];
+                      SUBJECT_CONTAINER_THEMES[subjectAr] || langBadge;
 
                     return (
                       <div
                         key={rec.id}
-                        className={`rounded-[24px] border ${themeStyles.bgClass} ${themeStyles.borderClass} flex flex-col justify-between shadow-2xs select-none transition-all hover:shadow-md`}
+                        className={`rounded-2xl border ${langBadge.bgClass} ${langBadge.borderClass} flex flex-col justify-between shadow-2xs select-none transition-all hover:shadow-md`}
                         style={{
-                          paddingTop: '22px',
-                          paddingRight: '26px',
-                          paddingLeft: '26px',
-                          paddingBottom: '26px',
-                          minHeight: '155px',
+                          padding: '12px 14px',
                         }}
                       >
                         <div>
                           {/* Top Row: Day Title + Status Badge */}
-                          <div className="flex items-center justify-between gap-3 mb-3">
+                          <div className="flex items-center justify-between gap-2 mb-2">
                             <div className="flex items-center gap-2">
-                              <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                              <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
                                 {dayLabel}
                               </span>
-                              <span className="text-xs text-slate-400 font-mono font-bold">
+                              <span dir="ltr" className="text-[11px] text-slate-400 font-mono font-bold">
                                 {rec.date}
                               </span>
                             </div>
 
                             <span
-                              className={`inline-flex items-center justify-center rounded-full text-xs font-black shadow-2xs select-none ${
+                              className={`inline-flex items-center justify-center rounded-full text-[11px] font-black shadow-2xs select-none ${
                                 isPresent
                                   ? 'bg-emerald-500 text-white'
                                   : isAbsent
@@ -731,9 +839,9 @@ export function PerformanceScreen({
                                   : 'bg-blue-500 text-white'
                               }`}
                               style={{
-                                height: '32px',
-                                paddingRight: '16px',
-                                paddingLeft: '16px',
+                                height: '22px',
+                                paddingRight: '10px',
+                                paddingLeft: '10px',
                               }}
                             >
                               {isPresent
@@ -746,19 +854,21 @@ export function PerformanceScreen({
                             </span>
                           </div>
 
-                          {/* Subject Pill */}
-                          <div className="flex items-center gap-2 mb-2">
-                            <BookOpen size={14} className="text-slate-400 shrink-0" />
-                            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                              {translatedSubject}
+                          {/* Subject Pill in Colored Container */}
+                          <div className="flex items-center mb-2">
+                            <span
+                              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold shadow-2xs ${langBadge.badgeContainer}`}
+                            >
+                              <BookOpen size={13} className={`${langBadge.iconClass} shrink-0`} />
+                              <span>{translatedSubject}</span>
                             </span>
                           </div>
 
                           {/* Session Time */}
-                          <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
-                            <Clock size={13} className="shrink-0" />
-                            <span>
-                              {rec.sessionTimeAr || '04:30 م'}
+                          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-mono">
+                            <Clock size={13} className="shrink-0 text-slate-400" />
+                            <span dir="ltr" className="font-mono font-bold text-[11px]">
+                              {rec.sessionTimeAr || '04:30 PM - 06:00 PM'}
                             </span>
                           </div>
                         </div>
@@ -766,8 +876,7 @@ export function PerformanceScreen({
                         {/* Note / Excuse Footer if present */}
                         {rec.noteAr && (
                           <div
-                            className="mt-3 p-3 px-4 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 text-xs text-slate-700 dark:text-slate-300 font-medium"
-                            style={{ marginBottom: '2px' }}
+                            className="mt-2.5 p-2 px-3 rounded-lg bg-white/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 text-[11px] text-slate-700 dark:text-slate-300 font-medium"
                           >
                             <span className="font-bold">{language === 'ar' ? 'ملاحظة: ' : language === 'fr' ? 'Remarque : ' : 'Note: '}</span>
                             {rec.noteAr}
@@ -786,16 +895,16 @@ export function PerformanceScreen({
       {/* TAB 3: Assessments */}
       {/* ============================================================ */}
       {activeTab === 'assessments' && (
-        <div className="space-y-6 animate-fade-in" style={{ paddingBottom: '48px' }}>
+        <div className="space-y-4 animate-fade-in" style={{ paddingBottom: '40px' }}>
           {/* Skill Radar / Bars Breakdown */}
           <div
-            className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs"
+            className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs"
             style={{
-              padding: '28px 32px',
-              borderRadius: '24px',
+              padding: '16px 20px',
+              borderRadius: '18px',
             }}
           >
-            <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white" style={{ marginBottom: '18px' }}>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white" style={{ marginBottom: '12px' }}>
               {language === 'ar'
                 ? `تقييم المهارات التراكمي (المستوى ${activeStudent.currentLevel})`
                 : language === 'fr'
@@ -803,40 +912,40 @@ export function PerformanceScreen({
                 : `Cumulative Skills Evaluation (${t.level} ${activeStudent.currentLevel})`}
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {[
                 {
                   name: language === 'ar' ? 'المحادثة والطلاقة الشفهية (Speaking Fluency)' : language === 'fr' ? 'Expression Orale & Fluidité (Speaking Fluency)' : 'Speaking & Verbal Fluency',
-                  score: 94,
+                  score: activeStudent?.skills?.speaking !== undefined ? activeStudent.skills.speaking : 0,
                 },
                 {
                   name: language === 'ar' ? 'الفهم السمعي والاستيعاب (Listening Comprehension)' : language === 'fr' ? 'Compréhension Orale (Listening Comprehension)' : 'Listening & Comprehension',
-                  score: 92,
+                  score: activeStudent?.skills?.listening !== undefined ? activeStudent.skills.listening : 0,
                 },
                 {
-                  name: language === 'ar' ? 'القواعد وبناء التراكيب (Grammar & Structure)' : language === 'fr' ? 'Grammaire & Structures (Grammar & Structure)' : 'Grammar & Syntax Structures',
-                  score: 88,
+                  name: language === 'ar' ? 'القراءة والفهم القرائي (Reading Comprehension)' : language === 'fr' ? 'Lecture & Compréhension (Reading Comprehension)' : 'Reading & Text Comprehension',
+                  score: activeStudent?.skills?.reading !== undefined ? activeStudent.skills.reading : 0,
                 },
                 {
-                  name: language === 'ar' ? 'القراءة والتعبير الكتابي (Reading & Writing)' : language === 'fr' ? 'Lecture & Expression Écrite (Reading & Writing)' : 'Reading & Essay Writing',
-                  score: 85,
+                  name: language === 'ar' ? 'الكتابة والتعبير الكتابي (Writing & Composition)' : language === 'fr' ? 'Expression Écrite (Writing & Composition)' : 'Writing & Composition',
+                  score: activeStudent?.skills?.writing !== undefined ? activeStudent.skills.writing : 0,
                 },
               ].map((skill, idx) => (
                 <div
                   key={idx}
                   className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-750 flex flex-col justify-center"
                   style={{
-                    padding: '18px 22px',
-                    borderRadius: '20px',
+                    padding: '10px 14px',
+                    borderRadius: '12px',
                   }}
                 >
-                  <div className="flex items-center justify-between text-xs sm:text-sm font-bold" style={{ marginBottom: '10px' }}>
-                    <span className="text-slate-800 dark:text-slate-200 font-extrabold">{skill.name}</span>
-                    <span style={{ color: theme.primary }} className="font-mono font-black text-sm sm:text-base">
+                  <div className="flex items-center justify-between text-xs font-bold" style={{ marginBottom: '6px' }}>
+                    <span className="text-slate-800 dark:text-slate-200 font-bold text-[11px] sm:text-xs truncate">{skill.name}</span>
+                    <span style={{ color: theme.primary }} className="font-mono font-bold text-xs sm:text-sm shrink-0">
                       {skill.score}%
                     </span>
                   </div>
-                  <div className="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all"
                       style={{
@@ -851,51 +960,51 @@ export function PerformanceScreen({
           </div>
 
           {/* Assessments History Cards Grid */}
-          <div className="space-y-4" style={{ marginTop: '32px' }}>
-            <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+          <div className="space-y-3" style={{ marginTop: '18px' }}>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
               {t.periodicAssessments}:
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               {assessments.map((asm) => (
                 <div
                   key={asm.id}
-                  className={`bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col justify-between ${isRTL ? 'text-right' : 'text-left'}`}
                   style={{
-                    padding: '28px 32px',
-                    borderRadius: '24px',
+                    padding: '16px 20px',
+                    borderRadius: '18px',
                   }}
                 >
                   <div>
                     {/* Top Row: Level/Type + Score Badge */}
-                    <div className="flex items-center justify-between gap-3" style={{ marginBottom: '14px' }}>
-                      <span className="text-xs sm:text-sm font-bold text-slate-400">
+                    <div className="flex items-center justify-between gap-2" style={{ marginBottom: '8px' }}>
+                      <span className="text-xs font-bold text-slate-400">
                         {t.level} {asm.level} • {translateSubject(asm.typeAr, language)}
                       </span>
                       <span
-                        className="inline-flex items-center justify-center rounded-full text-xs sm:text-sm font-black text-white shadow-2xs select-none"
+                        className="inline-flex items-center justify-center rounded-full text-[11px] font-bold text-white shadow-2xs select-none"
                         style={{
                           backgroundColor: theme.primary,
-                          height: '34px',
-                          paddingRight: '16px',
-                          paddingLeft: '16px',
+                          height: '26px',
+                          paddingRight: '12px',
+                          paddingLeft: '12px',
                         }}
                       >
                         {asm.score}% ({language === 'ar' ? asm.gradeLetterAr || 'ممتاز' : asm.score >= 90 ? 'A+' : 'A'})
                       </span>
                     </div>
 
-                    <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-snug" style={{ margin: '10px 0' }}>
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug" style={{ margin: '4px 0 6px 0' }}>
                       {translateHomeworkTitle(asm.titleAr, language)}
                     </h4>
 
                     {asm.teacherComments && (
                       <div
-                        className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium bg-slate-50 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-750"
+                        className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-medium bg-slate-50 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-750"
                         style={{
-                          padding: '16px 20px',
-                          borderRadius: '18px',
-                          margin: '14px 0',
+                          padding: '10px 14px',
+                          borderRadius: '12px',
+                          margin: '8px 0',
                         }}
                       >
                         "{translateTeacherNote(asm.teacherComments, language)}"
@@ -904,10 +1013,10 @@ export function PerformanceScreen({
                   </div>
 
                   <div
-                    className="border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs sm:text-sm text-slate-400 font-bold"
+                    className="border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 font-bold"
                     style={{
-                      paddingTop: '16px',
-                      marginTop: '16px',
+                      paddingTop: '10px',
+                      marginTop: '10px',
                     }}
                   >
                     <span>{language === 'ar' ? 'المادة: ' : language === 'fr' ? 'Matière : ' : 'Subject: '}{translateSubject(asm.subjectAr, language)}</span>
@@ -924,7 +1033,7 @@ export function PerformanceScreen({
       {/* TAB 4: Teacher Feedback */}
       {/* ============================================================ */}
       {activeTab === 'feedback' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-fade-in" style={{ paddingBottom: '48px' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 animate-fade-in" style={{ paddingBottom: '40px' }}>
           {teacherFeedback.map((fb) => {
             let formattedDate = fb.date;
             let formattedTime = '';
@@ -950,37 +1059,35 @@ export function PerformanceScreen({
             return (
               <div
                 key={fb.id}
-                className={`bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col justify-between ${isRTL ? 'text-right' : 'text-left'}`}
                 style={{
-                  padding: '28px 32px',
-                  borderRadius: '24px',
+                  padding: '16px 20px',
+                  borderRadius: '18px',
                 }}
               >
                 <div>
                   {/* Teacher Info */}
                   <div
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5"
-                    style={{ marginBottom: '18px' }}
+                    className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5"
+                    style={{ marginBottom: '12px' }}
                   >
-                    <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="flex items-start gap-2.5 min-w-0">
                       <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-sm shadow-xs shrink-0"
+                        className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-xs shadow-xs shrink-0 mt-0.5"
                         style={{ backgroundColor: theme.primaryDark }}
                       >
                         {fb.teacherNameAr.split(' ').slice(-1)[0]?.[0] || 'T'}
                       </div>
                       <div className="min-w-0">
-                        <div className="flex items-center gap-x-2.5 gap-y-2 flex-wrap" style={{ marginBottom: '4px' }}>
-                          <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white whitespace-nowrap">
+                        <div className="flex items-center gap-x-2 gap-y-1 flex-wrap" style={{ marginBottom: '2px' }}>
+                          <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap">
                             {fb.teacherNameAr}
                           </span>
                           {fb.badgeAr && (
                             <span
-                              className="inline-flex items-center rounded-full text-xs font-black bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-300 shadow-2xs whitespace-nowrap"
+                              className="inline-flex items-center rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-300 shadow-2xs whitespace-nowrap px-2 py-0.5"
                               style={{
-                                height: '28px',
-                                paddingRight: '12px',
-                                paddingLeft: '12px',
+                                height: '22px',
                               }}
                             >
                               {fb.badgeAr}
@@ -988,21 +1095,21 @@ export function PerformanceScreen({
                           )}
                         </div>
                         <span
-                          className="text-xs text-slate-400 font-medium block"
-                          style={{ marginTop: '8px' }}
+                          className="text-[11px] text-slate-400 font-medium block"
+                          style={{ marginTop: '1px' }}
                         >
                           {fb.teacherRoleAr || (language === 'ar' ? 'معلم المسار الأكاديمي' : language === 'fr' ? 'Enseignant Pédagogique' : 'Academic Course Teacher')}
                         </span>
                       </div>
                     </div>
 
-                    {/* Date and Time */}
-                    <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
-                      <span className="text-xs text-slate-600 dark:text-slate-300 font-mono font-bold bg-slate-100 dark:bg-slate-800/90 border border-slate-200/60 dark:border-slate-700/60 px-3 py-1.5 rounded-xl shadow-2xs">
+                    {/* Date and Time (Aligned to top) */}
+                    <div className="flex items-center gap-1 shrink-0 self-start pt-0.5">
+                      <span className="text-[11px] text-slate-600 dark:text-slate-300 font-mono font-bold bg-slate-100 dark:bg-slate-800/90 border border-slate-200/60 dark:border-slate-700/60 px-2 py-0.5 rounded-md shadow-2xs">
                         {formattedDate}
                       </span>
                       {formattedTime && (
-                        <span className="text-xs text-slate-600 dark:text-slate-300 font-mono font-bold bg-slate-100 dark:bg-slate-800/90 border border-slate-200/60 dark:border-slate-700/60 px-3 py-1.5 rounded-xl shadow-2xs">
+                        <span className="text-[11px] text-slate-600 dark:text-slate-300 font-mono font-bold bg-slate-100 dark:bg-slate-800/90 border border-slate-200/60 dark:border-slate-700/60 px-2 py-0.5 rounded-md shadow-2xs">
                           {formattedTime}
                         </span>
                       )}
@@ -1011,11 +1118,11 @@ export function PerformanceScreen({
 
                   {/* Message Content */}
                   <div
-                    className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-750 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 leading-relaxed"
+                    className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-750 text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-medium"
                     style={{
-                      padding: '18px 22px',
-                      borderRadius: '18px',
-                      margin: '14px 0',
+                      padding: '10px 14px',
+                      borderRadius: '12px',
+                      margin: '8px 0',
                     }}
                   >
                     "{translateTeacherNote(fb.messageAr, language)}"

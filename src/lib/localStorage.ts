@@ -23,10 +23,18 @@ export function setItem<T>(key: string, value: T): void {
 
 export function removeItem(key: string): void {
     if (typeof window === 'undefined') return;
-    localStorage.removeItem(key);
+    try {
+        localStorage.removeItem(key);
+    } catch (error) {
+        console.error(`Error removing localStorage key "${key}":`, error);
+    }
 }
 
 export function clearAll(): void {
     if (typeof window === 'undefined') return;
-    localStorage.clear();
+    try {
+        localStorage.clear();
+    } catch (error) {
+        console.error('Error clearing localStorage:', error);
+    }
 }

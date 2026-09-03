@@ -231,30 +231,40 @@ export function getAttendanceDataForStudent(studentId: string, isNewStudent?: bo
     };
   }
 
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const diffToSaturday = (dayOfWeek + 1) % 7;
+  
+  const getMockDateStr = (weeksAgo: number, dayOffset: number) => {
+    const d = new Date(now);
+    d.setDate(now.getDate() - diffToSaturday - (weeksAgo * 7) + dayOffset);
+    return d.toISOString().split('T')[0];
+  };
+
   const dates = [
-    // Week 0: الأسبوع الحالي (15 - 20 فبراير 2025)
-    { date: '2025-02-15', day: 'السبت', subject: 'محادثة إنجليزية', status: 'present' as const, time: '04:30 م', weekIndex: 0 },
-    { date: '2025-02-16', day: 'الأحد', subject: 'قواعد وتراكيب', status: 'late' as const, note: 'تأخر 12 دقيقة بسبب الازدحام', time: '04:42 م', weekIndex: 0 },
-    { date: '2025-02-17', day: 'الإثنين', subject: 'ورشة النطق الفرنسي', status: 'present' as const, time: '04:30 م', weekIndex: 0 },
-    { date: '2025-02-18', day: 'الثلاثاء', subject: 'استماع ومناقشة', status: 'absent' as const, note: 'عذر مرضي مسبق', time: '04:30 م', weekIndex: 0 },
-    { date: '2025-02-19', day: 'الأربعاء', subject: 'قراءة وفهم نصوص', status: 'present' as const, time: '04:30 م', weekIndex: 0 },
-    { date: '2025-02-20', day: 'الخميس', subject: 'محادثة إنجليزية', status: 'present' as const, time: '04:30 م', weekIndex: 0 },
+    // Week 0: Current Week
+    { date: getMockDateStr(0, 0), day: 'السبت', subject: 'محادثة إنجليزية', status: 'present' as const, time: '04:30 م', weekIndex: 0 },
+    { date: getMockDateStr(0, 1), day: 'الأحد', subject: 'قواعد وتراكيب', status: 'late' as const, note: 'تأخر 12 دقيقة بسبب الازدحام', time: '04:42 م', weekIndex: 0 },
+    { date: getMockDateStr(0, 2), day: 'الإثنين', subject: 'ورشة النطق الفرنسي', status: 'present' as const, time: '04:30 م', weekIndex: 0 },
+    { date: getMockDateStr(0, 3), day: 'الثلاثاء', subject: 'استماع ومناقشة', status: 'absent' as const, note: 'عذر مرضي مسبق', time: '04:30 م', weekIndex: 0 },
+    { date: getMockDateStr(0, 4), day: 'الأربعاء', subject: 'قراءة وفهم نصوص', status: 'present' as const, time: '04:30 م', weekIndex: 0 },
+    { date: getMockDateStr(0, 5), day: 'الخميس', subject: 'محادثة إنجليزية', status: 'present' as const, time: '04:30 م', weekIndex: 0 },
 
-    // Week 1: الأسبوع الماضي (8 - 13 فبراير 2025)
-    { date: '2025-02-08', day: 'السبت', subject: 'تعبير وكتابة', status: 'present' as const, time: '04:30 م', weekIndex: 1 },
-    { date: '2025-02-09', day: 'الأحد', subject: 'قواعد وتراكيب', status: 'present' as const, time: '04:30 م', weekIndex: 1 },
-    { date: '2025-02-10', day: 'الإثنين', subject: 'محادثة إنجليزية', status: 'present' as const, time: '04:30 م', weekIndex: 1 },
-    { date: '2025-02-11', day: 'الثلاثاء', subject: 'ورشة النطق الفرنسي', status: 'present' as const, time: '04:30 م', weekIndex: 1 },
-    { date: '2025-02-12', day: 'الأربعاء', subject: 'استماع ومناقشة', status: 'present' as const, time: '04:30 م', weekIndex: 1 },
-    { date: '2025-02-13', day: 'الخميس', subject: 'محادثة وتطبيق', status: 'excused' as const, note: 'مناسبة أسرية مصرح بها', time: '04:30 م', weekIndex: 1 },
+    // Week 1: Last Week
+    { date: getMockDateStr(1, 0), day: 'السبت', subject: 'تعبير وكتابة', status: 'present' as const, time: '04:30 م', weekIndex: 1 },
+    { date: getMockDateStr(1, 1), day: 'الأحد', subject: 'قواعد وتراكيب', status: 'present' as const, time: '04:30 م', weekIndex: 1 },
+    { date: getMockDateStr(1, 2), day: 'الإثنين', subject: 'محادثة إنجليزية', status: 'present' as const, time: '04:30 م', weekIndex: 1 },
+    { date: getMockDateStr(1, 3), day: 'الثلاثاء', subject: 'ورشة النطق الفرنسي', status: 'present' as const, time: '04:30 م', weekIndex: 1 },
+    { date: getMockDateStr(1, 4), day: 'الأربعاء', subject: 'استماع ومناقشة', status: 'present' as const, time: '04:30 م', weekIndex: 1 },
+    { date: getMockDateStr(1, 5), day: 'الخميس', subject: 'محادثة وتطبيق', status: 'excused' as const, note: 'مناسبة أسرية مصرح بها', time: '04:30 م', weekIndex: 1 },
 
-    // Week 2: الأسبوع الأسبق (1 - 6 فبراير 2025)
-    { date: '2025-02-01', day: 'السبت', subject: 'محادثة إنجليزية', status: 'present' as const, time: '04:30 م', weekIndex: 2 },
-    { date: '2025-02-02', day: 'الأحد', subject: 'قواعد وتراكيب', status: 'present' as const, time: '04:30 م', weekIndex: 2 },
-    { date: '2025-02-03', day: 'الإثنين', subject: 'ورشة النطق الفرنسي', status: 'present' as const, time: '04:30 م', weekIndex: 2 },
-    { date: '2025-02-04', day: 'الثلاثاء', subject: 'محادثة إنجليزية', status: 'present' as const, time: '04:30 م', weekIndex: 2 },
-    { date: '2025-02-05', day: 'الأربعاء', subject: 'تعبير وكتابة', status: 'present' as const, time: '04:30 م', weekIndex: 2 },
-    { date: '2025-02-06', day: 'الخميس', subject: 'استماع ومناقشة', status: 'present' as const, time: '04:30 م', weekIndex: 2 },
+    // Week 2: Previous Week
+    { date: getMockDateStr(2, 0), day: 'السبت', subject: 'محادثة إنجليزية', status: 'present' as const, time: '04:30 م', weekIndex: 2 },
+    { date: getMockDateStr(2, 1), day: 'الأحد', subject: 'قواعد وتراكيب', status: 'present' as const, time: '04:30 م', weekIndex: 2 },
+    { date: getMockDateStr(2, 2), day: 'الإثنين', subject: 'ورشة النطق الفرنسي', status: 'present' as const, time: '04:30 م', weekIndex: 2 },
+    { date: getMockDateStr(2, 3), day: 'الثلاثاء', subject: 'محادثة إنجليزية', status: 'present' as const, time: '04:30 م', weekIndex: 2 },
+    { date: getMockDateStr(2, 4), day: 'الأربعاء', subject: 'تعبير وكتابة', status: 'present' as const, time: '04:30 م', weekIndex: 2 },
+    { date: getMockDateStr(2, 5), day: 'الخميس', subject: 'استماع ومناقشة', status: 'present' as const, time: '04:30 م', weekIndex: 2 },
   ];
 
   const records: AttendanceRecord[] = dates.map((d, i) => ({

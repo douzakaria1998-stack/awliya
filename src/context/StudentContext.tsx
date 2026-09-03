@@ -18,8 +18,9 @@ import {
   LevelModule,
   LevelLessonItem,
   LevelStatus,
+  HomeworkStatus,
 } from '@/types';
-import { AdminStudent, AdminParent, CurriculumLevel, LessonProgressStatus, AttendanceSession } from '@/types/admin';
+import { AdminStudent, AdminParent, CurriculumLevel, LessonProgressStatus, AttendanceSession, AdminHomeworkAssignment } from '@/types/admin';
 import { getItem, setItem } from '@/lib/localStorage';
 import { STORAGE_KEYS, SHOW_FINANCIALS_TAB } from '@/lib/constants';
 import {
@@ -230,11 +231,13 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           timingAr: 'خلال أيام الأسبوع (Weekdays)',
           gender: adminStu.gender,
           status: adminStu.status as any,
-          enrollmentDate: adminStu.enrollmentDate,
+          enrollmentDate: adminStu.enrollmentDate || '2024-09-01',
           age: 10,
           language: adminStu.language,
           cefrLevel: adminStu.cefrLevel,
-          attendanceRate: adminStu.attendanceRate !== undefined ? adminStu.attendanceRate : (adminStu.overallProgress === 0 ? 0 : 0),
+          attendanceRate: adminStu.attendanceRate !== undefined ? adminStu.attendanceRate : 0,
+          averagePerformance: adminStu.averagePerformance !== undefined ? adminStu.averagePerformance : 0,
+          skills: adminStu.skills || { listening: 0, speaking: 0, reading: 0, writing: 0, overall: 0 },
         });
       }
     });
@@ -251,18 +254,26 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     if (parentChildren.length > 0) {
       setStudents(parentChildren);
-      // If activeStudentId is not in parent's children, select the first child
-      if (!parentChildren.some((c) => c.id === activeStudentId)) {
-        setActiveStudentIdState(parentChildren[0].id);
-        setItem(STORAGE_KEYS.ACTIVE_STUDENT_ID, parentChildren[0].id);
-        setLevel(parentChildren[0].currentLevel);
-      }
+      const currentStoredId = getItem<string>(STORAGE_KEYS.ACTIVE_STUDENT_ID);
+      const isValidCurrent = parentChildren.some((c) => c.id === currentStoredId);
+      const targetId = isValidCurrent ? (currentStoredId as string) : parentChildren[0].id;
+
+      setActiveStudentIdState((prev) => {
+        if (prev !== targetId) {
+          setItem(STORAGE_KEYS.ACTIVE_STUDENT_ID, targetId);
+          return targetId;
+        }
+        return prev;
+      });
+
+      const targetChild = parentChildren.find((c) => c.id === targetId) || parentChildren[0];
+      setLevel(targetChild.currentLevel);
     } else {
       // Parent has NO linked students yet: leave students strictly empty!
       setStudents([]);
       setActiveStudentIdState('');
     }
-  }, [parent, activeStudentId, setLevel]);
+  }, [parent, setLevel]);
 
   // Curricula & Lesson Progress states synced with Backoffice
   const [curricula, setCurricula] = useState<CurriculumLevel[]>(() => {
@@ -283,8 +294,11 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   const [attendanceSessions, setAttendanceSessions] = useState<AttendanceSession[]>(() => {
     return getItem<AttendanceSession[]>(STORAGE_KEYS.ADMIN_ATTENDANCE) || [];
   });
+  const [adminHomeworkList, setAdminHomeworkList] = useState<AdminHomeworkAssignment[]>(() => {
+    return getItem<AdminHomeworkAssignment[]>(STORAGE_KEYS.ADMIN_HOMEWORK) || [];
+  });
 
-  // Sync on parent change and listen to window/storage sync events
+  // Sync on parent change and listen to window storage and custom sync events
   useEffect(() => {
     syncParentStudents();
 
@@ -297,21 +311,45 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           STORAGE_KEYS.ADMIN_STUDENT_LEVEL_SCORES
         ) || {};
       const freshAttendance = getItem<AttendanceSession[]>(STORAGE_KEYS.ADMIN_ATTENDANCE) || [];
+      const freshAdminHw = getItem<AdminHomeworkAssignment[]>(STORAGE_KEYS.ADMIN_HOMEWORK) || [];
+      const freshNotifs = getItem<Notification[]>(STORAGE_KEYS.NOTIFICATIONS);
+
       setCurricula(freshCurricula);
       setLessonProgress(freshProgress);
       setStudentLevelScores(freshScores);
       setAttendanceSessions(freshAttendance);
+      setAdminHomeworkList(freshAdminHw);
+      if (freshNotifs) {
+        setNotifications(freshNotifs);
+      }
+    };
+
+    const handleStorage = (e: StorageEvent) => {
+      if (
+        !e.key ||
+        e.key === STORAGE_KEYS.ADMIN_STUDENTS ||
+        e.key === STORAGE_KEYS.ADMIN_PARENTS ||
+        e.key === STORAGE_KEYS.STUDENTS_LIST ||
+        e.key === STORAGE_KEYS.ADMIN_CURRICULA ||
+        e.key === STORAGE_KEYS.ADMIN_LESSON_PROGRESS ||
+        e.key === STORAGE_KEYS.ADMIN_STUDENT_LEVEL_SCORES ||
+        e.key === STORAGE_KEYS.ADMIN_ATTENDANCE ||
+        e.key === STORAGE_KEYS.ADMIN_HOMEWORK ||
+        e.key === STORAGE_KEYS.NOTIFICATIONS
+      ) {
+        handleSync();
+      }
     };
 
     if (typeof window !== 'undefined') {
+      window.addEventListener('storage', handleStorage);
       window.addEventListener('awliya-data-sync', handleSync);
-      window.addEventListener('storage', handleSync);
     }
 
     return () => {
       if (typeof window !== 'undefined') {
+        window.removeEventListener('storage', handleStorage);
         window.removeEventListener('awliya-data-sync', handleSync);
-        window.removeEventListener('storage', handleSync);
       }
     };
   }, [syncParentStudents]);
@@ -557,8 +595,80 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
   const homeworkList = useMemo(() => {
     if (!activeStudent.id) return [];
-    return homeworkMap[activeStudent.id] || [];
-  }, [homeworkMap, activeStudent.id]);
+
+    // 1. Read live homework assignments from backoffice
+    const liveAdminHw =
+      adminHomeworkList.length > 0
+        ? adminHomeworkList
+        : getItem<AdminHomeworkAssignment[]>(STORAGE_KEYS.ADMIN_HOMEWORK) || [];
+
+    // Find all homework that targets this student (either by studentIds, groupId, or evaluations entry)
+    const activeStudentAny = activeStudent as any;
+    const matchingAdminHw = liveAdminHw.filter((hw) => {
+      const inStudentIds = hw.studentIds?.includes(activeStudent.id);
+      const inGroup = hw.groupId && activeStudentAny.groupId && hw.groupId === activeStudentAny.groupId;
+      const inEvals = hw.evaluations?.some(
+        (e) =>
+          e.studentId === activeStudent.id ||
+          (activeStudent.fullNameAr && e.studentNameAr === activeStudent.fullNameAr) ||
+          (activeStudentAny.nameAr && e.studentNameAr === activeStudentAny.nameAr)
+      );
+      return inStudentIds || inGroup || inEvals;
+    });
+
+    const mappedAdminHw: Homework[] = matchingAdminHw.map((hw) => {
+      const studentEval = hw.evaluations?.find(
+        (e) =>
+          e.studentId === activeStudent.id ||
+          (activeStudent.fullNameAr && e.studentNameAr === activeStudent.fullNameAr) ||
+          (activeStudentAny.nameAr && e.studentNameAr === activeStudentAny.nameAr)
+      );
+      let status: HomeworkStatus = 'not_started';
+      if (studentEval?.completionStatus === 'completed') {
+        status = 'completed';
+      } else if (studentEval?.completionStatus === 'needs_revision') {
+        status = 'needs_revision';
+      } else if (studentEval?.completionStatus === 'pending') {
+        status = 'pending';
+      }
+
+      const subject =
+        activeStudent.enrolledPathAr?.includes('فرنسية') || activeStudent.language === 'French'
+          ? 'اللغة الفرنسية'
+          : 'اللغة الإنجليزية';
+
+      return {
+        id: hw.id,
+        studentId: activeStudent.id,
+        titleAr: hw.assignmentNameAr,
+        titleEn: hw.assignmentNameEn || hw.assignmentNameAr,
+        subjectAr: subject,
+        level: (activeStudent.currentLevel as LevelId) || 1,
+        dueDate: hw.dueDate,
+        assignedDate: hw.assignedDate || new Date().toISOString().substring(0, 10),
+        status,
+        score: studentEval?.score,
+        totalScore: hw.totalScore || 20,
+        maxScore: hw.totalScore || 20,
+        teacherNote: studentEval?.teacherComment || hw.teacherNote,
+        description: hw.descriptionAr,
+        parentConfirmed: status === 'completed',
+        parentConfirmDate: studentEval?.submittedAt,
+      };
+    });
+
+    // Merge with any custom client-side stored homework for this student
+    const clientHw = homeworkMap[activeStudent.id] || [];
+    const seenIds = new Set<string>(mappedAdminHw.map((h) => h.id));
+    const combined = [...mappedAdminHw];
+    clientHw.forEach((h) => {
+      if (!seenIds.has(h.id)) {
+        combined.push(h);
+      }
+    });
+
+    return combined;
+  }, [adminHomeworkList, homeworkMap, activeStudent]);
 
   const attendanceData = useMemo(() => {
     if (!activeStudent.id) {
@@ -585,15 +695,24 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         (a, b) => new Date(b.session.date).getTime() - new Date(a.session.date).getTime()
       );
 
-      // Helper to calculate week index relative to reference week:
-      // Week 0: Feb 15 - Feb 20, 2025 (or within 6 days of session)
-      // Week 1: Feb 08 - Feb 13, 2025
-      // Week 2: Feb 01 - Feb 06, 2025
+      // Helper to calculate week index dynamically relative to current week:
+      // Week 0: Current week (since latest Saturday)
+      // Week 1: Last week
+      // Week 2: Previous week
       const parseWeekIndex = (dateStr: string) => {
         try {
-          const date = new Date(dateStr);
-          const baseDate = new Date('2025-02-15');
-          const diffDays = Math.floor((baseDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+          const sessDate = new Date(dateStr);
+          sessDate.setHours(0, 0, 0, 0);
+
+          const now = new Date();
+          const dayOfWeek = now.getDay();
+          const diffToSaturday = (dayOfWeek + 1) % 7;
+          
+          const currentSat = new Date(now);
+          currentSat.setDate(now.getDate() - diffToSaturday);
+          currentSat.setHours(0, 0, 0, 0);
+
+          const diffDays = Math.floor((currentSat.getTime() - sessDate.getTime()) / (1000 * 60 * 60 * 24));
           if (diffDays <= 6 && diffDays >= -6) return 0; // Current week
           if (diffDays > 6 && diffDays <= 13) return 1;  // Last week
           return 2;                                      // Previous week
@@ -614,7 +733,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
               : 'اللغة الإنجليزية',
           status: entry.status,
           noteAr: entry.note || undefined,
-          sessionTimeAr: session.sessionTime ? `${session.sessionTime} م` : '04:30 م',
+          sessionTimeAr: session.sessionTime || '04:30 PM - 06:00 PM',
           weekIndex: parseWeekIndex(session.date),
         };
       });
@@ -665,13 +784,50 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
   const assessments = useMemo(() => {
     if (!activeStudent.id) return [];
+
+    // 1. Check live assessments recorded by teachers/admins in backoffice
+    const liveAdminAssessments = getItem<any[]>('myschool_admin_assessments_v11') || [];
+    const matched: Assessment[] = liveAdminAssessments
+      .filter((a) => a.studentId === activeStudent.id)
+      .map((a) => ({
+        id: a.id,
+        studentId: a.studentId,
+        titleAr: `تقييم المهارات اللغوية (${a.assessmentType === 'periodic' ? 'دوري' : a.assessmentType === 'midterm' ? 'نصفي' : a.assessmentType === 'final' ? 'نهائي' : 'تحديد مستوى'})`,
+        typeAr: a.assessmentType === 'periodic' ? 'اختبار دوري' : a.assessmentType === 'midterm' ? 'اختبار نصفي' : a.assessmentType === 'final' ? 'اختبار نهائي' : 'تحديد مستوى',
+        subjectAr: activeStudent.enrolledPathAr?.includes('فرنسية') || activeStudent.language === 'French' ? 'اللغة الفرنسية' : 'اللغة الإنجليزية',
+        score: a.scores?.overall !== undefined ? a.scores.overall : (a.score !== undefined ? a.score : 0),
+        totalScore: 100,
+        gradeLetterAr: a.gradeLetterAr || 'ممتاز',
+        date: a.date,
+        level: (Number(activeStudent.currentLevel) || 1) as LevelId,
+        teacherComments: a.teacherComment || 'أداء متميز وتطور ملحوظ في المهارات اللغوية.',
+      }));
+
+    if (matched.length > 0) return matched;
     return mockAssessmentsMap[activeStudent.id] || [];
-  }, [activeStudent.id]);
+  }, [activeStudent.id, activeStudent.enrolledPathAr, activeStudent.language, activeStudent.currentLevel]);
 
   const teacherFeedback = useMemo(() => {
     if (!activeStudent.id) return [];
+
+    // 1. Check live feedback recorded by teachers in backoffice
+    const liveAdminFeedback = getItem<any[]>('myschool_admin_feedback_v11') || [];
+    const matched: TeacherFeedback[] = liveAdminFeedback
+      .filter((fb) => fb.studentId === activeStudent.id)
+      .map((fb) => ({
+        id: fb.id,
+        studentId: fb.studentId,
+        teacherNameAr: fb.teacherName || 'الأستاذ',
+        messageAr: fb.teacherFeedback?.generalComments || fb.feedback || 'أداء متميز وتفاعل إيجابي في الحصص التعليمية.',
+        date: fb.date,
+        subjectAr: activeStudent.enrolledPathAr?.includes('فرنسية') || activeStudent.language === 'French' ? 'اللغة الفرنسية' : 'اللغة الإنجليزية',
+        isRead: true,
+        badgeAr: 'طالب متميز',
+      }));
+
+    if (matched.length > 0) return matched;
     return mockTeacherFeedbackMap[activeStudent.id] || [];
-  }, [activeStudent.id]);
+  }, [activeStudent.id, activeStudent.enrolledPathAr, activeStudent.language]);
 
   const studentFees = useMemo(() => {
     return fees.filter((f) => f.studentId === activeStudent.id || !f.studentId);

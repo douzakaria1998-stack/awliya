@@ -113,17 +113,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     };
 
+    const handleSyncEvent = () => {
+      setTimeout(syncAuth, 0);
+    };
+
     syncAuth();
 
     if (typeof window !== 'undefined') {
-      window.addEventListener('awliya-data-sync', syncAuth);
-      window.addEventListener('storage', syncAuth);
+      window.addEventListener('awliya-data-sync', handleSyncEvent);
+      window.addEventListener('storage', handleSyncEvent);
     }
 
     return () => {
       if (typeof window !== 'undefined') {
-        window.removeEventListener('awliya-data-sync', syncAuth);
-        window.removeEventListener('storage', syncAuth);
+        window.removeEventListener('awliya-data-sync', handleSyncEvent);
+        window.removeEventListener('storage', handleSyncEvent);
       }
     };
   }, []);

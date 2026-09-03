@@ -111,6 +111,7 @@ export interface AdminTeacher {
   fullNameAr: string;
   fullNameEn: string;
   username: string;
+  password?: string;
   email: string;
   phone: string;
   languagesTaught: ('English' | 'French')[];
@@ -135,6 +136,7 @@ export interface AdminGroup {
   daysEn: string;
   startTime: string; // '18:00'
   endTime: string; // '20:00'
+  schedules?: { day: string; time: string; period?: string }[];
   maxCapacity: number; // 20
   studentIds: string[];
   attendanceRate: number; // e.g. 91%
@@ -142,6 +144,8 @@ export interface AdminGroup {
   averagePerformance: number; // e.g. 78%
   completedLessonsCount: number;
   totalLessonsCount: number;
+  startDate?: string;
+  totalSessions?: number;
   status: EntityStatus;
 }
 
@@ -217,6 +221,9 @@ export interface AttendanceSession {
   teacherName: string;
   records: AttendanceStudentEntry[];
   isLocked?: boolean;
+  isCoveringSession?: boolean;
+  coveringType?: 'counted' | 'not_counted';
+  coveringReason?: string;
 }
 
 // Performance - Homework Assignment & Evaluation

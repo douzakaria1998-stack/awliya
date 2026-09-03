@@ -94,20 +94,6 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
                 {t.level} {level.level}
               </span>
 
-              {level.cefrCode && (
-                <span
-                  className="inline-flex items-center rounded-full font-black bg-white/25 backdrop-blur-md text-white border border-white/30 whitespace-nowrap font-mono select-none"
-                  style={{
-                    height: '32px',
-                    paddingRight: '14px',
-                    paddingLeft: '14px',
-                    fontSize: '13px',
-                  }}
-                >
-                  {level.cefrCode}
-                </span>
-              )}
-
               {level.status === 'studied' && (
                 <span
                   className="inline-flex items-center rounded-full font-bold bg-white text-emerald-800 shadow-2xs whitespace-nowrap select-none"

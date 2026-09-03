@@ -58,7 +58,6 @@ export function downloadCertificateHTML(
   const birthDateFormatted = formatBirthDate(student?.birthday || '2014-05-12');
   const completionDateFormatted = formatDisplayDate(level.completedDate || '2024-05-25');
   
-  const cefrCode = CEFR_LEVELS[level.level] || 'C1';
   const isFrench = student?.enrolledPathAr?.includes('فرنسية') || student?.enrolledPathAr?.includes('French');
   const subjectName = isFrench ? 'French' : 'English';
 
@@ -67,7 +66,7 @@ export function downloadCertificateHTML(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Certificate of Achievement - ${recipientName} - ${subjectName} ${cefrCode}</title>
+  <title>Certificate of Achievement - ${recipientName} - ${subjectName} Level ${level.level}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
@@ -531,7 +530,7 @@ export function downloadCertificateHTML(
 
         <!-- 6. Completion Paragraphs -->
         <p class="body-paragraph-1">
-          Has successfully completed a course in <strong>${subjectName} ${cefrCode} level</strong> following <strong>the CEFR model</strong><br>and the standards required by <strong>My School</strong> to merit this certificate.
+          Has successfully completed a course in <strong>${subjectName} Level ${level.level}</strong><br>and met the academic standards required by <strong>My School</strong> to merit this certificate.
         </p>
 
         <p class="body-paragraph-2">
@@ -586,7 +585,7 @@ export function downloadCertificateHTML(
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `Certificate-${recipientName.replace(/\\s+/g, '_')}-${subjectName}-${cefrCode}.html`;
+  a.download = `Certificate-${recipientName.replace(/\\s+/g, '_')}-${subjectName}-Level-${level.level}.html`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

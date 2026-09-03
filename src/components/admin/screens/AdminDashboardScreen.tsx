@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Users,
   UserCheck,
@@ -65,7 +65,7 @@ export function AdminDashboardScreen() {
       ? Math.round(studentsInLevel.reduce((sum, s) => sum + (s.overallProgress || 0), 0) / count)
       : 0;
     return {
-      level: curricLevel.cefrCode,
+      level: language === 'ar' ? `المستوى ${curricLevel.levelNumber}` : `Level ${curricLevel.levelNumber}`,
       levelNumber: curricLevel.levelNumber,
       nameAr: curricLevel.nameAr,
       nameEn: curricLevel.nameEn,
@@ -79,10 +79,29 @@ export function AdminDashboardScreen() {
   const allAttendanceRecords = attendanceSessions.flatMap((s) => s.records || []);
   const totalAttendanceCount = allAttendanceRecords.length;
   
-  const presentOrLateCount = allAttendanceRecords.filter((r) => r.status === 'present' || r.status === 'late').length;
-  const overallWeekAttendanceRate = totalAttendanceCount > 0
-    ? Math.round((presentOrLateCount / totalAttendanceCount) * 100)
-    : (students.length > 0 ? avgAttendance : 0);
+  // 1. Calculate this week's records (sessions within the last 7 days)
+  const now = new Date();
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(now.getDate() - 7);
+  const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+
+  const thisWeekSessions = attendanceSessions.filter((s) => s.date >= sevenDaysAgoStr);
+  const thisWeekRecords = thisWeekSessions.flatMap((s) => s.records || []);
+  const overallWeekAttendanceRate = thisWeekRecords.length > 0
+    ? Math.round(
+        (thisWeekRecords.filter((r) => r.status === 'present' || r.status === 'late').length /
+          thisWeekRecords.length) *
+          100
+      )
+    : allAttendanceRecords.length > 0
+    ? Math.round(
+        (allAttendanceRecords.filter((r) => r.status === 'present' || r.status === 'late').length /
+          allAttendanceRecords.length) *
+          100
+      )
+    : students.length > 0
+    ? avgAttendance
+    : 0;
 
   const todayStr = new Date().toISOString().split('T')[0];
   const yesterdayDate = new Date();
@@ -92,17 +111,107 @@ export function AdminDashboardScreen() {
   const todaySessions = attendanceSessions.filter((s) => s.date === todayStr);
   const todayRecords = todaySessions.flatMap((s) => s.records || []);
   const todayAttendanceRate = todayRecords.length > 0
-    ? Math.round((todayRecords.filter((r) => r.status === 'present' || r.status === 'late').length / todayRecords.length) * 100)
-    : (attendanceSessions.length > 0 ? overallWeekAttendanceRate : 0);
+    ? Math.round(
+        (todayRecords.filter((r) => r.status === 'present' || r.status === 'late').length /
+          todayRecords.length) *
+          100
+      )
+    : null;
 
   const yesterdaySessions = attendanceSessions.filter((s) => s.date === yesterdayStr);
   const yesterdayRecords = yesterdaySessions.flatMap((s) => s.records || []);
   const yesterdayAttendanceRate = yesterdayRecords.length > 0
-    ? Math.round((yesterdayRecords.filter((r) => r.status === 'present' || r.status === 'late').length / yesterdayRecords.length) * 100)
-    : (attendanceSessions.length > 0 ? overallWeekAttendanceRate : 0);
+    ? Math.round(
+        (yesterdayRecords.filter((r) => r.status === 'present' || r.status === 'late').length /
+          yesterdayRecords.length) *
+          100
+      )
+    : null;
 
-  const totalSessionsCompleted = attendanceSessions.length;
+  const totalSessionsDone = attendanceSessions.length;
+
+  // Calculate past/today scheduled sessions that have not been conducted/recorded yet (excluding future sessions)
+  const totalSessionsNotDone = useMemo(() => {
+    let unrecordedCount = 0;
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+
+    const dayMapEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayMapAr = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+    const isStudyDay = (grp: any, dateObj: Date) => {
+      const dayIdx = dateObj.getDay();
+      const enDay = dayMapEn[dayIdx].toLowerCase();
+      const arDay = dayMapAr[dayIdx];
+
+      if (grp.schedules && grp.schedules.length > 0) {
+        return grp.schedules.some((s: any) => {
+          const d = (s.day || '').toLowerCase();
+          return d.includes(enDay) || d.includes(arDay);
+        });
+      }
+
+      const daysEn = (grp.daysEn || '').toLowerCase();
+      const daysAr = grp.daysAr || '';
+      return daysEn.includes(enDay) || daysAr.includes(arDay);
+    };
+
+    visibleGroups.forEach((grp) => {
+      if (grp.status === 'archived') return;
+
+      // Group start date
+      const groupStartDate = grp.startDate ? new Date(grp.startDate) : new Date(today.getTime() - 14 * 86400000);
+      groupStartDate.setHours(0, 0, 0, 0);
+
+      const maxSessions = grp.totalSessions || 24;
+      let completedCount = 0;
+
+      const cursor = new Date(groupStartDate);
+      while (cursor <= today && completedCount < maxSessions) {
+        if (isStudyDay(grp, cursor)) {
+          const dateStr = cursor.toISOString().split('T')[0];
+          const hasRecordedSession = attendanceSessions.some(
+            (s) => s.groupId === grp.id && s.date === dateStr && (s.isLocked || (s.records && s.records.length > 0))
+          );
+
+          if (hasRecordedSession) {
+            completedCount++;
+          } else {
+            unrecordedCount++;
+          }
+        }
+        cursor.setDate(cursor.getDate() + 1);
+      }
+    });
+
+    return unrecordedCount;
+  }, [visibleGroups, attendanceSessions]);
+
+  const totalPresentCount = allAttendanceRecords.filter((r) => r.status === 'present').length;
+  const totalLateCount = allAttendanceRecords.filter((r) => r.status === 'late').length;
   const totalExcusedAbsences = allAttendanceRecords.filter((r) => r.status === 'excused').length;
+  const totalUnexcusedAbsences = allAttendanceRecords.filter((r) => r.status === 'absent').length;
+
+  const getDashboardGroupAttendanceRate = (grp: any) => {
+    const groupConfirmedSessions = attendanceSessions.filter(
+      (a) => a.groupId === grp.id && (a.isLocked || (a.records && a.records.length > 0))
+    );
+    if (!grp.studentIds || grp.studentIds.length === 0 || groupConfirmedSessions.length === 0) return 0;
+
+    let totalPossible = 0;
+    let totalAttended = 0;
+
+    groupConfirmedSessions.forEach((sess) => {
+      sess.records?.forEach((rec) => {
+        totalPossible++;
+        if (rec.status === 'present' || rec.status === 'late' || rec.status === 'excused') {
+          totalAttended++;
+        }
+      });
+    });
+
+    return totalPossible > 0 ? Math.round((totalAttended / totalPossible) * 100) : 0;
+  };
 
   const attendanceSubtext = students.length === 0
     ? (language === 'ar' ? 'لا توجد بيانات حضور' : 'No attendance data')
@@ -124,16 +233,16 @@ export function AdminDashboardScreen() {
     <div className={`w-full select-none ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* 1. Welcome Banner */}
       <div
-        className="rounded-[32px] bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white shadow-xl border border-purple-900/50 relative overflow-hidden"
+        className="rounded-2xl bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white shadow-lg border border-purple-900/50 relative overflow-hidden"
         style={{
-          padding: '36px 40px',
-          marginBottom: '36px',
+          padding: '18px 24px',
+          marginBottom: '24px',
         }}
       >
-        <div className="relative z-10 space-y-4">
+        <div className="relative z-10 space-y-2.5">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/20 text-purple-300 text-xs font-black border border-purple-500/30">
-              <Sparkles size={14} className="text-amber-400 shrink-0" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[11px] font-bold border border-purple-500/30">
+              <Sparkles size={12} className="text-amber-400 shrink-0" />
               <span>
                 {currentRole === 'super_admin'
                   ? 'Super Admin Dashboard • Full Platform Access'
@@ -144,11 +253,11 @@ export function AdminDashboardScreen() {
             </span>
           </div>
 
-          <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <div className="space-y-1">
+            <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
               {language === 'ar' ? 'لوحة المتابعة الشاملة والمؤشرات الأكاديمية' : language === 'fr' ? 'Tableau de Bord & Indicateurs Globaux' : 'Platform Executive Overview & Analytics'}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-2xl leading-relaxed">
+            <p className="text-xs text-slate-300 font-medium max-w-2xl leading-relaxed">
               {language === 'ar'
                 ? 'نظرة عامة متكاملة على إحصائيات الطلاب، الأفواج التعليمية، معدلات الحضور والتقدم في مساري الإنجليزية والفرنسية.'
                 : 'Real-time monitoring of students, class groups, attendance rates, and curriculum progress across languages.'}
@@ -158,28 +267,28 @@ export function AdminDashboardScreen() {
       </div>
 
       {/* 2. Top 8 KPI Statistics Cards (Section 4, 39) */}
-      <div style={{ marginBottom: '36px' }}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-            <Activity size={20} className="text-purple-600 dark:text-purple-400" />
+      <div style={{ marginBottom: '28px' }}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <Activity size={16} className="text-purple-600 dark:text-purple-400" />
             <span>{language === 'ar' ? 'المؤشرات الرئيسية للمنصة (Platform KPIs)' : 'Platform Key Statistics'}</span>
           </h3>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
           {/* Total Students */}
           <div
             onClick={() => setActiveTab('students')}
-            className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-blue-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '26px 28px' }}
+            className="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-blue-400 transition-all cursor-pointer flex flex-col justify-between"
+            style={{ padding: '14px 18px' }}
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'إجمالي الطلاب' : 'Total Students'}</span>
-              <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center">
-                <Users size={16} />
+              <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center">
+                <Users size={14} />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
+            <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono leading-none">
               {totalStudents}
             </div>
             <span className="text-[11px] font-bold text-emerald-600 mt-1 block">
@@ -190,16 +299,16 @@ export function AdminDashboardScreen() {
           {/* Total Parents */}
           <div
             onClick={() => setActiveTab('parents')}
-            className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-purple-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '24px 26px' }}
+            className="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-purple-400 transition-all cursor-pointer flex flex-col justify-between"
+            style={{ padding: '14px 18px' }}
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'أولياء الأمور' : 'Total Parents'}</span>
-              <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center">
-                <UserCheck size={16} />
+              <div className="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center">
+                <UserCheck size={14} />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
+            <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono leading-none">
               {totalParents}
             </div>
             <span className="text-[11px] font-bold text-slate-400 mt-1 block">
@@ -210,16 +319,16 @@ export function AdminDashboardScreen() {
           {/* Total Teachers */}
           <div
             onClick={() => setActiveTab('teachers')}
-            className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-emerald-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '24px 26px' }}
+            className="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-emerald-400 transition-all cursor-pointer flex flex-col justify-between"
+            style={{ padding: '14px 18px' }}
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'هيئة التدريس' : 'Total Teachers'}</span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
-                <GraduationCap size={16} />
+              <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
+                <GraduationCap size={14} />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
+            <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono leading-none">
               {totalTeachers}
             </div>
             <span className="text-[11px] font-bold text-slate-400 mt-1 block">
@@ -230,16 +339,16 @@ export function AdminDashboardScreen() {
           {/* Total Groups */}
           <div
             onClick={() => setActiveTab('groups')}
-            className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-amber-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '24px 26px' }}
+            className="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-amber-400 transition-all cursor-pointer flex flex-col justify-between"
+            style={{ padding: '14px 18px' }}
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'الأفواج النشطة' : 'Active Groups'}</span>
-              <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center">
-                <School size={16} />
+              <div className="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center">
+                <School size={14} />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
+            <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono leading-none">
               {activeGroups} / {totalGroups}
             </div>
             <span className="text-[11px] font-bold text-amber-600 mt-1 block">
@@ -250,16 +359,16 @@ export function AdminDashboardScreen() {
           {/* Attendance Rate */}
           <div
             onClick={() => setActiveTab('attendance')}
-            className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-teal-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '24px 26px' }}
+            className="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-teal-400 transition-all cursor-pointer flex flex-col justify-between"
+            style={{ padding: '14px 18px' }}
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'نسبة الانضباط والحضور' : 'Attendance Rate'}</span>
-              <div className="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 flex items-center justify-center">
-                <CalendarCheck2 size={16} />
+              <div className="w-7 h-7 rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-600 flex items-center justify-center">
+                <CalendarCheck2 size={14} />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
+            <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono leading-none">
               {avgAttendance}%
             </div>
             <span className="text-[11px] font-bold text-teal-600 mt-1 block">
@@ -270,16 +379,16 @@ export function AdminDashboardScreen() {
           {/* Average Performance */}
           <div
             onClick={() => setActiveTab('performance')}
-            className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-rose-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '24px 26px' }}
+            className="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-rose-400 transition-all cursor-pointer flex flex-col justify-between"
+            style={{ padding: '14px 18px' }}
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'المعدل العام للأداء' : 'Average Performance'}</span>
-              <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 flex items-center justify-center">
-                <Award size={16} />
+              <div className="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 flex items-center justify-center">
+                <Award size={14} />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-mono">
+            <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white font-mono leading-none">
               {avgPerformance}%
             </div>
             <span className="text-[11px] font-bold text-rose-600 mt-1 block">
@@ -290,36 +399,36 @@ export function AdminDashboardScreen() {
           {/* English Track Students */}
           <div
             onClick={() => setActiveTab('students')}
-            className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-indigo-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '24px 26px' }}
+            className="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-indigo-400 transition-all cursor-pointer flex flex-col justify-between"
+            style={{ padding: '14px 18px' }}
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'مسار الإنجليزية' : 'English Track'}</span>
-              <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 flex items-center justify-center">
-                <BookOpen size={16} />
+              <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 flex items-center justify-center">
+                <BookOpen size={14} />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-indigo-600 font-mono">
+            <div className="text-xl sm:text-2xl font-black text-indigo-600 font-mono leading-none">
               {students.filter((s) => s.language === 'English' || s.language === 'Dual').length}
             </div>
             <span className="text-[11px] font-bold text-slate-400 mt-1 block">
-              CEFR A1–B2
+              {language === 'ar' ? 'المستويات 1 - 10' : 'Levels 1 - 10'}
             </span>
           </div>
 
           {/* French Track Students */}
           <div
             onClick={() => setActiveTab('students')}
-            className="rounded-[24px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-violet-400 transition-all cursor-pointer flex flex-col justify-between"
-            style={{ padding: '24px 26px' }}
+            className="rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-violet-400 transition-all cursor-pointer flex flex-col justify-between"
+            style={{ padding: '14px 18px' }}
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-bold text-slate-400">{language === 'ar' ? 'مسار الفرنسية' : 'French Track'}</span>
-              <div className="w-8 h-8 rounded-xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 flex items-center justify-center">
-                <Languages size={16} />
+              <div className="w-7 h-7 rounded-lg bg-violet-50 dark:bg-violet-950/60 text-violet-600 flex items-center justify-center">
+                <Languages size={14} />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-violet-600 font-mono">
+            <div className="text-xl sm:text-2xl font-black text-violet-600 font-mono leading-none">
               {students.filter((s) => s.language === 'French' || s.language === 'Dual').length}
             </div>
             <span className="text-[11px] font-bold text-slate-400 mt-1 block">
@@ -330,39 +439,39 @@ export function AdminDashboardScreen() {
       </div>
 
       {/* 3. Middle Section: Student Progress by Level + Attendance Breakdown (Section 39) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ marginBottom: '48px' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5" style={{ marginBottom: '32px' }}>
         {/* Student Progress By Level */}
         <div
-          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs flex flex-col justify-between"
-          style={{ padding: '44px 48px' }}
+          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-2xs flex flex-col justify-between"
+          style={{ padding: '20px 24px' }}
         >
           <div>
             <div
-              className="flex items-center justify-between gap-4 flex-wrap"
-              style={{ marginBottom: '32px' }}
+              className="flex items-center justify-between gap-3 flex-wrap"
+              style={{ marginBottom: '20px' }}
             >
-              <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white flex items-center gap-3">
-                <TrendingUp size={24} className="text-indigo-600 shrink-0" />
+              <h4 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <TrendingUp size={18} className="text-indigo-600 shrink-0" />
                 <span>{language === 'ar' ? 'نسبة الإنجاز الأكاديمي حسب المستويات' : 'Student Progress by Level'}</span>
               </h4>
               <button
                 type="button"
                 onClick={() => setActiveTab('academic')}
-                className="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
               >
                 {language === 'ar' ? 'عرض المسار' : 'View Path'} →
               </button>
             </div>
 
             {levelProgressData.length === 0 ? (
-              <div className="py-10 flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4 shadow-xs border border-indigo-100 dark:border-indigo-900/50">
-                  <TrendingUp size={30} />
+              <div className="py-8 flex flex-col items-center justify-center text-center">
+                <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3 shadow-xs border border-indigo-100 dark:border-indigo-900/50">
+                  <TrendingUp size={22} />
                 </div>
-                <h5 className="text-base sm:text-lg font-black text-slate-800 dark:text-slate-100 mb-2">
+                <h5 className="text-sm sm:text-base font-black text-slate-800 dark:text-slate-100 mb-1">
                   {language === 'ar' ? 'لا توجد مستويات أكاديمية مضافة' : 'No curriculum levels added yet'}
                 </h5>
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed mb-6 px-4">
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed mb-4 px-2">
                   {language === 'ar'
                     ? 'قم بإضافة المستويات والوحدات والدروس من شاشة المسار الأكاديمي للبدء في تتبع الإنجاز.'
                     : 'Add levels, units, and lessons in Academic Path to start tracking progress.'}
@@ -370,25 +479,25 @@ export function AdminDashboardScreen() {
                 <button
                   type="button"
                   onClick={() => setActiveTab('academic')}
-                  className="inline-flex items-center justify-center gap-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer whitespace-nowrap"
-                  style={{ minHeight: '48px', padding: '12px 32px' }}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold shadow-xs transition-all cursor-pointer whitespace-nowrap"
+                  style={{ minHeight: '36px', padding: '8px 20px' }}
                 >
-                  <Sparkles size={16} className="shrink-0 text-amber-300" />
+                  <Sparkles size={14} className="shrink-0 text-amber-300" />
                   <span>{language === 'ar' ? 'إضافة مستوى أكاديمي' : 'Add Academic Level'}</span>
-                  <span className="font-mono text-sm leading-none font-bold">{isRTL ? '←' : '→'}</span>
+                  <span className="font-mono text-xs leading-none font-bold">{isRTL ? '←' : '→'}</span>
                 </button>
               </div>
             ) : (
-              <div className="space-y-7">
+              <div className="space-y-4">
                 {levelProgressData.map((item) => (
-                  <div key={`${item.level}-${item.levelNumber}-${item.language}`} className="space-y-3">
-                    <div className="flex items-center justify-between text-xs sm:text-sm font-bold">
-                      <span className="text-slate-700 dark:text-slate-200 font-mono text-sm sm:text-base">
+                  <div key={`${item.level}-${item.levelNumber}-${item.language}`} className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="text-slate-700 dark:text-slate-200 font-mono text-xs sm:text-sm">
                         {item.level} — {language === 'ar' ? item.nameAr : item.nameEn} ({item.count} {language === 'ar' ? 'طلاب' : 'students'})
                       </span>
-                      <span className="font-mono font-black text-indigo-600 text-sm sm:text-base">{item.progress}%</span>
+                      <span className="font-mono font-black text-indigo-600 text-xs sm:text-sm">{item.progress}%</span>
                     </div>
-                    <div className="w-full h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200/40 dark:border-slate-700/40">
+                    <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200/40 dark:border-slate-700/40">
                       <div
                         className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-purple-600 rounded-full transition-all"
                         style={{ width: `${item.progress}%` }}
@@ -403,84 +512,139 @@ export function AdminDashboardScreen() {
 
         {/* Attendance Breakdown (Today, Yesterday, This Week) */}
         <div
-          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs flex flex-col justify-between"
-          style={{ padding: '44px 48px' }}
+          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-2xs flex flex-col justify-between"
+          style={{ padding: '20px 24px' }}
         >
           <div>
             <div
-              className="flex items-center justify-between gap-4 flex-wrap"
-              style={{ marginBottom: '32px' }}
+              className="flex items-center justify-between gap-3 flex-wrap"
+              style={{ marginBottom: '20px' }}
             >
-              <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white flex items-center gap-3">
-                <CalendarCheck2 size={24} className="text-emerald-600 shrink-0" />
+              <h4 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <CalendarCheck2 size={18} className="text-emerald-600 shrink-0" />
                 <span>{language === 'ar' ? 'مؤشرات الحضور الأسبوعي' : 'Attendance Overview'}</span>
               </h4>
               <button
                 type="button"
                 onClick={() => setActiveTab('attendance')}
-                className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
               >
                 {language === 'ar' ? 'دفتر الحضور' : 'Attendance Sheet'} →
               </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-4" style={{ marginBottom: '32px' }}>
+            <div className="grid grid-cols-3 gap-2.5" style={{ marginBottom: '20px' }}>
               <div
-                className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 rounded-2xl text-center flex flex-col justify-center"
-                style={{ padding: '24px 18px' }}
+                className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 rounded-xl text-center flex flex-col justify-center"
+                style={{ padding: '12px 10px' }}
               >
-                <span className="text-xs sm:text-sm text-emerald-700 dark:text-emerald-300 font-bold block mb-2">
+                <span className="text-[11px] text-emerald-700 dark:text-emerald-300 font-bold block mb-1">
                   {language === 'ar' ? 'اليوم (Today)' : 'Today'}
                 </span>
-                <span className="text-3xl font-black text-emerald-800 dark:text-emerald-200 font-mono block">
-                  {todayAttendanceRate}%
+                <span className="text-xl sm:text-2xl font-black text-emerald-800 dark:text-emerald-200 font-mono block leading-none">
+                  {todayAttendanceRate !== null ? `${todayAttendanceRate}%` : '--'}
                 </span>
               </div>
               <div
-                className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/40 rounded-2xl text-center flex flex-col justify-center"
-                style={{ padding: '24px 18px' }}
+                className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/40 rounded-xl text-center flex flex-col justify-center"
+                style={{ padding: '12px 10px' }}
               >
-                <span className="text-xs sm:text-sm text-blue-700 dark:text-blue-300 font-bold block mb-2">
+                <span className="text-[11px] text-blue-700 dark:text-blue-300 font-bold block mb-1">
                   {language === 'ar' ? 'أمس (Yesterday)' : 'Yesterday'}
                 </span>
-                <span className="text-3xl font-black text-blue-800 dark:text-blue-200 font-mono block">
-                  {yesterdayAttendanceRate}%
+                <span className="text-xl sm:text-2xl font-black text-blue-800 dark:text-blue-200 font-mono block leading-none">
+                  {yesterdayAttendanceRate !== null ? `${yesterdayAttendanceRate}%` : '--'}
                 </span>
               </div>
               <div
-                className="bg-purple-50 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-800/40 rounded-2xl text-center flex flex-col justify-center"
-                style={{ padding: '24px 18px' }}
+                className="bg-purple-50 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-800/40 rounded-xl text-center flex flex-col justify-center"
+                style={{ padding: '12px 10px' }}
               >
-                <span className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 font-bold block mb-2">
+                <span className="text-[11px] text-purple-700 dark:text-purple-300 font-bold block mb-1">
                   {language === 'ar' ? 'هذا الأسبوع' : 'This Week'}
                 </span>
-                <span className="text-3xl font-black text-purple-800 dark:text-purple-200 font-mono block">
+                <span className="text-xl sm:text-2xl font-black text-purple-800 dark:text-purple-200 font-mono block leading-none">
                   {overallWeekAttendanceRate}%
                 </span>
               </div>
             </div>
 
-            <div className="space-y-4 text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400">
+            <div className="space-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+              {/* 1. Number session that done */}
               <div
-                className="flex items-center justify-between rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800"
-                style={{ padding: '18px 24px' }}
+                className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800"
+                style={{ padding: '9px 16px' }}
               >
                 <span className="text-slate-700 dark:text-slate-200 font-bold">
-                  {language === 'ar' ? 'إجمالي الحصص المنجزة:' : 'Completed Sessions:'}
+                  {language === 'ar' ? 'عدد الحصص المنجزة:' : 'Sessions Done (Completed):'}
                 </span>
-                <span className="font-mono font-black text-slate-900 dark:text-white text-base">
-                  {totalSessionsCompleted} {language === 'ar' ? 'حصة' : 'sessions'}
+                <span className="font-mono font-black text-slate-900 dark:text-white text-xs sm:text-sm">
+                  {totalSessionsDone} {language === 'ar' ? 'حصة' : 'sessions'}
                 </span>
               </div>
+
+              {/* 2. Session not done */}
               <div
-                className="flex items-center justify-between rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800"
-                style={{ padding: '18px 24px' }}
+                className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800"
+                style={{ padding: '9px 16px' }}
               >
                 <span className="text-slate-700 dark:text-slate-200 font-bold">
-                  {language === 'ar' ? 'عدد حالات الغياب المبرر:' : 'Excused Absences:'}
+                  {language === 'ar' ? 'عدد الحصص غير المنجزة (حتى اليوم):' : 'Sessions Not Done (Up to Today):'}
                 </span>
-                <span className="font-mono font-black text-blue-600 dark:text-blue-400 text-base">
+                <span className="font-mono font-black text-rose-600 dark:text-rose-400 text-xs sm:text-sm">
+                  {totalSessionsNotDone} {language === 'ar' ? 'حصة' : 'sessions'}
+                </span>
+              </div>
+
+              {/* 3. Present */}
+              <div
+                className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800"
+                style={{ padding: '9px 16px' }}
+              >
+                <span className="text-slate-700 dark:text-slate-200 font-bold">
+                  {language === 'ar' ? 'عدد حالات الحضور (Present):' : 'Present Count:'}
+                </span>
+                <span className="font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm">
+                  {totalPresentCount} {language === 'ar' ? 'حالات' : 'cases'}
+                </span>
+              </div>
+
+              {/* 4. Late */}
+              <div
+                className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800"
+                style={{ padding: '9px 16px' }}
+              >
+                <span className="text-slate-700 dark:text-slate-200 font-bold">
+                  {language === 'ar' ? 'عدد حالات التأخير (Late):' : 'Late Arrivals:'}
+                </span>
+                <span className="font-mono font-black text-amber-600 dark:text-amber-400 text-xs sm:text-sm">
+                  {totalLateCount} {language === 'ar' ? 'حالات' : 'cases'}
+                </span>
+              </div>
+
+              {/* 5. Absent with approve */}
+              <div
+                className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800"
+                style={{ padding: '9px 16px' }}
+              >
+                <span className="text-slate-700 dark:text-slate-200 font-bold">
+                  {language === 'ar' ? 'عدد حالات الغياب المبرر (بموافقة):' : 'Absent (With Approval):'}
+                </span>
+                <span className="font-mono font-black text-blue-600 dark:text-blue-400 text-xs sm:text-sm">
                   {totalExcusedAbsences} {language === 'ar' ? 'حالات' : 'cases'}
+                </span>
+              </div>
+
+              {/* 6. Absent */}
+              <div
+                className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800"
+                style={{ padding: '9px 16px' }}
+              >
+                <span className="text-slate-700 dark:text-slate-200 font-bold">
+                  {language === 'ar' ? 'عدد حالات الغياب غير المبرر (Absent):' : 'Absent (Unexcused):'}
+                </span>
+                <span className="font-mono font-black text-rose-600 dark:text-rose-400 text-xs sm:text-sm">
+                  {totalUnexcusedAbsences} {language === 'ar' ? 'حالات' : 'cases'}
                 </span>
               </div>
             </div>
@@ -490,24 +654,24 @@ export function AdminDashboardScreen() {
 
       {/* 4. Groups Performance Matrix (Section 4, 39) */}
       <div
-        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs"
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-2xs"
         style={{
-          padding: '44px 48px',
-          marginBottom: '48px',
+          padding: '20px 24px',
+          marginBottom: '32px',
         }}
       >
         <div
-          className="flex items-center justify-between gap-4 flex-wrap"
-          style={{ marginBottom: '32px' }}
+          className="flex items-center justify-between gap-3 flex-wrap"
+          style={{ marginBottom: '18px' }}
         >
-          <h4 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white flex items-center gap-3">
-            <School size={24} className="text-amber-500 shrink-0" />
+          <h4 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <School size={18} className="text-amber-500 shrink-0" />
             <span>{language === 'ar' ? 'مؤشرات أداء الأفواج التعليمية (Groups Performance)' : 'Class Groups Performance'}</span>
           </h4>
           <button
             type="button"
             onClick={() => setActiveTab('groups')}
-            className="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+            className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
           >
             {language === 'ar' ? 'إدارة جميع الأفواج' : 'Manage All Groups'} →
           </button>
@@ -517,49 +681,49 @@ export function AdminDashboardScreen() {
           <table className="w-full text-xs sm:text-sm text-right">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
-                <th className="pb-5 pt-2 px-6 text-right font-extrabold">{language === 'ar' ? 'الفوج والكود' : 'Group Code & Name'}</th>
-                <th className="pb-5 pt-2 px-6 text-center font-extrabold">{language === 'ar' ? 'المعلم المسند' : 'Teacher'}</th>
-                <th className="pb-5 pt-2 px-6 text-center font-extrabold">{language === 'ar' ? 'الطلاب / السعة' : 'Students / Capacity'}</th>
-                <th className="pb-5 pt-2 px-6 text-center font-extrabold">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
-                <th className="pb-5 pt-2 px-6 text-center font-extrabold">{language === 'ar' ? 'التقدم الأكاديمي' : 'Progress'}</th>
-                <th className="pb-5 pt-2 px-6 text-center font-extrabold">{language === 'ar' ? 'المعدل العام' : 'Performance'}</th>
+                <th className="pb-6 pt-2 px-5 text-right font-extrabold">{language === 'ar' ? 'الفوج والكود' : 'Group Code & Name'}</th>
+                <th className="pb-6 pt-2 px-5 text-center font-extrabold">{language === 'ar' ? 'المعلم المسند' : 'Teacher'}</th>
+                <th className="pb-6 pt-2 px-5 text-center font-extrabold">{language === 'ar' ? 'عدد الطلاب' : 'Students'}</th>
+                <th className="pb-6 pt-2 px-5 text-center font-extrabold">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
+                <th className="pb-6 pt-2 px-5 text-center font-extrabold">{language === 'ar' ? 'التقدم الأكاديمي' : 'Progress'}</th>
+                <th className="pb-6 pt-2 px-5 text-center font-extrabold">{language === 'ar' ? 'المعدل العام' : 'Performance'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {visibleGroups.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400 font-medium text-xs sm:text-sm">
+                  <td colSpan={6} className="py-10 text-center text-slate-400 font-medium text-xs sm:text-sm">
                     {language === 'ar' ? 'لا توجد أفواج تعليمية مضافة حالياً' : 'No class groups available'}
                   </td>
                 </tr>
               ) : (
                 visibleGroups.map((grp) => (
                   <tr key={grp.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="py-7 px-6 font-bold text-slate-900 dark:text-white">
-                      <div className="flex items-center gap-4">
+                    <td className="py-8 px-5 font-bold text-slate-900 dark:text-white">
+                      <div className="flex items-center gap-3">
                         <span
-                          className="rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-xs font-black text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80"
-                          style={{ padding: '6px 14px' }}
+                          className="rounded-lg bg-slate-100 dark:bg-slate-800 font-mono text-xs font-black text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80"
+                          style={{ padding: '4px 12px' }}
                         >
                           {grp.code}
                         </span>
-                        <span className="text-sm sm:text-base font-bold">{grp.name}</span>
+                        <span className="text-xs sm:text-sm font-bold">{grp.name}</span>
                       </div>
                     </td>
-                    <td className="py-7 px-6 text-center font-medium text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+                    <td className="py-8 px-5 text-center font-medium text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
                       {grp.teacherName || '—'}
                     </td>
-                    <td className="py-7 px-6 text-center font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
-                      {grp.studentIds.length} / {grp.maxCapacity}
+                    <td className="py-8 px-5 text-center font-mono font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
+                      {grp.studentIds.length}
                     </td>
-                    <td className="py-7 px-6 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-base">
-                      {grp.attendanceRate}%
+                    <td className="py-8 px-5 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm">
+                      {getDashboardGroupAttendanceRate(grp)}%
                     </td>
-                    <td className="py-7 px-6 text-center font-mono font-black text-blue-600 dark:text-blue-400 text-base">
-                      {grp.averageProgress}%
+                    <td className="py-8 px-5 text-center font-mono font-black text-blue-600 dark:text-blue-400 text-xs sm:text-sm">
+                      {grp.studentIds.length === 0 ? '0%' : `${grp.averageProgress}%`}
                     </td>
-                    <td className="py-7 px-6 text-center font-mono font-black text-purple-600 dark:text-purple-400 text-base">
-                      {grp.averagePerformance}%
+                    <td className="py-8 px-5 text-center font-mono font-black text-purple-600 dark:text-purple-400 text-xs sm:text-sm">
+                      {grp.studentIds.length === 0 ? '0%' : `${grp.averagePerformance}%`}
                     </td>
                   </tr>
                 ))
@@ -572,64 +736,64 @@ export function AdminDashboardScreen() {
       {/* 5. Students Falling Behind Alert Table (Section 4) */}
       {fallingBehindStudents.length > 0 && (
         <div
-          className="bg-amber-50/70 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700/80 rounded-[32px] shadow-xs"
+          className="bg-amber-50/70 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700/80 rounded-2xl shadow-2xs"
           style={{
-            padding: '44px 48px',
-            marginBottom: '48px',
+            padding: '20px 24px',
+            marginBottom: '32px',
           }}
         >
           <div
-            className="flex items-center justify-between gap-4 flex-wrap"
-            style={{ marginBottom: '36px' }}
+            className="flex items-center justify-between gap-3 flex-wrap"
+            style={{ marginBottom: '18px' }}
           >
-            <div className="flex items-center gap-3.5 text-amber-950 dark:text-amber-200">
-              <AlertTriangle size={26} className="text-amber-600 shrink-0" />
-              <h4 className="text-lg sm:text-xl font-black leading-normal">
+            <div className="flex items-center gap-2.5 text-amber-950 dark:text-amber-200">
+              <AlertTriangle size={18} className="text-amber-600 shrink-0" />
+              <h4 className="text-base font-black leading-normal">
                 {language === 'ar' ? 'تنبيه: طلاب بحاجة إلى متابعة واهتمام خاص (Falling Behind)' : 'Students Needing Attention'}
               </h4>
             </div>
             <span
               className="font-bold text-amber-800 dark:text-amber-200 bg-amber-200/70 dark:bg-amber-900/70 border border-amber-300/80 dark:border-amber-700/80 rounded-full font-mono shrink-0 leading-normal"
-              style={{ padding: '10px 24px', fontSize: '13px' }}
+              style={{ padding: '4px 14px', fontSize: '11px' }}
             >
               {fallingBehindStudents.length} {language === 'ar' ? 'طلاب' : 'students'}
             </span>
           </div>
 
-          <div className="space-y-5 sm:space-y-6">
+          <div className="space-y-3">
             {fallingBehindStudents.map((st) => (
               <div
                 key={st.id}
-                className="bg-white dark:bg-slate-850 rounded-2xl border border-amber-200 dark:border-amber-800/60 flex items-center justify-between gap-4 flex-wrap shadow-2xs"
-                style={{ padding: '26px 32px' }}
+                className="bg-white dark:bg-slate-850 rounded-xl border border-amber-200 dark:border-amber-800/60 flex items-center justify-between gap-3 flex-wrap shadow-2xs"
+                style={{ padding: '14px 18px' }}
               >
-                <div className="space-y-1.5 min-w-0">
-                  <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-snug">
+                <div className="space-y-0.5 min-w-0">
+                  <div className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm leading-snug">
                     {st.fullNameAr} ({st.fullNameEn})
                   </div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                     {st.groupName} • {language === 'ar' ? 'المعلم:' : 'Teacher:'} {st.teacherName} • {language === 'ar' ? 'ولي الأمر:' : 'Parent:'} {st.parentName} ({st.parentPhone})
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center gap-2.5 shrink-0">
                   <div
-                    className="text-xs font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/60 rounded-xl"
-                    style={{ padding: '8px 14px' }}
+                    className="text-[11px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/60 rounded-lg"
+                    style={{ padding: '4px 10px' }}
                   >
                     {language === 'ar' ? 'حضور:' : 'Att:'} {st.attendanceRate}%
                   </div>
                   <div
-                    className="text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/60 rounded-xl"
-                    style={{ padding: '8px 14px' }}
+                    className="text-[11px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/60 rounded-lg"
+                    style={{ padding: '4px 10px' }}
                   >
                     {language === 'ar' ? 'إنجاز:' : 'Prog:'} {st.overallProgress}%
                   </div>
                   <button
                     type="button"
                     onClick={() => setActiveTab('students')}
-                    className="rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
-                    style={{ padding: '10px 18px' }}
+                    className="rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+                    style={{ padding: '6px 14px' }}
                   >
                     {language === 'ar' ? 'فتح الملف' : 'Profile'} →
                   </button>

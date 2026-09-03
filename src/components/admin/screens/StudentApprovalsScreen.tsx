@@ -258,7 +258,7 @@ export function StudentApprovalsScreen() {
                 {/* Level Selection */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-                    المستوى الأكاديمي المعتمد (CEFR Level):
+                    المستوى الأكاديمي المعتمد:
                   </label>
                   <select
                     value={selectedLevel}
@@ -267,7 +267,7 @@ export function StudentApprovalsScreen() {
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((lvl) => (
                       <option key={lvl} value={lvl}>
-                        المستوى {lvl} ({lvl <= 2 ? 'Starter A1' : lvl <= 4 ? 'Elementary A2' : lvl <= 6 ? 'Intermediate B1' : lvl <= 8 ? 'Advanced B2' : 'Mastery C1/C2'})
+                        المستوى {lvl}
                       </option>
                     ))}
                   </select>

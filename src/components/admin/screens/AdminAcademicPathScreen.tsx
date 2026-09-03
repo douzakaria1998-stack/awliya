@@ -927,22 +927,22 @@ export function AdminAcademicPathScreen() {
                 }`}
                 style={{ padding: '12px 14px' }}
               >
-                {/* Top Row: CEFR Code + Units Count */}
-                <div className="flex items-center justify-between">
-                  <span className="font-mono font-black text-lg sm:text-xl" style={{ color: lvl.color }}>
-                    {lvl.cefrCode}
+                {/* Top Row: Level Name + Units Count */}
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold text-sm sm:text-base leading-tight truncate" style={{ color: lvl.color }}>
+                    {language === 'ar' ? lvl.nameAr : (lvl.nameEn || lvl.nameAr)}
                   </span>
                   <span
-                    className="text-[11px] font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                    className="text-[11px] font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0"
                     style={{ padding: '2px 8px' }}
                   >
                     {lvl.units.length} {language === 'ar' ? 'وحدات' : 'Units'}
                   </span>
                 </div>
 
-                {/* Level Title */}
-                <div className="text-xs font-bold text-slate-900 dark:text-white leading-snug line-clamp-2">
-                  {lvl.nameAr}
+                {/* Subtitle: Level Number */}
+                <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                  {language === 'ar' ? `المستوى ${lvl.levelNumber}` : `Level ${lvl.levelNumber}`}
                 </div>
 
                 {/* Bottom Row: Reorder Actions and Edit Button */}
@@ -1008,14 +1008,14 @@ export function AdminAcademicPathScreen() {
                 <div>
                   <div className="flex items-center" style={{ gap: '14px' }}>
                     <span
-                      className="rounded-xl font-mono font-black text-white text-xs shadow-xs shrink-0 flex items-center justify-center"
+                      className="rounded-xl font-bold text-white text-xs shadow-xs shrink-0 flex items-center justify-center"
                       style={{
                         backgroundColor: activeLevel.color,
                         padding: '5px 12px',
                         marginInlineEnd: '4px',
                       }}
                     >
-                      {activeLevel.cefrCode}
+                      {language === 'ar' ? `المستوى ${activeLevel.levelNumber}` : `Level ${activeLevel.levelNumber}`}
                     </span>
                     <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-tight">{activeLevel.nameAr}</h3>
                   </div>
@@ -1263,9 +1263,6 @@ export function AdminAcademicPathScreen() {
                     <span className="text-2xl font-black font-mono text-purple-600 dark:text-purple-400 mt-1 block">
                       {curricula.length}
                     </span>
-                    <span className="text-[11px] text-purple-600 dark:text-purple-400 font-bold mt-0.5 block">
-                      A1, A2, B1, B2, C1
-                    </span>
                   </div>
                   <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black shrink-0">
                     <Award size={22} />
@@ -1355,11 +1352,11 @@ export function AdminAcademicPathScreen() {
                     className="h-10 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500 cursor-pointer"
                   >
                     <option value="all">{language === 'ar' ? 'جميع المستويات' : 'All Levels'}</option>
-                    <option value="A1">A1 — Breakthrough</option>
-                    <option value="A2">A2 — Waystage</option>
-                    <option value="B1">B1 — Threshold</option>
-                    <option value="B2">B2 — Vantage</option>
-                    <option value="C1">C1 — Proficiency</option>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((lvl) => (
+                      <option key={lvl} value={lvl.toString()}>
+                        {language === 'ar' ? `المستوى ${lvl}` : `Level ${lvl}`}
+                      </option>
+                    ))}
                   </select>
 
                   {/* Group Status Filter (Active vs Archived) */}
@@ -1487,22 +1484,22 @@ export function AdminAcademicPathScreen() {
                             >
                               <div className="flex items-center gap-3">
                                 <span
-                                  className="inline-flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-black text-xs shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-2xs"
+                                  className="inline-flex items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-mono font-black text-xs shrink-0 border border-amber-200/80 dark:border-amber-800/60 shadow-xs select-none"
                                   style={{
-                                    minWidth: '40px',
-                                    height: '34px',
-                                    padding: '0 10px',
-                                    letterSpacing: '0.04em',
+                                    padding: '4px 12px',
+                                    minWidth: '42px',
+                                    height: '30px',
+                                    lineHeight: '1',
                                   }}
                                 >
-                                  {grp.level}
+                                  {grp.code}
                                 </span>
                                 <div>
                                   <span className="font-black text-xs sm:text-sm text-slate-900 dark:text-white block group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                                     {grp.name}
                                   </span>
-                                  <span className="text-[11px] text-slate-400 font-mono mt-0.5 block">
-                                    {grp.code}
+                                  <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
+                                    {grp.language} Track
                                   </span>
                                 </div>
                               </div>
@@ -1603,10 +1600,10 @@ export function AdminAcademicPathScreen() {
                                   handleOpenGroupDetail(grp.id);
                                 }}
                                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs border border-indigo-200/60 dark:border-indigo-800/60 transition-all cursor-pointer shadow-2xs mx-auto whitespace-nowrap"
-                                style={{ padding: '8px 18px' }}
+                                style={{ padding: '6px 16px', lineHeight: '1.2' }}
                               >
                                 <span>{language === 'ar' ? 'عرض الفوج' : 'View Group'}</span>
-                                {isRTL ? <ArrowLeft size={15} /> : <ArrowRight size={15} />}
+                                {isRTL ? <ArrowLeft size={14} className="shrink-0" /> : <ArrowRight size={14} className="shrink-0" />}
                               </button>
                             </td>
                           </tr>
@@ -1681,7 +1678,13 @@ export function AdminAcademicPathScreen() {
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-3">
                     <span
-                      className="rounded-xl bg-indigo-600 text-white font-mono font-black text-xs shadow-xs inline-flex items-center justify-center select-none"
+                      className="rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-mono font-black text-sm sm:text-base shadow-2xs border border-amber-200/80 dark:border-amber-800/60 inline-flex items-center justify-center select-none"
+                      style={{ padding: '5px 14px' }}
+                    >
+                      {activeProgressGroup.code}
+                    </span>
+                    <span
+                      className="rounded-xl bg-indigo-600 text-white font-mono font-black text-sm shadow-xs inline-flex items-center justify-center select-none"
                       style={{ padding: '5px 16px', minWidth: '48px', lineHeight: '1.2' }}
                     >
                       {activeProgressGroup.level}
@@ -1689,9 +1692,6 @@ export function AdminAcademicPathScreen() {
                     <h3 className="font-black text-xl sm:text-2xl text-slate-900 dark:text-white">
                       {activeProgressGroup.name}
                     </h3>
-                    <span className="text-xs text-slate-400 font-mono font-medium">
-                      ({activeProgressGroup.code})
-                    </span>
 
                     {/* Show status of the group: whether it's active or archived */}
                     {activeProgressGroup.status === 'archived' ? (
@@ -1749,11 +1749,43 @@ export function AdminAcademicPathScreen() {
                         : (activeProgressGroup.averageProgress || 0)}%
                     </span>
                   </div>
-                  <div className="w-13 h-13 rounded-full border-4 border-indigo-500/20 border-t-indigo-600 flex items-center justify-center font-bold text-xs font-mono">
-                    {activeProgressGroup.status === 'archived'
-                      ? (activeProgressGroup.averageProgress > 0 ? activeProgressGroup.averageProgress : 100)
-                      : (activeProgressGroup.averageProgress || 0)}%
-                  </div>
+
+                  {(() => {
+                    const progressVal =
+                      activeProgressGroup.status === 'archived'
+                        ? activeProgressGroup.averageProgress > 0
+                          ? activeProgressGroup.averageProgress
+                          : 100
+                        : activeProgressGroup.averageProgress || 0;
+
+                    return (
+                      <div className="relative w-13 h-13 flex items-center justify-center shrink-0">
+                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                          <path
+                            className="text-indigo-100 dark:text-indigo-950/80"
+                            strokeWidth="3.5"
+                            stroke="currentColor"
+                            fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          />
+                          {progressVal > 0 && (
+                            <path
+                              className="text-indigo-600 dark:text-indigo-400 transition-all duration-500"
+                              strokeDasharray={`${progressVal}, 100`}
+                              strokeWidth="3.5"
+                              strokeLinecap="round"
+                              stroke="currentColor"
+                              fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                          )}
+                        </svg>
+                        <span className="absolute font-mono font-black text-xs text-indigo-600 dark:text-indigo-400">
+                          {progressVal}%
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -2483,39 +2515,19 @@ export function AdminAcademicPathScreen() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3.5">
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
-                      {language === 'ar' ? 'رمز المستوى (CEFR) *' : 'CEFR Code *'}
-                    </label>
-                    <select
-                      value={newLevelCode}
-                      onChange={(e) => setNewLevelCode(e.target.value as any)}
-                      className="w-full h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
-                      style={{ paddingLeft: '14px', paddingRight: '14px' }}
-                    >
-                      <option value="A1">A1 — Breakthrough</option>
-                      <option value="A2">A2 — Waystage</option>
-                      <option value="B1">B1 — Threshold</option>
-                      <option value="B2">B2 — Vantage</option>
-                      <option value="C1">C1 — Effective Proficiency</option>
-                      <option value="C2">C2 — Mastery</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
-                      {language === 'ar' ? 'عدد الوحدات الأولية' : 'Initial Units Count'}
-                    </label>
-                    <input
-                      type="number"
-                      value={newUnitsCount}
-                      onChange={(e) => setNewUnitsCount(Math.max(1, Number(e.target.value)))}
-                      min={1}
-                      max={12}
-                      className="w-full h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
-                      style={{ paddingLeft: '16px', paddingRight: '16px' }}
-                    />
-                  </div>
+                <div>
+                  <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
+                    {language === 'ar' ? 'عدد الوحدات الأولية' : 'Initial Units Count'}
+                  </label>
+                  <input
+                    type="number"
+                    value={newUnitsCount}
+                    onChange={(e) => setNewUnitsCount(Math.max(1, Number(e.target.value)))}
+                    min={1}
+                    max={12}
+                    className="w-full h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
+                    style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                  />
                 </div>
 
                 <div>
@@ -3211,7 +3223,7 @@ export function AdminAcademicPathScreen() {
                     >
                       {(currentLangLevels.length > 0 ? currentLangLevels : curricula).map((lvl) => (
                         <option key={lvl.levelNumber} value={lvl.levelNumber}>
-                          {lvl.cefrCode} — {language === 'ar' ? lvl.nameAr : (lvl.nameEn || lvl.nameAr)} ({lvl.units.length} {language === 'ar' ? 'وحدات' : 'Units'})
+                          {language === 'ar' ? `المستوى ${lvl.levelNumber} — ${lvl.nameAr}` : `Level ${lvl.levelNumber} — ${lvl.nameEn || lvl.nameAr}`} ({lvl.units.length} {language === 'ar' ? 'وحدات' : 'Units'})
                         </option>
                       ))}
                     </select>
