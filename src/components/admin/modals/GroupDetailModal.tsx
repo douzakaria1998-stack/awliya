@@ -1261,10 +1261,11 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
                     </label>
                     <input
                       type="date"
+                      dir="ltr"
                       value={editStartDate}
                       onChange={(e) => setEditStartDate(e.target.value)}
                       style={{ paddingLeft: '14px', paddingRight: '14px' }}
-                      className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/20"
+                      className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/20"
                     />
                   </div>
 

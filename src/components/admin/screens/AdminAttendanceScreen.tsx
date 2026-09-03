@@ -188,7 +188,7 @@ export function AdminAttendanceScreen() {
     const dayIdx = getDayOfWeekIndex(coveringDate);
     const dayNameEn = dayMapEn[dayIdx];
 
-    const sessionTime = `${coveringStartTime} - ${coveringEndTime}`;
+    const sessionTime = coveringStartTime;
 
     addCoveringSession({
       groupId: grp.id,
@@ -1224,45 +1224,33 @@ export function AdminAttendanceScreen() {
               </div>
 
               {/* Date & Time Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {/* Date */}
-                <div className="flex flex-col gap-1.5 sm:col-span-1">
+                <div className="flex flex-col gap-1.5">
                   <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
                     {language === 'ar' ? 'تاريخ الحصة:' : 'Session Date:'}
                   </label>
                   <input
                     type="date"
+                    dir="ltr"
                     value={coveringDate}
                     onChange={(e) => setCoveringDate(e.target.value)}
-                    className="w-full h-12 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all cursor-pointer"
+                    className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all cursor-pointer"
                     required
                   />
                 </div>
 
-                {/* Start Time */}
+                {/* Session Time */}
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
-                    {language === 'ar' ? 'وقت البدء:' : 'Start Time:'}
+                    {language === 'ar' ? 'وقت وتوقيت الحصة:' : 'Session Time:'}
                   </label>
                   <input
                     type="time"
+                    dir="ltr"
                     value={coveringStartTime}
                     onChange={(e) => setCoveringStartTime(e.target.value)}
-                    className="w-full h-12 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all cursor-pointer"
-                    required
-                  />
-                </div>
-
-                {/* End Time */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
-                    {language === 'ar' ? 'وقت الانتهاء:' : 'End Time:'}
-                  </label>
-                  <input
-                    type="time"
-                    value={coveringEndTime}
-                    onChange={(e) => setCoveringEndTime(e.target.value)}
-                    className="w-full h-12 px-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all cursor-pointer"
+                    className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all cursor-pointer"
                     required
                   />
                 </div>
@@ -1296,73 +1284,45 @@ export function AdminAttendanceScreen() {
                 <label className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
                   {language === 'ar' ? 'نوع الحصة الاستدراكية (Session Type):' : 'Covering Session Type:'}
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* Type 1: Counted */}
                   <div
                     onClick={() => setCoveringType('counted')}
-                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
+                    className={`rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
                       coveringType === 'counted'
                         ? 'border-amber-500 bg-amber-500/10 dark:bg-amber-500/15 shadow-xs'
                         : 'border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-700'
                     }`}
+                    style={{ padding: '14px 18px' }}
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="w-4 h-4 rounded-full border-2 border-amber-500 flex items-center justify-center shrink-0">
-                          {coveringType === 'counted' && <span className="w-2 h-2 rounded-full bg-amber-500" />}
-                        </span>
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-bold text-xs sm:text-sm text-amber-900 dark:text-amber-200 leading-tight">
-                            {language === 'ar' ? 'حصة محسوبة' : 'Counted Session'}
-                          </span>
-                          <span className="text-[11px] text-amber-700/80 dark:text-amber-300/80 font-semibold" dir="ltr">
-                            (Counted)
-                          </span>
-                        </div>
-                      </div>
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-900 dark:text-amber-200 border border-amber-500/30 whitespace-nowrap shrink-0 select-none">
-                        {language === 'ar' ? 'من النصاب' : 'From Quota'}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="w-4 h-4 rounded-full border-2 border-amber-500 flex items-center justify-center shrink-0">
+                        {coveringType === 'counted' && <span className="w-2 h-2 rounded-full bg-amber-500" />}
+                      </span>
+                      <span className="font-bold text-xs sm:text-sm text-amber-950 dark:text-amber-100">
+                        {language === 'ar' ? 'حصة محسوبة (Counted)' : 'Counted Session'}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
-                      {language === 'ar'
-                        ? 'تُحسب ضمن نصاب وحصص المنهاج الإجمالية للفوج (تنقص من الحصص المتبقية للبرنامج).'
-                        : 'Counts towards the total session quota of the group and decrements remaining sessions.'}
-                    </p>
                   </div>
 
                   {/* Type 2: Not Counted */}
                   <div
                     onClick={() => setCoveringType('not_counted')}
-                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
+                    className={`rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
                       coveringType === 'not_counted'
                         ? 'border-purple-500 bg-purple-500/10 dark:bg-purple-500/15 shadow-xs'
                         : 'border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-700'
                     }`}
+                    style={{ padding: '14px 18px' }}
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="w-4 h-4 rounded-full border-2 border-purple-500 flex items-center justify-center shrink-0">
-                          {coveringType === 'not_counted' && <span className="w-2 h-2 rounded-full bg-purple-500" />}
-                        </span>
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-bold text-xs sm:text-sm text-purple-900 dark:text-purple-200 leading-tight">
-                            {language === 'ar' ? 'غير محسوبة' : 'Not Counted'}
-                          </span>
-                          <span className="text-[11px] text-purple-700/80 dark:text-purple-300/80 font-semibold" dir="ltr">
-                            (Extra)
-                          </span>
-                        </div>
-                      </div>
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-900 dark:text-purple-200 border border-purple-500/30 whitespace-nowrap shrink-0 select-none">
-                        {language === 'ar' ? 'إضافية / مجانية' : 'Extra / Free'}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="w-4 h-4 rounded-full border-2 border-purple-500 flex items-center justify-center shrink-0">
+                        {coveringType === 'not_counted' && <span className="w-2 h-2 rounded-full bg-purple-500" />}
+                      </span>
+                      <span className="font-bold text-xs sm:text-sm text-purple-950 dark:text-purple-100">
+                        {language === 'ar' ? 'غير محسوبة (Extra)' : 'Not Counted (Extra)'}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
-                      {language === 'ar'
-                        ? 'حصة تعويضية إضافية أو مجانية لا تستهلك من نصاب الحصص المقررة للفوج.'
-                        : 'An extra / free makeup session that does not consume from the group planned session quota.'}
-                    </p>
                   </div>
                 </div>
               </div>
