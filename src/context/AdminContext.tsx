@@ -169,6 +169,7 @@ interface AdminContextType {
   updateRolePermissions: (roleId: AdminRole, modules: AdminRolePermissionConfig['modules']) => void;
   addNewAdminUser: (userData: Partial<AdminUser>) => void;
   updateAdminUser: (userId: string, updates: Partial<AdminUser>) => void;
+  deleteAdminUser: (userId: string) => void;
 
   approveStudentRegistration: (approvalId: string, level: number, track?: string) => void;
   rejectStudentRegistration: (approvalId: string, reason?: string) => void;
@@ -1932,8 +1933,31 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
         return updated;
       });
+      const targetUser = adminUsers.find((u) => u.id === userId);
+      logAudit(
+        `تعديل بيانات الحساب الإداري: ${targetUser?.fullNameAr || userId}`,
+        `Updated admin user: ${targetUser?.fullNameEn || userId}`,
+        'role'
+      );
     },
-    []
+    [adminUsers, logAudit]
+  );
+
+  const deleteAdminUser = useCallback(
+    (userId: string) => {
+      const targetUser = adminUsers.find((u) => u.id === userId);
+      setAdminUsers((prev) => {
+        const updated = prev.filter((u) => u.id !== userId);
+        setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
+        return updated;
+      });
+      logAudit(
+        `حذف الحساب الإداري: ${targetUser?.fullNameAr || userId}`,
+        `Deleted admin user: ${targetUser?.fullNameEn || userId}`,
+        'role'
+      );
+    },
+    [adminUsers, logAudit]
   );
 
   // ==========================================
@@ -2084,6 +2108,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         updateRolePermissions,
         addNewAdminUser,
         updateAdminUser,
+        deleteAdminUser,
         approveStudentRegistration,
         rejectStudentRegistration,
         markNotificationRead,
