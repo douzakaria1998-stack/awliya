@@ -18,11 +18,12 @@ import { AdminNotificationsScreen } from '../screens/AdminNotificationsScreen';
 import { AdminAuditLogsScreen } from '../screens/AdminAuditLogsScreen';
 import { SystemSettingsScreen } from '../screens/SystemSettingsScreen';
 import { StudentApprovalsScreen } from '../screens/StudentApprovalsScreen';
+import { AdminLoginScreen } from '../screens/AdminLoginScreen';
 import { X } from 'lucide-react';
 
 export function AdminShell() {
   const [mounted, setMounted] = useState(false);
-  const { activeTab } = useAdmin();
+  const { activeTab, isAdminLoggedIn } = useAdmin();
   const { dir } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -37,11 +38,16 @@ export function AdminShell() {
         suppressHydrationWarning
       >
         <div
-          className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin"
+          className="w-8 h-8 rounded-full border-2 border-purple-500 border-t-transparent animate-spin"
           suppressHydrationWarning
         />
       </div>
     );
+  }
+
+  // If not logged in to Back Office, display the Stitch AI styled AdminLoginScreen
+  if (!isAdminLoggedIn) {
+    return <AdminLoginScreen />;
   }
 
   const renderActiveScreen = () => {

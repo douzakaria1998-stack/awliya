@@ -44,12 +44,15 @@ import { useStudent } from '@/context/StudentContext';
 import { STORAGE_KEYS } from '@/lib/constants';
 
 interface AdminContextType {
-  // Current user & role
+  // Current user & role & auth
   currentAdmin: AdminUser;
   currentRole: AdminRole;
   activeTab: AdminTabKey;
   setActiveTab: (tab: AdminTabKey) => void;
   switchRole: (role: AdminRole, userId?: string) => void;
+  isAdminLoggedIn: boolean;
+  loginAdmin: (usernameOrEmail: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  logoutAdmin: () => void;
 
   // Entities
   adminUsers: AdminUser[];
@@ -177,6 +180,7 @@ interface AdminContextType {
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 const ADMIN_STORAGE_KEYS = {
+  IS_LOGGED_IN: 'myschool_admin_logged_in_v11',
   CURRENT_USER_ID: 'myschool_admin_user_id_v11',
   ADMIN_USERS: 'myschool_admin_users_v11',
   STUDENTS: 'myschool_admin_students_v11',
@@ -199,6 +203,9 @@ const ADMIN_STORAGE_KEYS = {
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const { approveStudent: approveInStudentContext, updateStudent: updateInStudentContext } = useStudent();
 
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
+    return getItem<boolean>(ADMIN_STORAGE_KEYS.IS_LOGGED_IN) ?? false;
+  });
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>(mockAdminUsers);
   const [currentAdminId, setCurrentAdminId] = useState<string>(mockAdminUsers[0].id);
   const [activeTab, setActiveTab] = useState<AdminTabKey>('overview');
@@ -229,6 +236,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   // Sync state from storage
   useEffect(() => {
+    const sLoggedIn = getItem<boolean>(ADMIN_STORAGE_KEYS.IS_LOGGED_IN);
+    if (typeof sLoggedIn === 'boolean') setIsAdminLoggedIn(sLoggedIn);
+
     const sUsers = getItem<AdminUser[]>(ADMIN_STORAGE_KEYS.ADMIN_USERS);
     if (sUsers?.length) setAdminUsers(sUsers);
 
@@ -374,6 +384,59 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     },
     [adminUsers]
   );
+
+  // Admin / Staff Login
+  const loginAdmin = useCallback(
+    async (usernameOrEmail: string, password: string): Promise<{ success: boolean; message?: string }> => {
+      const trimmed = usernameOrEmail.trim().toLowerCase();
+      const trimmedPass = password.trim();
+
+      if (!trimmed) {
+        return { success: false, message: 'empty_username' };
+      }
+
+      const user = adminUsers.find(
+        (u) =>
+          u.email.toLowerCase() === trimmed ||
+          u.username.toLowerCase() === trimmed ||
+          u.fullNameAr.toLowerCase() === trimmed ||
+          u.fullNameEn.toLowerCase() === trimmed
+      );
+
+      if (!user) {
+        return { success: false, message: 'user_not_found' };
+      }
+
+      if (user.status === 'inactive' || user.status === 'suspended') {
+        return { success: false, message: 'user_inactive' };
+      }
+
+      // Password check with mock flexibility (admin123, user's defined password, or any standard mock pass)
+      const expectedPass = user.password || 'admin123';
+      if (
+        trimmedPass !== expectedPass &&
+        trimmedPass !== 'admin123' &&
+        trimmedPass !== 'admin' &&
+        trimmedPass !== '123456'
+      ) {
+        return { success: false, message: 'invalid_password' };
+      }
+
+      setCurrentAdminId(user.id);
+      setIsAdminLoggedIn(true);
+      setItem(ADMIN_STORAGE_KEYS.CURRENT_USER_ID, user.id);
+      setItem(ADMIN_STORAGE_KEYS.IS_LOGGED_IN, true);
+
+      return { success: true };
+    },
+    [adminUsers]
+  );
+
+  // Admin / Staff Logout
+  const logoutAdmin = useCallback(() => {
+    setIsAdminLoggedIn(false);
+    setItem(ADMIN_STORAGE_KEYS.IS_LOGGED_IN, false);
+  }, []);
 
   // Helper to dispatch instant parent notification into parent portal
   const notifyParentPortal = useCallback(
@@ -1965,6 +2028,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         activeTab,
         setActiveTab,
         switchRole,
+        isAdminLoggedIn,
+        loginAdmin,
+        logoutAdmin,
         adminUsers,
         students,
         parents,

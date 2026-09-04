@@ -39,6 +39,7 @@ export interface AdminUser {
   assignedGroups?: string[];
   createdAt: string;
   lastLogin?: string;
+  password?: string;
   status: 'active' | 'inactive' | 'suspended';
   permissions?: Record<string, boolean>;
 }
