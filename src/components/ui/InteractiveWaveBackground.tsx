@@ -42,6 +42,10 @@ export function InteractiveWaveBackground() {
     handleResize();
 
     const handleMouseMove = (e: MouseEvent) => {
+      if (!mouse.active) {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      }
       mouse.targetX = e.clientX;
       mouse.targetY = e.clientY;
       mouse.active = true;
@@ -53,6 +57,10 @@ export function InteractiveWaveBackground() {
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 0) {
+        if (!mouse.active) {
+          mouse.x = e.touches[0].clientX;
+          mouse.y = e.touches[0].clientY;
+        }
         mouse.targetX = e.touches[0].clientX;
         mouse.targetY = e.touches[0].clientY;
         mouse.active = true;
@@ -60,9 +68,9 @@ export function InteractiveWaveBackground() {
     };
 
     window.addEventListener('resize', handleResize);
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('mouseleave', handleMouseLeave);
-    window.addEventListener('touchmove', handleTouchMove);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
 
     // Initial mouse center position
     mouse.x = width * 0.6;
@@ -88,14 +96,16 @@ export function InteractiveWaveBackground() {
     const render = () => {
       time += 0.012;
 
-      // Smooth mouse lerp
+      // Ultra-fast low-latency mouse tracking with smooth snapping
       if (mouse.active) {
-        mouse.x += (mouse.targetX - mouse.x) * 0.06;
-        mouse.y += (mouse.targetY - mouse.y) * 0.06;
+        mouse.x += (mouse.targetX - mouse.x) * 0.35;
+        mouse.y += (mouse.targetY - mouse.y) * 0.35;
       } else {
-        // Subtle autonomous breathing drift when idle
-        mouse.x = width * 0.55 + Math.sin(time * 0.6) * (width * 0.15);
-        mouse.y = height * 0.5 + Math.cos(time * 0.4) * (height * 0.12);
+        // Smooth transition to subtle autonomous breathing drift when idle
+        const idleTargetX = width * 0.55 + Math.sin(time * 0.6) * (width * 0.15);
+        const idleTargetY = height * 0.5 + Math.cos(time * 0.4) * (height * 0.12);
+        mouse.x += (idleTargetX - mouse.x) * 0.06;
+        mouse.y += (idleTargetY - mouse.y) * 0.06;
       }
 
       // 1. Draw Deep Space Background
