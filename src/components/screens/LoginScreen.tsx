@@ -217,11 +217,10 @@ export function LoginScreen() {
         >
           {/* Brand & Greetings */}
           <div className="flex flex-col items-center justify-center text-center" style={{ marginBottom: '24px' }}>
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-md mb-3.5 shrink-0"
-              style={{ background: theme.gradient }}
-            >
-              و
+            <div className="mb-3.5 flex items-center justify-center">
+              <div className="h-12 px-3.5 py-1.5 rounded-2xl bg-slate-50 dark:bg-white border border-slate-200/80 dark:border-transparent flex items-center justify-center shadow-md">
+                <img src="/myschool-logo.png" alt="My School" className="h-8 w-auto object-contain" />
+              </div>
             </div>
             <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               {language === 'ar' ? 'بوابة أولياء الأمور' : language === 'fr' ? 'Portail Parents' : 'Parent Portal'}
