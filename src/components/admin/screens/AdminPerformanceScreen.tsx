@@ -16,6 +16,10 @@ import {
   School,
   X,
   Send,
+  Clock,
+  Globe,
+  Hash,
+  Users,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -344,62 +348,120 @@ export function AdminPerformanceScreen() {
       {/* SUB-TAB 1: Homework (Section 23, 24, 25) */}
       {activeSubTab === 'homework' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          {visibleHomework.map((hw) => (
-            <div
-              key={hw.id}
-              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-2xs"
-              style={{ padding: '18px 22px' }}
-            >
-              {/* Header Row */}
-              <div
-                className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800"
-                style={{ paddingBottom: '14px', marginBottom: '14px' }}
-              >
-                <div>
-                  <div className="flex flex-wrap items-center gap-2.5">
-                    <span
-                      className="inline-flex items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-black text-xs border border-purple-200/60 dark:border-purple-800/60 shadow-2xs whitespace-nowrap"
-                      style={{ height: '26px', padding: '0 12px' }}
-                    >
-                      {hw.groupName}
-                    </span>
-                    <h4 className="font-black text-base text-slate-900 dark:text-white">{hw.assignmentNameAr}</h4>
-                  </div>
-                  <p className="text-xs text-slate-400 font-medium mt-1 leading-relaxed">{hw.descriptionAr}</p>
-                </div>
+          {visibleHomework.map((hw) => {
+            const grp =
+              visibleGroups.find((g) => g.id === hw.groupId || g.name === hw.groupName) ||
+              groups.find((g) => g.id === hw.groupId || g.name === hw.groupName);
+            const groupName = grp?.name || hw.groupName;
+            const groupId = grp?.id || hw.groupId;
+            const groupLanguage = grp?.language || 'English';
+            const groupTiming = grp
+              ? `${grp.daysAr ? `${grp.daysAr} • ` : ''}${grp.startTime || '18:00'} - ${grp.endTime || '20:00'}`
+              : '18:00 - 20:00';
 
-                <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                  <span
-                    className="rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center shadow-2xs whitespace-nowrap"
-                    style={{ height: '34px', padding: '0 14px', gap: '8px' }}
-                  >
-                    <Calendar size={14} className="text-purple-600 shrink-0" />
-                    <span className="flex items-center gap-1.5">
-                      <span>{language === 'ar' ? 'تاريخ الاستحقاق:' : 'Due Date:'}</span>
-                      <span dir="ltr" className="font-mono font-bold">{hw.dueDate}</span>
+            return (
+              <div
+                key={hw.id}
+                className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-2xs"
+                style={{ padding: '18px 22px' }}
+              >
+                {/* Header Row */}
+                <div
+                  className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 border-b border-slate-100 dark:border-slate-800"
+                  style={{ paddingBottom: '16px', marginBottom: '16px' }}
+                >
+                  <div className="space-y-2">
+                    {/* Group Meta Info Badges */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* 1. Group Name */}
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-black text-xs border border-purple-200/60 dark:border-purple-800/60 shadow-2xs whitespace-nowrap"
+                        style={{ height: '28px', padding: '0 12px' }}
+                      >
+                        <Users size={13} className="shrink-0 text-purple-600 dark:text-purple-400" />
+                        <span>{groupName}</span>
+                      </span>
+
+                      {/* 2. Group ID */}
+                      {groupId && (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-bold text-xs border border-slate-200 dark:border-slate-700 shadow-2xs whitespace-nowrap"
+                          style={{ height: '28px', padding: '0 10px' }}
+                          title="Group ID"
+                        >
+                          <Hash size={12} className="shrink-0 text-slate-400" />
+                          <span>{groupId}</span>
+                        </span>
+                      )}
+
+                      {/* 3. Language */}
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold text-xs border border-blue-200/60 dark:border-blue-800/60 shadow-2xs whitespace-nowrap"
+                        style={{ height: '28px', padding: '0 10px' }}
+                      >
+                        <Globe size={13} className="shrink-0 text-blue-600 dark:text-blue-400" />
+                        <span>
+                          {groupLanguage === 'French'
+                            ? (language === 'ar' ? 'اللغة الفرنسية' : 'French')
+                            : groupLanguage === 'Dual'
+                            ? (language === 'ar' ? 'مسار مزدوج' : 'Dual Track')
+                            : (language === 'ar' ? 'اللغة الإنجليزية' : 'English')}
+                        </span>
+                      </span>
+
+                      {/* 4. Timing */}
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 font-bold text-xs border border-amber-200/60 dark:border-amber-800/50 shadow-2xs whitespace-nowrap"
+                        style={{ height: '28px', padding: '0 10px' }}
+                      >
+                        <Clock size={13} className="shrink-0 text-amber-600 dark:text-amber-400" />
+                        <span dir="ltr" className="font-mono text-[11px] font-semibold">{groupTiming}</span>
+                      </span>
+                    </div>
+
+                    <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white leading-tight">
+                      {hw.assignmentNameAr}
+                    </h4>
+
+                    {hw.descriptionAr && (
+                      <p className="text-xs text-slate-400 font-medium leading-relaxed max-w-2xl">
+                        {hw.descriptionAr}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                    <span
+                      className="rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center shadow-2xs whitespace-nowrap"
+                      style={{ height: '34px', padding: '0 14px', gap: '8px' }}
+                    >
+                      <Calendar size={14} className="text-purple-600 shrink-0" />
+                      <span className="flex items-center gap-1.5">
+                        <span>{language === 'ar' ? 'تاريخ الاستحقاق:' : 'Due Date:'}</span>
+                        <span dir="ltr" className="font-mono font-bold">{hw.dueDate}</span>
+                      </span>
                     </span>
-                  </span>
-                  <span
-                    className="rounded-xl bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-bold text-xs border border-purple-200/60 dark:border-purple-800/60 flex items-center shadow-2xs whitespace-nowrap"
-                    style={{ height: '34px', padding: '0 14px', gap: '8px' }}
-                  >
-                    <Award size={14} className="text-purple-600 dark:text-purple-400 shrink-0" />
-                    <span className="flex items-center gap-1.5">
-                      <span>{language === 'ar' ? 'الدرجة القصوى:' : 'Max Score:'}</span>
-                      <span dir="ltr" className="font-mono font-black">{hw.totalScore}</span>
+                    <span
+                      className="rounded-xl bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-bold text-xs border border-purple-200/60 dark:border-purple-800/60 flex items-center shadow-2xs whitespace-nowrap"
+                      style={{ height: '34px', padding: '0 14px', gap: '8px' }}
+                    >
+                      <Award size={14} className="text-purple-600 dark:text-purple-400 shrink-0" />
+                      <span className="flex items-center gap-1.5">
+                        <span>{language === 'ar' ? 'الدرجة القصوى:' : 'Max Score:'}</span>
+                        <span dir="ltr" className="font-mono font-black">{hw.totalScore}</span>
+                      </span>
                     </span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => openGradeGroupModal(hw)}
-                    className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md shadow-purple-600/20 hover:scale-102 active:scale-98 transition-all cursor-pointer flex items-center shrink-0 whitespace-nowrap"
-                    style={{ height: '34px', padding: '0 16px', gap: '8px' }}
-                  >
-                    <CheckCircle2 size={15} className="shrink-0" />
-                    <span>{language === 'ar' ? 'تصحيح وتقييم الفوج' : 'Grade Group'}</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => openGradeGroupModal(hw)}
+                      className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md shadow-purple-600/20 hover:scale-102 active:scale-98 transition-all cursor-pointer flex items-center shrink-0 whitespace-nowrap"
+                      style={{ height: '34px', padding: '0 16px', gap: '8px' }}
+                    >
+                      <CheckCircle2 size={15} className="shrink-0" />
+                      <span>{language === 'ar' ? 'تصحيح وتقييم الفوج' : 'Grade Group'}</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
 
               {/* Teacher Note Callout (Section 23 in PDF) */}
               {hw.teacherNote && (
@@ -478,9 +540,10 @@ export function AdminPerformanceScreen() {
                 )}
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
+    )}
 
       {/* SUB-TAB 2: Assessments & 4 Skills (Section 27, 28, 29) */}
       {activeSubTab === 'assessments' && (
@@ -741,49 +804,100 @@ export function AdminPerformanceScreen() {
           <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
             
             {/* 1. Modal Header */}
-            <div
-              className="bg-slate-900 text-white flex items-center justify-between shrink-0"
-              style={{ padding: '18px 26px' }}
-            >
-              <div className="min-w-0">
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  <h3 className="font-black text-lg sm:text-xl text-white tracking-tight">
-                    {language === 'ar' ? 'تصحيح وتقييم واجبات الفوج' : 'Grade Group Homework'}
-                  </h3>
-                  <span
-                    className="inline-flex items-center justify-center rounded-lg text-xs font-black bg-purple-500/25 text-purple-200 border border-purple-400/50 shadow-xs whitespace-nowrap"
-                    style={{ height: '26px', padding: '0 12px' }}
-                  >
-                    {selectedHwToGrade.groupName}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-slate-300 font-medium mt-1.5 flex-wrap">
-                  <span className="font-bold text-amber-300">
-                    {selectedHwToGrade.assignmentNameAr}
-                  </span>
-                  <span>•</span>
-                  <span>
-                    {language === 'ar'
-                      ? `الدرجة القصوى: ${selectedHwToGrade.totalScore || 20}`
-                      : `Max Score: ${selectedHwToGrade.totalScore || 20}`}
-                  </span>
-                  <span>•</span>
-                  <span>
-                    {language === 'ar'
-                      ? `تاريخ الاستحقاق: ${selectedHwToGrade.dueDate}`
-                      : `Due Date: ${selectedHwToGrade.dueDate}`}
-                  </span>
-                </div>
-              </div>
+            {(() => {
+              const modalGrp =
+                visibleGroups.find((g) => g.id === selectedHwToGrade.groupId || g.name === selectedHwToGrade.groupName) ||
+                groups.find((g) => g.id === selectedHwToGrade.groupId || g.name === selectedHwToGrade.groupName);
+              const modalGroupName = modalGrp?.name || selectedHwToGrade.groupName;
+              const modalGroupId = modalGrp?.id || selectedHwToGrade.groupId;
+              const modalGroupLanguage = modalGrp?.language || 'English';
+              const modalGroupTiming = modalGrp
+                ? `${modalGrp.daysAr ? `${modalGrp.daysAr} • ` : ''}${modalGrp.startTime || '18:00'} - ${modalGrp.endTime || '20:00'}`
+                : '18:00 - 20:00';
 
-              <button
-                type="button"
-                onClick={() => setSelectedHwToGrade(null)}
-                className="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition-colors cursor-pointer shrink-0"
-              >
-                <X size={18} />
-              </button>
-            </div>
+              return (
+                <div
+                  className="bg-slate-900 text-white flex items-center justify-between shrink-0"
+                  style={{ padding: '18px 26px' }}
+                >
+                  <div className="min-w-0 space-y-2">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <h3 className="font-black text-lg sm:text-xl text-white tracking-tight">
+                        {language === 'ar' ? 'تصحيح وتقييم واجبات الفوج' : 'Grade Group Homework'}
+                      </h3>
+
+                      {/* Group Name */}
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-lg text-xs font-black bg-purple-500/25 text-purple-200 border border-purple-400/50 shadow-xs whitespace-nowrap"
+                        style={{ height: '26px', padding: '0 12px' }}
+                      >
+                        <Users size={12} className="text-purple-300" />
+                        <span>{modalGroupName}</span>
+                      </span>
+
+                      {/* Group ID */}
+                      {modalGroupId && (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-lg text-xs font-mono font-bold bg-slate-800 text-slate-300 border border-slate-700 shadow-xs whitespace-nowrap"
+                          style={{ height: '26px', padding: '0 10px' }}
+                        >
+                          <Hash size={11} className="text-slate-400" />
+                          <span>{modalGroupId}</span>
+                        </span>
+                      )}
+
+                      {/* Language */}
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-lg text-xs font-bold bg-blue-500/20 text-blue-200 border border-blue-400/40 shadow-xs whitespace-nowrap"
+                        style={{ height: '26px', padding: '0 10px' }}
+                      >
+                        <Globe size={12} className="text-blue-300" />
+                        <span>
+                          {modalGroupLanguage === 'French'
+                            ? (language === 'ar' ? 'اللغة الفرنسية' : 'French')
+                            : (language === 'ar' ? 'اللغة الإنجليزية' : 'English')}
+                        </span>
+                      </span>
+
+                      {/* Timing */}
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-200 border border-amber-400/40 shadow-xs whitespace-nowrap"
+                        style={{ height: '26px', padding: '0 10px' }}
+                      >
+                        <Clock size={12} className="text-amber-300" />
+                        <span dir="ltr" className="font-mono text-[11px] font-semibold">{modalGroupTiming}</span>
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs text-slate-300 font-medium flex-wrap">
+                      <span className="font-bold text-amber-300">
+                        {selectedHwToGrade.assignmentNameAr}
+                      </span>
+                      <span>•</span>
+                      <span>
+                        {language === 'ar'
+                          ? `الدرجة القصوى: ${selectedHwToGrade.totalScore || 20}`
+                          : `Max Score: ${selectedHwToGrade.totalScore || 20}`}
+                      </span>
+                      <span>•</span>
+                      <span>
+                        {language === 'ar'
+                          ? `تاريخ الاستحقاق: ${selectedHwToGrade.dueDate}`
+                          : `Due Date: ${selectedHwToGrade.dueDate}`}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedHwToGrade(null)}
+                    className="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition-colors cursor-pointer shrink-0"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              );
+            })()}
 
             {/* 2. Sub-Header Quick Action Bar */}
             <div
