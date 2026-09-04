@@ -451,11 +451,11 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
                 type="button"
                 disabled={isSelf}
                 onClick={handleTriggerDelete}
-                className="h-11 px-5 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
+                className="h-11 px-6 min-w-[145px] rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 font-bold text-xs sm:text-sm flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
                 title={isSelf ? (language === 'ar' ? 'الحساب الحالي مسجل للدخول ولا يمكن حذفه' : 'Current account cannot be deleted') : undefined}
               >
-                <Trash2 size={16} />
-                <span>{language === 'ar' ? 'حذف الحساب' : 'Delete Account'}</span>
+                <Trash2 size={16} className="shrink-0" />
+                <span className="px-1">{language === 'ar' ? 'حذف الحساب' : 'Delete Account'}</span>
               </button>
             </div>
 
@@ -464,18 +464,18 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
               <button
                 type="button"
                 onClick={onClose}
-                className="h-11 px-6 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
+                className="h-11 px-7 min-w-[100px] rounded-xl bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
               >
-                {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                <span className="px-1">{language === 'ar' ? 'إلغاء' : 'Cancel'}</span>
               </button>
 
               <button
                 type="submit"
                 form="admin-user-form"
-                className="h-11 px-7 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md hover:shadow-purple-600/30 hover:scale-102 active:scale-98 transition-all cursor-pointer shrink-0 whitespace-nowrap"
+                className="h-11 px-8 min-w-[170px] rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-3 shadow-md hover:shadow-purple-600/30 hover:scale-102 active:scale-98 transition-all cursor-pointer shrink-0 whitespace-nowrap"
               >
-                <Save size={16} />
-                <span>{language === 'ar' ? 'حفظ التعديلات' : 'Save Changes'}</span>
+                <Save size={16} className="shrink-0" />
+                <span className="px-1">{language === 'ar' ? 'حفظ التعديلات' : 'Save Changes'}</span>
               </button>
             </div>
           </div>
