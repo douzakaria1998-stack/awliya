@@ -390,12 +390,14 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
                   )}
                 </div>
 
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">
-                      {language === 'ar' ? 'كلمة المرور الجديدة' : 'New Password'}
-                    </label>
-                    <div className="relative w-full">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                    {language === 'ar' ? 'كلمة المرور الجديدة' : 'New Password'}
+                  </label>
+
+                  {/* One single line with input + generate + copy buttons */}
+                  <div className="flex items-center gap-3 w-full">
+                    <div className="relative flex-1 min-w-0">
                       <input
                         type={showPassword ? 'text' : 'password'}
                         value={password}
@@ -415,25 +417,23 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
-                  </div>
 
-                  <div className="flex flex-wrap items-center gap-3 pt-1">
                     <button
                       type="button"
                       onClick={handleGeneratePassword}
-                      className="px-4 h-10 rounded-xl bg-white dark:bg-slate-850 hover:bg-purple-50 dark:hover:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98"
+                      className="h-11 px-4 rounded-xl bg-white dark:bg-slate-850 hover:bg-purple-50 dark:hover:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
                     >
                       <RefreshCw size={14} />
-                      <span>{language === 'ar' ? 'توليد تلقائي لكلمة مرور قوية' : 'Auto Generate Strong Password'}</span>
+                      <span>{language === 'ar' ? 'توليد تلقائي' : 'Auto Generate'}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={handleCopyPassword}
-                      className="px-4 h-10 rounded-xl bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98"
+                      className="h-11 px-4 rounded-xl bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
                     >
                       {isCopied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-                      <span>{isCopied ? (language === 'ar' ? 'تم نسخ كلمة المرور' : 'Password Copied') : (language === 'ar' ? 'نسخ كلمة المرور' : 'Copy Password')}</span>
+                      <span>{isCopied ? (language === 'ar' ? 'تم النسخ' : 'Copied') : (language === 'ar' ? 'نسخ' : 'Copy')}</span>
                     </button>
                   </div>
                 </div>
