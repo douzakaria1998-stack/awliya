@@ -47,6 +47,30 @@ export function AdminPerformanceScreen() {
   } = useAdmin();
   const { isRTL, language } = useLanguage();
 
+  const getCleanGroupScheduleStr = (grp?: any) => {
+    if (!grp) return '06:00 PM';
+    if (grp.schedules && grp.schedules.length > 0) {
+      const days = grp.schedules.map((s: any) => s.day).join(' + ');
+      const times = grp.schedules.map((s: any) => {
+        let t = (s.time || '06:00').trim();
+        const p = s.period || 'PM';
+        if (!/(AM|PM)/i.test(t)) t = `${t} ${p}`;
+        return t.toUpperCase();
+      });
+      const uniqueTime = Array.from(new Set(times)).join(' / ');
+      return `${days} • ${uniqueTime}`;
+    }
+    const days = grp.daysAr ? grp.daysAr.trim() : '';
+    let timeStr = grp.startTime ? grp.startTime.trim() : '06:00 PM';
+    const match = timeStr.match(/(\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?)/i);
+    if (match) {
+      let t = match[1].trim();
+      if (!/(AM|PM)/i.test(t)) t = `${t} PM`;
+      timeStr = t.toUpperCase();
+    }
+    return days ? `${days} • ${timeStr}` : timeStr;
+  };
+
   const [activeSubTab, setActiveSubTab] = useState<'homework' | 'assessments' | 'feedback'>('homework');
 
   // Create Homework Modal State
@@ -408,9 +432,7 @@ export function AdminPerformanceScreen() {
                 ? grp.code.trim()
                 : grp?.code || hw.groupId?.replace('grp-', '') || '3927';
             const groupLanguage = grp?.language || 'English';
-            const groupTiming = grp
-              ? `${grp.daysAr ? `${grp.daysAr} • ` : ''}${grp.startTime || '18:00'} - ${grp.endTime || '20:00'}`
-              : '18:00 - 20:00';
+            const groupTiming = getCleanGroupScheduleStr(grp);
 
             return (
               <div
@@ -795,8 +817,8 @@ export function AdminPerformanceScreen() {
                 <SearchableSelect
                   options={visibleGroups.map((g) => ({
                     value: g.id,
-                    label: g.name,
-                    subLabel: g.code,
+                    label: `${g.name} (${g.code || '3925'}) • ${g.language}`,
+                    subLabel: getCleanGroupScheduleStr(g),
                   }))}
                   value={newHwGroupId}
                   onChange={(val) => setNewHwGroupId(val)}
@@ -938,6 +960,7 @@ export function AdminPerformanceScreen() {
                   options={visibleGroups.map((g) => ({
                     value: g.id,
                     label: `${g.name} (${g.code || '3925'}) • ${g.language}`,
+                    subLabel: getCleanGroupScheduleStr(g),
                   }))}
                   value={editHwGroupId}
                   onChange={(val) => setEditHwGroupId(val)}
@@ -1051,18 +1074,17 @@ export function AdminPerformanceScreen() {
             {/* 1. Modal Header */}
             {(() => {
               const modalGrp =
-                visibleGroups.find((g) => g.id === selectedHwToGrade.groupId || g.name === selectedHwToGrade.groupName) ||
-                groups.find((g) => g.id === selectedHwToGrade.groupId || g.name === selectedHwToGrade.groupName);
+                visibleGroups.find((g) => g.id === selectedHwToGrade.groupId) ||
+                groups.find((g) => g.id === selectedHwToGrade.groupId) ||
+                visibleGroups.find((g) => g.name === selectedHwToGrade.groupName) ||
+                groups.find((g) => g.name === selectedHwToGrade.groupName);
               const modalGroupName = modalGrp?.name || selectedHwToGrade.groupName;
-              const modalRawGroupId = modalGrp?.code || modalGrp?.id || selectedHwToGrade.groupId;
               const modalDisplayGroupId =
                 modalGrp?.code && modalGrp.code.trim() && !modalGrp.code.startsWith('grp-')
                   ? modalGrp.code.trim()
-                  : '3925';
+                  : modalGrp?.code || selectedHwToGrade.groupId?.replace('grp-', '') || '3927';
               const modalGroupLanguage = modalGrp?.language || 'English';
-              const modalGroupTiming = modalGrp
-                ? `${modalGrp.daysAr ? `${modalGrp.daysAr} • ` : ''}${modalGrp.startTime || '18:00'} - ${modalGrp.endTime || '20:00'}`
-                : '18:00 - 20:00';
+              const modalGroupTiming = getCleanGroupScheduleStr(modalGrp);
 
               return (
                 <div
