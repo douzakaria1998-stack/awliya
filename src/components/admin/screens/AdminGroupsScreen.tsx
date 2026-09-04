@@ -105,6 +105,19 @@ export function AdminGroupsScreen() {
     }
   }, [availableLevels, newLevel]);
 
+  // Auto-suggest next unique 4-digit code when opening add group modal
+  useEffect(() => {
+    if (isAddGroupOpen && !newCode) {
+      const existing = new Set(visibleGroups.map((g) => g.code?.trim()).filter(Boolean));
+      for (let num = 3925; num <= 9999; num++) {
+        if (!existing.has(num.toString())) {
+          setNewCode(num.toString());
+          break;
+        }
+      }
+    }
+  }, [isAddGroupOpen, newCode, visibleGroups]);
+
   // Dynamic schedules (Day + Time + AM/PM)
   const [schedules, setSchedules] = useState<ScheduleSlot[]>([
     { id: '1', day: 'الأحد', time: '06:00', period: 'PM' },

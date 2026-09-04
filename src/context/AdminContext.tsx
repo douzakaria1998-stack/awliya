@@ -203,6 +203,40 @@ const ADMIN_STORAGE_KEYS = {
   STUDENT_LEVEL_SCORES: 'myschool_admin_student_level_scores_v11',
 };
 
+// Helper to guarantee strictly unique 4-digit codes across all class groups
+export function generateUniqueGroupCode(preferredCode: string | undefined, usedCodes: Set<string>): string {
+  const clean = preferredCode ? preferredCode.toString().trim() : '';
+  if (
+    clean &&
+    !usedCodes.has(clean) &&
+    !clean.startsWith('grp-') &&
+    clean !== 'G-' &&
+    clean !== 'undefined' &&
+    clean !== 'null'
+  ) {
+    usedCodes.add(clean);
+    return clean;
+  }
+
+  // Find next available 4-digit numeric code starting from 3925
+  for (let num = 3925; num <= 9999; num++) {
+    const candidate = num.toString();
+    if (!usedCodes.has(candidate)) {
+      usedCodes.add(candidate);
+      return candidate;
+    }
+  }
+
+  // Fallback random 4-digit code if needed
+  while (true) {
+    const candidate = Math.floor(1000 + Math.random() * 9000).toString();
+    if (!usedCodes.has(candidate)) {
+      usedCodes.add(candidate);
+      return candidate;
+    }
+  }
+}
+
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const { approveStudent: approveInStudentContext, updateStudent: updateInStudentContext } = useStudent();
 
@@ -287,11 +321,13 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           (s.fullNameEn && s.fullNameEn.toLowerCase().includes('dalila'))
       )?.id;
 
-      let cleanedGroups = sGroups.map((g) => {
-        const isBeg = g.name === 'Beg' || g.name.includes('Beg') || g.code === '3927';
+      // Ensure EVERY group has a strictly UNIQUE 4-digit code (no duplicate IDs)
+      const usedCodes = new Set<string>();
+      const cleanedGroups = sGroups.map((g) => {
+        const uniqueCode = generateUniqueGroupCode(g.code, usedCodes);
         return {
           ...g,
-          code: isBeg ? '3925' : g.code || '3925',
+          code: uniqueCode,
           studentIds: dalilaId ? (g.studentIds || []).filter((id) => id !== dalilaId) : g.studentIds,
         };
       });
@@ -983,10 +1019,13 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   // ==========================================
   const addGroup = useCallback(
     (data: Partial<AdminGroup>) => {
+      const existingCodes = new Set(groups.map((g) => g.code?.trim()).filter(Boolean) as string[]);
+      const uniqueCode = generateUniqueGroupCode(data.code, existingCodes);
+
       const newGroup: AdminGroup = {
         id: `grp-${Date.now()}`,
         name: data.name || 'Group New',
-        code: data.code || '3925',
+        code: uniqueCode,
         language: data.language || 'English',
         level: data.level || 'A1',
         levelNumber: data.levelNumber || 1,
@@ -1015,17 +1054,32 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
       logAudit(
         `إنشاء فوج جديد: ${newGroup.name} (${newGroup.code})`,
-        `Created new class group: ${newGroup.name}`,
+        `Created new class group: ${newGroup.name} (${newGroup.code})`,
         'group'
       );
     },
-    [logAudit]
+    [groups, logAudit]
   );
 
   const updateGroup = useCallback(
     (groupId: string, updates: Partial<AdminGroup>) => {
       setGroups((prev) => {
-        const updated = prev.map((g) => (g.id === groupId ? { ...g, ...updates } : g));
+        let codeToSet = updates.code;
+        if (codeToSet) {
+          const isDuplicate = prev.some((g) => g.id !== groupId && g.code === codeToSet);
+          if (isDuplicate) {
+            const usedCodes = new Set(
+              prev.filter((g) => g.id !== groupId).map((g) => g.code?.trim()).filter(Boolean) as string[]
+            );
+            codeToSet = generateUniqueGroupCode(codeToSet, usedCodes);
+          }
+        }
+
+        const updated = prev.map((g) =>
+          g.id === groupId
+            ? { ...g, ...updates, ...(codeToSet ? { code: codeToSet } : {}) }
+            : g
+        );
         setItem(ADMIN_STORAGE_KEYS.GROUPS, updated);
         return updated;
       });
