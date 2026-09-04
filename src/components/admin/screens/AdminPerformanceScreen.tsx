@@ -27,6 +27,7 @@ export function AdminPerformanceScreen() {
     visibleAssessments,
     visibleStudents,
     visibleGroups,
+    groups,
     feedbackList,
     createHomework,
     evaluateHomework,
@@ -59,23 +60,61 @@ export function AdminPerformanceScreen() {
     completionStatus: 'completed' | 'needs_revision' | 'pending';
   }[]>([]);
 
-  const openGradeGroupModal = (hw: any) => {
-    setSelectedHwToGrade(hw);
-    const grp = visibleGroups.find((g) => g.id === hw.groupId);
-    const studentIds = hw.studentIds?.length ? hw.studentIds : grp?.studentIds?.length ? grp.studentIds : (hw.evaluations || []).map((e: any) => e.studentId);
-    
-    // Ensure all students in group are included
-    const evals = studentIds.map((sId: string) => {
-      const sObj = students.find((s) => s.id === sId);
-      const existingEval = hw.evaluations?.find((e: any) => e.studentId === sId);
+  // Dynamically resolve all students belonging to the homework's assigned group
+  const getHomeworkEvaluations = (hw: any) => {
+    const grp =
+      visibleGroups.find((g) => g.id === hw.groupId || g.name === hw.groupName) ||
+      groups.find((g) => g.id === hw.groupId || g.name === hw.groupName);
+
+    const groupStudents = students.filter(
+      (s) =>
+        (hw.groupId && s.groupId === hw.groupId) ||
+        (grp?.id && s.groupId === grp.id) ||
+        (hw.groupName && s.groupName?.trim().toLowerCase() === hw.groupName.trim().toLowerCase()) ||
+        (grp?.name && s.groupName?.trim().toLowerCase() === grp.name.trim().toLowerCase()) ||
+        (grp?.studentIds && grp.studentIds.includes(s.id)) ||
+        (hw.studentIds && hw.studentIds.includes(s.id)) ||
+        (hw.evaluations && hw.evaluations.some((e: any) => e.studentId === s.id))
+    );
+
+    const targetStudents =
+      groupStudents.length > 0
+        ? groupStudents
+        : visibleStudents.length > 0
+        ? visibleStudents
+        : students;
+
+    return targetStudents.map((s) => {
+      const existing = (hw.evaluations || []).find((e: any) => e.studentId === s.id);
       return {
-        studentId: sId,
-        studentNameAr: existingEval?.studentNameAr || sObj?.fullNameAr || sId,
-        score: existingEval?.score !== undefined ? existingEval.score : 18,
-        teacherComment: existingEval?.teacherComment || 'أداء ممتاز وعمل متقن!',
-        completionStatus: (existingEval?.completionStatus as any) || 'completed',
+        studentId: s.id,
+        studentNameAr: existing?.studentNameAr || s.fullNameAr,
+        score: existing?.score,
+        teacherComment: existing?.teacherComment,
+        completionStatus: existing?.completionStatus || 'pending',
       };
     });
+  };
+
+  const openGradeGroupModal = (hw: any) => {
+    setSelectedHwToGrade(hw);
+    const resolvedList = getHomeworkEvaluations(hw);
+
+    const evals = resolvedList.map((ev) => ({
+      studentId: ev.studentId,
+      studentNameAr: ev.studentNameAr,
+      score:
+        ev.score !== undefined
+          ? ev.score
+          : (hw.totalScore || 20) >= 20
+          ? 18
+          : Math.round((hw.totalScore || 20) * 0.9),
+      teacherComment:
+        ev.teacherComment ||
+        (language === 'ar' ? 'أداء ممتاز وعمل متقن!' : 'Excellent work!'),
+      completionStatus: (ev.completionStatus as any) === 'pending' ? 'completed' : (ev.completionStatus as any) || 'completed',
+    }));
+
     setGroupEvalsDraft(evals);
   };
 
@@ -131,7 +170,18 @@ export function AdminPerformanceScreen() {
     e.preventDefault();
     if (!newHwTitleAr) return;
 
-    const grp = visibleGroups.find((g) => g.id === newHwGroupId) || visibleGroups[0];
+    const grp =
+      visibleGroups.find((g) => g.id === newHwGroupId) ||
+      groups.find((g) => g.id === newHwGroupId) ||
+      visibleGroups[0];
+    const groupStudents = students.filter(
+      (s) =>
+        s.groupId === grp?.id ||
+        s.groupName === grp?.name ||
+        grp?.studentIds?.includes(s.id)
+    );
+    const targetStudents =
+      groupStudents.length > 0 ? groupStudents : visibleStudents;
 
     createHomework({
       assignmentNameAr: newHwTitleAr,
@@ -143,7 +193,7 @@ export function AdminPerformanceScreen() {
       groupId: grp?.id,
       groupName: grp?.name,
       totalScore: Number(newHwScore),
-      studentIds: grp?.studentIds || [],
+      studentIds: targetStudents.map((s) => s.id),
     });
 
     setNewHwTitleAr('');
@@ -391,7 +441,7 @@ export function AdminPerformanceScreen() {
                   </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                  {hw.evaluations.map((ev, idx) => (
+                  {getHomeworkEvaluations(hw).map((ev, idx) => (
                     <div
                       key={idx}
                       className="rounded-xl bg-slate-50/90 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-750 flex items-center justify-between gap-3 shadow-2xs hover:border-purple-300 dark:hover:border-purple-700 transition-all"

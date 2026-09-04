@@ -1565,10 +1565,27 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   // ==========================================
   const createHomework = useCallback(
     (hwData: Partial<AdminHomeworkAssignment>) => {
+      // Resolve matching group
+      const grp = groups.find((g) => g.id === hwData.groupId || g.name === hwData.groupName);
+      
+      // Resolve all group students
+      const matchingStudents = students.filter(
+        (s) =>
+          (hwData.groupId && s.groupId === hwData.groupId) ||
+          (grp?.id && s.groupId === grp.id) ||
+          (hwData.groupName && s.groupName?.trim().toLowerCase() === hwData.groupName.trim().toLowerCase()) ||
+          (grp?.name && s.groupName?.trim().toLowerCase() === grp.name.trim().toLowerCase()) ||
+          (grp?.studentIds && grp.studentIds.includes(s.id)) ||
+          (hwData.studentIds && hwData.studentIds.includes(s.id))
+      );
+
+      const targetStudents = matchingStudents.length > 0 ? matchingStudents : students;
+      const targetStudentIds = targetStudents.map((s) => s.id);
+
       const newHw: AdminHomeworkAssignment = {
         id: `hw-${Date.now()}`,
-        groupId: hwData.groupId || 'grp-a2-03',
-        groupName: hwData.groupName || 'Group A2 — Elementary',
+        groupId: hwData.groupId || grp?.id || 'grp-a2-03',
+        groupName: hwData.groupName || grp?.name || 'Group A2 — Elementary',
         assignmentNameAr: hwData.assignmentNameAr || 'واجب جديد',
         assignmentNameEn: hwData.assignmentNameEn || 'New Assignment',
         descriptionAr: hwData.descriptionAr || '',
@@ -1577,17 +1594,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         dueDate: hwData.dueDate || new Date(Date.now() + 7 * 86400000).toISOString().substring(0, 10),
         assignedDate: new Date().toISOString().substring(0, 10),
         totalScore: hwData.totalScore || 20,
-        studentIds: hwData.studentIds || [],
+        studentIds: targetStudentIds,
         status: 'assigned',
-        evaluations: (hwData.studentIds || []).map((sId) => {
-          const sObj = students.find((s) => s.id === sId);
-          return {
-            studentId: sId,
-            studentNameAr: sObj?.fullNameAr || sId,
-            completionStatus: 'pending',
-            parentNotified: true,
-          };
-        }),
+        evaluations: targetStudents.map((sObj) => ({
+          studentId: sObj.id,
+          studentNameAr: sObj.fullNameAr,
+          completionStatus: 'pending',
+          parentNotified: true,
+        })),
       };
 
       setHomeworkList((prev) => {
@@ -1597,7 +1611,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       });
 
       // Send Parent Portal Notifications for new homework
-      (hwData.studentIds || []).forEach((sId) => {
+      targetStudentIds.forEach((sId) => {
         notifyParentPortal({
           studentId: sId,
           type: 'homework',
@@ -1618,7 +1632,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         'homework'
       );
     },
-    [students, notifyParentPortal, logAudit]
+    [groups, students, notifyParentPortal, logAudit]
   );
 
   const evaluateHomework = useCallback(
@@ -1631,20 +1645,36 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           if (hw.id === hwId) {
             targetHwTitle = hw.assignmentNameAr;
             targetHwMaxScore = hw.totalScore || 20;
-            const updatedEvals = hw.evaluations.map((ev) => {
-              if (ev.studentId === studentId) {
-                return {
-                  ...ev,
-                  score,
-                  teacherComment: comment,
-                  completionStatus: status,
-                  submittedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
-                  parentNotified: true,
-                };
-              }
-              return ev;
-            });
-            return { ...hw, evaluations: updatedEvals };
+            const existingIdx = (hw.evaluations || []).findIndex((ev) => ev.studentId === studentId);
+            const sObj = students.find((s) => s.id === studentId);
+
+            let updatedEvals = [...(hw.evaluations || [])];
+            if (existingIdx >= 0) {
+              updatedEvals[existingIdx] = {
+                ...updatedEvals[existingIdx],
+                score,
+                teacherComment: comment,
+                completionStatus: status,
+                submittedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                parentNotified: true,
+              };
+            } else {
+              updatedEvals.push({
+                studentId,
+                studentNameAr: sObj?.fullNameAr || studentId,
+                score,
+                teacherComment: comment,
+                completionStatus: status,
+                submittedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                parentNotified: true,
+              });
+            }
+
+            return {
+              ...hw,
+              studentIds: Array.from(new Set([...(hw.studentIds || []), studentId])),
+              evaluations: updatedEvals,
+            };
           }
           return hw;
         });
@@ -1695,21 +1725,43 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             targetHwMaxScore = hw.totalScore || 20;
             const evalMap = new Map(evaluations.map((e) => [e.studentId, e]));
 
-            const updatedEvals = hw.evaluations.map((ev) => {
-              const match = evalMap.get(ev.studentId);
-              if (match) {
+            const allStudentIds = Array.from(
+              new Set([
+                ...(hw.studentIds || []),
+                ...(hw.evaluations || []).map((e) => e.studentId),
+                ...evaluations.map((e) => e.studentId),
+              ])
+            );
+
+            const updatedEvals = allStudentIds.map((sId) => {
+              const sObj = students.find((s) => s.id === sId);
+              const oldEval = (hw.evaluations || []).find((e) => e.studentId === sId);
+              const newEval = evalMap.get(sId);
+
+              if (newEval) {
                 return {
-                  ...ev,
-                  score: match.score,
-                  teacherComment: match.teacherComment,
-                  completionStatus: match.completionStatus,
+                  studentId: sId,
+                  studentNameAr: oldEval?.studentNameAr || sObj?.fullNameAr || sId,
+                  score: newEval.score,
+                  teacherComment: newEval.teacherComment,
+                  completionStatus: newEval.completionStatus,
                   submittedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
                   parentNotified: true,
                 };
               }
-              return ev;
+              return oldEval || {
+                studentId: sId,
+                studentNameAr: sObj?.fullNameAr || sId,
+                completionStatus: 'pending' as const,
+                parentNotified: true,
+              };
             });
-            return { ...hw, evaluations: updatedEvals };
+
+            return {
+              ...hw,
+              studentIds: allStudentIds,
+              evaluations: updatedEvals,
+            };
           }
           return hw;
         });
@@ -1718,13 +1770,13 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       });
 
       // Send Parent Portal notifications for evaluated students
-      evaluations.forEach((item) => {
-        const sObj = students.find((s) => s.id === item.studentId);
+      evaluations.forEach((ev) => {
+        const sObj = students.find((s) => s.id === ev.studentId);
         notifyParentPortal({
-          studentId: item.studentId,
+          studentId: ev.studentId,
           type: 'homework',
-          titleAr: `تصحيح وتقييم الواجب: ${targetHwTitle}`,
-          messageAr: `حصل الطالب ${sObj?.fullNameAr || item.studentId} على درجة (${item.score}/${targetHwMaxScore}) ${item.teacherComment ? `مع ملاحظة: "${item.teacherComment}"` : ''}.`,
+          titleAr: `تصحيح واجب: ${targetHwTitle}`,
+          messageAr: `تم تصحيح واجب ${targetHwTitle} للطالب ${sObj?.fullNameAr || ev.studentId} وحصل على درجة (${ev.score}/${targetHwMaxScore}).`,
           routeTo: 'performance',
           actionPayload: { tab: 'homework', itemId: hwId },
         });
@@ -1735,8 +1787,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       }
 
       logAudit(
-        `تقييم وتسجيل واجب الفوج: ${targetHwTitle} لعدد (${evaluations.length}) طالب`,
-        `Batch graded homework: ${targetHwTitle} for (${evaluations.length}) students`,
+        `تصحيح وتقييم جماعي لواجب (${targetHwTitle}) لعدد ${evaluations.length} طالب`,
+        `Batch evaluated homework (${targetHwTitle}) for ${evaluations.length} students`,
         'homework'
       );
     },
