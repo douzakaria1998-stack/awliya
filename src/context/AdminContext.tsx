@@ -150,6 +150,7 @@ interface AdminContextType {
   }) => void;
   
   createHomework: (hwData: Partial<AdminHomeworkAssignment>) => void;
+  deleteHomework: (hwId: string) => void;
   evaluateHomework: (hwId: string, studentId: string, score: number, comment: string, status: 'completed' | 'needs_revision') => void;
   batchEvaluateHomework: (
     hwId: string,
@@ -1687,6 +1688,30 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     [groups, students, notifyParentPortal, logAudit]
   );
 
+  const deleteHomework = useCallback(
+    (hwId: string) => {
+      let deletedName = '';
+      setHomeworkList((prev) => {
+        const target = prev.find((h) => h.id === hwId);
+        if (target) deletedName = target.assignmentNameAr;
+        const updated = prev.filter((h) => h.id !== hwId);
+        setItem(ADMIN_STORAGE_KEYS.HOMEWORK, updated);
+        return updated;
+      });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
+      logAudit(
+        `حذف الواجب المنزلي: ${deletedName || hwId}`,
+        `Deleted homework: ${hwId}`,
+        'homework'
+      );
+    },
+    [logAudit]
+  );
+
   const evaluateHomework = useCallback(
     (hwId: string, studentId: string, score: number, comment: string, status: 'completed' | 'needs_revision') => {
       let targetHwTitle = 'الواجب المنزلي';
@@ -2208,6 +2233,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         recordAttendance,
         addCoveringSession,
         createHomework,
+        deleteHomework,
         evaluateHomework,
         batchEvaluateHomework,
         recordAssessment,

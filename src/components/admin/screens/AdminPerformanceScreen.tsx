@@ -20,6 +20,7 @@ import {
   Globe,
   Hash,
   Users,
+  Trash2,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -34,6 +35,7 @@ export function AdminPerformanceScreen() {
     groups,
     feedbackList,
     createHomework,
+    deleteHomework,
     evaluateHomework,
     batchEvaluateHomework,
     recordAssessment,
@@ -56,6 +58,7 @@ export function AdminPerformanceScreen() {
 
   // Group Homework Evaluation Modal State
   const [selectedHwToGrade, setSelectedHwToGrade] = useState<any | null>(null);
+  const [hwToDelete, setHwToDelete] = useState<{ id: string; name: string } | null>(null);
   const [groupEvalsDraft, setGroupEvalsDraft] = useState<{
     studentId: string;
     studentNameAr: string;
@@ -373,10 +376,11 @@ export function AdminPerformanceScreen() {
               >
                 {/* Header Row */}
                 <div
-                  className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 border-b border-slate-100 dark:border-slate-800"
+                  className="flex flex-col gap-3.5 border-b border-slate-100 dark:border-slate-800"
                   style={{ paddingBottom: '16px', marginBottom: '16px' }}
                 >
-                  <div className="space-y-2">
+                  {/* Top Badges & Remove Button Row */}
+                  <div className="flex flex-wrap items-center justify-between gap-2.5">
                     {/* Group Meta Info Badges */}
                     <div className="flex flex-wrap items-center gap-2">
                       {/* 1. Group Name */}
@@ -424,18 +428,33 @@ export function AdminPerformanceScreen() {
                       </span>
                     </div>
 
-                    <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white leading-tight">
-                      {hw.assignmentNameAr}
-                    </h4>
-
-                    {hw.descriptionAr && (
-                      <p className="text-xs text-slate-400 font-medium leading-relaxed max-w-2xl">
-                        {hw.descriptionAr}
-                      </p>
-                    )}
+                    {/* Remove Homework Button (Top Left in RTL / Top Right in LTR) */}
+                    <button
+                      type="button"
+                      onClick={() => setHwToDelete({ id: hw.id, name: hw.assignmentNameAr })}
+                      className="rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 font-bold text-xs border border-rose-200/70 dark:border-rose-800/60 shadow-2xs hover:scale-102 active:scale-98 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap"
+                      style={{ height: '28px', padding: '0 12px' }}
+                      title={language === 'ar' ? 'حذف الواجب' : 'Delete Homework'}
+                    >
+                      <Trash2 size={13} className="shrink-0 text-rose-500" />
+                      <span>{language === 'ar' ? 'حذف' : 'Remove'}</span>
+                    </button>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
+                    <div className="space-y-1">
+                      <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white leading-tight">
+                        {hw.assignmentNameAr}
+                      </h4>
+
+                      {hw.descriptionAr && (
+                        <p className="text-xs text-slate-400 font-medium leading-relaxed max-w-2xl">
+                          {hw.descriptionAr}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2.5 shrink-0">
                     <span
                       className="rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center shadow-2xs whitespace-nowrap"
                       style={{ height: '34px', padding: '0 14px', gap: '8px' }}
@@ -465,6 +484,7 @@ export function AdminPerformanceScreen() {
                       <CheckCircle2 size={15} className="shrink-0" />
                       <span>{language === 'ar' ? 'تصحيح وتقييم الفوج' : 'Grade Group'}</span>
                     </button>
+                    </div>
                   </div>
                 </div>
 
@@ -1362,6 +1382,49 @@ export function AdminPerformanceScreen() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Homework Confirmation Modal */}
+      {hwToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-[24px] shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 animate-scale-in">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto shadow-inner">
+              <Trash2 size={24} />
+            </div>
+
+            <div className="text-center space-y-1.5">
+              <h3 className="font-black text-lg text-slate-900 dark:text-white">
+                {language === 'ar' ? 'حذف الواجب المنزلي' : 'Delete Homework'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                {language === 'ar'
+                  ? `هل أنت متأكد من رغبتك في حذف واجب "${hwToDelete.name}"؟ لا يمكن التراجع عن هذا الإجراء.`
+                  : `Are you sure you want to delete "${hwToDelete.name}"? This action cannot be undone.`}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setHwToDelete(null)}
+                className="flex-1 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs sm:text-sm transition-all cursor-pointer"
+              >
+                {language === 'ar' ? 'إلغاء' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteHomework(hwToDelete.id);
+                  setHwToDelete(null);
+                }}
+                className="flex-1 h-11 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-98 text-white font-bold text-xs sm:text-sm shadow-md shadow-rose-600/20 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <Trash2 size={15} />
+                <span>{language === 'ar' ? 'تأكيد الحذف' : 'Confirm Delete'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
