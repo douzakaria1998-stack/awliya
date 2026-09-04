@@ -26,6 +26,7 @@ import { AdminTeacher } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { generateAutoPassword, formatStudentCount } from '@/lib/utils';
+import { ConfirmModal } from './ConfirmModal';
 
 interface TeacherDetailModalProps {
   teacher: AdminTeacher | null;
@@ -39,6 +40,23 @@ export function TeacherDetailModal({ teacher, isOpen, onClose }: TeacherDetailMo
 
   // Find live teacher data from context
   const currentTeacher = teachers.find((t) => t.id === teacher?.id) || teacher;
+
+  // Confirmation Modal State
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'danger' | 'warning' | 'primary';
+    icon?: 'trash' | 'edit' | 'alert' | 'check';
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
 
   // Edit Mode State
   const [isEditing, setIsEditing] = useState(false);
@@ -80,9 +98,7 @@ export function TeacherDetailModal({ teacher, isOpen, onClose }: TeacherDetailMo
   const totalStudentsCount = assignedGroups.reduce((acc, g) => acc + g.studentIds.length, 0);
   const activePassword = currentTeacher.password || 'MS-Teach-2026!';
 
-  // Handle Save Profile Edits
-  const handleSaveProfile = (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeSaveProfile = () => {
     updateTeacher(currentTeacher.id, {
       fullNameAr: editFullNameAr.trim() || currentTeacher.fullNameAr,
       fullNameEn: editFullNameEn.trim() || currentTeacher.fullNameEn,
@@ -96,28 +112,83 @@ export function TeacherDetailModal({ teacher, isOpen, onClose }: TeacherDetailMo
     setTimeout(() => setSaveSuccess(false), 2500);
   };
 
+  // Handle Save Profile Edits
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    setConfirmConfig({
+      isOpen: true,
+      title: language === 'ar' ? 'تأكيد تعديل بيانات المعلم' : 'Confirm Teacher Profile Changes',
+      message: language === 'ar'
+        ? `هل أنت متأكد من حفظ التعديلات الجديدة على ملف المعلم (${editFullNameAr.trim() || currentTeacher.fullNameAr})؟`
+        : `Are you sure you want to save changes for teacher ${editFullNameEn.trim() || currentTeacher.fullNameEn}?`,
+      confirmText: language === 'ar' ? 'تأكيد وحفظ' : 'Confirm & Save',
+      variant: 'primary',
+      icon: 'edit',
+      onConfirm: () => {
+        executeSaveProfile();
+        setConfirmConfig((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
+  };
+
   // Handle Quick Password Reset
   const handleResetPassword = () => {
-    const newPass = generateAutoPassword();
-    updateTeacher(currentTeacher.id, { password: newPass });
-    setShowPassword(true);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
+    setConfirmConfig({
+      isOpen: true,
+      title: language === 'ar' ? 'تأكيد إعادة تعيين كلمة المرور' : 'Confirm Password Reset',
+      message: language === 'ar'
+        ? `هل أنت متأكد من إنشاء كلمة مرور عشوائية جديدة للمعلم (${currentTeacher.fullNameAr})؟`
+        : `Are you sure you want to generate a new random password for ${currentTeacher.fullNameEn}?`,
+      confirmText: language === 'ar' ? 'إعادة التعيين' : 'Reset Password',
+      variant: 'warning',
+      icon: 'alert',
+      onConfirm: () => {
+        const newPass = generateAutoPassword();
+        updateTeacher(currentTeacher.id, { password: newPass });
+        setShowPassword(true);
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 2500);
+        setConfirmConfig((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
   };
 
   // Handle Custom Password Save
   const handleSaveCustomPassword = () => {
     if (!customPasswordInput.trim()) return;
-    updateTeacher(currentTeacher.id, { password: customPasswordInput.trim() });
-    setIsChangingCustomPass(false);
-    setCustomPasswordInput('');
-    setShowPassword(true);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
+    setConfirmConfig({
+      isOpen: true,
+      title: language === 'ar' ? 'تأكيد تغيير كلمة المرور' : 'Confirm Custom Password',
+      message: language === 'ar'
+        ? `هل أنت متأكد من تعيين كلمة المرور المخصصة الجديدة للمعلم (${currentTeacher.fullNameAr})؟`
+        : `Are you sure you want to set the new custom password for ${currentTeacher.fullNameEn}?`,
+      confirmText: language === 'ar' ? 'تغيير كلمة المرور' : 'Change Password',
+      variant: 'warning',
+      icon: 'alert',
+      onConfirm: () => {
+        updateTeacher(currentTeacher.id, { password: customPasswordInput.trim() });
+        setIsChangingCustomPass(false);
+        setCustomPasswordInput('');
+        setShowPassword(true);
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 2500);
+        setConfirmConfig((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        onClose={() => setConfirmConfig((prev) => ({ ...prev, isOpen: false }))}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        variant={confirmConfig.variant}
+        icon={confirmConfig.icon}
+        onConfirm={confirmConfig.onConfirm}
+      />
       <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-fade-in-up my-6 flex flex-col max-h-[90vh]">
         {/* Modal Header */}
         <div

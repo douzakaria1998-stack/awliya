@@ -22,16 +22,34 @@ import {
   EyeOff,
   Sparkles,
   UserPlus,
+  Trash2,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdminParent } from '@/types/admin';
 import { generateAutoPassword, formatChildrenCount } from '@/lib/utils';
 import { ParentDetailModal } from '../modals/ParentDetailModal';
+import { ConfirmModal } from '../modals/ConfirmModal';
 
 export function AdminParentsScreen() {
-  const { visibleParents, students, addParent } = useAdmin();
+  const { visibleParents, students, addParent, deleteParent } = useAdmin();
   const { isRTL, language } = useLanguage();
+
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'danger' | 'warning' | 'primary';
+    icon?: 'trash' | 'edit' | 'alert' | 'check';
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedParent, setSelectedParent] = useState<AdminParent | null>(null);
@@ -253,14 +271,40 @@ export function AdminParentsScreen() {
                       }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <button
-                        type="button"
-                        onClick={() => handleOpenParent(par)}
-                        className="rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-300 font-bold text-xs transition-colors cursor-pointer"
-                        style={{ padding: '6px 14px' }}
-                      >
-                        {language === 'ar' ? 'الملف وإدارة الأبناء' : 'Manage Children'} →
-                      </button>
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenParent(par)}
+                          className="rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-300 font-bold text-xs transition-colors cursor-pointer"
+                          style={{ padding: '6px 14px' }}
+                        >
+                          {language === 'ar' ? 'الملف وإدارة الأبناء' : 'Manage Children'} →
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setConfirmConfig({
+                              isOpen: true,
+                              title: language === 'ar' ? 'تأكيد حذف حساب ولي الأمر' : 'Confirm Delete Parent Account',
+                              message:
+                                language === 'ar'
+                                  ? `هل أنت متأكد من رغبتك في حذف حساب ولي الأمر "${par.fullNameAr}" نهائياً من المنظومة؟ سيتم إلغاء ربط جميع الأبناء المرتبطين بهذا الحساب.`
+                                  : `Are you sure you want to permanently delete parent "${par.fullNameAr}"? All linked student relations will be detached.`,
+                              confirmText: language === 'ar' ? 'نعم، حذف ولي الأمر' : 'Yes, Delete Parent',
+                              cancelText: language === 'ar' ? 'إلغاء' : 'Cancel',
+                              variant: 'danger',
+                              icon: 'trash',
+                              onConfirm: () => {
+                                deleteParent(par.id);
+                              },
+                            });
+                          }}
+                          className="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-300 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                          title={language === 'ar' ? 'حذف ولي الأمر' : 'Delete Parent'}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -481,6 +525,19 @@ export function AdminParentsScreen() {
           setIsModalOpen(false);
           setSelectedParent(null);
         }}
+      />
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        cancelText={confirmConfig.cancelText}
+        variant={confirmConfig.variant}
+        icon={confirmConfig.icon}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig((prev) => ({ ...prev, isOpen: false }))}
       />
     </div>
   );

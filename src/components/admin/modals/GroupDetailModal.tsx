@@ -27,6 +27,7 @@ import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { SearchableSelect } from '@/components/common/SearchableSelect';
 import { DateInputDMY, formatDateDMY } from '@/components/common/DateInputDMY';
+import { ConfirmModal } from './ConfirmModal';
 
 interface ScheduleSlot {
   id: string;
@@ -180,8 +181,24 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
     );
   };
 
-  const handleSaveEditGroup = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Confirmation Modal State
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'danger' | 'warning' | 'primary';
+    icon?: 'trash' | 'edit' | 'alert' | 'check';
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
+
+  const executeSaveEditGroup = () => {
     if (!group) return;
     const teacherObj = teachers.find((t) => t.id === editTeacherId);
 
@@ -216,6 +233,26 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
     } as any);
 
     setIsEditGroupOpen(false);
+  };
+
+  const handleSaveEditGroup = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!group) return;
+
+    setConfirmConfig({
+      isOpen: true,
+      title: language === 'ar' ? 'تأكيد تعديل بيانات الفوج' : 'Confirm Group Changes',
+      message: language === 'ar'
+        ? `هل أنت متأكد من رغبتك في حفظ وتطبيق التعديلات على الفوج (${editName.trim()})؟`
+        : `Are you sure you want to save changes for group (${editName.trim()})?`,
+      confirmText: language === 'ar' ? 'تأكيد وحفظ' : 'Confirm & Save',
+      variant: 'primary',
+      icon: 'edit',
+      onConfirm: () => {
+        executeSaveEditGroup();
+        setConfirmConfig((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
   };
 
   const availableLevels = useMemo(() => {
@@ -1501,6 +1538,19 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
           </div>
         )}
       </div>
+
+      {/* Action Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        onClose={() => setConfirmConfig((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmConfig.onConfirm}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        cancelText={confirmConfig.cancelText}
+        variant={confirmConfig.variant}
+        icon={confirmConfig.icon}
+      />
     </div>
   );
 }

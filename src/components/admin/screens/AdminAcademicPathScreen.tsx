@@ -43,6 +43,7 @@ import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { CurriculumLevel, LessonProgressStatus, AdminGroup } from '@/types/admin';
 import { formatStudentCount } from '@/lib/utils';
+import { ConfirmModal } from '../modals/ConfirmModal';
 
 export function AdminAcademicPathScreen() {
   const {
@@ -65,6 +66,22 @@ export function AdminAcademicPathScreen() {
     updateStudent,
   } = useAdmin();
   const { isRTL, language } = useLanguage();
+
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'danger' | 'warning' | 'primary';
+    icon?: 'trash' | 'edit' | 'alert' | 'check';
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
 
   const [activeTab, setActiveTab] = useState<'curriculum' | 'student_progress'>('curriculum');
   const [selectedCurriculumLanguage, setSelectedCurriculumLanguage] = useState<'English' | 'French'>('English');
@@ -332,95 +349,109 @@ export function AdminAcademicPathScreen() {
     const repeatingStudents = groupStudentsList.filter((s) => studentDecisions[s.id] === 'repeat');
     const stoppedStudents = groupStudentsList.filter((s) => studentDecisions[s.id] === 'stopped');
 
-    // Snapshot of students in the current group before upgrading
-    const currentStudentsSnapshot =
-      groupStudentsList.length > 0
-        ? groupStudentsList.map((s) => s.id)
-        : activeProgressGroup.studentIds && activeProgressGroup.studentIds.length > 0
-        ? activeProgressGroup.studentIds
-        : visibleStudents.map((s) => s.id);
+    setConfirmConfig({
+      isOpen: true,
+      title: language === 'ar' ? 'تأكيد ترقية الفوج وأرشفة المستوى' : 'Confirm Group Upgrade & Archival',
+      message:
+        language === 'ar'
+          ? `هل أنت متأكد من تنفيذ ترقية الفوج "${activeProgressGroup.name}" إلى المستوى (${finalTargetCefr})؟ سيتم أرشفة بيانات المستوى المكتمل (${activeProgressGroup.level}) وترحيل ${passingStudents.length} طلاب وتحديد ${repeatingStudents.length} للإعادة.`
+          : `Are you sure you want to upgrade group "${activeProgressGroup.name}" to (${finalTargetCefr})? The completed level (${activeProgressGroup.level}) will be archived, ${passingStudents.length} students advanced, and ${repeatingStudents.length} set to repeat.`,
+      confirmText: language === 'ar' ? 'نعم، تنفيذ الترقية والأرشفة' : 'Yes, Execute Upgrade',
+      cancelText: language === 'ar' ? 'إلغاء' : 'Cancel',
+      variant: 'warning',
+      icon: 'alert',
+      onConfirm: () => {
+        // Snapshot of students in the current group before upgrading
+        const currentStudentsSnapshot =
+          groupStudentsList.length > 0
+            ? groupStudentsList.map((s) => s.id)
+            : activeProgressGroup.studentIds && activeProgressGroup.studentIds.length > 0
+            ? activeProgressGroup.studentIds
+            : visibleStudents.map((s) => s.id);
 
-    // 1. Archive the Old Group Data (Holding the completed level snapshot)
-    const archivedGroupId = `grp-archive-${activeProgressGroup.id}-${Date.now()}`;
-    const archivedGroup: AdminGroup = {
-      ...activeProgressGroup,
-      id: archivedGroupId,
-      name: `${activeProgressGroup.name} (${language === 'ar' ? 'أرشيف' : 'Archived'})`,
-      code: `${activeProgressGroup.code}-ARC`,
-      level: activeProgressGroup.level,
-      levelNumber: activeProgressGroup.levelNumber || currentLevelNum,
-      status: 'archived',
-      averageProgress: 100,
-      studentIds: currentStudentsSnapshot,
-    };
-    addGroup(archivedGroup);
+        // 1. Archive the Old Group Data (Holding the completed level snapshot)
+        const archivedGroupId = `grp-archive-${activeProgressGroup.id}-${Date.now()}`;
+        const archivedGroup: AdminGroup = {
+          ...activeProgressGroup,
+          id: archivedGroupId,
+          name: `${activeProgressGroup.name} (${language === 'ar' ? 'أرشيف' : 'Archived'})`,
+          code: `${activeProgressGroup.code}-ARC`,
+          level: activeProgressGroup.level,
+          levelNumber: activeProgressGroup.levelNumber || currentLevelNum,
+          status: 'archived',
+          averageProgress: 100,
+          studentIds: currentStudentsSnapshot,
+        };
+        addGroup(archivedGroup);
 
-    // 2. Process Passing Students -> Move to new level & reset progress to 0%
-    passingStudents.forEach((s) => {
-      updateStudent(s.id, {
-        currentLevel: nextLevelNum,
-        cefrLevel: finalTargetCefr,
-        groupName: targetGroupName,
-        groupId: activeProgressGroup.id,
-        overallProgress: 0,
-        completedLessonsCount: 0,
-        attendanceRate: 0,
-        status: 'active',
-      });
+        // 2. Process Passing Students -> Move to new level & reset progress to 0%
+        passingStudents.forEach((s) => {
+          updateStudent(s.id, {
+            currentLevel: nextLevelNum,
+            cefrLevel: finalTargetCefr,
+            groupName: targetGroupName,
+            groupId: activeProgressGroup.id,
+            overallProgress: 0,
+            completedLessonsCount: 0,
+            attendanceRate: 0,
+            status: 'active',
+          });
 
-      // Save certified passing mark for the completed level in archive/certificate
-      updateStudentLevelScore(
-        s.id,
-        currentLevelNum,
-        95,
-        language === 'ar' ? 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)' : 'Honors: High Distinction'
-      );
+          // Save certified passing mark for the completed level in archive/certificate
+          updateStudentLevelScore(
+            s.id,
+            currentLevelNum,
+            95,
+            language === 'ar' ? 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)' : 'Honors: High Distinction'
+          );
+        });
+
+        // 3. Process Repeating Students
+        repeatingStudents.forEach((s) => {
+          updateStudent(s.id, {
+            overallProgress: 0,
+            completedLessonsCount: 0,
+            status: 'active',
+            groupId: '',
+            groupName: language === 'ar' ? `إعادة المستوى (${activeProgressGroup.level}) - بانتظار التسكين` : `Repeating (${activeProgressGroup.level}) - Unassigned`,
+          });
+        });
+
+        // 4. Process Stopped Students
+        stoppedStudents.forEach((s) => {
+          updateStudent(s.id, {
+            status: 'inactive',
+            groupId: '',
+            groupName: language === 'ar' ? 'منقطع عن الدراسة' : 'Stopped / Paused',
+          });
+        });
+
+        // 5. Update the Group itself with new level data & reset progress
+        updateGroup(activeProgressGroup.id, {
+          level: finalTargetCefr,
+          levelNumber: nextLevelNum,
+          name: targetGroupName,
+          code: targetGroupCode,
+          studentIds: passingStudents.map((s) => s.id),
+          averageProgress: 0,
+          completedLessonsCount: 0,
+          status: 'active',
+        });
+
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('awliya-data-sync'));
+        }
+
+        setIsUpgradeModalOpen(false);
+
+        const msg =
+          language === 'ar'
+            ? `تهانينا! تمت ترقية الفوج بنجاح إلى (${finalTargetCefr}) وأرشفة بيانات المستوى السابق (${activeProgressGroup.level})، وتم ترحيل ${passingStudents.length} طلاب، وتحديد ${repeatingStudents.length} للإعادة و ${stoppedStudents.length} متوقفين.`
+            : `Congratulations! Group successfully upgraded to (${finalTargetCefr}) and previous level (${activeProgressGroup.level}) archived. ${passingStudents.length} students advanced, ${repeatingStudents.length} repeating, and ${stoppedStudents.length} stopped.`;
+        setUpgradeSuccessMessage(msg);
+        setTimeout(() => setUpgradeSuccessMessage(null), 6000);
+      },
     });
-
-    // 3. Process Repeating Students
-    repeatingStudents.forEach((s) => {
-      updateStudent(s.id, {
-        overallProgress: 0,
-        completedLessonsCount: 0,
-        status: 'active',
-        groupId: '',
-        groupName: language === 'ar' ? `إعادة المستوى (${activeProgressGroup.level}) - بانتظار التسكين` : `Repeating (${activeProgressGroup.level}) - Unassigned`,
-      });
-    });
-
-    // 4. Process Stopped Students
-    stoppedStudents.forEach((s) => {
-      updateStudent(s.id, {
-        status: 'inactive',
-        groupId: '',
-        groupName: language === 'ar' ? 'منقطع عن الدراسة' : 'Stopped / Paused',
-      });
-    });
-
-    // 5. Update the Group itself with new level data & reset progress
-    updateGroup(activeProgressGroup.id, {
-      level: finalTargetCefr,
-      levelNumber: nextLevelNum,
-      name: targetGroupName,
-      code: targetGroupCode,
-      studentIds: passingStudents.map((s) => s.id),
-      averageProgress: 0,
-      completedLessonsCount: 0,
-      status: 'active',
-    });
-
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('awliya-data-sync'));
-    }
-
-    setIsUpgradeModalOpen(false);
-
-    const msg =
-      language === 'ar'
-        ? `تهانينا! تمت ترقية الفوج بنجاح إلى (${finalTargetCefr}) وأرشفة بيانات المستوى السابق (${activeProgressGroup.level})، وتم ترحيل ${passingStudents.length} طلاب، وتحديد ${repeatingStudents.length} للإعادة و ${stoppedStudents.length} متوقفين.`
-        : `Congratulations! Group successfully upgraded to (${finalTargetCefr}) and previous level (${activeProgressGroup.level}) archived. ${passingStudents.length} students advanced, ${repeatingStudents.length} repeating, and ${stoppedStudents.length} stopped.`;
-    setUpgradeSuccessMessage(msg);
-    setTimeout(() => setUpgradeSuccessMessage(null), 6000);
   };
 
   // Filtered Groups for Level 1
@@ -575,17 +606,22 @@ export function AdminAcademicPathScreen() {
   const handleDeleteLevel = (lvlNumber: number) => {
     const target = curricula.find((c) => c.levelNumber === lvlNumber && c.language === selectedCurriculumLanguage);
     if (!target) return;
-    if (
-      !confirm(
+    setConfirmConfig({
+      isOpen: true,
+      title: language === 'ar' ? 'تأكيد حذف المستوى التعليمي' : 'Confirm Delete Curriculum Level',
+      message:
         language === 'ar'
-          ? `هل أنت متأكد من رغبتك في حذف مستوى "${target.nameAr}" بالكامل من المنهاج؟`
-          : `Are you sure you want to delete "${target.nameEn}" from the curriculum?`
-      )
-    ) {
-      return;
-    }
-    deleteCurriculumLevel(lvlNumber, selectedCurriculumLanguage);
-    setSelectedLevelNumber(1);
+          ? `هل أنت متأكد من رغبتك في حذف مستوى "${target.nameAr}" (${target.cefrCode}) بالكامل من المنهاج؟ سيتم حذف جميع الوحدات والدروس المرتبطة به نهائياً.`
+          : `Are you sure you want to permanently delete level "${target.nameEn || target.nameAr}" (${target.cefrCode}) from the curriculum? All associated units and lessons will be removed.`,
+      confirmText: language === 'ar' ? 'نعم، حذف المستوى' : 'Yes, Delete Level',
+      cancelText: language === 'ar' ? 'إلغاء' : 'Cancel',
+      variant: 'danger',
+      icon: 'trash',
+      onConfirm: () => {
+        deleteCurriculumLevel(lvlNumber, selectedCurriculumLanguage);
+        setSelectedLevelNumber(1);
+      },
+    });
   };
 
   // Step 1 Submit: Move to Step 2 (Units & Lessons configuration)
@@ -3469,6 +3505,19 @@ export function AdminAcademicPathScreen() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        cancelText={confirmConfig.cancelText}
+        variant={confirmConfig.variant}
+        icon={confirmConfig.icon}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

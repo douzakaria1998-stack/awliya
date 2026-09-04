@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { AdminGroup } from '@/types/admin';
 import { formatStudentCount } from '@/lib/utils';
 
 export function AdminAttendanceScreen() {

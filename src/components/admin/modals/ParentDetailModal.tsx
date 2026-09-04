@@ -33,6 +33,8 @@ import { generateAutoPassword } from '@/lib/utils';
 import { setItem } from '@/lib/localStorage';
 import { STORAGE_KEYS } from '@/lib/constants';
 
+import { ConfirmModal } from './ConfirmModal';
+
 interface ParentDetailModalProps {
   parent: AdminParent | null;
   isOpen: boolean;
@@ -42,6 +44,22 @@ interface ParentDetailModalProps {
 export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModalProps) {
   const { parents, students, linkStudentToParent, unlinkStudentFromParent, updateParent } = useAdmin();
   const { isRTL, language } = useLanguage();
+
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'danger' | 'warning' | 'primary';
+    icon?: 'trash' | 'edit' | 'alert' | 'check';
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
 
   const [isLinkingOpen, setIsLinkingOpen] = useState(false);
   const [selectedStudentToLink, setSelectedStudentToLink] = useState('');
@@ -122,18 +140,32 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
     e.preventDefault();
     if (!editNameAr.trim() || !editPhone.trim()) return;
 
-    updateParent(currentParent.id, {
-      fullNameAr: editNameAr.trim(),
-      fullNameEn: editNameEn.trim() || editNameAr.trim(),
-      phone: editPhone.trim(),
-      email: editEmail.trim() || currentParent.email,
-      address: editAddress.trim() || currentParent.address,
-      status: editStatus,
-    });
+    setConfirmConfig({
+      isOpen: true,
+      title: language === 'ar' ? 'تأكيد تعديل بيانات ولي الأمر' : 'Confirm Parent Profile Changes',
+      message:
+        language === 'ar'
+          ? `هل أنت متأكد من حفظ التعديلات الجديدة لولي الأمر "${editNameAr}"؟ سيتم تحديث بيانات الاتصال والحساب فوراً.`
+          : `Are you sure you want to save changes to "${editNameAr}"? Contact and profile details will be updated immediately.`,
+      confirmText: language === 'ar' ? 'نعم، حفظ التعديلات' : 'Yes, Save Changes',
+      cancelText: language === 'ar' ? 'إلغاء' : 'Cancel',
+      variant: 'primary',
+      icon: 'edit',
+      onConfirm: () => {
+        updateParent(currentParent.id, {
+          fullNameAr: editNameAr.trim(),
+          fullNameEn: editNameEn.trim() || editNameAr.trim(),
+          phone: editPhone.trim(),
+          email: editEmail.trim() || currentParent.email,
+          address: editAddress.trim() || currentParent.address,
+          status: editStatus,
+        });
 
-    setIsEditing(false);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
+        setIsEditing(false);
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 2500);
+      },
+    });
   };
 
   const handleOpenParentPortalSession = () => {
@@ -478,9 +510,23 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                 <button
                   type="button"
                   onClick={() => {
-                    const newPass = generateAutoPassword();
-                    updateParent(currentParent.id, { password: newPass });
-                    setIsCopied(false);
+                    setConfirmConfig({
+                      isOpen: true,
+                      title: language === 'ar' ? 'إعادة تعيين كلمة مرور ولي الأمر' : 'Reset Parent Password',
+                      message:
+                        language === 'ar'
+                          ? `هل أنت متأكد من رغبتك في توليد وتعيين كلمة مرور جديدة لـ "${currentParent.fullNameAr}"؟ سيتعين على ولي الأمر استخدام الرمز الجديد لتسجيل الدخول.`
+                          : `Are you sure you want to generate a new password for "${currentParent.fullNameAr}"? The parent will need to use this new credential to log in.`,
+                      confirmText: language === 'ar' ? 'نعم، تعيين كلمة مرور جديدة' : 'Yes, Reset Password',
+                      cancelText: language === 'ar' ? 'إلغاء' : 'Cancel',
+                      variant: 'warning',
+                      icon: 'alert',
+                      onConfirm: () => {
+                        const newPass = generateAutoPassword();
+                        updateParent(currentParent.id, { password: newPass });
+                        setIsCopied(false);
+                      },
+                    });
                   }}
                   title={language === 'ar' ? 'توليد وتعيين كلمة مرور جديدة تلقائياً' : 'Auto generate and set new password'}
                   className="bg-white dark:bg-slate-900 hover:bg-purple-50 dark:hover:bg-purple-950/50 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0 whitespace-nowrap shadow-2xs"
@@ -724,7 +770,23 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
 
                       <button
                         type="button"
-                        onClick={() => unlinkStudentFromParent(currentParent.id, st.id)}
+                        onClick={() => {
+                          setConfirmConfig({
+                            isOpen: true,
+                            title: language === 'ar' ? 'تأكيد إلغاء ربط الطالب' : 'Confirm Unlink Student',
+                            message:
+                              language === 'ar'
+                                ? `هل أنت متأكد من رغبتك في إلغاء ربط الطالب "${st.fullNameAr}" من حساب ولي الأمر "${currentParent.fullNameAr}"؟ لن يتمكن ولي الأمر من متابعة هذا الطالب في البوابة.`
+                                : `Are you sure you want to unlink student "${st.fullNameAr}" from "${currentParent.fullNameAr}"? The parent will no longer see this student in their portal.`,
+                            confirmText: language === 'ar' ? 'نعم، إلغاء الربط' : 'Yes, Unlink Student',
+                            cancelText: language === 'ar' ? 'تراجع' : 'Cancel',
+                            variant: 'danger',
+                            icon: 'trash',
+                            onConfirm: () => {
+                              unlinkStudentFromParent(currentParent.id, st.id);
+                            },
+                          });
+                        }}
                         className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
                         title={language === 'ar' ? 'إلغاء ربط الطالب' : 'Unlink student'}
                       >
@@ -739,6 +801,19 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
         </div>
       </div>
     </div>
-  </div>
-);
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        cancelText={confirmConfig.cancelText}
+        variant={confirmConfig.variant}
+        icon={confirmConfig.icon}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig((prev) => ({ ...prev, isOpen: false }))}
+      />
+    </div>
+  );
 }

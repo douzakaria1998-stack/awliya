@@ -42,17 +42,18 @@ export function DateInputDMY({
   const displayValue = formatDateDMY(value);
 
   const handleContainerClick = () => {
-    if (disabled) return;
+    if (disabled || !hiddenInputRef.current) return;
+    const el: any = hiddenInputRef.current;
     try {
-      if (hiddenInputRef.current && 'showPicker' in hiddenInputRef.current) {
-        hiddenInputRef.current.showPicker();
+      if (typeof el.showPicker === 'function') {
+        el.showPicker();
       } else {
-        hiddenInputRef.current?.focus();
-        hiddenInputRef.current?.click();
+        el.focus?.();
+        el.click?.();
       }
     } catch {
-      hiddenInputRef.current?.focus();
-      hiddenInputRef.current?.click();
+      el.focus?.();
+      el.click?.();
     }
   };
 

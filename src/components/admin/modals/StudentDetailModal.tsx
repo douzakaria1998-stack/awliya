@@ -27,6 +27,7 @@ import {
 import { AdminStudent } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { ConfirmModal } from './ConfirmModal';
 
 interface StudentDetailModalProps {
   student: AdminStudent | null;
@@ -106,8 +107,24 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
     }));
   }, [curricula, language]);
 
-  const handleSaveStudentInfo = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Confirmation Modal State
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'danger' | 'warning' | 'primary';
+    icon?: 'trash' | 'edit' | 'alert' | 'check';
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
+
+  const executeSaveStudentInfo = () => {
     if (!editFullNameAr.trim()) return;
 
     const matchedGroup = editGroupId ? groups.find((g) => g.id === editGroupId) : undefined;
@@ -131,6 +148,26 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
       setSaveSuccess(false);
       setIsEditingInfo(false);
     }, 1200);
+  };
+
+  const handleSaveStudentInfo = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editFullNameAr.trim()) return;
+
+    setConfirmConfig({
+      isOpen: true,
+      title: language === 'ar' ? 'تأكيد تعديل بيانات الطالب' : 'Confirm Student Profile Changes',
+      message: language === 'ar'
+        ? `هل أنت متأكد من رغبتك في حفظ وتطبيق التعديلات الجديدة على ملف الطالب (${editFullNameAr.trim()})؟`
+        : `Are you sure you want to save the changes made to the profile of ${editFullNameAr.trim()}?`,
+      confirmText: language === 'ar' ? 'تأكيد وحفظ' : 'Confirm & Save',
+      variant: 'primary',
+      icon: 'edit',
+      onConfirm: () => {
+        executeSaveStudentInfo();
+        setConfirmConfig((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
   };
 
   // 4-Skill Assessment Editing State
@@ -493,7 +530,22 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                         {hasParent && (
                           <button
                             type="button"
-                            onClick={() => unlinkStudentFromParent(currentStudent.parentId, currentStudent.id)}
+                            onClick={() => {
+                              setConfirmConfig({
+                                isOpen: true,
+                                title: language === 'ar' ? 'تأكيد إلغاء ربط ولي الأمر' : 'Confirm Unlinking Parent',
+                                message: language === 'ar'
+                                  ? `هل أنت متأكد من رغبتك في إلغاء ربط ولي الأمر (${currentStudent.parentName || ''}) بملف الطالب؟`
+                                  : `Are you sure you want to unlink parent (${currentStudent.parentName || ''}) from this student's profile?`,
+                                confirmText: language === 'ar' ? 'إلغاء الربط' : 'Unlink',
+                                variant: 'danger',
+                                icon: 'trash',
+                                onConfirm: () => {
+                                  unlinkStudentFromParent(currentStudent.parentId, currentStudent.id);
+                                  setConfirmConfig((prev) => ({ ...prev, isOpen: false }));
+                                },
+                              });
+                            }}
                             className="text-[10px] font-bold text-rose-500 hover:text-rose-700 dark:text-rose-400 cursor-pointer transition-colors"
                             title={language === 'ar' ? 'إلغاء ربط ولي الأمر' : 'Unlink Parent'}
                           >
@@ -630,7 +682,7 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                       style={{ padding: '14px 18px' }}
                     >
                       <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'تاريخ التسجيل:' : 'Join Date:'}</span>
-                      <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm font-mono">{currentStudent.joinDate}</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm font-mono">{currentStudent.enrollmentDate || (currentStudent as any).joinDate}</span>
                     </div>
                   </div>
                 </div>
@@ -832,26 +884,39 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                             overall,
                           };
 
-                          updateStudent(currentStudent.id, {
-                            skills: updatedSkills,
-                            averagePerformance: overall,
-                          });
+                          setConfirmConfig({
+                            isOpen: true,
+                            title: language === 'ar' ? 'تأكيد تحديث درجات المهارات' : 'Confirm Skill Scores Update',
+                            message: language === 'ar'
+                              ? `هل أنت متأكد من حفظ درجات المهارات الجديدة (المعدل: ${overall}%) لملف الطالب (${currentStudent.fullNameAr})؟`
+                              : `Are you sure you want to update skill scores (Average: ${overall}%) for ${currentStudent.fullNameEn}?`,
+                            confirmText: language === 'ar' ? 'تحديث وحفظ' : 'Update & Save',
+                            variant: 'primary',
+                            icon: 'check',
+                            onConfirm: () => {
+                              updateStudent(currentStudent.id, {
+                                skills: updatedSkills,
+                                averagePerformance: overall,
+                              });
 
-                          recordAssessment({
-                            studentId: currentStudent.id,
-                            studentNameAr: currentStudent.fullNameAr,
-                            studentNameEn: currentStudent.fullNameEn,
-                            groupId: currentStudent.groupId,
-                            groupName: currentStudent.groupName,
-                            level: currentStudent.cefrLevel,
-                            assessmentType: 'periodic',
-                            scores: updatedSkills,
-                            gradeLetterAr: overall >= 90 ? 'ممتاز (A+)' : overall >= 80 ? 'جيد جداً (B+)' : overall >= 60 ? 'مقبول (C)' : 'يحتاج تحسين (D)',
-                            gradeLetterEn: overall >= 90 ? 'A+ (Distinction)' : overall >= 80 ? 'B+ (Very Good)' : overall >= 60 ? 'C (Pass)' : 'D (Needs Improvement)',
-                            teacherComment: language === 'ar' ? 'تحديث مباشر لتقييم المهارات اللغوية الأربعة' : 'Direct update of 4-skill assessment',
-                          });
+                              recordAssessment({
+                                studentId: currentStudent.id,
+                                studentNameAr: currentStudent.fullNameAr,
+                                studentNameEn: currentStudent.fullNameEn,
+                                groupId: currentStudent.groupId,
+                                groupName: currentStudent.groupName,
+                                level: currentStudent.cefrLevel,
+                                assessmentType: 'periodic',
+                                scores: updatedSkills,
+                                gradeLetterAr: overall >= 90 ? 'ممتاز (A+)' : overall >= 80 ? 'جيد جداً (B+)' : overall >= 60 ? 'مقبول (C)' : 'يحتاج تحسين (D)',
+                                gradeLetterEn: overall >= 90 ? 'A+ (Distinction)' : overall >= 80 ? 'B+ (Very Good)' : overall >= 60 ? 'C (Pass)' : 'D (Needs Improvement)',
+                                teacherComment: language === 'ar' ? 'تحديث مباشر لتقييم المهارات اللغوية الأربعة' : 'Direct update of 4-skill assessment',
+                              });
 
-                          setIsEditingSkills(false);
+                              setIsEditingSkills(false);
+                              setConfirmConfig((prev) => ({ ...prev, isOpen: false }));
+                            },
+                          });
                         }}
                         className="inline-flex items-center justify-center rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
                         style={{ padding: '8px 20px', minHeight: '36px', lineHeight: '1.4' }}
@@ -1030,6 +1095,19 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
           )}
         </div>
       </div>
+
+      {/* Action Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        onClose={() => setConfirmConfig((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmConfig.onConfirm}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        cancelText={confirmConfig.cancelText}
+        variant={confirmConfig.variant}
+        icon={confirmConfig.icon}
+      />
     </div>
   );
 }

@@ -60,7 +60,7 @@ export function AdminDashboardScreen() {
   const levelProgressData = curricula.map((curricLevel) => {
     // 1. Find all groups matching this curriculum level
     const matchingGroups = visibleGroups.filter((g) => {
-      if (g.curriculumLevelId && g.curriculumLevelId === curricLevel.id) return true;
+      if ((g as any).curriculumLevelId && (g as any).curriculumLevelId === (curricLevel as any).id) return true;
       const gLevel = (g.level || '').trim().toLowerCase();
       const nameAr = (curricLevel.nameAr || '').trim().toLowerCase();
       const nameEn = (curricLevel.nameEn || '').trim().toLowerCase();
