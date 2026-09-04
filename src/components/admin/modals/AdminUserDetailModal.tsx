@@ -420,18 +420,18 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
                     <button
                       type="button"
                       onClick={handleGeneratePassword}
-                      className="h-11 px-5 rounded-xl bg-white dark:bg-slate-850 hover:bg-purple-50 dark:hover:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
+                      className="h-11 px-5 min-w-[135px] rounded-xl bg-white dark:bg-slate-850 hover:bg-purple-50 dark:hover:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs sm:text-sm font-bold flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
                     >
-                      <RefreshCw size={14} />
+                      <RefreshCw size={15} className="shrink-0" />
                       <span>{language === 'ar' ? 'توليد تلقائي' : 'Auto Generate'}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={handleCopyPassword}
-                      className="h-11 px-5 rounded-xl bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
+                      className="h-11 px-5 min-w-[105px] rounded-xl bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
                     >
-                      {isCopied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                      {isCopied ? <Check size={15} className="text-emerald-500 shrink-0" /> : <Copy size={15} className="shrink-0" />}
                       <span>{isCopied ? (language === 'ar' ? 'تم النسخ' : 'Copied') : (language === 'ar' ? 'نسخ' : 'Copy')}</span>
                     </button>
                   </div>
