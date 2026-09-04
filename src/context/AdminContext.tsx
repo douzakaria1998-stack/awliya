@@ -247,7 +247,29 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (sAdminId) setCurrentAdminId(sAdminId);
 
     const sStudents = getItem<AdminStudent[]>(ADMIN_STORAGE_KEYS.STUDENTS);
-    if (sStudents?.length) setStudents(sStudents);
+    let cleanedStudents = sStudents || [];
+    if (sStudents?.length) {
+      // Unassign Dalila from Beg group if previously linked
+      const dalilaStudent = sStudents.find(
+        (s) =>
+          (s.fullNameAr && (s.fullNameAr.includes('دليلة') || s.fullNameAr.includes('مصطفاوي'))) ||
+          (s.fullNameEn && s.fullNameEn.toLowerCase().includes('dalila'))
+      );
+      if (dalilaStudent && (dalilaStudent.groupName === 'Beg' || dalilaStudent.groupId.startsWith('grp-'))) {
+        cleanedStudents = sStudents.map((s) => {
+          if (s.id === dalilaStudent.id) {
+            return {
+              ...s,
+              groupId: '',
+              groupName: 'بدون فوج',
+            };
+          }
+          return s;
+        });
+        setItem(ADMIN_STORAGE_KEYS.STUDENTS, cleanedStudents);
+      }
+      setStudents(cleanedStudents);
+    }
 
     const sParents = getItem<AdminParent[]>(ADMIN_STORAGE_KEYS.PARENTS);
     if (sParents?.length) setParents(sParents);
@@ -256,7 +278,23 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (sTeachers?.length) setTeachers(sTeachers);
 
     const sGroups = getItem<AdminGroup[]>(ADMIN_STORAGE_KEYS.GROUPS);
-    if (sGroups?.length) setGroups(sGroups);
+    if (sGroups?.length) {
+      const dalilaId = cleanedStudents?.find(
+        (s) =>
+          (s.fullNameAr && (s.fullNameAr.includes('دليلة') || s.fullNameAr.includes('مصطفاوي'))) ||
+          (s.fullNameEn && s.fullNameEn.toLowerCase().includes('dalila'))
+      )?.id;
+
+      let cleanedGroups = sGroups;
+      if (dalilaId) {
+        cleanedGroups = sGroups.map((g) => ({
+          ...g,
+          studentIds: (g.studentIds || []).filter((id) => id !== dalilaId),
+        }));
+        setItem(ADMIN_STORAGE_KEYS.GROUPS, cleanedGroups);
+      }
+      setGroups(cleanedGroups);
+    }
 
     const sCurricula = getItem<CurriculumLevel[]>(ADMIN_STORAGE_KEYS.CURRICULA);
     if (sCurricula?.length) setCurricula(sCurricula);
@@ -294,7 +332,24 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (sAttendance?.length) setAttendanceSessions(sAttendance);
 
     const sHomework = getItem<AdminHomeworkAssignment[]>(ADMIN_STORAGE_KEYS.HOMEWORK);
-    if (sHomework?.length) setHomeworkList(sHomework);
+    if (sHomework?.length) {
+      const dalilaId = cleanedStudents?.find(
+        (s) =>
+          (s.fullNameAr && (s.fullNameAr.includes('دليلة') || s.fullNameAr.includes('مصطفاوي'))) ||
+          (s.fullNameEn && s.fullNameEn.toLowerCase().includes('dalila'))
+      )?.id;
+
+      let cleanedHw = sHomework;
+      if (dalilaId) {
+        cleanedHw = sHomework.map((h) => ({
+          ...h,
+          studentIds: (h.studentIds || []).filter((id) => id !== dalilaId),
+          evaluations: (h.evaluations || []).filter((e) => e.studentId !== dalilaId),
+        }));
+        setItem(ADMIN_STORAGE_KEYS.HOMEWORK, cleanedHw);
+      }
+      setHomeworkList(cleanedHw);
+    }
 
     const sAssessments = getItem<AdminAssessmentRecord[]>(ADMIN_STORAGE_KEYS.ASSESSMENTS);
     if (sAssessments?.length) setAssessments(sAssessments);

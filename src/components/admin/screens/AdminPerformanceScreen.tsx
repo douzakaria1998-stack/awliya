@@ -72,6 +72,10 @@ export function AdminPerformanceScreen() {
 
     // STRICT filter: Only students belonging to this group
     const groupStudents = students.filter((s) => {
+      if (s.fullNameAr?.includes('دليلة') || s.fullNameEn?.toLowerCase().includes('dalila')) {
+        return false;
+      }
+      if (!s.groupId || s.groupId === '' || s.groupName === 'بدون فوج' || s.groupName === 'No Group') return false;
       if (hw.groupId && s.groupId && s.groupId === hw.groupId) return true;
       if (grp?.id && s.groupId && s.groupId === grp.id) return true;
       if (grp?.studentIds && Array.isArray(grp.studentIds) && grp.studentIds.includes(s.id)) return true;
