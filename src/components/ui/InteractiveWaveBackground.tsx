@@ -121,214 +121,73 @@ export function InteractiveWaveBackground() {
       }
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Draw Multi-layered Glowing Diagonal Aurora Light Beams (Stitch AI signature wave)
-      // The wave travels diagonally from bottom-left to mid/top-right
-      ctx.save();
-      ctx.globalCompositeOperation = isDarkMode ? 'screen' : 'multiply';
-
-      const drawAuroraWave = (
-        baseYOffset: number,
-        amplitude: number,
-        frequency: number,
-        speed: number,
-        thickness: number,
-        colorStart: string,
-        colorMid: string,
-        colorEnd: string,
-        opacity: number
-      ) => {
-        const points: { x: number; y: number }[] = [];
-        const step = 20;
-
-        for (let x = -50; x <= width + 50; x += step) {
-          // Diagonal slope + sinusoidal motion + mouse interaction
-          const progress = x / width;
-          const diagonalY = height * 0.72 - progress * (height * 0.42) + baseYOffset;
-
-          // Multi-frequency wave
-          const wave1 = Math.sin(x * frequency + time * speed) * amplitude;
-          const wave2 = Math.cos(x * (frequency * 0.6) - time * (speed * 0.8)) * (amplitude * 0.5);
-
-          // Mouse gravity pull on the beam
-          const dx = x - mouse.x;
-          const dy = diagonalY - mouse.y;
-          const distToMouse = Math.hypot(dx, dy);
-          let mousePull = 0;
-          if (distToMouse < 320) {
-            const force = (1 - distToMouse / 320);
-            mousePull = Math.sin(force * Math.PI) * 45;
-          }
-
-          const y = diagonalY + wave1 + wave2 + mousePull;
-          points.push({ x, y });
-        }
-
-        if (points.length < 2) return;
-
-        // Draw broad soft atmospheric glow
-        ctx.beginPath();
-        ctx.moveTo(points[0].x, points[0].y - thickness * 1.8);
-        for (let i = 1; i < points.length; i++) {
-          const xc = (points[i - 1].x + points[i].x) / 2;
-          const yc = (points[i - 1].y + points[i].y) / 2;
-          ctx.quadraticCurveTo(points[i - 1].x, points[i - 1].y - thickness * 1.8, xc, yc - thickness * 1.8);
-        }
-        ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y + thickness * 1.8);
-        for (let i = points.length - 1; i > 0; i--) {
-          const xc = (points[i].x + points[i - 1].x) / 2;
-          const yc = (points[i].y + points[i - 1].y) / 2;
-          ctx.quadraticCurveTo(points[i].x, points[i].y + thickness * 1.8, xc, yc + thickness * 1.8);
-        }
-        ctx.closePath();
-
-        const grad = ctx.createLinearGradient(0, height * 0.8, width, height * 0.2);
-        grad.addColorStop(0, colorStart);
-        grad.addColorStop(0.45, colorMid);
-        grad.addColorStop(1, colorEnd);
-
-        ctx.fillStyle = grad;
-        ctx.globalAlpha = opacity;
-        ctx.filter = 'blur(42px)';
-        ctx.fill();
-
-        // Draw sharp focused core ribbon
-        ctx.filter = 'blur(16px)';
-        ctx.globalAlpha = opacity * 1.4;
-        ctx.fill();
-
-        ctx.filter = 'none';
-      };
-
-      if (isDarkMode) {
-        // Deep purple/magenta base atmospheric glow
-        drawAuroraWave(
-          40,
-          55,
-          0.0022,
-          1.1,
-          95,
-          'rgba(147, 51, 234, 0.45)', // Purple 600
-          'rgba(168, 85, 247, 0.55)', // Purple 500
-          'rgba(99, 102, 241, 0.35)', // Indigo 500
-          0.65
-        );
-
-        // Electric blue & violet core beam (from the picture)
-        drawAuroraWave(
-          0,
-          42,
-          0.0028,
-          1.4,
-          65,
-          'rgba(124, 58, 237, 0.7)',  // Violet 600
-          'rgba(99, 102, 241, 0.85)', // Indigo 500
-          'rgba(59, 130, 246, 0.75)', // Blue 500
-          0.75
-        );
-
-        // Vibrant cyan/sky shimmer highlights
-        drawAuroraWave(
-          -25,
-          32,
-          0.0035,
-          1.7,
-          40,
-          'rgba(99, 102, 241, 0.6)',  // Indigo
-          'rgba(56, 189, 248, 0.85)', // Cyan / Sky 400
-          'rgba(147, 51, 234, 0.65)', // Purple
-          0.7
-        );
-      } else {
-        // Light mode gentle pastel aurora
-        drawAuroraWave(
-          0,
-          35,
-          0.0025,
-          1.2,
-          60,
-          'rgba(147, 51, 234, 0.18)',
-          'rgba(99, 102, 241, 0.22)',
-          'rgba(59, 130, 246, 0.16)',
-          0.4
-        );
-      }
-
-      ctx.restore();
-
-      // 3. Draw Crisp Geometric Dot Grid Matrix (Matching Image 1)
-      const dotSpacing = 26; // Exact clean grid spacing
+      // 2. Draw Crisp Geometric Dot Grid Matrix (High density, minimized dot size, smooth dynamic wave animation)
+      const dotSpacing = 15; // Increased density / dot count
       const gridCols = Math.ceil(width / dotSpacing) + 1;
       const gridRows = Math.ceil(height / dotSpacing) + 1;
 
-      // Calculate the approximate centerline of the aurora beam across the canvas
-      const getBeamCenterY = (x: number) => {
-        const progress = x / width;
-        const diagonalY = height * 0.72 - progress * (height * 0.42);
-        const wave = Math.sin(x * 0.0028 + time * 1.4) * 42;
-        return diagonalY + wave;
-      };
-
       for (let c = 0; c < gridCols; c++) {
         const dotX = c * dotSpacing;
-        const beamY = getBeamCenterY(dotX);
 
         for (let r = 0; r < gridRows; r++) {
           const dotY = r * dotSpacing;
 
-          // Distance from the aurora beam
-          const distToBeam = Math.abs(dotY - beamY);
+          // Multi-frequency diagonal ambient wave animation across dots
+          const wave1 = Math.sin(dotX * 0.004 + dotY * 0.003 - time * 1.4);
+          const wave2 = Math.cos(dotX * 0.002 - dotY * 0.004 + time * 0.9);
+          const waveValue = (wave1 + wave2 * 0.6) / 1.6; // normalized roughly -1 to 1
 
           // Distance from the mouse
           const dx = dotX - mouse.x;
           const dy = dotY - mouse.y;
           const distToMouse = Math.hypot(dx, dy);
 
-          // Calculate illumination intensity
+          // Calculate illumination intensity from mouse and wave pulses
           let intensity = 0;
 
-          // Beam illumination (dots lit up by the glowing aurora wave)
-          if (distToBeam < 140) {
-            intensity = Math.max(intensity, (1 - distToBeam / 140) * 0.85);
+          // Subtle ambient traveling wave pulse
+          if (waveValue > 0.35) {
+            intensity = Math.max(intensity, ((waveValue - 0.35) / 0.65) * 0.4);
           }
 
           // Mouse spotlight illumination
           if (distToMouse < mouse.radius) {
-            const mouseIntensity = (1 - distToMouse / mouse.radius);
+            const mouseIntensity = Math.pow(1 - distToMouse / mouse.radius, 1.5);
             intensity = Math.max(intensity, mouseIntensity * 0.95);
           }
 
-          // Determine dot color & size
-          let dotRadius = 1.1;
+          // Minimized dot sizing
+          let dotRadius = 0.6;
           let fillStyle = '';
 
           if (isDarkMode) {
             if (intensity > 0.05) {
               // Lit dots: Vibrant gradient color from cyan to violet/purple
-              dotRadius = 1.2 + intensity * 1.6;
-              const colorRatio = Math.sin(dotX * 0.003 + time) * 0.5 + 0.5;
+              dotRadius = 0.65 + intensity * 0.75; // small max size (~1.4px)
+              const colorRatio = Math.sin(dotX * 0.003 + dotY * 0.002 + time) * 0.5 + 0.5;
 
               if (colorRatio > 0.6) {
                 // Electric Cyan / Sky
-                fillStyle = `rgba(56, 189, 248, ${0.35 + intensity * 0.65})`;
+                fillStyle = `rgba(56, 189, 248, ${0.25 + intensity * 0.75})`;
               } else if (colorRatio > 0.3) {
                 // Bright Indigo / Blue
-                fillStyle = `rgba(129, 140, 248, ${0.35 + intensity * 0.65})`;
+                fillStyle = `rgba(129, 140, 248, ${0.25 + intensity * 0.75})`;
               } else {
                 // Neon Purple / Violet
-                fillStyle = `rgba(192, 132, 252, ${0.35 + intensity * 0.65})`;
+                fillStyle = `rgba(192, 132, 252, ${0.25 + intensity * 0.75})`;
               }
             } else {
-              // Quiescent background dots (subtle deep slate blue)
-              dotRadius = 0.9;
-              fillStyle = 'rgba(71, 85, 105, 0.22)'; // Slate 600 / low opacity
+              // Quiescent background dots (subtle slate blue, very clean and small)
+              dotRadius = 0.55;
+              fillStyle = 'rgba(100, 116, 139, 0.18)'; // Slate 500 / low opacity
             }
           } else {
             if (intensity > 0.05) {
-              dotRadius = 1.2 + intensity * 1.3;
-              fillStyle = `rgba(99, 102, 241, ${0.3 + intensity * 0.5})`;
+              dotRadius = 0.65 + intensity * 0.65;
+              fillStyle = `rgba(99, 102, 241, ${0.25 + intensity * 0.65})`;
             } else {
-              dotRadius = 0.9;
-              fillStyle = 'rgba(148, 163, 184, 0.35)'; // Slate 400
+              dotRadius = 0.55;
+              fillStyle = 'rgba(148, 163, 184, 0.28)'; // Slate 400
             }
           }
 
@@ -337,9 +196,9 @@ export function InteractiveWaveBackground() {
           ctx.fillStyle = fillStyle;
           ctx.fill();
 
-          // Add extra intense glow on highly lit dots near the beam core
-          if (isDarkMode && intensity > 0.65) {
-            ctx.shadowBlur = 6;
+          // Subtle glow on intensely lit dots near mouse
+          if (isDarkMode && intensity > 0.75) {
+            ctx.shadowBlur = 4;
             ctx.shadowColor = '#38bdf8';
             ctx.fill();
             ctx.shadowBlur = 0;
@@ -347,7 +206,7 @@ export function InteractiveWaveBackground() {
         }
       }
 
-      // 4. Draw Floating Ambient Energy Micro-specks
+      // 3. Draw Floating Ambient Energy Micro-specks
       specks.forEach((speck) => {
         speck.x += speck.vx;
         speck.y += speck.vy;
@@ -362,14 +221,14 @@ export function InteractiveWaveBackground() {
         const currentAlpha = Math.max(0.1, speck.baseAlpha + pulse);
 
         ctx.beginPath();
-        ctx.arc(speck.x, speck.y, speck.size, 0, Math.PI * 2);
+        ctx.arc(speck.x, speck.y, speck.size * 0.7, 0, Math.PI * 2);
         ctx.fillStyle = isDarkMode
-          ? `rgba(165, 180, 252, ${currentAlpha})`
-          : `rgba(99, 102, 241, ${currentAlpha * 0.6})`;
+          ? `rgba(165, 180, 252, ${currentAlpha * 0.7})`
+          : `rgba(99, 102, 241, ${currentAlpha * 0.4})`;
         ctx.fill();
       });
 
-      // 5. Ambient Mouse Cursor Halo Light
+      // 4. Ambient Mouse Cursor Halo Light
       if (isDarkMode && mouse.active) {
         const mouseGlow = ctx.createRadialGradient(
           mouse.x,
@@ -377,10 +236,10 @@ export function InteractiveWaveBackground() {
           0,
           mouse.x,
           mouse.y,
-          mouse.radius * 1.2
+          mouse.radius * 1.1
         );
-        mouseGlow.addColorStop(0, 'rgba(124, 58, 237, 0.12)');
-        mouseGlow.addColorStop(0.5, 'rgba(56, 189, 248, 0.05)');
+        mouseGlow.addColorStop(0, 'rgba(124, 58, 237, 0.08)');
+        mouseGlow.addColorStop(0.5, 'rgba(56, 189, 248, 0.03)');
         mouseGlow.addColorStop(1, 'transparent');
 
         ctx.fillStyle = mouseGlow;
