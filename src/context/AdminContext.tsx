@@ -1933,29 +1933,33 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
         return updated;
       });
-      const targetUser = adminUsers.find((u) => u.id === userId);
-      logAudit(
-        `تعديل بيانات الحساب الإداري: ${targetUser?.fullNameAr || userId}`,
-        `Updated admin user: ${targetUser?.fullNameEn || userId}`,
-        'role'
-      );
+      const target = adminUsers.find((u) => u.id === userId);
+      if (target) {
+        logAudit(
+          `تعديل بيانات الحساب الإداري: ${updates.fullNameAr || target.fullNameAr}`,
+          `Updated admin user: ${updates.fullNameEn || target.fullNameEn}`,
+          'role'
+        );
+      }
     },
     [adminUsers, logAudit]
   );
 
   const deleteAdminUser = useCallback(
     (userId: string) => {
-      const targetUser = adminUsers.find((u) => u.id === userId);
+      const target = adminUsers.find((u) => u.id === userId);
       setAdminUsers((prev) => {
         const updated = prev.filter((u) => u.id !== userId);
         setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
         return updated;
       });
-      logAudit(
-        `حذف الحساب الإداري: ${targetUser?.fullNameAr || userId}`,
-        `Deleted admin user: ${targetUser?.fullNameEn || userId}`,
-        'role'
-      );
+      if (target) {
+        logAudit(
+          `حذف حساب إداري: ${target.fullNameAr} (@${target.username})`,
+          `Deleted admin user: ${target.fullNameEn} (@${target.username})`,
+          'role'
+        );
+      }
     },
     [adminUsers, logAudit]
   );
