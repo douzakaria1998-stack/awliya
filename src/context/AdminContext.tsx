@@ -928,7 +928,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       const newGroup: AdminGroup = {
         id: `grp-${Date.now()}`,
         name: data.name || 'Group New',
-        code: data.code || `G-${Date.now().toString().slice(-3)}`,
+        code: data.code || '3927',
         language: data.language || 'English',
         level: data.level || 'A1',
         levelNumber: data.levelNumber || 1,

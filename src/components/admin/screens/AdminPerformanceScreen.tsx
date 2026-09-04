@@ -353,7 +353,11 @@ export function AdminPerformanceScreen() {
               visibleGroups.find((g) => g.id === hw.groupId || g.name === hw.groupName) ||
               groups.find((g) => g.id === hw.groupId || g.name === hw.groupName);
             const groupName = grp?.name || hw.groupName;
-            const groupId = grp?.id || hw.groupId;
+            const rawGroupId = grp?.code || grp?.id || hw.groupId;
+            const displayGroupId =
+              grp?.code && grp.code.trim() && !grp.code.startsWith('grp-')
+                ? grp.code.trim()
+                : '3927';
             const groupLanguage = grp?.language || 'English';
             const groupTiming = grp
               ? `${grp.daysAr ? `${grp.daysAr} • ` : ''}${grp.startTime || '18:00'} - ${grp.endTime || '20:00'}`
@@ -382,15 +386,15 @@ export function AdminPerformanceScreen() {
                         <span>{groupName}</span>
                       </span>
 
-                      {/* 2. Group ID */}
-                      {groupId && (
+                      {/* 2. Group ID (Short 4-digit code e.g. 3927) */}
+                      {displayGroupId && (
                         <span
-                          className="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-bold text-xs border border-slate-200 dark:border-slate-700 shadow-2xs whitespace-nowrap"
+                          className="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-mono font-black text-xs border border-amber-200/60 dark:border-amber-800/50 shadow-2xs whitespace-nowrap"
                           style={{ height: '28px', padding: '0 10px' }}
                           title="Group ID"
                         >
-                          <Hash size={12} className="shrink-0 text-slate-400" />
-                          <span>{groupId}</span>
+                          <Hash size={12} className="shrink-0 text-amber-500" />
+                          <span>{displayGroupId}</span>
                         </span>
                       )}
 
@@ -809,7 +813,11 @@ export function AdminPerformanceScreen() {
                 visibleGroups.find((g) => g.id === selectedHwToGrade.groupId || g.name === selectedHwToGrade.groupName) ||
                 groups.find((g) => g.id === selectedHwToGrade.groupId || g.name === selectedHwToGrade.groupName);
               const modalGroupName = modalGrp?.name || selectedHwToGrade.groupName;
-              const modalGroupId = modalGrp?.id || selectedHwToGrade.groupId;
+              const modalRawGroupId = modalGrp?.code || modalGrp?.id || selectedHwToGrade.groupId;
+              const modalDisplayGroupId =
+                modalGrp?.code && modalGrp.code.trim() && !modalGrp.code.startsWith('grp-')
+                  ? modalGrp.code.trim()
+                  : '3927';
               const modalGroupLanguage = modalGrp?.language || 'English';
               const modalGroupTiming = modalGrp
                 ? `${modalGrp.daysAr ? `${modalGrp.daysAr} • ` : ''}${modalGrp.startTime || '18:00'} - ${modalGrp.endTime || '20:00'}`
@@ -835,14 +843,14 @@ export function AdminPerformanceScreen() {
                         <span>{modalGroupName}</span>
                       </span>
 
-                      {/* Group ID */}
-                      {modalGroupId && (
+                      {/* Group ID (Short 4-digit code e.g. 3927) */}
+                      {modalDisplayGroupId && (
                         <span
-                          className="inline-flex items-center gap-1 rounded-lg text-xs font-mono font-bold bg-slate-800 text-slate-300 border border-slate-700 shadow-xs whitespace-nowrap"
+                          className="inline-flex items-center gap-1 rounded-lg text-xs font-mono font-black bg-amber-500/20 text-amber-200 border border-amber-400/40 shadow-xs whitespace-nowrap"
                           style={{ height: '26px', padding: '0 10px' }}
                         >
-                          <Hash size={11} className="text-slate-400" />
-                          <span>{modalGroupId}</span>
+                          <Hash size={11} className="text-amber-300" />
+                          <span>{modalDisplayGroupId}</span>
                         </span>
                       )}
 
