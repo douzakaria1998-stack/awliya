@@ -285,14 +285,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           (s.fullNameEn && s.fullNameEn.toLowerCase().includes('dalila'))
       )?.id;
 
-      let cleanedGroups = sGroups;
-      if (dalilaId) {
-        cleanedGroups = sGroups.map((g) => ({
+      let cleanedGroups = sGroups.map((g) => {
+        const isBeg = g.name === 'Beg' || g.name.includes('Beg') || g.code === '3927';
+        return {
           ...g,
-          studentIds: (g.studentIds || []).filter((id) => id !== dalilaId),
-        }));
-        setItem(ADMIN_STORAGE_KEYS.GROUPS, cleanedGroups);
-      }
+          code: isBeg ? '3925' : g.code || '3925',
+          studentIds: dalilaId ? (g.studentIds || []).filter((id) => id !== dalilaId) : g.studentIds,
+        };
+      });
+      setItem(ADMIN_STORAGE_KEYS.GROUPS, cleanedGroups);
       setGroups(cleanedGroups);
     }
 
@@ -983,7 +984,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       const newGroup: AdminGroup = {
         id: `grp-${Date.now()}`,
         name: data.name || 'Group New',
-        code: data.code || '3927',
+        code: data.code || '3925',
         language: data.language || 'English',
         level: data.level || 'A1',
         levelNumber: data.levelNumber || 1,

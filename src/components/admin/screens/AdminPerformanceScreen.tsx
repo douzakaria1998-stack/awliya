@@ -359,7 +359,7 @@ export function AdminPerformanceScreen() {
             const displayGroupId =
               grp?.code && grp.code.trim() && !grp.code.startsWith('grp-')
                 ? grp.code.trim()
-                : '3927';
+                : '3925';
             const groupLanguage = grp?.language || 'English';
             const groupTiming = grp
               ? `${grp.daysAr ? `${grp.daysAr} • ` : ''}${grp.startTime || '18:00'} - ${grp.endTime || '20:00'}`
@@ -388,14 +388,13 @@ export function AdminPerformanceScreen() {
                         <span>{groupName}</span>
                       </span>
 
-                      {/* 2. Group ID (Short 4-digit code e.g. 3927) */}
+                      {/* 2. Group ID (Clean short code e.g. 3925) */}
                       {displayGroupId && (
                         <span
-                          className="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-mono font-black text-xs border border-amber-200/60 dark:border-amber-800/50 shadow-2xs whitespace-nowrap"
-                          style={{ height: '28px', padding: '0 10px' }}
+                          className="inline-flex items-center justify-center rounded-lg bg-amber-500/20 text-amber-700 dark:text-amber-300 font-mono font-black text-xs border border-amber-400/40 shadow-2xs whitespace-nowrap"
+                          style={{ height: '28px', padding: '0 12px' }}
                           title="Group ID"
                         >
-                          <Hash size={12} className="shrink-0 text-amber-500" />
                           <span>{displayGroupId}</span>
                         </span>
                       )}
@@ -834,7 +833,7 @@ export function AdminPerformanceScreen() {
               const modalDisplayGroupId =
                 modalGrp?.code && modalGrp.code.trim() && !modalGrp.code.startsWith('grp-')
                   ? modalGrp.code.trim()
-                  : '3927';
+                  : '3925';
               const modalGroupLanguage = modalGrp?.language || 'English';
               const modalGroupTiming = modalGrp
                 ? `${modalGrp.daysAr ? `${modalGrp.daysAr} • ` : ''}${modalGrp.startTime || '18:00'} - ${modalGrp.endTime || '20:00'}`
@@ -860,13 +859,12 @@ export function AdminPerformanceScreen() {
                         <span>{modalGroupName}</span>
                       </span>
 
-                      {/* Group ID (Short 4-digit code e.g. 3927) */}
+                      {/* Group ID (Clean short code e.g. 3925) */}
                       {modalDisplayGroupId && (
                         <span
-                          className="inline-flex items-center gap-1 rounded-lg text-xs font-mono font-black bg-amber-500/20 text-amber-200 border border-amber-400/40 shadow-xs whitespace-nowrap"
-                          style={{ height: '26px', padding: '0 10px' }}
+                          className="inline-flex items-center justify-center rounded-lg text-xs font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-400/40 shadow-xs whitespace-nowrap"
+                          style={{ height: '26px', padding: '0 12px' }}
                         >
-                          <Hash size={11} className="text-amber-300" />
                           <span>{modalDisplayGroupId}</span>
                         </span>
                       )}
