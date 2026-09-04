@@ -742,11 +742,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return updated;
       });
 
-      // Synchronize group studentIds if student is assigned to a group
+      // Synchronize group studentIds and group homework if student is assigned to a group
       if (newStudent.groupId) {
         setGroups((prevGroups) => {
           const updatedGroups = prevGroups.map((g) => {
-            if (g.id === newStudent.groupId) {
+            if (g.id === newStudent.groupId || g.code === newStudent.groupId) {
               const currentIds = g.studentIds || [];
               if (!currentIds.includes(newStudent.id)) {
                 return { ...g, studentIds: [...currentIds, newStudent.id] };
@@ -756,6 +756,32 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           });
           setItem(ADMIN_STORAGE_KEYS.GROUPS, updatedGroups);
           return updatedGroups;
+        });
+
+        // Automatically sync existing homework assignments for this group so the new student is immediately included
+        setHomeworkList((prevHw) => {
+          const updated = prevHw.map((hw) => {
+            if (hw.groupId === newStudent.groupId || hw.groupName === newStudent.groupName) {
+              const currentIds = hw.studentIds || [];
+              const studentIds = currentIds.includes(newStudent.id) ? currentIds : [...currentIds, newStudent.id];
+              const existingEval = (hw.evaluations || []).find((e) => e.studentId === newStudent.id);
+              const evaluations = existingEval
+                ? hw.evaluations
+                : [
+                    ...(hw.evaluations || []),
+                    {
+                      studentId: newStudent.id,
+                      studentNameAr: newStudent.fullNameAr,
+                      completionStatus: 'pending' as const,
+                      parentNotified: false,
+                    },
+                  ];
+              return { ...hw, studentIds, evaluations };
+            }
+            return hw;
+          });
+          setItem(ADMIN_STORAGE_KEYS.HOMEWORK, updated);
+          return updated;
         });
       }
 
@@ -778,22 +804,56 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         const updated = prev.map((s) => (s.id === studentId ? { ...s, ...updates } : s));
         setItem(ADMIN_STORAGE_KEYS.STUDENTS, updated);
 
-        // If groupId changed, sync group's studentIds
+        // If groupId changed, sync group's studentIds and homework
         if (updates.groupId !== undefined) {
           setGroups((prevGroups) => {
             const updatedGroups = prevGroups.map((g) => {
-              if (g.id === updates.groupId) {
+              if (g.id === updates.groupId || (updates.groupId && g.code === updates.groupId)) {
                 const currentIds = g.studentIds || [];
                 if (!currentIds.includes(studentId)) {
                   return { ...g, studentIds: [...currentIds, studentId] };
                 }
-              } else if (prevStudent?.groupId && g.id === prevStudent.groupId && updates.groupId !== prevStudent.groupId) {
+              } else if (prevStudent?.groupId && (g.id === prevStudent.groupId || g.code === prevStudent.groupId) && updates.groupId !== prevStudent.groupId) {
                 return { ...g, studentIds: (g.studentIds || []).filter((id) => id !== studentId) };
               }
               return g;
             });
             setItem(ADMIN_STORAGE_KEYS.GROUPS, updatedGroups);
             return updatedGroups;
+          });
+
+          // Sync Homework assignments for the old and new groups
+          setHomeworkList((prevHw) => {
+            const studentObj = prev.find((s) => s.id === studentId);
+            const studentName = updates.fullNameAr || studentObj?.fullNameAr || studentId;
+            const updated = prevHw.map((hw) => {
+              if (hw.groupId === updates.groupId || (updates.groupName && hw.groupName === updates.groupName)) {
+                const currentIds = hw.studentIds || [];
+                const studentIds = currentIds.includes(studentId) ? currentIds : [...currentIds, studentId];
+                const hasEval = (hw.evaluations || []).some((e) => e.studentId === studentId);
+                const evaluations = hasEval
+                  ? hw.evaluations
+                  : [
+                      ...(hw.evaluations || []),
+                      {
+                        studentId: studentId,
+                        studentNameAr: studentName,
+                        completionStatus: 'pending' as const,
+                        parentNotified: false,
+                      },
+                    ];
+                return { ...hw, studentIds, evaluations };
+              } else if (prevStudent?.groupId && hw.groupId === prevStudent.groupId && updates.groupId !== prevStudent.groupId) {
+                return {
+                  ...hw,
+                  studentIds: (hw.studentIds || []).filter((id) => id !== studentId),
+                  evaluations: (hw.evaluations || []).filter((e) => e.studentId !== studentId),
+                };
+              }
+              return hw;
+            });
+            setItem(ADMIN_STORAGE_KEYS.HOMEWORK, updated);
+            return updated;
           });
         }
 
@@ -1176,6 +1236,26 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         setItem(ADMIN_STORAGE_KEYS.GROUPS, updated);
         return updated;
       });
+
+      // Update student records if students were assigned to this new group
+      if (newGroup.studentIds && newGroup.studentIds.length > 0) {
+        setStudents((prev) => {
+          const updated = prev.map((s) => {
+            if (newGroup.studentIds.includes(s.id)) {
+              return {
+                ...s,
+                groupId: newGroup.id,
+                groupName: newGroup.name,
+                teacherId: newGroup.teacherId,
+                teacherName: newGroup.teacherName,
+              };
+            }
+            return s;
+          });
+          setItem(ADMIN_STORAGE_KEYS.STUDENTS, updated);
+          return updated;
+        });
+      }
 
       logAudit(
         `إنشاء فوج جديد: ${newGroup.name} (${newGroup.code})`,
@@ -1802,7 +1882,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   // ==========================================
   const createHomework = useCallback(
     (hwData: Partial<AdminHomeworkAssignment>) => {
-      const grp = groups.find((g) => g.id === hwData.groupId);
+      const grp =
+        groups.find((g) => g.id === hwData.groupId) ||
+        groups.find((g) => g.code === hwData.groupId || (g.code && hwData.groupName?.includes(g.code))) ||
+        groups.find((g) => g.name === hwData.groupName);
+
       // Resolve strictly this group's students
       const matchingStudents = students.filter(
         (s) =>
@@ -1810,7 +1894,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           !s.fullNameEn?.toLowerCase().includes('dalila') &&
           ((hwData.groupId && s.groupId && s.groupId === hwData.groupId) ||
             (grp?.id && s.groupId && s.groupId === grp.id) ||
-            (grp?.studentIds && grp.studentIds.includes(s.id)))
+            (grp?.code && (s.groupId === grp.code || s.groupName?.includes(grp.code))) ||
+            (grp?.studentIds && Array.isArray(grp.studentIds) && grp.studentIds.includes(s.id)) ||
+            (hwData.studentIds && Array.isArray(hwData.studentIds) && hwData.studentIds.includes(s.id)))
       );
 
       const targetStudents = matchingStudents;
