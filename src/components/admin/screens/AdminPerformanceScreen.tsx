@@ -327,22 +327,33 @@ export function AdminPerformanceScreen() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                  <span className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 shadow-2xs">
-                    <Calendar size={13} className="text-purple-600 shrink-0" />
-                    <span>{language === 'ar' ? 'تاريخ الاستحقاق:' : 'Due Date:'}</span>
-                    <span dir="ltr" className="font-mono font-bold">{hw.dueDate}</span>
+                  <span
+                    className="rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center shadow-2xs whitespace-nowrap"
+                    style={{ height: '34px', padding: '0 14px', gap: '8px' }}
+                  >
+                    <Calendar size={14} className="text-purple-600 shrink-0" />
+                    <span className="flex items-center gap-1.5">
+                      <span>{language === 'ar' ? 'تاريخ الاستحقاق:' : 'Due Date:'}</span>
+                      <span dir="ltr" className="font-mono font-bold">{hw.dueDate}</span>
+                    </span>
                   </span>
-                  <span className="px-3 py-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-bold text-xs border border-purple-200/60 dark:border-purple-800/60 flex items-center gap-1.5 shadow-2xs">
-                    <Award size={13} className="text-purple-600 shrink-0" />
-                    <span>{language === 'ar' ? 'الدرجة القصوى:' : 'Max Score:'}</span>
-                    <span dir="ltr" className="font-mono font-black">{hw.totalScore}</span>
+                  <span
+                    className="rounded-xl bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-bold text-xs border border-purple-200/60 dark:border-purple-800/60 flex items-center shadow-2xs whitespace-nowrap"
+                    style={{ height: '34px', padding: '0 14px', gap: '8px' }}
+                  >
+                    <Award size={14} className="text-purple-600 dark:text-purple-400 shrink-0" />
+                    <span className="flex items-center gap-1.5">
+                      <span>{language === 'ar' ? 'الدرجة القصوى:' : 'Max Score:'}</span>
+                      <span dir="ltr" className="font-mono font-black">{hw.totalScore}</span>
+                    </span>
                   </span>
                   <button
                     type="button"
                     onClick={() => openGradeGroupModal(hw)}
-                    className="px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-2xs hover:scale-102 active:scale-98 transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                    className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md shadow-purple-600/20 hover:scale-102 active:scale-98 transition-all cursor-pointer flex items-center shrink-0 whitespace-nowrap"
+                    style={{ height: '34px', padding: '0 16px', gap: '8px' }}
                   >
-                    <CheckCircle2 size={13} className="shrink-0" />
+                    <CheckCircle2 size={15} className="shrink-0" />
                     <span>{language === 'ar' ? 'تصحيح وتقييم الفوج' : 'Grade Group'}</span>
                   </button>
                 </div>
