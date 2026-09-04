@@ -219,7 +219,7 @@ export function LoginScreen() {
       {/* Main Login Card Container */}
       <main className="w-full max-w-[450px] z-10">
         <div
-          className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-xl"
+          className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 shadow-2xl"
           style={{
             padding: '36px 32px',
             borderRadius: '32px',
