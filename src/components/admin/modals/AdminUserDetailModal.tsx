@@ -22,7 +22,6 @@ import {
   Save,
   AlertTriangle,
   Lock,
-  UserCheck,
 } from 'lucide-react';
 import { AdminUser, AdminRole } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
@@ -186,13 +185,13 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-md animate-fade-in select-none">
         <div
-          className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl border border-slate-200/80 dark:border-slate-800 animate-fade-in-up flex flex-col max-h-[92vh] overflow-hidden"
+          className="w-full max-w-3xl sm:max-w-4xl bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl border border-slate-200/80 dark:border-slate-800 animate-fade-in-up flex flex-col max-h-[92vh] overflow-hidden"
           dir={isRTL ? 'rtl' : 'ltr'}
         >
-          {/* 1. Modal Header (Fixed at top) */}
+          {/* 1. Modal Header (Fixed at top with generous horizontal padding) */}
           <div
             className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 shrink-0 bg-slate-50/80 dark:bg-slate-900/80"
-            style={{ padding: '20px 32px' }}
+            style={{ padding: '22px 36px' }}
           >
             <div className="flex items-center gap-3.5">
               <div
@@ -213,7 +212,7 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
                 )}
               </div>
               <div>
-                <h3 className="font-black text-lg text-slate-900 dark:text-white leading-snug">
+                <h3 className="font-black text-lg sm:text-xl text-slate-900 dark:text-white leading-snug">
                   {language === 'ar' ? 'تعديل بيانات الحساب الإداري' : language === 'fr' ? 'Modifier le Compte Admin' : 'Edit Admin Account'}
                 </h3>
                 <div className="flex items-center gap-2 mt-0.5">
@@ -237,19 +236,19 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
             </button>
           </div>
 
-          {/* 2. Modal Body (Scrollable with distinct, spacious container cards) */}
-          <div className="flex-1 overflow-y-auto" style={{ padding: '28px 32px' }}>
+          {/* 2. Modal Body (Scrollable with generous left/right padding around containers) */}
+          <div className="flex-1 overflow-y-auto" style={{ padding: '28px 36px 36px' }}>
             <form id="admin-user-form" onSubmit={handleTriggerSave} className="space-y-6 sm:space-y-7">
               {/* Container 1: Personal & Identity Information */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-slate-50/70 dark:bg-slate-850/50 border border-slate-200/80 dark:border-slate-800 space-y-4 sm:space-y-5 shadow-xs">
-                <div className="flex items-center gap-2 pb-1 border-b border-slate-200/60 dark:border-slate-750">
+              <div className="p-6 sm:p-7 rounded-2xl bg-slate-50/70 dark:bg-slate-850/50 border border-slate-200/80 dark:border-slate-800 space-y-5 shadow-xs">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-750">
                   <User size={16} className="text-purple-600 dark:text-purple-400 shrink-0" />
                   <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
                     {language === 'ar' ? 'البيانات الشخصية والحساب' : 'Identity & Personal Info'}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
                   <div>
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">
                       {language === 'ar' ? 'الاسم الكامل بالعربية' : 'Full Name (Arabic)'} <span className="text-rose-500">*</span>
@@ -276,7 +275,7 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
                   <div>
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">
                       {language === 'ar' ? 'اسم المستخدم (Username)' : 'Username'} <span className="text-rose-500">*</span>
@@ -306,15 +305,15 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
               </div>
 
               {/* Container 2: Role, Department & Contact */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-slate-50/70 dark:bg-slate-850/50 border border-slate-200/80 dark:border-slate-800 space-y-4 sm:space-y-5 shadow-xs">
-                <div className="flex items-center gap-2 pb-1 border-b border-slate-200/60 dark:border-slate-750">
+              <div className="p-6 sm:p-7 rounded-2xl bg-slate-50/70 dark:bg-slate-850/50 border border-slate-200/80 dark:border-slate-800 space-y-5 shadow-xs">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-750">
                   <Briefcase size={16} className="text-purple-600 dark:text-purple-400 shrink-0" />
                   <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
                     {language === 'ar' ? 'بيانات العمل والصلاحيات' : 'Role & Department'}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
                   <div>
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">
                       {language === 'ar' ? 'رقم الهاتف والتواصل' : 'Phone Number'}
@@ -341,7 +340,7 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
                   <div>
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">
                       {language === 'ar' ? 'الدور والصلاحية (Role)' : 'Role'}
@@ -374,9 +373,9 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
                 </div>
               </div>
 
-              {/* Container 3: Security & Password Management in Dedicated Spacious Card */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-900/60 shadow-xs space-y-4">
-                <div className="flex items-center justify-between pb-1 border-b border-purple-200/60 dark:border-purple-850">
+              {/* Container 3: Security & Password Management in Dedicated Spacious Card (One Line Buttons) */}
+              <div className="p-6 sm:p-7 rounded-2xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-900/60 shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-purple-200/60 dark:border-purple-850">
                   <div className="flex items-center gap-2">
                     <KeyRound size={16} className="text-purple-600 dark:text-purple-400 shrink-0" />
                     <span className="text-xs font-black uppercase tracking-wider text-purple-950 dark:text-purple-200">
@@ -391,12 +390,12 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                     {language === 'ar' ? 'كلمة المرور الجديدة' : 'New Password'}
                   </label>
 
-                  {/* One single line with input + generate + copy buttons */}
-                  <div className="flex items-center gap-3 w-full">
+                  {/* One single unified line with input + generate + copy buttons */}
+                  <div className="flex items-center gap-3.5 w-full flex-nowrap">
                     <div className="relative flex-1 min-w-0">
                       <input
                         type={showPassword ? 'text' : 'password'}
@@ -421,7 +420,7 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
                     <button
                       type="button"
                       onClick={handleGeneratePassword}
-                      className="h-11 px-4 rounded-xl bg-white dark:bg-slate-850 hover:bg-purple-50 dark:hover:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
+                      className="h-11 px-5 rounded-xl bg-white dark:bg-slate-850 hover:bg-purple-50 dark:hover:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
                     >
                       <RefreshCw size={14} />
                       <span>{language === 'ar' ? 'توليد تلقائي' : 'Auto Generate'}</span>
@@ -430,7 +429,7 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
                     <button
                       type="button"
                       onClick={handleCopyPassword}
-                      className="h-11 px-4 rounded-xl bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
+                      className="h-11 px-5 rounded-xl bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
                     >
                       {isCopied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                       <span>{isCopied ? (language === 'ar' ? 'تم النسخ' : 'Copied') : (language === 'ar' ? 'نسخ' : 'Copy')}</span>
@@ -441,18 +440,18 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
             </form>
           </div>
 
-          {/* 3. Sticky Bottom Action Footer (Clean, spacious separation between all buttons) */}
+          {/* 3. Sticky Bottom Action Footer (All in One Line with Generous Padding) */}
           <div
-            className="border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-4"
-            style={{ padding: '20px 32px' }}
+            className="border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 shrink-0 flex flex-row items-center justify-between gap-6 flex-nowrap"
+            style={{ padding: '20px 36px' }}
           >
-            {/* Delete Account Button */}
-            <div>
+            {/* Delete Account Button on One Side */}
+            <div className="shrink-0">
               <button
                 type="button"
                 disabled={isSelf}
                 onClick={handleTriggerDelete}
-                className="h-11 px-5 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs hover:scale-102 active:scale-98"
+                className="h-11 px-5 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
                 title={isSelf ? (language === 'ar' ? 'الحساب الحالي مسجل للدخول ولا يمكن حذفه' : 'Current account cannot be deleted') : undefined}
               >
                 <Trash2 size={16} />
@@ -460,12 +459,12 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
               </button>
             </div>
 
-            {/* Cancel & Save Changes Buttons with Generous Gap */}
-            <div className="flex items-center gap-4 sm:gap-5 w-full sm:w-auto justify-end">
+            {/* Cancel & Save Changes Buttons in One Line on Other Side */}
+            <div className="flex items-center gap-4 sm:gap-5 justify-end shrink-0 flex-nowrap">
               <button
                 type="button"
                 onClick={onClose}
-                className="h-11 px-6 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98"
+                className="h-11 px-6 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap"
               >
                 {language === 'ar' ? 'إلغاء' : 'Cancel'}
               </button>
@@ -473,7 +472,7 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
               <button
                 type="submit"
                 form="admin-user-form"
-                className="h-11 px-7 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md hover:shadow-purple-600/30 hover:scale-102 active:scale-98 transition-all cursor-pointer"
+                className="h-11 px-7 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-md hover:shadow-purple-600/30 hover:scale-102 active:scale-98 transition-all cursor-pointer shrink-0 whitespace-nowrap"
               >
                 <Save size={16} />
                 <span>{language === 'ar' ? 'حفظ التعديلات' : 'Save Changes'}</span>
