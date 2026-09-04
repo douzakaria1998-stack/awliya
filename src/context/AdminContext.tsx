@@ -150,6 +150,7 @@ interface AdminContextType {
   }) => void;
   
   createHomework: (hwData: Partial<AdminHomeworkAssignment>) => void;
+  updateHomework: (hwId: string, updates: Partial<AdminHomeworkAssignment>) => void;
   deleteHomework: (hwId: string) => void;
   evaluateHomework: (hwId: string, studentId: string, score: number, comment: string, status: 'completed' | 'needs_revision') => void;
   batchEvaluateHomework: (
@@ -1688,6 +1689,48 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     [groups, students, notifyParentPortal, logAudit]
   );
 
+  const updateHomework = useCallback(
+    (hwId: string, updates: Partial<AdminHomeworkAssignment>) => {
+      let updatedName = '';
+      setHomeworkList((prev) => {
+        const updated = prev.map((h) => {
+          if (h.id === hwId) {
+            updatedName = updates.assignmentNameAr || h.assignmentNameAr;
+            let newStudentIds = h.studentIds;
+            if (updates.groupId && updates.groupId !== h.groupId) {
+              const newGrp = groups.find((g) => g.id === updates.groupId);
+              const groupStudents = students.filter(
+                (s) =>
+                  s.groupId === updates.groupId ||
+                  (newGrp?.studentIds && newGrp.studentIds.includes(s.id))
+              );
+              newStudentIds = groupStudents.map((s) => s.id);
+            }
+            return {
+              ...h,
+              ...updates,
+              studentIds: newStudentIds,
+            };
+          }
+          return h;
+        });
+        setItem(ADMIN_STORAGE_KEYS.HOMEWORK, updated);
+        return updated;
+      });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
+      logAudit(
+        `تعديل الواجب المنزلي: ${updatedName || hwId}`,
+        `Updated homework: ${hwId}`,
+        'homework'
+      );
+    },
+    [groups, students, logAudit]
+  );
+
   const deleteHomework = useCallback(
     (hwId: string) => {
       let deletedName = '';
@@ -2233,6 +2276,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         recordAttendance,
         addCoveringSession,
         createHomework,
+        updateHomework,
         deleteHomework,
         evaluateHomework,
         batchEvaluateHomework,

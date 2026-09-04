@@ -21,6 +21,7 @@ import {
   Hash,
   Users,
   Trash2,
+  Pencil,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -35,6 +36,7 @@ export function AdminPerformanceScreen() {
     groups,
     feedbackList,
     createHomework,
+    updateHomework,
     deleteHomework,
     evaluateHomework,
     batchEvaluateHomework,
@@ -55,6 +57,46 @@ export function AdminPerformanceScreen() {
   const [newHwDueDate, setNewHwDueDate] = useState(new Date(Date.now() + 7 * 86400000).toISOString().substring(0, 10));
   const [newHwGroupId, setNewHwGroupId] = useState(visibleGroups[0]?.id || 'grp-a2-03');
   const [newHwScore, setNewHwScore] = useState(20);
+
+  // Edit Homework Modal State
+  const [editingHw, setEditingHw] = useState<any | null>(null);
+  const [editHwTitleAr, setEditHwTitleAr] = useState('');
+  const [editHwDescAr, setEditHwDescAr] = useState('');
+  const [editHwNoteAr, setEditHwNoteAr] = useState('');
+  const [editHwDueDate, setEditHwDueDate] = useState('');
+  const [editHwGroupId, setEditHwGroupId] = useState('');
+  const [editHwScore, setEditHwScore] = useState(20);
+
+  const openEditHomeworkModal = (hw: any) => {
+    setEditingHw(hw);
+    setEditHwTitleAr(hw.assignmentNameAr || '');
+    setEditHwDescAr(hw.descriptionAr || '');
+    setEditHwNoteAr(hw.teacherNote || '');
+    setEditHwDueDate(hw.dueDate || '');
+    setEditHwGroupId(hw.groupId || visibleGroups[0]?.id || '');
+    setEditHwScore(hw.totalScore || 20);
+  };
+
+  const handleSaveEditHomework = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingHw || !editHwTitleAr.trim()) return;
+
+    const targetGrp = groups.find((g) => g.id === editHwGroupId);
+
+    updateHomework(editingHw.id, {
+      assignmentNameAr: editHwTitleAr.trim(),
+      assignmentNameEn: editHwTitleAr.trim(),
+      descriptionAr: editHwDescAr.trim(),
+      descriptionEn: editHwDescAr.trim(),
+      teacherNote: editHwNoteAr.trim(),
+      dueDate: editHwDueDate,
+      groupId: editHwGroupId,
+      groupName: targetGrp?.name || editingHw.groupName,
+      totalScore: Number(editHwScore),
+    });
+
+    setEditingHw(null);
+  };
 
   // Group Homework Evaluation Modal State
   const [selectedHwToGrade, setSelectedHwToGrade] = useState<any | null>(null);
@@ -428,17 +470,32 @@ export function AdminPerformanceScreen() {
                       </span>
                     </div>
 
-                    {/* Remove Homework Button (Top Left in RTL / Top Right in LTR) */}
-                    <button
-                      type="button"
-                      onClick={() => setHwToDelete({ id: hw.id, name: hw.assignmentNameAr })}
-                      className="rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 font-bold text-xs border border-rose-200/70 dark:border-rose-800/60 shadow-2xs hover:scale-102 active:scale-98 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap"
-                      style={{ height: '28px', padding: '0 12px' }}
-                      title={language === 'ar' ? 'حذف الواجب' : 'Delete Homework'}
-                    >
-                      <Trash2 size={13} className="shrink-0 text-rose-500" />
-                      <span>{language === 'ar' ? 'حذف' : 'Remove'}</span>
-                    </button>
+                    {/* Top Actions: Edit + Remove */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      {/* Edit Homework Button */}
+                      <button
+                        type="button"
+                        onClick={() => openEditHomeworkModal(hw)}
+                        className="rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 font-bold text-xs border border-blue-200/70 dark:border-blue-800/60 shadow-2xs hover:scale-102 active:scale-98 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap"
+                        style={{ height: '28px', padding: '0 12px' }}
+                        title={language === 'ar' ? 'تعديل الواجب' : 'Edit Homework'}
+                      >
+                        <Pencil size={12} className="shrink-0 text-blue-500" />
+                        <span>{language === 'ar' ? 'تعديل' : 'Edit'}</span>
+                      </button>
+
+                      {/* Remove Homework Button */}
+                      <button
+                        type="button"
+                        onClick={() => setHwToDelete({ id: hw.id, name: hw.assignmentNameAr })}
+                        className="rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 font-bold text-xs border border-rose-200/70 dark:border-rose-800/60 shadow-2xs hover:scale-102 active:scale-98 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap"
+                        style={{ height: '28px', padding: '0 12px' }}
+                        title={language === 'ar' ? 'حذف الواجب' : 'Delete Homework'}
+                      >
+                        <Trash2 size={13} className="shrink-0 text-rose-500" />
+                        <span>{language === 'ar' ? 'حذف' : 'Remove'}</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
@@ -831,6 +888,152 @@ export function AdminPerformanceScreen() {
                   className="w-full h-12 bg-purple-600 hover:bg-purple-700 active:scale-98 text-white font-black rounded-xl shadow-md shadow-purple-600/20 transition-all cursor-pointer text-sm flex items-center justify-center gap-2"
                 >
                   <span>{language === 'ar' ? 'إسناد وإشعار أولياء الأمور' : 'Assign & Notify Parents'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Edit Homework Assignment */}
+      {editingHw && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
+          <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-scale-in">
+            {/* Modal Header */}
+            <div
+              className="bg-slate-900 text-white flex items-center justify-between"
+              style={{ padding: '20px 24px' }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black shadow-md shadow-blue-500/20">
+                  <Pencil size={18} />
+                </div>
+                <div>
+                  <h3 className="font-black text-lg text-white">
+                    {language === 'ar' ? 'تعديل بيانات الواجب المنزلي' : 'Edit Homework Assignment'}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-medium">
+                    {language === 'ar' ? 'تحديث العنوان أو التعليمات أو تاريخ التسليم' : 'Update assignment details & due date'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingHw(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSaveEditHomework} className="space-y-4" style={{ padding: '24px' }}>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-slate-700 dark:text-slate-300 font-bold text-xs">
+                  {language === 'ar' ? 'الفوج المسند إليه *' : 'Assigned Class Group *'}
+                </label>
+                <SearchableSelect
+                  options={visibleGroups.map((g) => ({
+                    value: g.id,
+                    label: `${g.name} (${g.code || '3925'}) • ${g.language}`,
+                  }))}
+                  value={editHwGroupId}
+                  onChange={(val) => setEditHwGroupId(val)}
+                  themeColor="blue"
+                  placeholder={language === 'ar' ? 'اختر الفوج...' : 'Select class group...'}
+                  searchPlaceholder={language === 'ar' ? 'ابحث عن اسم أو رمز الفوج...' : 'Search group by name or code...'}
+                  emptyText={language === 'ar' ? 'لا يوجد فوج بهذا الاسم' : 'No matching groups found'}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-slate-700 dark:text-slate-300 font-bold text-xs">
+                  {language === 'ar' ? 'عنوان الواجب *' : 'Homework Title *'}
+                </label>
+                <input
+                  type="text"
+                  dir="auto"
+                  required
+                  value={editHwTitleAr}
+                  onChange={(e) => setEditHwTitleAr(e.target.value)}
+                  style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                  className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500/20"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-slate-700 dark:text-slate-300 font-bold text-xs">
+                  {language === 'ar' ? 'تفاصيل التمرين والتعليمات' : 'Exercise Details & Instructions'}
+                </label>
+                <textarea
+                  rows={2}
+                  dir="auto"
+                  value={editHwDescAr}
+                  onChange={(e) => setEditHwDescAr(e.target.value)}
+                  style={{ padding: '12px 16px' }}
+                  className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium leading-relaxed resize-none focus:ring-2 focus:ring-blue-500/20"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-slate-700 dark:text-slate-300 font-bold text-xs">
+                  {language === 'ar' ? 'ملاحظة وتوجيه المعلم للواجب' : 'Teacher Guidance Note'}
+                </label>
+                <input
+                  type="text"
+                  dir="auto"
+                  value={editHwNoteAr}
+                  onChange={(e) => setEditHwNoteAr(e.target.value)}
+                  style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                  className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500/20"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-700 dark:text-slate-300 font-bold text-xs">
+                    {language === 'ar' ? 'آخر موعد للتسليم' : 'Due Date'}
+                  </label>
+                  <input
+                    type="date"
+                    dir="ltr"
+                    value={editHwDueDate}
+                    onChange={(e) => setEditHwDueDate(e.target.value)}
+                    style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                    className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-700 dark:text-slate-300 font-bold text-xs">
+                    {language === 'ar' ? 'الدرجة القصوى' : 'Max Score'}
+                  </label>
+                  <input
+                    type="number"
+                    dir="ltr"
+                    value={editHwScore}
+                    onChange={(e) => setEditHwScore(Number(e.target.value))}
+                    min={10}
+                    max={100}
+                    style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                    className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingHw(null)}
+                  className="flex-1 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs sm:text-sm transition-all cursor-pointer"
+                >
+                  {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-black rounded-xl shadow-md shadow-blue-600/20 transition-all cursor-pointer text-sm flex items-center justify-center gap-2"
+                >
+                  <CheckCircle2 size={16} />
+                  <span>{language === 'ar' ? 'حفظ التعديلات' : 'Save Changes'}</span>
                 </button>
               </div>
             </form>
