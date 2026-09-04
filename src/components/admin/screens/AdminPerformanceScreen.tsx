@@ -67,16 +67,16 @@ export function AdminPerformanceScreen() {
   // Dynamically resolve only the students belonging to THIS homework's assigned group (strictly isolated per group)
   const getHomeworkEvaluations = (hw: any) => {
     const grp =
-      visibleGroups.find((g) => g.id === hw.groupId || g.name === hw.groupName) ||
-      groups.find((g) => g.id === hw.groupId || g.name === hw.groupName);
+      visibleGroups.find((g) => g.id === hw.groupId || (hw.groupName && g.name === hw.groupName)) ||
+      groups.find((g) => g.id === hw.groupId || (hw.groupName && g.name === hw.groupName));
 
     // STRICT filter: Only students belonging to this group
     const groupStudents = students.filter((s) => {
       if (hw.groupId && s.groupId && s.groupId === hw.groupId) return true;
       if (grp?.id && s.groupId && s.groupId === grp.id) return true;
-      if (hw.groupName && s.groupName && s.groupName.trim().toLowerCase() === hw.groupName.trim().toLowerCase()) return true;
-      if (grp?.name && s.groupName && s.groupName.trim().toLowerCase() === grp.name.trim().toLowerCase()) return true;
       if (grp?.studentIds && Array.isArray(grp.studentIds) && grp.studentIds.includes(s.id)) return true;
+      if (grp?.name && s.groupName && s.groupName.trim() === grp.name.trim() && grp.name !== 'بدون فوج' && grp.name !== 'No Group') return true;
+      if (hw.groupName && s.groupName && s.groupName.trim() === hw.groupName.trim() && hw.groupName !== 'بدون فوج' && hw.groupName !== 'No Group') return true;
       return false;
     });
 
@@ -84,10 +84,11 @@ export function AdminPerformanceScreen() {
       const existing = (hw.evaluations || []).find((e: any) => e.studentId === s.id);
       return {
         studentId: s.id,
-        studentNameAr: existing?.studentNameAr || s.fullNameAr,
+        studentNameAr: s.fullNameAr || existing?.studentNameAr || '',
+        studentNameEn: s.fullNameEn || '',
         score: existing?.score,
         teacherComment: existing?.teacherComment,
-        completionStatus: existing?.completionStatus || 'pending',
+        completionStatus: existing?.completionStatus || (existing?.score !== undefined ? 'completed' : 'pending'),
       };
     });
   };
@@ -168,16 +169,13 @@ export function AdminPerformanceScreen() {
 
     const grp =
       visibleGroups.find((g) => g.id === newHwGroupId) ||
-      groups.find((g) => g.id === newHwGroupId) ||
-      visibleGroups[0];
+      groups.find((g) => g.id === newHwGroupId);
     const groupStudents = students.filter(
       (s) =>
-        s.groupId === grp?.id ||
-        s.groupName === grp?.name ||
-        grp?.studentIds?.includes(s.id)
+        (grp?.id && s.groupId === grp.id) ||
+        (grp?.studentIds && grp.studentIds.includes(s.id)) ||
+        (grp?.name && s.groupName && s.groupName.trim() === grp.name.trim() && grp.name !== 'بدون فوج' && grp.name !== 'No Group')
     );
-    const targetStudents =
-      groupStudents.length > 0 ? groupStudents : visibleStudents;
 
     createHomework({
       assignmentNameAr: newHwTitleAr,
@@ -189,7 +187,7 @@ export function AdminPerformanceScreen() {
       groupId: grp?.id,
       groupName: grp?.name,
       totalScore: Number(newHwScore),
-      studentIds: targetStudents.map((s) => s.id),
+      studentIds: groupStudents.map((s) => s.id),
     });
 
     setNewHwTitleAr('');
@@ -505,38 +503,53 @@ export function AdminPerformanceScreen() {
                       : 'No students enrolled in this group yet'}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
                     {getHomeworkEvaluations(hw).map((ev, idx) => (
                       <div
                         key={idx}
-                        className="rounded-xl bg-slate-50/90 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-750 flex items-center justify-between gap-3 shadow-2xs hover:border-purple-300 dark:hover:border-purple-700 transition-all"
+                        className="rounded-2xl bg-slate-50/90 dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 flex items-center justify-between gap-3 shadow-2xs hover:border-purple-300 dark:hover:border-purple-700/60 hover:shadow-xs transition-all"
                         style={{ padding: '12px 14px' }}
                       >
-                        <div>
-                          <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white leading-snug">{ev.studentNameAr}</div>
-                          <div className="text-[11px] font-bold mt-1">
-                            {ev.score !== undefined ? (
-                              <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                                <span>{language === 'ar' ? 'الدرجة:' : 'Score:'}</span>
-                                <span dir="ltr" className="font-mono">{ev.score} / {hw.totalScore}</span>
-                              </span>
-                            ) : (
-                              <span className="text-amber-600 dark:text-amber-400">
-                                {language === 'ar' ? 'لم يتم التصحيح' : 'Not graded'}
-                              </span>
-                            )}
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950/70 border border-purple-200/60 dark:border-purple-800/60 text-purple-700 dark:text-purple-300 font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                            {ev.studentNameAr.slice(0, 1) || 'ط'}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white leading-snug truncate">
+                              {ev.studentNameAr}
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              {ev.score !== undefined ? (
+                                <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/50">
+                                  <CheckCircle2 size={11} className="text-emerald-600 dark:text-emerald-400" />
+                                  <span dir="ltr" className="font-mono font-black">{ev.score} / {hw.totalScore}</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/50">
+                                  <Clock size={11} className="text-amber-500" />
+                                  <span>{language === 'ar' ? 'لم يتم التصحيح' : 'Not graded'}</span>
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
 
                         <button
                           type="button"
                           onClick={() => openGradeGroupModal(hw)}
-                          className="rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
-                          style={{ padding: '6px 12px' }}
+                          className={`rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-2xs hover:scale-102 active:scale-98 transition-all cursor-pointer shrink-0 whitespace-nowrap ${
+                            ev.score !== undefined
+                              ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
+                              : 'bg-purple-600 hover:bg-purple-700 text-white shadow-purple-600/20 shadow-sm'
+                          }`}
+                          style={{ padding: '7px 14px' }}
                         >
-                          {ev.score !== undefined
-                            ? (language === 'ar' ? 'تعديل' : 'Edit')
-                            : (language === 'ar' ? 'تصحيح' : 'Grade')}
+                          <CheckCircle2 size={13} className="shrink-0" />
+                          <span>
+                            {ev.score !== undefined
+                              ? (language === 'ar' ? 'تعديل' : 'Edit')
+                              : (language === 'ar' ? 'تصحيح' : 'Grade')}
+                          </span>
                         </button>
                       </div>
                     ))}

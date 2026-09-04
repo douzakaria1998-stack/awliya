@@ -535,8 +535,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         enrolledPathAr: data.enrolledPathAr || 'مسار اللغة الإنجليزية المكثف (CEFR)',
         enrolledPathEn: data.enrolledPathEn || 'Intensive English Language Track (CEFR)',
         language: data.language || 'English',
-        groupId: data.groupId || 'grp-a1-01',
-        groupName: data.groupName || 'Group A1 — Beginner',
+        groupId: data.groupId !== undefined ? data.groupId : '',
+        groupName: data.groupName !== undefined ? data.groupName : '',
         teacherId: data.teacherId || 'usr-teach-01',
         teacherName: data.teacherName || 'Sarah Benali',
         parentId: data.parentId || 'par-01',
@@ -1565,18 +1565,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   // ==========================================
   const createHomework = useCallback(
     (hwData: Partial<AdminHomeworkAssignment>) => {
-      // Resolve matching group
       const grp = groups.find((g) => g.id === hwData.groupId || g.name === hwData.groupName);
-      
-      // Resolve all group students
+      // Resolve strictly this group's students
       const matchingStudents = students.filter(
         (s) =>
-          (hwData.groupId && s.groupId === hwData.groupId) ||
-          (grp?.id && s.groupId === grp.id) ||
-          (hwData.groupName && s.groupName?.trim().toLowerCase() === hwData.groupName.trim().toLowerCase()) ||
-          (grp?.name && s.groupName?.trim().toLowerCase() === grp.name.trim().toLowerCase()) ||
+          (hwData.groupId && s.groupId && s.groupId === hwData.groupId) ||
+          (grp?.id && s.groupId && s.groupId === grp.id) ||
           (grp?.studentIds && grp.studentIds.includes(s.id)) ||
-          (hwData.studentIds && hwData.studentIds.includes(s.id))
+          (grp?.name && s.groupName && s.groupName.trim() === grp.name.trim() && grp.name !== 'بدون فوج' && grp.name !== 'No Group')
       );
 
       const targetStudents = matchingStudents;
