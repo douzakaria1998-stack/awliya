@@ -60,31 +60,23 @@ export function AdminPerformanceScreen() {
     completionStatus: 'completed' | 'needs_revision' | 'pending';
   }[]>([]);
 
-  // Dynamically resolve all students belonging to the homework's assigned group
+  // Dynamically resolve only the students belonging to THIS homework's assigned group (strictly isolated per group)
   const getHomeworkEvaluations = (hw: any) => {
     const grp =
       visibleGroups.find((g) => g.id === hw.groupId || g.name === hw.groupName) ||
       groups.find((g) => g.id === hw.groupId || g.name === hw.groupName);
 
-    const groupStudents = students.filter(
-      (s) =>
-        (hw.groupId && s.groupId === hw.groupId) ||
-        (grp?.id && s.groupId === grp.id) ||
-        (hw.groupName && s.groupName?.trim().toLowerCase() === hw.groupName.trim().toLowerCase()) ||
-        (grp?.name && s.groupName?.trim().toLowerCase() === grp.name.trim().toLowerCase()) ||
-        (grp?.studentIds && grp.studentIds.includes(s.id)) ||
-        (hw.studentIds && hw.studentIds.includes(s.id)) ||
-        (hw.evaluations && hw.evaluations.some((e: any) => e.studentId === s.id))
-    );
+    // STRICT filter: Only students belonging to this group
+    const groupStudents = students.filter((s) => {
+      if (hw.groupId && s.groupId && s.groupId === hw.groupId) return true;
+      if (grp?.id && s.groupId && s.groupId === grp.id) return true;
+      if (hw.groupName && s.groupName && s.groupName.trim().toLowerCase() === hw.groupName.trim().toLowerCase()) return true;
+      if (grp?.name && s.groupName && s.groupName.trim().toLowerCase() === grp.name.trim().toLowerCase()) return true;
+      if (grp?.studentIds && Array.isArray(grp.studentIds) && grp.studentIds.includes(s.id)) return true;
+      return false;
+    });
 
-    const targetStudents =
-      groupStudents.length > 0
-        ? groupStudents
-        : visibleStudents.length > 0
-        ? visibleStudents
-        : students;
-
-    return targetStudents.map((s) => {
+    return groupStudents.map((s) => {
       const existing = (hw.evaluations || []).find((e: any) => e.studentId === s.id);
       return {
         studentId: s.id,
@@ -440,42 +432,50 @@ export function AdminPerformanceScreen() {
                     <span>←</span>
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                  {getHomeworkEvaluations(hw).map((ev, idx) => (
-                    <div
-                      key={idx}
-                      className="rounded-xl bg-slate-50/90 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-750 flex items-center justify-between gap-3 shadow-2xs hover:border-purple-300 dark:hover:border-purple-700 transition-all"
-                      style={{ padding: '12px 14px' }}
-                    >
-                      <div>
-                        <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white leading-snug">{ev.studentNameAr}</div>
-                        <div className="text-[11px] font-bold mt-1">
-                          {ev.score !== undefined ? (
-                            <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                              <span>{language === 'ar' ? 'الدرجة:' : 'Score:'}</span>
-                              <span dir="ltr" className="font-mono">{ev.score} / {hw.totalScore}</span>
-                            </span>
-                          ) : (
-                            <span className="text-amber-600 dark:text-amber-400">
-                              {language === 'ar' ? 'لم يتم التصحيح' : 'Not graded'}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => openGradeGroupModal(hw)}
-                        className="rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
-                        style={{ padding: '6px 12px' }}
+                {getHomeworkEvaluations(hw).length === 0 ? (
+                  <div className="rounded-xl bg-slate-50/50 dark:bg-slate-900/40 border border-dashed border-slate-200 dark:border-slate-800 p-4 text-center text-xs text-slate-400 font-bold">
+                    {language === 'ar'
+                      ? 'لا يوجد طلاب مسجلين في هذا الفوج حالياً'
+                      : 'No students enrolled in this group yet'}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                    {getHomeworkEvaluations(hw).map((ev, idx) => (
+                      <div
+                        key={idx}
+                        className="rounded-xl bg-slate-50/90 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-750 flex items-center justify-between gap-3 shadow-2xs hover:border-purple-300 dark:hover:border-purple-700 transition-all"
+                        style={{ padding: '12px 14px' }}
                       >
-                        {ev.score !== undefined
-                          ? (language === 'ar' ? 'تعديل' : 'Edit')
-                          : (language === 'ar' ? 'تصحيح' : 'Grade')}
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                        <div>
+                          <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white leading-snug">{ev.studentNameAr}</div>
+                          <div className="text-[11px] font-bold mt-1">
+                            {ev.score !== undefined ? (
+                              <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                <span>{language === 'ar' ? 'الدرجة:' : 'Score:'}</span>
+                                <span dir="ltr" className="font-mono">{ev.score} / {hw.totalScore}</span>
+                              </span>
+                            ) : (
+                              <span className="text-amber-600 dark:text-amber-400">
+                                {language === 'ar' ? 'لم يتم التصحيح' : 'Not graded'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => openGradeGroupModal(hw)}
+                          className="rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
+                          style={{ padding: '6px 12px' }}
+                        >
+                          {ev.score !== undefined
+                            ? (language === 'ar' ? 'تعديل' : 'Edit')
+                            : (language === 'ar' ? 'تصحيح' : 'Grade')}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}

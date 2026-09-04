@@ -1579,7 +1579,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           (hwData.studentIds && hwData.studentIds.includes(s.id))
       );
 
-      const targetStudents = matchingStudents.length > 0 ? matchingStudents : students;
+      const targetStudents = matchingStudents;
       const targetStudentIds = targetStudents.map((s) => s.id);
 
       const newHw: AdminHomeworkAssignment = {
