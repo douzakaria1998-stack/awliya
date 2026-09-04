@@ -141,19 +141,20 @@ export function AdminPerformanceScreen() {
       visibleGroups.find((g) => g.name === hw.groupName) ||
       groups.find((g) => g.name === hw.groupName);
 
-    // Filter students belonging to this homework / group (excluding Dalila)
+    // STRICT MATCHING BY SPECIFIC GROUP ID ONLY:
     const groupStudents = students.filter((s) => {
       if (s.fullNameAr?.includes('دليلة') || s.fullNameEn?.toLowerCase().includes('dalila')) {
         return false;
       }
       if (!s.groupId || s.groupId === '' || s.groupName === 'بدون فوج' || s.groupName === 'No Group') return false;
+
+      // 1. Direct hw.groupId match
       if (hw.groupId && s.groupId === hw.groupId) return true;
+      // 2. Direct grp.id match
       if (grp?.id && s.groupId === grp.id) return true;
+      // 3. Group's studentIds array match
       if (grp?.studentIds && Array.isArray(grp.studentIds) && grp.studentIds.includes(s.id)) return true;
-      if (hw.studentIds && Array.isArray(hw.studentIds) && hw.studentIds.includes(s.id)) return true;
-      if (hw.evaluations && Array.isArray(hw.evaluations) && hw.evaluations.some((e: any) => e.studentId === s.id)) return true;
-      if (grp?.name && s.groupName && s.groupName.trim().toLowerCase() === grp.name.trim().toLowerCase()) return true;
-      if (hw.groupName && s.groupName && s.groupName.trim().toLowerCase() === hw.groupName.trim().toLowerCase()) return true;
+
       return false;
     });
 
