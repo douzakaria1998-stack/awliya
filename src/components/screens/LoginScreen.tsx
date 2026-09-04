@@ -112,18 +112,8 @@ export function LoginScreen() {
       style={{ padding: '32px 16px' }}
       suppressHydrationWarning
     >
-      {/* Interactive mouse-following fluid wave background */}
+      {/* Interactive dynamic high-density dots matrix background */}
       <InteractiveWaveBackground />
-
-      {/* Ambient background glowing orbs */}
-      <div
-        className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-3xl opacity-20 pointer-events-none"
-        style={{ backgroundColor: theme.primary }}
-      />
-      <div
-        className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-3xl opacity-15 pointer-events-none"
-        style={{ backgroundColor: theme.primary }}
-      />
 
       {/* Top Controls Bar: Language + Dark Mode */}
       <div
