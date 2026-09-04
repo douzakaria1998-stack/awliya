@@ -469,7 +469,7 @@ export function AdminGroupsScreen() {
                   </td>
 
                   <td className="py-4.5 px-4 text-center font-mono font-bold text-purple-600 dark:text-purple-400 text-xs sm:text-sm border-y border-slate-200/80 dark:border-slate-800">
-                    {grp.studentIds.length}
+                    {new Set([...(grp.studentIds || []), ...students.filter((s) => s.groupId === grp.id).map((s) => s.id)]).size}
                   </td>
 
                   <td className="py-4.5 px-4 text-center border-y border-slate-200/80 dark:border-slate-800">

@@ -603,7 +603,7 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
                     {language === 'ar' ? 'متوسط التقدم في المنهاج:' : 'Average Curriculum Progress:'}
                   </span>
                   <div className="text-2xl font-black font-mono text-blue-900 dark:text-blue-200">
-                    {group.studentIds.length === 0 ? '0%' : `${group.averageProgress}%`}
+                    {groupStudents.length === 0 ? '0%' : `${group.averageProgress}%`}
                   </div>
                 </div>
               </div>

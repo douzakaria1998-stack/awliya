@@ -355,20 +355,23 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           groupCode = generateUniqueGroupCode(g.code === '3927' ? undefined : g.code, usedCodes);
         }
 
-        // Strictly assign students by their specific groupId
-        let studentIds: string[] = [];
-        if (isTarget3927 && ahmedId) {
-          studentIds = [ahmedId];
-        } else {
-          studentIds = (cleanedStudents || [])
-            .filter((s) => s.id !== dalilaId && s.id !== ahmedId && s.groupId === g.id)
-            .map((s) => s.id);
-        }
+        // Collect all enrolled students for this group (excluding Dalila)
+        const matchingStudentIds = (cleanedStudents || [])
+          .filter((s) => s.id !== dalilaId && s.groupId === g.id)
+          .map((s) => s.id);
+
+        const mergedStudentIds = Array.from(
+          new Set([
+            ...(g.studentIds || []).filter((id) => id !== dalilaId),
+            ...matchingStudentIds,
+            ...(isTarget3927 && ahmedId ? [ahmedId] : []),
+          ])
+        );
 
         return {
           ...g,
           code: groupCode,
-          studentIds,
+          studentIds: mergedStudentIds,
         };
       });
 
@@ -739,6 +742,23 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return updated;
       });
 
+      // Synchronize group studentIds if student is assigned to a group
+      if (newStudent.groupId) {
+        setGroups((prevGroups) => {
+          const updatedGroups = prevGroups.map((g) => {
+            if (g.id === newStudent.groupId) {
+              const currentIds = g.studentIds || [];
+              if (!currentIds.includes(newStudent.id)) {
+                return { ...g, studentIds: [...currentIds, newStudent.id] };
+              }
+            }
+            return g;
+          });
+          setItem(ADMIN_STORAGE_KEYS.GROUPS, updatedGroups);
+          return updatedGroups;
+        });
+      }
+
       logAudit(
         `إضافة طالب جديد: ${newStudent.fullNameAr}`,
         `Added new student: ${newStudent.fullNameEn}`,
@@ -757,6 +777,25 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         const prevStudent = prev.find((s) => s.id === studentId);
         const updated = prev.map((s) => (s.id === studentId ? { ...s, ...updates } : s));
         setItem(ADMIN_STORAGE_KEYS.STUDENTS, updated);
+
+        // If groupId changed, sync group's studentIds
+        if (updates.groupId !== undefined) {
+          setGroups((prevGroups) => {
+            const updatedGroups = prevGroups.map((g) => {
+              if (g.id === updates.groupId) {
+                const currentIds = g.studentIds || [];
+                if (!currentIds.includes(studentId)) {
+                  return { ...g, studentIds: [...currentIds, studentId] };
+                }
+              } else if (prevStudent?.groupId && g.id === prevStudent.groupId && updates.groupId !== prevStudent.groupId) {
+                return { ...g, studentIds: (g.studentIds || []).filter((id) => id !== studentId) };
+              }
+              return g;
+            });
+            setItem(ADMIN_STORAGE_KEYS.GROUPS, updatedGroups);
+            return updatedGroups;
+          });
+        }
 
         if (prevStudent) {
           logAudit(
