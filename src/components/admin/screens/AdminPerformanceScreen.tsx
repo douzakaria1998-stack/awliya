@@ -141,7 +141,7 @@ export function AdminPerformanceScreen() {
       visibleGroups.find((g) => g.name === hw.groupName) ||
       groups.find((g) => g.name === hw.groupName);
 
-    // STRICT filter: Only students belonging to this specific group
+    // Filter students belonging to this homework / group (excluding Dalila)
     const groupStudents = students.filter((s) => {
       if (s.fullNameAr?.includes('دليلة') || s.fullNameEn?.toLowerCase().includes('dalila')) {
         return false;
@@ -150,6 +150,10 @@ export function AdminPerformanceScreen() {
       if (hw.groupId && s.groupId === hw.groupId) return true;
       if (grp?.id && s.groupId === grp.id) return true;
       if (grp?.studentIds && Array.isArray(grp.studentIds) && grp.studentIds.includes(s.id)) return true;
+      if (hw.studentIds && Array.isArray(hw.studentIds) && hw.studentIds.includes(s.id)) return true;
+      if (hw.evaluations && Array.isArray(hw.evaluations) && hw.evaluations.some((e: any) => e.studentId === s.id)) return true;
+      if (grp?.name && s.groupName && s.groupName.trim().toLowerCase() === grp.name.trim().toLowerCase()) return true;
+      if (hw.groupName && s.groupName && s.groupName.trim().toLowerCase() === hw.groupName.trim().toLowerCase()) return true;
       return false;
     });
 
