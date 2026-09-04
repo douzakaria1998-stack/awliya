@@ -112,20 +112,20 @@ export function AdminPerformanceScreen() {
   // Dynamically resolve only the students belonging to THIS homework's assigned group (strictly isolated per group)
   const getHomeworkEvaluations = (hw: any) => {
     const grp =
-      visibleGroups.find((g) => g.id === hw.groupId || (hw.groupName && g.name === hw.groupName)) ||
-      groups.find((g) => g.id === hw.groupId || (hw.groupName && g.name === hw.groupName));
+      visibleGroups.find((g) => g.id === hw.groupId) ||
+      groups.find((g) => g.id === hw.groupId) ||
+      visibleGroups.find((g) => g.name === hw.groupName) ||
+      groups.find((g) => g.name === hw.groupName);
 
-    // STRICT filter: Only students belonging to this group
+    // STRICT filter: Only students belonging to this specific group
     const groupStudents = students.filter((s) => {
       if (s.fullNameAr?.includes('دليلة') || s.fullNameEn?.toLowerCase().includes('dalila')) {
         return false;
       }
       if (!s.groupId || s.groupId === '' || s.groupName === 'بدون فوج' || s.groupName === 'No Group') return false;
-      if (hw.groupId && s.groupId && s.groupId === hw.groupId) return true;
-      if (grp?.id && s.groupId && s.groupId === grp.id) return true;
+      if (hw.groupId && s.groupId === hw.groupId) return true;
+      if (grp?.id && s.groupId === grp.id) return true;
       if (grp?.studentIds && Array.isArray(grp.studentIds) && grp.studentIds.includes(s.id)) return true;
-      if (grp?.name && s.groupName && s.groupName.trim() === grp.name.trim() && grp.name !== 'بدون فوج' && grp.name !== 'No Group') return true;
-      if (hw.groupName && s.groupName && s.groupName.trim() === hw.groupName.trim() && hw.groupName !== 'بدون فوج' && hw.groupName !== 'No Group') return true;
       return false;
     });
 
@@ -221,9 +221,10 @@ export function AdminPerformanceScreen() {
       groups.find((g) => g.id === newHwGroupId);
     const groupStudents = students.filter(
       (s) =>
-        (grp?.id && s.groupId === grp.id) ||
-        (grp?.studentIds && grp.studentIds.includes(s.id)) ||
-        (grp?.name && s.groupName && s.groupName.trim() === grp.name.trim() && grp.name !== 'بدون فوج' && grp.name !== 'No Group')
+        !s.fullNameAr?.includes('دليلة') &&
+        !s.fullNameEn?.toLowerCase().includes('dalila') &&
+        ((grp?.id && s.groupId === grp.id) ||
+          (grp?.studentIds && grp.studentIds.includes(s.id)))
     );
 
     createHomework({
@@ -397,14 +398,15 @@ export function AdminPerformanceScreen() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           {visibleHomework.map((hw) => {
             const grp =
-              visibleGroups.find((g) => g.id === hw.groupId || g.name === hw.groupName) ||
-              groups.find((g) => g.id === hw.groupId || g.name === hw.groupName);
+              visibleGroups.find((g) => g.id === hw.groupId) ||
+              groups.find((g) => g.id === hw.groupId) ||
+              visibleGroups.find((g) => g.name === hw.groupName) ||
+              groups.find((g) => g.name === hw.groupName);
             const groupName = grp?.name || hw.groupName;
-            const rawGroupId = grp?.code || grp?.id || hw.groupId;
             const displayGroupId =
               grp?.code && grp.code.trim() && !grp.code.startsWith('grp-')
                 ? grp.code.trim()
-                : '3925';
+                : grp?.code || hw.groupId?.replace('grp-', '') || '3927';
             const groupLanguage = grp?.language || 'English';
             const groupTiming = grp
               ? `${grp.daysAr ? `${grp.daysAr} • ` : ''}${grp.startTime || '18:00'} - ${grp.endTime || '20:00'}`

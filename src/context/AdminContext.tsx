@@ -314,6 +314,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (sTeachers?.length) setTeachers(sTeachers);
 
     const sGroups = getItem<AdminGroup[]>(ADMIN_STORAGE_KEYS.GROUPS);
+    let cleanedGroupsState: AdminGroup[] = [];
     if (sGroups?.length) {
       const dalilaId = cleanedStudents?.find(
         (s) =>
@@ -321,18 +322,71 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           (s.fullNameEn && s.fullNameEn.toLowerCase().includes('dalila'))
       )?.id;
 
+      const ahmedStudent = cleanedStudents?.find(
+        (s) =>
+          (s.fullNameAr && (s.fullNameAr.includes('احمد') || s.fullNameAr.includes('بوكوشة'))) ||
+          (s.fullNameEn && s.fullNameEn.toLowerCase().includes('ahmed'))
+      );
+      const ahmedId = ahmedStudent?.id;
+
+      // Find the Sunday + Tuesday group (Ahmed's designated group)
+      const sundayTuesdayGrp = sGroups.find(
+        (g) =>
+          (g.daysAr && g.daysAr.includes('الأحد') && g.daysAr.includes('الثلاثاء')) ||
+          (g.daysEn && g.daysEn.toLowerCase().includes('sunday'))
+      );
+      const ahmedTargetGroupId = sundayTuesdayGrp?.id;
+
       // Ensure EVERY group has a strictly UNIQUE 4-digit code (no duplicate IDs)
       const usedCodes = new Set<string>();
+      if (sundayTuesdayGrp) {
+        usedCodes.add('3927');
+      }
+
       const cleanedGroups = sGroups.map((g) => {
-        const uniqueCode = generateUniqueGroupCode(g.code, usedCodes);
+        const isAhmedGroup = (sundayTuesdayGrp && g.id === sundayTuesdayGrp.id) || (ahmedTargetGroupId && g.id === ahmedTargetGroupId);
+        let groupCode: string;
+        if (isAhmedGroup) {
+          groupCode = '3927';
+        } else {
+          groupCode = generateUniqueGroupCode(g.code === '3927' ? undefined : g.code, usedCodes);
+        }
+
+        let studentIds = (g.studentIds || []).filter((id) => id !== dalilaId);
+        if (isAhmedGroup && ahmedId) {
+          if (!studentIds.includes(ahmedId)) {
+            studentIds = [...studentIds, ahmedId];
+          }
+        } else if (ahmedId) {
+          studentIds = studentIds.filter((id) => id !== ahmedId);
+        }
+
         return {
           ...g,
-          code: uniqueCode,
-          studentIds: dalilaId ? (g.studentIds || []).filter((id) => id !== dalilaId) : g.studentIds,
+          code: groupCode,
+          studentIds,
         };
       });
+
+      cleanedGroupsState = cleanedGroups;
       setItem(ADMIN_STORAGE_KEYS.GROUPS, cleanedGroups);
       setGroups(cleanedGroups);
+
+      // Ensure Ahmed is explicitly bound to group 3927 (Sunday + Tuesday)
+      if (ahmedStudent && sundayTuesdayGrp) {
+        cleanedStudents = cleanedStudents.map((s) => {
+          if (s.id === ahmedStudent.id) {
+            return {
+              ...s,
+              groupId: sundayTuesdayGrp.id,
+              groupName: sundayTuesdayGrp.name,
+            };
+          }
+          return s;
+        });
+        setItem(ADMIN_STORAGE_KEYS.STUDENTS, cleanedStudents);
+        setStudents(cleanedStudents);
+      }
     }
 
     const sCurricula = getItem<CurriculumLevel[]>(ADMIN_STORAGE_KEYS.CURRICULA);
@@ -378,15 +432,21 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           (s.fullNameEn && s.fullNameEn.toLowerCase().includes('dalila'))
       )?.id;
 
-      let cleanedHw = sHomework;
-      if (dalilaId) {
-        cleanedHw = sHomework.map((h) => ({
+      const cleanedHw = sHomework.map((h) => {
+        const targetGroup = cleanedGroupsState.find((g) => g.id === h.groupId) || sGroups?.find((g) => g.id === h.groupId);
+        const validStudentIds = targetGroup?.studentIds || [];
+
+        return {
           ...h,
-          studentIds: (h.studentIds || []).filter((id) => id !== dalilaId),
-          evaluations: (h.evaluations || []).filter((e) => e.studentId !== dalilaId),
-        }));
-        setItem(ADMIN_STORAGE_KEYS.HOMEWORK, cleanedHw);
-      }
+          studentIds: (h.studentIds || []).filter(
+            (id) => id !== dalilaId && (validStudentIds.length === 0 || validStudentIds.includes(id))
+          ),
+          evaluations: (h.evaluations || []).filter(
+            (e) => e.studentId !== dalilaId && (validStudentIds.length === 0 || validStudentIds.includes(e.studentId))
+          ),
+        };
+      });
+      setItem(ADMIN_STORAGE_KEYS.HOMEWORK, cleanedHw);
       setHomeworkList(cleanedHw);
     }
 
@@ -1677,14 +1737,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   // ==========================================
   const createHomework = useCallback(
     (hwData: Partial<AdminHomeworkAssignment>) => {
-      const grp = groups.find((g) => g.id === hwData.groupId || g.name === hwData.groupName);
+      const grp = groups.find((g) => g.id === hwData.groupId);
       // Resolve strictly this group's students
       const matchingStudents = students.filter(
         (s) =>
-          (hwData.groupId && s.groupId && s.groupId === hwData.groupId) ||
-          (grp?.id && s.groupId && s.groupId === grp.id) ||
-          (grp?.studentIds && grp.studentIds.includes(s.id)) ||
-          (grp?.name && s.groupName && s.groupName.trim() === grp.name.trim() && grp.name !== 'بدون فوج' && grp.name !== 'No Group')
+          !s.fullNameAr?.includes('دليلة') &&
+          !s.fullNameEn?.toLowerCase().includes('dalila') &&
+          ((hwData.groupId && s.groupId && s.groupId === hwData.groupId) ||
+            (grp?.id && s.groupId && s.groupId === grp.id) ||
+            (grp?.studentIds && grp.studentIds.includes(s.id)))
       );
 
       const targetStudents = matchingStudents;
