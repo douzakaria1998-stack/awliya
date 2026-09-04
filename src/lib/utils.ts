@@ -38,3 +38,31 @@ export function generateAutoPassword(prefix: string = 'Awliya'): string {
     return `${prefix}${symbol}${randomNum}`;
 }
 
+export function formatStudentCount(count: number, language: string = 'ar'): string {
+    if (language === 'ar') {
+        if (count === 0) return '0 طالب';
+        if (count === 1) return 'طالب واحد';
+        if (count === 2) return 'طالبان';
+        if (count >= 3 && count <= 10) return `${count} طلاب`;
+        return `${count} طالباً`;
+    }
+    if (language === 'fr') {
+        return count <= 1 ? `${count} élève` : `${count} élèves`;
+    }
+    return count === 1 ? '1 student' : `${count} students`;
+}
+
+export function formatChildrenCount(count: number, language: string = 'ar'): string {
+    if (language === 'ar') {
+        if (count === 0) return '0 أبناء';
+        if (count === 1) return 'ابن واحد';
+        if (count === 2) return 'ابنان';
+        if (count >= 3 && count <= 10) return `${count} أبناء`;
+        return `${count} ابناً`;
+    }
+    if (language === 'fr') {
+        return count <= 1 ? `${count} enfant` : `${count} enfants`;
+    }
+    return count === 1 ? '1 child' : `${count} children`;
+}
+

@@ -107,22 +107,22 @@ export function AdminAuditLogsScreen() {
 
         {/* Table Container */}
         <div className="overflow-x-auto">
-          <table className="w-full text-xs sm:text-sm text-right">
-            <thead className="bg-slate-50/80 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-400 font-black">
-              <tr>
-                <th style={{ padding: '18px 36px', textAlign: isRTL ? 'right' : 'left' }}>
+          <table className="w-full min-w-[960px] text-xs sm:text-sm text-right">
+            <thead>
+              <tr className="bg-slate-50/80 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-black">
+                <th className="w-[220px] whitespace-nowrap" style={{ padding: '18px 28px', textAlign: isRTL ? 'right' : 'left' }}>
                   {language === 'ar' ? 'المسؤول (Who)' : 'Actor (Who)'}
                 </th>
-                <th style={{ padding: '18px 24px', textAlign: 'center' }}>
+                <th className="w-[180px] whitespace-nowrap" style={{ padding: '18px 20px', textAlign: 'center' }}>
                   {language === 'ar' ? 'التوقيت (When)' : 'Timestamp (When)'}
                 </th>
-                <th style={{ padding: '18px 32px', textAlign: isRTL ? 'right' : 'left' }}>
+                <th className="min-w-[320px]" style={{ padding: '18px 28px', textAlign: isRTL ? 'right' : 'left' }}>
                   {language === 'ar' ? 'العملية المنجزة (What)' : 'Action Performed (What)'}
                 </th>
-                <th style={{ padding: '18px 24px', textAlign: 'center' }}>
+                <th className="w-[160px] whitespace-nowrap" style={{ padding: '18px 20px', textAlign: 'center' }}>
                   {language === 'ar' ? 'القيمة السابقة (Previous)' : 'Previous Value'}
                 </th>
-                <th style={{ padding: '18px 36px', textAlign: 'center' }}>
+                <th className="w-[160px] whitespace-nowrap" style={{ padding: '18px 28px', textAlign: 'center' }}>
                   {language === 'ar' ? 'القيمة الجديدة (New Value)' : 'New Value'}
                 </th>
               </tr>
@@ -141,13 +141,13 @@ export function AdminAuditLogsScreen() {
                     className="hover:bg-purple-50/30 dark:hover:bg-slate-800/40 transition-colors"
                   >
                     {/* Actor (Who) */}
-                    <td style={{ padding: '22px 36px' }}>
+                    <td className="w-[220px] whitespace-nowrap" style={{ padding: '20px 28px' }}>
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center font-black shrink-0">
                           <User size={15} />
                         </div>
-                        <div>
-                          <div className="font-black text-slate-900 dark:text-white text-xs sm:text-sm">
+                        <div className="min-w-0">
+                          <div className="font-black text-slate-900 dark:text-white text-xs sm:text-sm truncate">
                             {log.actorName}
                           </div>
                           <span
@@ -161,27 +161,27 @@ export function AdminAuditLogsScreen() {
                     </td>
 
                     {/* Timestamp (When) */}
-                    <td style={{ padding: '22px 24px', textAlign: 'center' }}>
-                      <div className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800">
-                        <Clock size={12} className="text-slate-400" />
-                        <span>{log.timestamp}</span>
+                    <td className="w-[180px] whitespace-nowrap" style={{ padding: '20px 20px', textAlign: 'center' }}>
+                      <div className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 whitespace-nowrap shadow-2xs">
+                        <Clock size={12} className="text-slate-400 shrink-0" />
+                        <span dir="ltr" className="tracking-tight">{log.timestamp}</span>
                       </div>
                     </td>
 
                     {/* Action (What) */}
-                    <td style={{ padding: '22px 32px' }}>
-                      <div className="font-black text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
+                    <td className="min-w-[320px]" style={{ padding: '20px 28px' }}>
+                      <div className="font-black text-slate-800 dark:text-slate-200 text-xs sm:text-sm leading-snug">
                         {log.actionAr}
                       </div>
                       {log.details && (
-                        <div className="text-[11px] text-slate-400 font-medium mt-1 leading-relaxed">
+                        <div className="text-[11px] text-slate-400 font-medium mt-1 leading-relaxed break-all">
                           {log.details}
                         </div>
                       )}
                     </td>
 
                     {/* Previous Value */}
-                    <td style={{ padding: '22px 24px', textAlign: 'center' }}>
+                    <td className="w-[160px] whitespace-nowrap" style={{ padding: '20px 20px', textAlign: 'center' }}>
                       {log.previousValue ? (
                         <span
                           className="inline-block rounded-xl font-mono text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-950/40 border border-rose-200/90 dark:border-rose-900/50 shadow-2xs"
@@ -195,7 +195,7 @@ export function AdminAuditLogsScreen() {
                     </td>
 
                     {/* New Value */}
-                    <td style={{ padding: '22px 36px', textAlign: 'center' }}>
+                    <td className="w-[160px] whitespace-nowrap" style={{ padding: '20px 28px', textAlign: 'center' }}>
                       {log.newValue ? (
                         <span
                           className="inline-block rounded-xl font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200/90 dark:border-emerald-900/50 shadow-2xs"

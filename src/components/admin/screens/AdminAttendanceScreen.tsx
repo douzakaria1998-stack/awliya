@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { formatStudentCount } from '@/lib/utils';
 
 export function AdminAttendanceScreen() {
   const { visibleGroups, visibleStudents, teachers, attendanceSessions, recordAttendance, addCoveringSession } = useAdmin();
@@ -212,6 +213,82 @@ export function AdminAttendanceScreen() {
   const dayGroups = useMemo(() => {
     return visibleGroups.filter((g) => doesGroupStudyOnDate(g, selectedDate));
   }, [visibleGroups, selectedDate, attendanceSessions]);
+
+  const sanitizeTimeStr = (raw: string) => {
+    if (!raw) return '06:00 PM';
+    let str = raw.trim();
+    // Fix corrupted repeating times or messy slashes/dashes
+    const match = str.match(/(\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?)/i);
+    if (match) {
+      let t = match[1].trim();
+      if (!/(AM|PM|am|pm)/i.test(t)) {
+        t = `${t} PM`;
+      }
+      return t.toUpperCase();
+    }
+    return str.split('/')[0]?.trim() || '06:00 PM';
+  };
+
+  const renderGroupSchedule = (grp: AdminGroup) => {
+    const dayIdx = getDayOfWeekIndex(selectedDate);
+    const enDay = dayMapEn[dayIdx]?.toLowerCase() || '';
+    const arDay = dayMapAr[dayIdx] || '';
+
+    // 1. If group has structured schedules array
+    if (grp.schedules && grp.schedules.length > 0) {
+      const todaySchedule =
+        grp.schedules.find((s) => {
+          const d = (s.day || '').toLowerCase();
+          return d.includes(enDay) || d.includes(arDay);
+        }) || grp.schedules[0];
+
+      return (
+        <div className="flex justify-center py-0.5 whitespace-nowrap">
+          <div className="inline-flex items-center justify-between gap-3 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs min-w-[145px]">
+            <span className="font-bold text-xs text-slate-800 dark:text-slate-200">
+              {todaySchedule.day}
+            </span>
+            <span
+              className="inline-flex items-center font-mono font-bold text-[11px] text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-900/60 shrink-0"
+              dir="ltr"
+            >
+              {sanitizeTimeStr(todaySchedule.time ? `${todaySchedule.time} ${todaySchedule.period || ''}` : '')}
+            </span>
+          </div>
+        </div>
+      );
+    }
+
+    // 2. Parse from daysAr and startTime
+    const days = grp.daysAr ? grp.daysAr.split(/\s*[\+\•\/,]\s*/).filter(Boolean) : [];
+    const times = grp.startTime ? grp.startTime.split(/\s*[\/]\s*/).filter(Boolean) : [];
+
+    if (days.length > 0) {
+      const dayIndexInGroup = days.findIndex((d) => d.includes(arDay) || d.toLowerCase().includes(enDay));
+      const targetIdx = dayIndexInGroup >= 0 ? dayIndexInGroup : 0;
+      const targetDay = days[targetIdx] || days[0];
+      const rawTime = times[targetIdx] || times[0] || grp.startTime || '06:00 PM';
+      const cleanTime = sanitizeTimeStr(rawTime);
+
+      return (
+        <div className="flex justify-center py-0.5 whitespace-nowrap">
+          <div className="inline-flex items-center justify-between gap-3 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs min-w-[145px]">
+            <span className="font-bold text-xs text-slate-800 dark:text-slate-200">
+              {targetDay.trim()}
+            </span>
+            <span
+              className="inline-flex items-center font-mono font-bold text-[11px] text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-900/60 shrink-0"
+              dir="ltr"
+            >
+              {cleanTime}
+            </span>
+          </div>
+        </div>
+      );
+    }
+
+    return <span className="text-slate-400 text-xs">—</span>;
+  };
 
   // Drawer selected students
   const drawerStudents = useMemo(() => {
@@ -543,39 +620,23 @@ export function AdminAttendanceScreen() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className={`w-full text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
-              <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-400 font-bold">
+          <div className="overflow-x-auto px-5 sm:px-8 py-2">
+            <table className={`w-full text-xs sm:text-sm border-separate border-spacing-y-3.5 ${isRTL ? 'text-right' : 'text-left'}`}>
+              <thead className="text-slate-400 dark:text-slate-500 font-bold text-xs">
                 <tr>
-                  <th
-                    className={`font-extrabold text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
-                    style={{
-                      paddingTop: '26px',
-                      paddingBottom: '26px',
-                      paddingLeft: isRTL ? '24px' : '40px',
-                      paddingRight: isRTL ? '40px' : '24px',
-                    }}
-                  >
+                  <th className={`pb-2.5 font-extrabold ${isRTL ? 'text-right pr-9 pl-6' : 'text-left pl-9 pr-6'}`}>
                     {language === 'ar' ? 'الفوج والمستوى' : language === 'fr' ? 'Groupe & Niveau' : 'Group & Level'}
                   </th>
-                  <th className="py-7 px-6 font-extrabold">{language === 'ar' ? 'الأستاذ المشرف' : language === 'fr' ? 'Enseignant' : 'Assigned Teacher'}</th>
-                  <th className="py-7 px-6 font-extrabold">{language === 'ar' ? 'توقيت الحصة' : language === 'fr' ? 'Horaire du cours' : 'Session Timing'}</th>
-                  <th className="py-7 px-6 font-extrabold">{language === 'ar' ? 'الطلاب المسجلين' : language === 'fr' ? 'Élèves inscrits' : 'Enrolled Students'}</th>
-                  <th className="py-7 px-6 font-extrabold">{language === 'ar' ? 'حالة الرصد' : language === 'fr' ? 'Statut d\'appel' : 'Attendance Status'}</th>
-                  <th
-                    className={`font-extrabold text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}
-                    style={{
-                      paddingTop: '26px',
-                      paddingBottom: '26px',
-                      paddingRight: isRTL ? '40px' : '24px',
-                      paddingLeft: isRTL ? '24px' : '40px',
-                    }}
-                  >
+                  <th className="pb-2.5 px-4 font-extrabold text-center">{language === 'ar' ? 'الأستاذ المشرف' : language === 'fr' ? 'Enseignant' : 'Assigned Teacher'}</th>
+                  <th className="pb-2.5 px-4 font-extrabold text-center">{language === 'ar' ? 'توقيت الحصة' : language === 'fr' ? 'Horaire du cours' : 'Session Timing'}</th>
+                  <th className="pb-2.5 px-4 font-extrabold text-center">{language === 'ar' ? 'الطلاب المسجلين' : language === 'fr' ? 'Élèves inscrits' : 'Enrolled Students'}</th>
+                  <th className="pb-2.5 px-4 font-extrabold text-center">{language === 'ar' ? 'حالة الرصد' : language === 'fr' ? 'Statut d\'appel' : 'Attendance Status'}</th>
+                  <th className={`pb-2.5 font-extrabold text-center ${isRTL ? 'pl-8 pr-4' : 'pr-8 pl-4'}`}>
                     {language === 'ar' ? 'الإجراء' : language === 'fr' ? 'Action' : 'Action'}
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody>
                 {dayGroups.map((grp) => {
                   const studentCount = grp.studentIds.length || 0;
                   const sessionRecord = attendanceSessions.find(
@@ -589,28 +650,22 @@ export function AdminAttendanceScreen() {
                     <tr
                       key={grp.id}
                       onClick={() => openAttendanceDrawer(grp)}
-                      className="hover:bg-indigo-50/40 dark:hover:bg-slate-800/60 transition-colors cursor-pointer group"
+                      className="bg-white dark:bg-slate-850 hover:bg-indigo-50/50 dark:hover:bg-slate-800 transition-all cursor-pointer group shadow-2xs hover:shadow-xs"
                     >
                       {/* Group & Level */}
-                      <td
-                        className="py-12 font-bold text-slate-900 dark:text-white"
-                        style={{
-                          paddingLeft: isRTL ? '24px' : '40px',
-                          paddingRight: isRTL ? '40px' : '24px',
-                        }}
-                      >
-                        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap whitespace-nowrap">
-                          <span className="px-3.5 py-1.5 rounded-xl bg-indigo-100/90 dark:bg-indigo-950/90 text-indigo-700 dark:text-indigo-300 font-mono font-black text-sm tracking-wider shadow-2xs border border-indigo-200/80 dark:border-indigo-800/80 shrink-0 text-center min-w-[58px]">
+                      <td className="py-4.5 font-bold text-slate-900 dark:text-white border-y border-slate-200/80 dark:border-slate-800 rtl:border-r rtl:rounded-r-2xl ltr:border-l ltr:rounded-l-2xl rtl:pr-9 rtl:pl-6 ltr:pl-9 ltr:pr-6">
+                        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap whitespace-nowrap">
+                          <span className="px-2.5 py-1 rounded-xl bg-indigo-100/90 dark:bg-indigo-950/90 text-indigo-700 dark:text-indigo-300 font-mono font-black text-xs sm:text-sm tracking-wider shadow-2xs border border-indigo-200/80 dark:border-indigo-800/80 shrink-0 text-center min-w-[50px]">
                             {grp.code}
                           </span>
-                          <span className="font-black text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">
+                          <span className="font-black text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">
                             {grp.name}
                           </span>
-                          <span className="text-xs sm:text-sm text-slate-400 font-medium">
+                          <span className="text-xs text-slate-400 font-medium">
                             • {grp.level}
                           </span>
                           <span
-                            className={`text-xs font-bold rounded-lg border px-2.5 py-0.5 inline-flex items-center gap-1 shadow-2xs ${
+                            className={`text-[11px] font-bold rounded-lg border px-2 py-0.5 inline-flex items-center gap-1 shadow-2xs ${
                               grp.language?.toLowerCase().includes('french') || grp.language?.includes('فرنسية')
                                 ? 'bg-red-100/80 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200/80 dark:border-red-800/80'
                                 : grp.language?.toLowerCase().includes('spanish') || grp.language?.includes('إسبانية')
@@ -620,31 +675,31 @@ export function AdminAttendanceScreen() {
                                 : 'bg-blue-100/80 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200/80 dark:border-blue-800/80'
                             }`}
                           >
-                            <BookOpen size={12} className="shrink-0" />
+                            <BookOpen size={11} className="shrink-0" />
                             <span>{grp.language}</span>
                           </span>
                           {isCovering ? (
                             covType === 'counted' ? (
                               <span
-                                className="text-[11px] font-bold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap inline-flex items-center gap-1.5 shadow-2xs"
-                                style={{ padding: '3px 10px' }}
+                                className="text-[11px] font-bold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap inline-flex items-center gap-1 shadow-2xs"
+                                style={{ padding: '2px 9px' }}
                               >
-                                <Sparkles size={12} className="text-amber-500 shrink-0" />
+                                <Sparkles size={11} className="text-amber-500 shrink-0" />
                                 <span>{language === 'ar' ? 'حصة استدراكية (محسوبة)' : 'Covering (Counted)'}</span>
                               </span>
                             ) : (
                               <span
-                                className="text-[11px] font-bold rounded-full bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 whitespace-nowrap inline-flex items-center gap-1.5 shadow-2xs"
-                                style={{ padding: '3px 10px' }}
+                                className="text-[11px] font-bold rounded-full bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 whitespace-nowrap inline-flex items-center gap-1 shadow-2xs"
+                                style={{ padding: '2px 9px' }}
                               >
-                                <Sparkles size={12} className="text-purple-500 shrink-0" />
+                                <Sparkles size={11} className="text-purple-500 shrink-0" />
                                 <span>{language === 'ar' ? 'حصة استدراكية (إضافية)' : 'Covering (Extra)'}</span>
                               </span>
                             )
                           ) : (
                             <span
                               className="text-xs font-bold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap shadow-2xs inline-flex items-center gap-1.5"
-                              style={{ padding: '3px 12px' }}
+                              style={{ padding: '2px 10px' }}
                             >
                               <span>{language === 'ar' ? 'الحصة' : 'Session'}</span>
                               <span dir="ltr" className="font-mono font-black tracking-wide">
@@ -656,70 +711,61 @@ export function AdminAttendanceScreen() {
                       </td>
 
                       {/* Teacher */}
-                      <td className="py-12 px-6 font-bold text-slate-800 dark:text-slate-200">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-black text-sm flex items-center justify-center shrink-0 shadow-2xs">
+                      <td className="py-4.5 px-4 font-bold text-slate-800 dark:text-slate-200 text-center border-y border-slate-200/80 dark:border-slate-800">
+                        <div className="inline-flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
                             {grp.teacherName[0]}
                           </div>
-                          <span className="text-xs sm:text-sm">{grp.teacherName}</span>
+                          <span className="text-xs sm:text-sm whitespace-nowrap">{grp.teacherName}</span>
                         </div>
                       </td>
 
-                      {/* Timing */}
-                      <td className="py-12 px-6 font-mono font-bold text-slate-700 dark:text-slate-300 text-xs sm:text-sm">
-                        <div className="flex items-center gap-2">
-                          <Clock size={17} className="text-indigo-600 shrink-0" />
-                          <span>{grp.startTime} - {grp.endTime}</span>
-                        </div>
+                      {/* Timing / Schedule */}
+                      <td className="py-4.5 px-4 text-center border-y border-slate-200/80 dark:border-slate-800">
+                        {renderGroupSchedule(grp)}
                       </td>
 
                       {/* Enrolled Students */}
-                      <td className="py-12 px-6 font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
-                        <div className="flex items-center gap-2">
-                          <Users size={17} className="text-purple-600 shrink-0" />
-                          <span>{studentCount} {language === 'ar' ? 'طلاب' : language === 'fr' ? 'élèves' : 'students'}</span>
+                      <td className="py-4.5 px-4 font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm text-center whitespace-nowrap border-y border-slate-200/80 dark:border-slate-800">
+                        <div className="inline-flex items-center gap-1.5">
+                          <Users size={15} className="text-purple-600 shrink-0" />
+                          <span>{formatStudentCount(studentCount, language)}</span>
                         </div>
                       </td>
 
                       {/* Attendance Status */}
-                      <td className="py-12 px-6">
+                      <td className="py-4.5 px-4 text-center border-y border-slate-200/80 dark:border-slate-800">
                         {isRecorded ? (
                           <span
-                            className="inline-flex items-center gap-2 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 font-black text-xs border border-emerald-300/80 dark:border-emerald-700/80 shadow-2xs whitespace-nowrap"
-                            style={{ padding: '5px 14px' }}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 font-bold text-xs border border-emerald-300/80 dark:border-emerald-700/80 shadow-2xs whitespace-nowrap"
+                            style={{ padding: '4px 12px' }}
                           >
-                            <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                            <CheckCircle2 size={13} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
                             <span>{language === 'ar' ? 'تم الرصد' : language === 'fr' ? 'Enregistré' : 'Recorded'}</span>
                           </span>
                         ) : (
                           <span
-                            className="inline-flex items-center gap-2 rounded-full bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 font-black text-xs border border-amber-300/80 dark:border-amber-700/80 shadow-2xs whitespace-nowrap"
-                            style={{ padding: '5px 14px' }}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 font-bold text-xs border border-amber-300/80 dark:border-amber-700/80 shadow-2xs whitespace-nowrap"
+                            style={{ padding: '4px 12px' }}
                           >
-                            <Clock size={15} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                            <Clock size={13} className="text-amber-600 dark:text-amber-400 shrink-0" />
                             <span>{language === 'ar' ? 'بانتظار التسجيل' : language === 'fr' ? 'En attente' : 'Pending'}</span>
                           </span>
                         )}
                       </td>
 
                       {/* Action Button */}
-                      <td
-                        className="py-12"
-                        style={{
-                          paddingRight: isRTL ? '40px' : '24px',
-                          paddingLeft: isRTL ? '24px' : '40px',
-                        }}
-                      >
+                      <td className={`py-4.5 text-center border-y border-slate-200/80 dark:border-slate-800 rtl:border-l rtl:rounded-l-2xl ltr:border-r ltr:rounded-r-2xl ${isRTL ? 'pl-8 pr-4' : 'pr-8 pl-4'}`}>
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             openAttendanceDrawer(grp);
                           }}
-                          className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
-                          style={{ padding: '7px 16px' }}
+                          className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap mx-auto"
+                          style={{ padding: '6px 14px' }}
                         >
-                          <CalendarCheck2 size={14} />
+                          <CalendarCheck2 size={13} className="shrink-0" />
                           <span>{language === 'ar' ? 'رصد الحضور' : language === 'fr' ? 'Faire l\'appel' : 'Take Attendance'}</span>
                         </button>
                       </td>

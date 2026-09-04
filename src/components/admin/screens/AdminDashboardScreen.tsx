@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { formatStudentCount } from '@/lib/utils';
 
 export function AdminDashboardScreen() {
   const {
@@ -55,15 +56,50 @@ export function AdminDashboardScreen() {
   const pendingCount = pendingApprovals.filter((a) => a.status === 'pending').length;
   const fallingBehindStudents = visibleStudents.filter((s) => s.isFallingBehind || s.attendanceRate < 75 || s.overallProgress < 50);
 
-  // Level Progress Distribution (derived strictly from active curriculum levels)
+  // Level Progress Distribution (derived strictly from active curriculum levels and their enrolled groups/students)
   const levelProgressData = curricula.map((curricLevel) => {
-    const studentsInLevel = visibleStudents.filter(
-      (s) => s.cefrLevel === curricLevel.cefrCode || s.currentLevel === curricLevel.levelNumber
-    );
+    // 1. Find all groups matching this curriculum level
+    const matchingGroups = visibleGroups.filter((g) => {
+      if (g.curriculumLevelId && g.curriculumLevelId === curricLevel.id) return true;
+      const gLevel = (g.level || '').trim().toLowerCase();
+      const nameAr = (curricLevel.nameAr || '').trim().toLowerCase();
+      const nameEn = (curricLevel.nameEn || '').trim().toLowerCase();
+      const cefr = (curricLevel.cefrCode || '').trim().toLowerCase();
+      const numStr = String(curricLevel.levelNumber);
+
+      return (
+        (nameAr && gLevel === nameAr) ||
+        (nameEn && gLevel === nameEn) ||
+        gLevel === `l${numStr}` ||
+        gLevel === `level ${numStr}` ||
+        gLevel === `المستوى ${numStr}` ||
+        gLevel === numStr ||
+        (cefr && gLevel === cefr)
+      );
+    });
+
+    const matchingGroupIds = new Set(matchingGroups.map((g) => g.id));
+    const studentsInMatchingGroups = new Set(matchingGroups.flatMap((g) => g.studentIds || []));
+
+    // 2. Filter students that belong to this curriculum level
+    const studentsInLevel = visibleStudents.filter((s) => {
+      // If student is in one of the matching groups
+      if (s.groupId && matchingGroupIds.has(s.groupId)) return true;
+      if (studentsInMatchingGroups.has(s.id)) return true;
+
+      // If student is not assigned to any group, match strictly by currentLevel number
+      if (!s.groupId || s.groupId === '') {
+        return s.currentLevel === curricLevel.levelNumber;
+      }
+
+      return false;
+    });
+
     const count = studentsInLevel.length;
     const progress = count > 0
       ? Math.round(studentsInLevel.reduce((sum, s) => sum + (s.overallProgress || 0), 0) / count)
       : 0;
+
     return {
       level: language === 'ar' ? `المستوى ${curricLevel.levelNumber}` : `Level ${curricLevel.levelNumber}`,
       levelNumber: curricLevel.levelNumber,
@@ -493,7 +529,7 @@ export function AdminDashboardScreen() {
                   <div key={`${item.level}-${item.levelNumber}-${item.language}`} className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs font-bold">
                       <span className="text-slate-700 dark:text-slate-200 font-mono text-xs sm:text-sm">
-                        {item.level} — {language === 'ar' ? item.nameAr : item.nameEn} ({item.count} {language === 'ar' ? 'طلاب' : 'students'})
+                        {item.level} — {language === 'ar' ? item.nameAr : item.nameEn} ({formatStudentCount(item.count, language)})
                       </span>
                       <span className="font-mono font-black text-indigo-600 text-xs sm:text-sm">{item.progress}%</span>
                     </div>
@@ -756,7 +792,7 @@ export function AdminDashboardScreen() {
               className="font-bold text-amber-800 dark:text-amber-200 bg-amber-200/70 dark:bg-amber-900/70 border border-amber-300/80 dark:border-amber-700/80 rounded-full font-mono shrink-0 leading-normal"
               style={{ padding: '4px 14px', fontSize: '11px' }}
             >
-              {fallingBehindStudents.length} {language === 'ar' ? 'طلاب' : 'students'}
+              {formatStudentCount(fallingBehindStudents.length, language)}
             </span>
           </div>
 

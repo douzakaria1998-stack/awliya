@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   X,
   User,
@@ -20,6 +20,9 @@ import {
   UserPlus,
   Link2,
   Search,
+  Edit3,
+  Check,
+  Save,
 } from 'lucide-react';
 import { AdminStudent } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
@@ -41,6 +44,9 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
     attendanceSessions,
     students,
     parents,
+    groups,
+    teachers,
+    curricula,
     linkStudentToParent,
     unlinkStudentFromParent,
     updateStudent,
@@ -50,6 +56,82 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
   const [activeTab, setActiveTab] = useState<StudentTabKey>('overview');
   const [isLinkingParent, setIsLinkingParent] = useState(false);
   const [parentSearchQuery, setParentSearchQuery] = useState('');
+
+  // Student Profile Editing State
+  const [isEditingInfo, setIsEditingInfo] = useState(false);
+  const [editFullNameAr, setEditFullNameAr] = useState('');
+  const [editFullNameEn, setEditFullNameEn] = useState('');
+  const [editGender, setEditGender] = useState<'male' | 'female'>('male');
+  const [editLanguage, setEditLanguage] = useState<'English' | 'French' | 'Dual' | ''>('English');
+  const [editLevel, setEditLevel] = useState<number | ''>(1);
+  const [editGroupId, setEditGroupId] = useState<string>('');
+  const [editStatus, setEditStatus] = useState<string>('active');
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Sync edit form whenever student changes or modal opens
+  useEffect(() => {
+    if (student) {
+      setEditFullNameAr(student.fullNameAr || '');
+      setEditFullNameEn(student.fullNameEn || '');
+      setEditGender(student.gender || 'male');
+      setEditLanguage(student.language || 'English');
+      setEditLevel(student.currentLevel !== undefined ? student.currentLevel : 1);
+      setEditGroupId(student.groupId || '');
+      setEditStatus(student.status || 'active');
+      setIsEditingInfo(false);
+      setSaveSuccess(false);
+    }
+  }, [student, isOpen]);
+
+  // Available Curriculum Levels
+  const availableCurriculumLevels = useMemo(() => {
+    if (curricula && curricula.length > 0) {
+      const seen = new Set<number>();
+      const list: { levelNumber: number; name: string }[] = [];
+      const sorted = [...curricula].sort((a, b) => (a.levelNumber || 0) - (b.levelNumber || 0));
+      sorted.forEach((c) => {
+        if (!seen.has(c.levelNumber)) {
+          seen.add(c.levelNumber);
+          list.push({
+            levelNumber: c.levelNumber,
+            name: language === 'ar' ? (c.nameAr || `المستوى ${c.levelNumber}`) : (c.nameEn || c.nameAr || `Level ${c.levelNumber}`),
+          });
+        }
+      });
+      return list;
+    }
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((lvl) => ({
+      levelNumber: lvl,
+      name: language === 'ar' ? `المستوى ${lvl}` : `Level ${lvl}`,
+    }));
+  }, [curricula, language]);
+
+  const handleSaveStudentInfo = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editFullNameAr.trim()) return;
+
+    const matchedGroup = editGroupId ? groups.find((g) => g.id === editGroupId) : undefined;
+    const matchedTeacher = matchedGroup ? teachers.find((t) => t.id === matchedGroup?.teacherId) : undefined;
+
+    updateStudent(student?.id || '', {
+      fullNameAr: editFullNameAr.trim(),
+      fullNameEn: editFullNameEn.trim() || editFullNameAr.trim(),
+      gender: editGender,
+      language: (editLanguage as any) || '',
+      currentLevel: typeof editLevel === 'number' ? editLevel : 1,
+      groupId: matchedGroup ? matchedGroup.id : '',
+      groupName: matchedGroup ? matchedGroup.name : (language === 'ar' ? 'بدون فوج' : 'No Group'),
+      teacherId: matchedTeacher ? matchedTeacher.id : '',
+      teacherName: matchedTeacher ? (language === 'ar' ? matchedTeacher.fullNameAr : matchedTeacher.fullNameEn) : (language === 'ar' ? 'غير مسند' : 'Unassigned'),
+      status: (editStatus as any) || 'active',
+    });
+
+    setSaveSuccess(true);
+    setTimeout(() => {
+      setSaveSuccess(false);
+      setIsEditingInfo(false);
+    }, 1200);
+  };
 
   // 4-Skill Assessment Editing State
   const [isEditingSkills, setIsEditingSkills] = useState(false);
@@ -112,33 +194,60 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
         >
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-base shadow-md shrink-0">
-              {student.fullNameAr[0]}
+              {currentStudent.fullNameAr[0]}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base sm:text-lg font-black text-white truncate">
-                  {student.fullNameAr} ({student.fullNameEn})
+                  {currentStudent.fullNameAr} ({currentStudent.fullNameEn})
                 </h3>
                 <span
                   className="inline-flex items-center justify-center rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold font-mono tracking-wide"
                   style={{ padding: '4px 12px', lineHeight: '1.2' }}
                 >
-                  {language === 'ar' ? `المستوى ${student.currentLevel}` : `Level ${student.currentLevel}`}
+                  {language === 'ar' ? `المستوى ${currentStudent.currentLevel}` : `Level ${currentStudent.currentLevel}`}
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-medium mt-0.5 truncate">
-                {student.groupName} • {student.enrolledPathAr}
+                {currentStudent.groupName} • {currentStudent.enrolledPathAr}
               </p>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <X size={16} />
-          </button>
+          <div className="flex items-center gap-2.5 shrink-0">
+            {!isEditingInfo ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditingInfo(true);
+                  setActiveTab('overview');
+                }}
+                style={{ paddingLeft: '16px', paddingRight: '16px', gap: '8px' }}
+                className="h-9 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+              >
+                <Edit3 size={14} className="shrink-0" />
+                <span>{language === 'ar' ? 'تعديل البيانات' : 'Edit Profile'}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsEditingInfo(false)}
+                style={{ paddingLeft: '16px', paddingRight: '16px', gap: '8px' }}
+                className="h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center transition-all cursor-pointer shrink-0 border border-slate-700"
+              >
+                <X size={14} className="shrink-0" />
+                <span>{language === 'ar' ? 'إلغاء' : 'Cancel'}</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Tab Navigation (Connected Profile Hub) */}
@@ -176,201 +285,356 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
           {/* TAB 1: Overview */}
           {activeTab === 'overview' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* Basic Information Grid */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  {language === 'ar' ? 'المعلومات الشخصية والأكاديمية' : 'Personal & Academic Details'}
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                  <div
-                    className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '14px 18px' }}
-                  >
-                    <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'الاسم الكامل:' : 'Full Name:'}</span>
-                    <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{student.fullNameAr}</span>
+              {saveSuccess && (
+                <div className="p-3 mb-2 rounded-2xl bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center gap-2 animate-fade-in">
+                  <Check size={16} />
+                  <span>{language === 'ar' ? 'تم حفظ وتحديث بيانات الطالب بنجاح!' : 'Student profile updated successfully!'}</span>
+                </div>
+              )}
+
+              {isEditingInfo ? (
+                <form
+                  onSubmit={handleSaveStudentInfo}
+                  className="rounded-3xl bg-slate-50 dark:bg-slate-850/90 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 animate-fade-in shadow-xs flex flex-col gap-6"
+                >
+                  {/* Header */}
+                  <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+                    <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                        <Edit3 size={16} />
+                      </div>
+                      <span>{language === 'ar' ? 'تعديل بيانات الطالب الأكاديمية والشخصية' : 'Edit Student Information'}</span>
+                    </h4>
                   </div>
-                  <div
-                    className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '14px 18px' }}
-                  >
-                    <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'الفوج المسند:' : 'Assigned Group:'}</span>
-                    <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{student.groupName}</span>
-                  </div>
-                  <div
-                    className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '14px 18px' }}
-                  >
-                    <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'المعلم المشرف:' : 'Assigned Teacher:'}</span>
-                    <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{student.teacherName}</span>
-                  </div>
-                  <div
-                    className={`${hasParent ? 'bg-slate-50 dark:bg-slate-800/60 border-slate-100 dark:border-slate-800' : 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-200/80 dark:border-amber-900/50'} rounded-2xl border`}
-                    style={{ padding: '14px 18px' }}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className={`text-xs block font-bold ${hasParent ? 'text-slate-400' : 'text-amber-700/80 dark:text-amber-400/80'}`}>
-                        {language === 'ar' ? 'ولي الأمر المربوط:' : 'Linked Parent:'}
-                      </span>
-                      {hasParent && (
-                        <button
-                          type="button"
-                          onClick={() => unlinkStudentFromParent(currentStudent.parentId, currentStudent.id)}
-                          className="text-[10px] font-bold text-rose-500 hover:text-rose-700 dark:text-rose-400 cursor-pointer transition-colors"
-                          title={language === 'ar' ? 'إلغاء ربط ولي الأمر' : 'Unlink Parent'}
-                        >
-                          {language === 'ar' ? 'إلغاء الربط' : 'Unlink'}
-                        </button>
-                      )}
+
+                  {/* Row 1: Names */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        {language === 'ar' ? 'الاسم الكامل بالعربية *' : 'Full Name (Arabic) *'}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={editFullNameAr}
+                        onChange={(e) => setEditFullNameAr(e.target.value)}
+                        className="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-2xs transition-all"
+                        style={{ height: '46px', padding: '10px 16px' }}
+                      />
                     </div>
 
-                    {hasParent ? (
-                      <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm block truncate">
-                        {currentStudent.parentName} {currentStudent.relationship ? `(${currentStudent.relationship})` : ''}
-                      </span>
-                    ) : isLinkingParent ? (
-                      <div className="space-y-2 mt-2 animate-fade-in">
-                        {/* Search Input Bar */}
-                        <div className="relative">
-                          <Search
-                            size={15}
-                            className={`absolute top-1/2 -translate-y-1/2 text-amber-600 dark:text-amber-400 pointer-events-none ${
-                              isRTL ? 'right-3.5' : 'left-3.5'
-                            }`}
-                          />
-                          <input
-                            type="text"
-                            autoFocus
-                            value={parentSearchQuery}
-                            onChange={(e) => setParentSearchQuery(e.target.value)}
-                            placeholder={language === 'ar' ? 'ابحث بالاسم أو رقم الهاتف...' : 'Search by name or phone...'}
-                            className="w-full text-xs font-bold bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all shadow-2xs"
-                            style={{
-                              paddingTop: '9px',
-                              paddingBottom: '9px',
-                              paddingRight: isRTL ? '36px' : '14px',
-                              paddingLeft: isRTL ? '14px' : '36px',
-                              minHeight: '38px',
-                            }}
-                          />
-                          {parentSearchQuery && (
-                            <button
-                              type="button"
-                              onClick={() => setParentSearchQuery('')}
-                              className={`absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer ${
-                                isRTL ? 'left-3' : 'right-3'
-                              }`}
-                            >
-                              <X size={14} />
-                            </button>
-                          )}
-                        </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        {language === 'ar' ? 'الاسم الكامل بالإنجليزية' : 'Full Name (English)'}
+                      </label>
+                      <input
+                        type="text"
+                        value={editFullNameEn}
+                        onChange={(e) => setEditFullNameEn(e.target.value)}
+                        className="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-2xs transition-all"
+                        style={{ height: '46px', padding: '10px 16px' }}
+                        dir="ltr"
+                      />
+                    </div>
+                  </div>
 
-                        {/* Search Results Dropdown List (only shown when typing a search query) */}
-                        {isSearchingParent && (
-                          <div
-                            className="bg-white dark:bg-slate-900 rounded-xl border border-amber-300/80 dark:border-amber-700/80 shadow-lg divide-y divide-slate-100 dark:divide-slate-800 overflow-y-auto animate-fade-in"
-                            style={{ maxHeight: '180px' }}
+                  {/* Row 2: Gender, Language Track, Status */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        {language === 'ar' ? 'الجنس' : 'Gender'}
+                      </label>
+                      <select
+                        value={editGender}
+                        onChange={(e) => setEditGender(e.target.value as any)}
+                        className="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 cursor-pointer shadow-2xs transition-all"
+                        style={{ height: '46px', padding: '10px 14px' }}
+                      >
+                        <option value="male">{language === 'ar' ? 'ذكر (Male)' : 'Male'}</option>
+                        <option value="female">{language === 'ar' ? 'أنثى (Female)' : 'Female'}</option>
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        {language === 'ar' ? 'المسار اللغوي' : 'Language Track'}
+                      </label>
+                      <select
+                        value={editLanguage}
+                        onChange={(e) => setEditLanguage(e.target.value as any)}
+                        className="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 cursor-pointer shadow-2xs transition-all"
+                        style={{ height: '46px', padding: '10px 14px' }}
+                      >
+                        <option value="">{language === 'ar' ? 'بدون (لا شيء)' : 'None (Nothing)'}</option>
+                        <option value="English">الإنجليزية (English)</option>
+                        <option value="French">الفرنسية (Français)</option>
+                        <option value="Dual">مسار مزدوج (Dual)</option>
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        {language === 'ar' ? 'الحالة' : 'Status'}
+                      </label>
+                      <select
+                        value={editStatus}
+                        onChange={(e) => setEditStatus(e.target.value)}
+                        className="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 cursor-pointer shadow-2xs transition-all"
+                        style={{ height: '46px', padding: '10px 14px' }}
+                      >
+                        <option value="active">{language === 'ar' ? 'نشط (Active)' : 'Active'}</option>
+                        <option value="inactive">{language === 'ar' ? 'غير نشط (Inactive)' : 'Inactive'}</option>
+                        <option value="suspended">{language === 'ar' ? 'موقوف (Suspended)' : 'Suspended'}</option>
+                        <option value="archived">{language === 'ar' ? 'مؤرشف (Archived)' : 'Archived'}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Row 3: Level & Group */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        {language === 'ar' ? 'المستوى الأكاديمي' : 'Curriculum Level'}
+                      </label>
+                      <select
+                        value={editLevel}
+                        onChange={(e) => setEditLevel(e.target.value === '' ? '' : Number(e.target.value))}
+                        className="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 cursor-pointer shadow-2xs transition-all"
+                        style={{ height: '46px', padding: '10px 14px' }}
+                      >
+                        <option value="">{language === 'ar' ? 'بدون (لا شيء)' : 'None (Nothing)'}</option>
+                        {availableCurriculumLevels.map((lvl) => (
+                          <option key={lvl.levelNumber} value={lvl.levelNumber}>
+                            {lvl.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        {language === 'ar' ? 'الفوج المسند' : 'Assigned Group'}
+                      </label>
+                      <select
+                        value={editGroupId}
+                        onChange={(e) => setEditGroupId(e.target.value)}
+                        className="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 cursor-pointer shadow-2xs transition-all"
+                        style={{ height: '46px', padding: '10px 14px' }}
+                      >
+                        <option value="">{language === 'ar' ? 'بدون فوج (لا شيء)' : 'No Group (None)'}</option>
+                        {groups.map((g) => (
+                          <option key={g.id} value={g.id}>
+                            {g.code ? `${g.code} — ` : ''}{g.name} — {isRTL ? g.daysAr : g.daysEn} ({g.level})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div
+                    className="flex items-center justify-end pt-5 border-t border-slate-200 dark:border-slate-800"
+                    style={{ gap: '14px' }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingInfo(false)}
+                      className="rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold transition-all cursor-pointer hover:scale-105 active:scale-95"
+                      style={{ padding: '10px 20px' }}
+                    >
+                      {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                    </button>
+                    <button
+                      type="submit"
+                      className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold flex items-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95"
+                      style={{ padding: '10px 22px', gap: '8px' }}
+                    >
+                      <Save size={16} />
+                      <span>{language === 'ar' ? 'حفظ التعديلات' : 'Save Changes'}</span>
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                /* Basic Information Grid */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    {language === 'ar' ? 'المعلومات الشخصية والأكاديمية' : 'Personal & Academic Details'}
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                    <div
+                      className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
+                      style={{ padding: '14px 18px' }}
+                    >
+                      <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'الاسم الكامل:' : 'Full Name:'}</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{currentStudent.fullNameAr}</span>
+                    </div>
+                    <div
+                      className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
+                      style={{ padding: '14px 18px' }}
+                    >
+                      <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'الفوج المسند:' : 'Assigned Group:'}</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{currentStudent.groupName}</span>
+                    </div>
+                    <div
+                      className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
+                      style={{ padding: '14px 18px' }}
+                    >
+                      <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'المعلم المشرف:' : 'Assigned Teacher:'}</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{currentStudent.teacherName}</span>
+                    </div>
+                    <div
+                      className={`${hasParent ? 'bg-slate-50 dark:bg-slate-800/60 border-slate-100 dark:border-slate-800' : 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-200/80 dark:border-amber-900/50'} rounded-2xl border`}
+                      style={{ padding: '14px 18px' }}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-xs block font-bold ${hasParent ? 'text-slate-400' : 'text-amber-700/80 dark:text-amber-400/80'}`}>
+                          {language === 'ar' ? 'ولي الأمر المربوط:' : 'Linked Parent:'}
+                        </span>
+                        {hasParent && (
+                          <button
+                            type="button"
+                            onClick={() => unlinkStudentFromParent(currentStudent.parentId, currentStudent.id)}
+                            className="text-[10px] font-bold text-rose-500 hover:text-rose-700 dark:text-rose-400 cursor-pointer transition-colors"
+                            title={language === 'ar' ? 'إلغاء ربط ولي الأمر' : 'Unlink Parent'}
                           >
-                            {filteredParentsToLink.length === 0 ? (
-                              <div className="py-3.5 px-4 text-center text-xs text-slate-400 font-bold">
-                                {language === 'ar' ? 'لا يوجد ولي أمر مطابق للبحث' : 'No matching parents found'}
-                              </div>
-                            ) : (
-                              filteredParentsToLink.map((p) => (
-                                <div
-                                  key={p.id}
-                                  className="p-3 hover:bg-amber-50/80 dark:hover:bg-amber-950/40 flex items-center justify-between gap-3 transition-colors cursor-pointer"
-                                  onClick={() => {
-                                    linkStudentToParent(p.id, currentStudent.id);
-                                    setIsLinkingParent(false);
-                                    setParentSearchQuery('');
-                                  }}
-                                >
-                                  <div className="min-w-0">
-                                    <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
-                                      {p.fullNameAr} {p.fullNameEn ? `(${p.fullNameEn})` : ''}
-                                    </div>
-                                    <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate" dir="ltr">
-                                      {p.phone}
-                                    </div>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
+                            {language === 'ar' ? 'إلغاء الربط' : 'Unlink'}
+                          </button>
+                        )}
+                      </div>
+
+                      {hasParent ? (
+                        <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm block truncate">
+                          {currentStudent.parentName} {currentStudent.relationship ? `(${currentStudent.relationship})` : ''}
+                        </span>
+                      ) : isLinkingParent ? (
+                        <div className="space-y-2 mt-2 animate-fade-in">
+                          {/* Search Input Bar */}
+                          <div className="relative">
+                            <Search
+                              size={15}
+                              className={`absolute top-1/2 -translate-y-1/2 text-amber-600 dark:text-amber-400 pointer-events-none ${
+                                isRTL ? 'right-3.5' : 'left-3.5'
+                              }`}
+                            />
+                            <input
+                              type="text"
+                              autoFocus
+                              value={parentSearchQuery}
+                              onChange={(e) => setParentSearchQuery(e.target.value)}
+                              placeholder={language === 'ar' ? 'ابحث بالاسم أو رقم الهاتف...' : 'Search by name or phone...'}
+                              className="w-full text-xs font-bold bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all shadow-2xs"
+                              style={{
+                                paddingTop: '9px',
+                                paddingBottom: '9px',
+                                paddingRight: isRTL ? '36px' : '14px',
+                                paddingLeft: isRTL ? '14px' : '36px',
+                                minHeight: '38px',
+                              }}
+                            />
+                            {parentSearchQuery && (
+                              <button
+                                type="button"
+                                onClick={() => setParentSearchQuery('')}
+                                className={`absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer ${
+                                  isRTL ? 'left-3' : 'right-3'
+                                }`}
+                              >
+                                <X size={14} />
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Search Results Dropdown List (only shown when typing a search query) */}
+                          {isSearchingParent && (
+                            <div
+                              className="bg-white dark:bg-slate-900 rounded-xl border border-amber-300/80 dark:border-amber-700/80 shadow-lg divide-y divide-slate-100 dark:divide-slate-800 overflow-y-auto animate-fade-in"
+                              style={{ maxHeight: '180px' }}
+                            >
+                              {filteredParentsToLink.length === 0 ? (
+                                <div className="py-3.5 px-4 text-center text-xs text-slate-400 font-bold">
+                                  {language === 'ar' ? 'لا يوجد ولي أمر مطابق للبحث' : 'No matching parents found'}
+                                </div>
+                              ) : (
+                                filteredParentsToLink.map((p) => (
+                                  <div
+                                    key={p.id}
+                                    onClick={() => {
                                       linkStudentToParent(p.id, currentStudent.id);
                                       setIsLinkingParent(false);
                                       setParentSearchQuery('');
                                     }}
-                                    className="rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-colors cursor-pointer whitespace-nowrap shadow-2xs shrink-0 flex items-center justify-center"
-                                    style={{ padding: '6px 14px', minHeight: '30px' }}
+                                    className="p-3 hover:bg-amber-50/80 dark:hover:bg-slate-800/80 cursor-pointer flex items-center justify-between transition-colors text-xs"
                                   >
-                                    {language === 'ar' ? 'ربط' : 'Link'}
-                                  </button>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        )}
+                                    <div>
+                                      <div className="font-bold text-slate-900 dark:text-white">{p.fullNameAr}</div>
+                                      <div className="text-[11px] text-slate-500 font-mono" dir="ltr">{p.phone}</div>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                      <Link2 size={11} />
+                                      <span>{language === 'ar' ? 'ربط الحساب' : 'Link'}</span>
+                                    </span>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          )}
 
-                        {/* Cancel Button */}
-                        <div className="flex items-center justify-end pt-0.5">
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-[10px] text-slate-400">
+                              {language === 'ar' ? 'اختر ولي أمر لربطه بهذا الطالب' : 'Select a parent to link'}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsLinkingParent(false);
+                                setParentSearchQuery('');
+                              }}
+                              className="rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800 text-xs font-bold transition-colors cursor-pointer"
+                              style={{ padding: '5px 12px', minHeight: '30px', whiteSpace: 'nowrap' }}
+                            >
+                              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-bold text-amber-700 dark:text-amber-300 text-xs flex items-center gap-1.5 min-w-0">
+                            <UserPlus size={14} className="shrink-0 text-amber-600" />
+                            <span className="truncate">{language === 'ar' ? 'إضافة ولي أمر للربط' : 'Add parent to link'}</span>
+                          </span>
                           <button
                             type="button"
                             onClick={() => {
-                              setIsLinkingParent(false);
+                              setIsLinkingParent(true);
                               setParentSearchQuery('');
                             }}
-                            className="rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800 text-xs font-bold transition-colors cursor-pointer"
-                            style={{ padding: '5px 12px', minHeight: '30px', whiteSpace: 'nowrap' }}
+                            className="rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center transition-colors cursor-pointer shrink-0 shadow-xs"
+                            style={{ padding: '7px 14px', gap: '6px' }}
                           >
-                            {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                            <Link2 size={13} />
+                            <span>{language === 'ar' ? 'ربط ولي أمر' : 'Link Parent'}</span>
                           </button>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="font-bold text-amber-700 dark:text-amber-300 text-xs flex items-center gap-1.5 min-w-0">
-                          <UserPlus size={14} className="shrink-0 text-amber-600" />
-                          <span className="truncate">{language === 'ar' ? 'إضافة ولي أمر للربط' : 'Add parent to link'}</span>
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsLinkingParent(true);
-                            setParentSearchQuery('');
-                          }}
-                          className="rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-all cursor-pointer hover:scale-102 active:scale-98 shrink-0 flex items-center justify-center shadow-xs"
-                          style={{
-                            padding: '6px 16px',
-                            minHeight: '32px',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {language === 'ar' ? 'ربط الآن' : 'Link'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <div
-                    className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '14px 18px' }}
-                  >
-                    <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'هاتف التواصل:' : 'Parent Phone:'}</span>
-                    <span className="font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm" dir="ltr">
-                      {hasParent ? (currentStudent.parentPhone || '—') : (language === 'ar' ? 'غير محدد' : 'Not set')}
-                    </span>
-                  </div>
-                  <div
-                    className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
-                    style={{ padding: '14px 18px' }}
-                  >
-                    <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'تاريخ التسجيل:' : 'Enrollment Date:'}</span>
-                    <span className="font-mono font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{student.enrollmentDate}</span>
+                      )}
+                    </div>
+
+                    <div
+                      className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
+                      style={{ padding: '14px 18px' }}
+                    >
+                      <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'هاتف التواصل:' : 'Phone:'}</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm font-mono" dir="ltr">{currentStudent.parentPhone}</span>
+                    </div>
+                    <div
+                      className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800"
+                      style={{ padding: '14px 18px' }}
+                    >
+                      <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'تاريخ التسجيل:' : 'Join Date:'}</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm font-mono">{currentStudent.joinDate}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-
+              )}
               {/* Placement Test Box (if exists) */}
               {student.placementTest && (
                 <div

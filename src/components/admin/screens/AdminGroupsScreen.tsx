@@ -22,6 +22,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { AdminGroup } from '@/types/admin';
 import { GroupDetailModal } from '../modals/GroupDetailModal';
 import { SearchableSelect } from '@/components/common/SearchableSelect';
+import { DateInputDMY } from '@/components/common/DateInputDMY';
 
 interface ScheduleSlot {
   id: string;
@@ -46,7 +47,13 @@ export function AdminGroupsScreen() {
   const [newLanguage, setNewLanguage] = useState<'English' | 'French' | 'Dual'>('English');
   const [newLevel, setNewLevel] = useState<string>('A1');
   const [newTeacherId, setNewTeacherId] = useState(teachers[0]?.id || '');
-  const [newStartDate, setNewStartDate] = useState('2025-02-01');
+  const [newStartDate, setNewStartDate] = useState(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
   const [newTotalSessions, setNewTotalSessions] = useState<number | string>(24);
 
   // Derive available levels dynamically from the Curriculum (Path Tab 1)
@@ -189,7 +196,9 @@ export function AdminGroupsScreen() {
 
     setNewName('');
     setNewCode('');
-    setNewStartDate('2025-02-01');
+    const d = new Date();
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    setNewStartDate(todayStr);
     setNewTotalSessions(24);
     setSchedules([
       { id: '1', day: 'الأحد', time: '06:00', period: 'PM' },
@@ -198,17 +207,38 @@ export function AdminGroupsScreen() {
     setIsAddGroupOpen(false);
   };
 
+  const sanitizeTimeStr = (raw: string) => {
+    if (!raw) return '06:00 PM';
+    let str = raw.trim();
+    const match = str.match(/(\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?)/i);
+    if (match) {
+      let t = match[1].trim();
+      if (!/(AM|PM|am|pm)/i.test(t)) {
+        t = `${t} PM`;
+      }
+      return t.toUpperCase();
+    }
+    return str.split('/')[0]?.trim() || '06:00 PM';
+  };
+
   const renderGroupSchedule = (grp: AdminGroup) => {
     // 1. If group has structured schedules array
     if (grp.schedules && grp.schedules.length > 0) {
       return (
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-1.5 py-0.5 whitespace-nowrap">
           {grp.schedules.map((s, idx) => (
-            <div key={idx} className="flex items-center gap-1.5 whitespace-nowrap text-xs">
-              <span className="font-bold text-slate-800 dark:text-slate-200">{s.day}</span>
-              <span className="text-slate-400 font-bold">:</span>
-              <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[11px]" dir="ltr">
-                {s.time} {s.period || ''}
+            <div
+              key={idx}
+              className="inline-flex items-center justify-between gap-3 px-3 py-1 rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs min-w-[150px]"
+            >
+              <span className="font-bold text-xs text-slate-800 dark:text-slate-200">
+                {s.day}
+              </span>
+              <span
+                className="inline-flex items-center font-mono font-bold text-[11px] text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-900/60 shrink-0"
+                dir="ltr"
+              >
+                {sanitizeTimeStr(s.time ? `${s.time} ${s.period || ''}` : '')}
               </span>
             </div>
           ))}
@@ -216,21 +246,29 @@ export function AdminGroupsScreen() {
       );
     }
 
-    // 2. Parse from daysAr (e.g. "الأحد + الثلاثاء") and startTime (e.g. "06:00 PM / 06:00 PM" or "18:00")
+    // 2. Parse from daysAr (e.g. "الأحد + الثلاثاء") and startTime
     const days = grp.daysAr ? grp.daysAr.split(/\s*[\+\•\/,]\s*/).filter(Boolean) : [];
     const times = grp.startTime ? grp.startTime.split(/\s*[\/]\s*/).filter(Boolean) : [];
 
     if (days.length > 0) {
       return (
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-1.5 py-0.5 whitespace-nowrap">
           {days.map((day, idx) => {
-            const timeVal = times[idx] || times[0] || grp.startTime || '06:00 PM';
+            const rawTime = times[idx] || times[0] || grp.startTime || '06:00 PM';
+            const cleanTime = sanitizeTimeStr(rawTime);
             return (
-              <div key={idx} className="flex items-center gap-1.5 whitespace-nowrap text-xs">
-                <span className="font-bold text-slate-800 dark:text-slate-200">{day.trim()}</span>
-                <span className="text-slate-400 font-bold">:</span>
-                <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 text-[11px]" dir="ltr">
-                  {timeVal.trim()}
+              <div
+                key={idx}
+                className="inline-flex items-center justify-between gap-3 px-3 py-1 rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs min-w-[150px]"
+              >
+                <span className="font-bold text-xs text-slate-800 dark:text-slate-200">
+                  {day.trim()}
+                </span>
+                <span
+                  className="inline-flex items-center font-mono font-bold text-[11px] text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-900/60 shrink-0"
+                  dir="ltr"
+                >
+                  {cleanTime}
                 </span>
               </div>
             );
@@ -337,36 +375,32 @@ export function AdminGroupsScreen() {
 
       {/* Groups Table (Section 12) */}
       <div
-        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-[32px] shadow-xs overflow-hidden"
+        className="bg-transparent border-0 rounded-[32px] overflow-hidden"
         style={{ marginBottom: '44px' }}
       >
         <div className="overflow-x-auto">
-          <table className={`w-full text-xs sm:text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
-            <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold">
+          <table className={`w-full text-xs sm:text-sm border-separate border-spacing-y-3.5 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <thead className="text-slate-400 font-bold">
               <tr>
                 <th
-                  className={`font-extrabold text-xs ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`font-extrabold text-xs pb-1 ${isRTL ? 'text-right' : 'text-left'}`}
                   style={{
-                    paddingTop: '14px',
-                    paddingBottom: '14px',
                     paddingLeft: isRTL ? '20px' : '28px',
                     paddingRight: isRTL ? '28px' : '20px',
                   }}
                 >
                   {language === 'ar' ? 'الفوج والكود' : 'Group Code & Name'}
                 </th>
-                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'اللغة والمستوى' : 'Language & Level'}</th>
-                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'المعلم المشرف' : 'Assigned Teacher'}</th>
-                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الأيام والتوقيت' : 'Schedule'}</th>
-                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'عدد الطلاب' : 'Students'}</th>
-                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الحالة' : 'Status'}</th>
-                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
-                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
+                <th className="pb-1 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'اللغة والمستوى' : 'Language & Level'}</th>
+                <th className="pb-1 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'المعلم المشرف' : 'Assigned Teacher'}</th>
+                <th className="pb-1 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الأيام والتوقيت' : 'Schedule'}</th>
+                <th className="pb-1 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'عدد الطلاب' : 'Students'}</th>
+                <th className="pb-1 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الحالة' : 'Status'}</th>
+                <th className="pb-1 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'نسبة الحضور' : 'Attendance'}</th>
+                <th className="pb-1 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
                 <th
-                  className="font-extrabold text-center text-xs"
+                  className="pb-1 font-extrabold text-center text-xs"
                   style={{
-                    paddingTop: '14px',
-                    paddingBottom: '14px',
                     paddingRight: isRTL ? '28px' : '20px',
                     paddingLeft: isRTL ? '20px' : '28px',
                   }}
@@ -375,83 +409,84 @@ export function AdminGroupsScreen() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody>
               {filteredGroups.map((grp) => (
                 <tr
                   key={grp.id}
-                  className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                  className="bg-white dark:bg-slate-850 hover:bg-amber-50/50 dark:hover:bg-slate-800 transition-all cursor-pointer group shadow-2xs hover:shadow-xs"
                   onClick={() => handleOpenGroup(grp)}
                 >
                   <td
-                    className="py-3.5"
+                    className="py-4.5 border-y border-slate-200/80 dark:border-slate-800 rtl:border-r rtl:rounded-r-2xl ltr:border-l ltr:rounded-l-2xl"
                     style={{
                       paddingLeft: isRTL ? '20px' : '28px',
                       paddingRight: isRTL ? '28px' : '20px',
                     }}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5 whitespace-nowrap">
                       <span
                         className="inline-flex items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-mono font-black text-xs sm:text-sm border border-amber-200/80 dark:border-amber-800/60 shrink-0 shadow-xs"
                         style={{ padding: '5px 12px', minWidth: '42px', height: '32px' }}
                       >
                         {grp.code}
                       </span>
-                      <div>
-                        <div className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm leading-snug">{grp.name}</div>
-                        <div className="text-[11px] text-slate-400 font-medium mt-0.5">{grp.language} Track</div>
-                      </div>
+                      <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{grp.name}</span>
+                      <span className="text-slate-300 dark:text-slate-600 text-xs">•</span>
+                      <span className="text-[11px] text-slate-400 font-medium bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
+                        {grp.language}
+                      </span>
                     </div>
                   </td>
 
-                  <td className="py-3.5 px-4 text-center">
+                  <td className="py-4.5 px-4 text-center border-y border-slate-200/80 dark:border-slate-800">
                     <span
                       className="inline-flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs select-none"
-                      style={{ padding: '5px 14px', minWidth: '46px', lineHeight: '1.2' }}
+                      style={{ padding: '6px 14px', minWidth: '48px', lineHeight: '1.2' }}
                     >
                       {grp.level}
                     </span>
                   </td>
 
-                  <td className="py-3.5 px-4 text-center font-bold text-slate-700 dark:text-slate-300 text-xs">
+                  <td className="py-4.5 px-4 text-center font-bold text-slate-700 dark:text-slate-300 text-xs sm:text-sm border-y border-slate-200/80 dark:border-slate-800">
                     {grp.teacherName}
                   </td>
 
-                  <td className="py-3.5 px-4 text-center text-xs">
+                  <td className="py-4.5 px-4 text-center text-xs border-y border-slate-200/80 dark:border-slate-800">
                     {renderGroupSchedule(grp)}
                   </td>
 
-                  <td className="py-3.5 px-4 text-center font-mono font-bold text-purple-600 dark:text-purple-400 text-xs sm:text-sm">
+                  <td className="py-4.5 px-4 text-center font-mono font-bold text-purple-600 dark:text-purple-400 text-xs sm:text-sm border-y border-slate-200/80 dark:border-slate-800">
                     {grp.studentIds.length}
                   </td>
 
-                  <td className="py-3.5 px-4 text-center">
+                  <td className="py-4.5 px-4 text-center border-y border-slate-200/80 dark:border-slate-800">
                     {grp.status === 'archived' ? (
                       <span
                         className="inline-flex items-center justify-center font-bold text-[11px] rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shadow-2xs whitespace-nowrap"
-                        style={{ padding: '3px 12px', minWidth: '54px', lineHeight: '1.2' }}
+                        style={{ padding: '4px 14px', minWidth: '58px', lineHeight: '1.2' }}
                       >
                         {language === 'ar' ? 'مؤرشف' : 'Archived'}
                       </span>
                     ) : (
                       <span
                         className="inline-flex items-center justify-center font-bold text-[11px] rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-2xs whitespace-nowrap"
-                        style={{ padding: '3px 12px', minWidth: '54px', lineHeight: '1.2' }}
+                        style={{ padding: '4px 14px', minWidth: '58px', lineHeight: '1.2' }}
                       >
                         {language === 'ar' ? 'نشط' : 'Active'}
                       </span>
                     )}
                   </td>
 
-                  <td className="py-3.5 px-4 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm">
+                  <td className="py-4.5 px-4 text-center font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm border-y border-slate-200/80 dark:border-slate-800">
                     {getGroupAttendanceRate(grp)}%
                   </td>
 
-                  <td className="py-3.5 px-4 text-center font-mono font-black text-blue-600 dark:text-blue-400 text-xs sm:text-sm">
+                  <td className="py-4.5 px-4 text-center font-mono font-black text-blue-600 dark:text-blue-400 text-xs sm:text-sm border-y border-slate-200/80 dark:border-slate-800">
                     {grp.studentIds.length === 0 ? '0%' : `${grp.averageProgress}%`}
                   </td>
 
                   <td
-                    className="py-3.5 text-center"
+                    className="py-4.5 text-center border-y border-slate-200/80 dark:border-slate-800 rtl:border-l rtl:rounded-l-2xl ltr:border-r ltr:rounded-r-2xl"
                     style={{
                       paddingRight: isRTL ? '28px' : '20px',
                       paddingLeft: isRTL ? '20px' : '28px',
@@ -462,7 +497,7 @@ export function AdminGroupsScreen() {
                       type="button"
                       onClick={() => handleOpenGroup(grp)}
                       className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-bold text-xs transition-colors cursor-pointer border border-amber-200/60 dark:border-amber-800/60 shadow-2xs"
-                      style={{ padding: '6px 14px', lineHeight: '1.2' }}
+                      style={{ padding: '7px 15px', lineHeight: '1.2' }}
                     >
                       <span>{language === 'ar' ? 'عرض الفوج' : 'View Group'}</span>
                       {isRTL ? <ArrowLeft size={13} className="shrink-0" /> : <ArrowRight size={13} className="shrink-0" />}
@@ -588,14 +623,12 @@ export function AdminGroupsScreen() {
                 <div className="flex flex-col gap-1">
                   <label className="text-slate-700 dark:text-slate-300 font-bold text-[11px] flex items-center gap-1.5">
                     <Calendar size={13} className="text-amber-500" />
-                    <span>{language === 'ar' ? 'تاريخ بداية الفوج' : 'Start Date'}</span>
+                    <span>{language === 'ar' ? 'تاريخ بداية الفوج (DD/MM/YYYY)' : 'Start Date (DD/MM/YYYY)'}</span>
                   </label>
-                  <input
-                    type="date"
+                  <DateInputDMY
                     value={newStartDate}
-                    onChange={(e) => setNewStartDate(e.target.value)}
-                    style={{ paddingLeft: '14px', paddingRight: '14px' }}
-                    className="w-full h-9 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/20"
+                    onChange={(val) => setNewStartDate(val)}
+                    className="w-full h-9 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3 hover:border-amber-500/50 focus-within:ring-2 focus-within:ring-amber-500/20"
                   />
                 </div>
 
@@ -743,7 +776,7 @@ export function AdminGroupsScreen() {
 
       {/* Group Details Modal */}
       <GroupDetailModal
-        group={selectedGroup}
+        group={visibleGroups.find((g) => g.id === selectedGroup?.id) || selectedGroup}
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);

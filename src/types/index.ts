@@ -144,6 +144,9 @@ export interface AttendanceRecord {
   status: AttendanceStatus;
   noteAr?: string;
   sessionTimeAr?: string;
+  isCoveringSession?: boolean;
+  coveringType?: 'counted' | 'not_counted';
+  coveringReason?: string;
 }
 
 export interface AttendanceSummary {
@@ -184,6 +187,12 @@ export interface TeacherFeedback {
   hasAudio?: boolean;
   audioDurationSeconds?: number;
   badgeAr?: string; // "طالب متميز", "مثابرة عالية"
+  teacherFeedbackDetails?: {
+    strengths?: string[];
+    needsImprovement?: string[];
+    recommendations?: string;
+    generalComments?: string;
+  };
 }
 
 // ---------- Financials ----------

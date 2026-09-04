@@ -20,11 +20,30 @@ import {
   Check,
   CheckCircle2,
   Pencil,
+  Trash2,
 } from 'lucide-react';
 import { AdminGroup } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { SearchableSelect } from '@/components/common/SearchableSelect';
+import { DateInputDMY, formatDateDMY } from '@/components/common/DateInputDMY';
+
+interface ScheduleSlot {
+  id: string;
+  day: string;
+  time: string;
+  period: 'AM' | 'PM';
+}
+
+const DAYS_LIST = [
+  { value: 'الأحد', labelAr: 'الأحد', labelEn: 'Sunday' },
+  { value: 'الإثنين', labelAr: 'الإثنين', labelEn: 'Monday' },
+  { value: 'الثلاثاء', labelAr: 'الثلاثاء', labelEn: 'Tuesday' },
+  { value: 'الأربعاء', labelAr: 'الأربعاء', labelEn: 'Wednesday' },
+  { value: 'الخميس', labelAr: 'الخميس', labelEn: 'Thursday' },
+  { value: 'الجمعة', labelAr: 'الجمعة', labelEn: 'Friday' },
+  { value: 'السبت', labelAr: 'السبت', labelEn: 'Saturday' },
+];
 
 interface GroupDetailModalProps {
   group: AdminGroup | null;
@@ -34,8 +53,9 @@ interface GroupDetailModalProps {
 
 type GroupTabKey = 'overview' | 'students' | 'attendance' | 'progress' | 'performance' | 'assessments';
 
-export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalProps) {
+export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: GroupDetailModalProps) {
   const {
+    groups,
     students,
     parents,
     teachers,
@@ -51,6 +71,12 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
   const { isRTL, language } = useLanguage();
   const [activeTab, setActiveTab] = useState<GroupTabKey>('overview');
 
+  // Reactively track the live group from context so edits reflect immediately everywhere
+  const group = useMemo(() => {
+    if (!initialGroup) return null;
+    return groups.find((g) => g.id === initialGroup.id) || initialGroup;
+  }, [groups, initialGroup]);
+
   // Sub-modal state: Edit Group
   const [isEditGroupOpen, setIsEditGroupOpen] = useState(false);
   const [editName, setEditName] = useState('');
@@ -58,11 +84,14 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
   const [editLanguage, setEditLanguage] = useState<'English' | 'French' | 'Dual'>('English');
   const [editLevel, setEditLevel] = useState('');
   const [editTeacherId, setEditTeacherId] = useState('');
-  const [editSchedule, setEditSchedule] = useState('');
   const [editStartDate, setEditStartDate] = useState('');
   const [editTotalSessions, setEditTotalSessions] = useState<number | string>(24);
   const [editStatus, setEditStatus] = useState<'active' | 'archived'>('active');
-  const [editCapacity, setEditCapacity] = useState(25);
+  const [editCapacity, setEditCapacity] = useState(20);
+  const [editSchedules, setEditSchedules] = useState<ScheduleSlot[]>([
+    { id: '1', day: 'الأحد', time: '06:00', period: 'PM' },
+    { id: '2', day: 'الثلاثاء', time: '06:00', period: 'PM' },
+  ]);
 
   // Sub-modal state: Add Student
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
@@ -88,21 +117,85 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
     setEditLanguage(group.language || 'English');
     setEditLevel(group.level || 'A1');
     setEditTeacherId(group.teacherId || (teachers[0]?.id || ''));
-    setEditSchedule(gAny.schedule || group.daysAr || '');
-    setEditStartDate(group.startDate || '2025-02-01');
+    const d = new Date();
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    setEditStartDate(group.startDate || todayStr);
     setEditTotalSessions(group.totalSessions ?? 24);
-    setEditStatus((group.status === 'archived' ? 'archived' : 'active'));
-    setEditCapacity(gAny.capacity || 25);
+    setEditStatus(group.status === 'archived' ? 'archived' : 'active');
+    setEditCapacity(group.maxCapacity || gAny.capacity || 20);
+
+    // Initialize structured schedules
+    if (group.schedules && group.schedules.length > 0) {
+      setEditSchedules(
+        group.schedules.map((s, idx) => ({
+          id: (idx + 1).toString(),
+          day: s.day || 'الأحد',
+          time: s.time || '06:00',
+          period: (s.period as 'AM' | 'PM') || 'PM',
+        }))
+      );
+    } else {
+      const days = (group.daysAr || '').split(/\s*[\+\•\/,]\s*/).filter(Boolean);
+      const times = (group.startTime || '').split(/\s*[\/]\s*/).filter(Boolean);
+      if (days.length > 0) {
+        setEditSchedules(
+          days.map((d, idx) => {
+            const rawTime = times[idx] || times[0] || '06:00 PM';
+            const isPM = rawTime.includes('PM') || (!rawTime.includes('AM') && parseInt(rawTime, 10) >= 12);
+            const cleanTime = rawTime.replace(/(AM|PM)/i, '').trim() || '06:00';
+            return {
+              id: (idx + 1).toString(),
+              day: d.trim(),
+              time: cleanTime,
+              period: isPM ? 'PM' : 'AM',
+            };
+          })
+        );
+      } else {
+        setEditSchedules([
+          { id: '1', day: 'الأحد', time: '06:00', period: 'PM' },
+          { id: '2', day: 'الثلاثاء', time: '06:00', period: 'PM' },
+        ]);
+      }
+    }
+
     setIsEditGroupOpen(true);
+  };
+
+  const handleAddEditSchedule = () => {
+    setEditSchedules((prev) => [
+      ...prev,
+      { id: Date.now().toString(), day: 'الأربعاء', time: '06:00', period: 'PM' },
+    ]);
+  };
+
+  const handleRemoveEditSchedule = (id: string) => {
+    if (editSchedules.length <= 1) return;
+    setEditSchedules((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const handleUpdateEditSchedule = (id: string, field: keyof ScheduleSlot, value: string) => {
+    setEditSchedules((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, [field]: value } : s))
+    );
   };
 
   const handleSaveEditGroup = (e: React.FormEvent) => {
     e.preventDefault();
     if (!group) return;
     const teacherObj = teachers.find((t) => t.id === editTeacherId);
+
+    const daysArFormatted = editSchedules.map((s) => s.day).join(' + ');
+    const daysEnFormatted = editSchedules
+      .map((s) => DAYS_LIST.find((d) => d.value === s.day)?.labelEn || s.day)
+      .join(' + ');
+    const startTimeFormatted = editSchedules
+      .map((s) => `${s.time} ${s.period}`)
+      .join(' / ');
+
     updateGroup(group.id, {
       name: editName.trim(),
-      code: editCode.trim(),
+      code: editCode.trim().toUpperCase(),
       language: editLanguage,
       level: editLevel as any,
       teacherId: editTeacherId,
@@ -111,12 +204,17 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
           ? teacherObj.fullNameAr
           : teacherObj.fullNameEn || teacherObj.fullNameAr
         : group.teacherName,
-      schedule: editSchedule.trim(),
+      daysAr: daysArFormatted,
+      daysEn: daysEnFormatted,
+      startTime: startTimeFormatted,
+      schedules: editSchedules.map((s) => ({ day: s.day, time: s.time, period: s.period })),
       startDate: editStartDate,
       totalSessions: Number(editTotalSessions) || 24,
       status: editStatus,
-      capacity: Number(editCapacity) || 25,
+      maxCapacity: Number(editCapacity) || 20,
+      capacity: Number(editCapacity) || 20,
     } as any);
+
     setIsEditGroupOpen(false);
   };
 
@@ -290,7 +388,7 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
                   className="rounded-xl bg-sky-500/20 text-sky-200 font-black text-xs sm:text-sm border border-sky-400/40 shadow-xs flex items-center justify-center shrink-0"
                   style={{ padding: '4px 14px' }}
                 >
-                  {group.name}
+                  {group.name.replace(/\s*\([A-Z0-9\.\+\-]+\)/g, '')}
                 </span>
 
                 {/* 4. Language Badge */}
@@ -398,13 +496,18 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
                   <span className="text-xs text-slate-400 font-medium">
                     {language === 'ar' ? 'أيام الحصص والتوقيت:' : 'Schedule & Timing:'}
                   </span>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
                     {group.schedules && group.schedules.length > 0 ? (
                       group.schedules.map((s, idx) => (
-                        <div key={idx} className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
-                          <span>{s.day}</span>
-                          <span className="text-slate-400">:</span>
-                          <span className="font-mono text-indigo-600 dark:text-indigo-400 text-[11px]" dir="ltr">
+                        <div
+                          key={idx}
+                          className="inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs"
+                        >
+                          <span className="font-bold text-xs text-slate-800 dark:text-slate-200">{s.day}</span>
+                          <span
+                            className="font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 px-1.5 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/60 text-[11px]"
+                            dir="ltr"
+                          >
                             {s.time} {s.period || ''}
                           </span>
                         </div>
@@ -424,8 +527,8 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
                   <span className="text-xs text-slate-400 font-medium">
                     {language === 'ar' ? 'تاريخ بداية الفوج:' : 'Start Date:'}
                   </span>
-                  <span className="font-mono font-bold text-amber-600 dark:text-amber-400 text-xs sm:text-sm" dir="ltr">
-                    {group.startDate || '2025-02-01'}
+                  <span className="font-mono font-bold text-amber-600 dark:text-amber-400 text-xs sm:text-sm tracking-wider" dir="ltr">
+                    {formatDateDMY(group.startDate) || '—'}
                   </span>
                 </div>
 
@@ -1045,47 +1148,6 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
                         </div>
                       )}
 
-                      {/* Linked Parent Live Info Badge */}
-                      {(() => {
-                        if (!selectedParentId) return null;
-                        const activeParent = parents.find((p) => p.id === selectedParentId);
-                        if (!activeParent) return null;
-                        return (
-                          <div
-                            className="flex items-center justify-between gap-2.5 rounded-xl bg-amber-50/60 dark:bg-slate-800 border border-amber-200/80 dark:border-slate-700 shadow-2xs"
-                            style={{ padding: '8px 14px' }}
-                          >
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-7 h-7 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-black text-xs shrink-0">
-                                {activeParent.fullNameAr.charAt(0)}
-                              </div>
-                              <div>
-                                <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
-                                  {activeParent.fullNameAr} <span className="font-normal text-[11px] text-slate-500 font-mono">({activeParent.fullNameEn})</span>
-                                </div>
-                                <div className="text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium" dir="ltr">
-                                  📱 {activeParent.phone}
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 flex items-center gap-1">
-                                <Check size={11} />
-                                <span>{language === 'ar' ? 'تم الربط' : 'Linked'}</span>
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => setSelectedParentId('')}
-                                title={language === 'ar' ? 'إلغاء الربط' : 'Remove Link'}
-                                className="w-6 h-6 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer border border-rose-200/60 dark:border-rose-900/50"
-                              >
-                                <X size={12} />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })()}
                     </div>
 
                     <div
@@ -1134,7 +1196,7 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
                   </div>
                   <div>
                     <h3 className="font-black text-base sm:text-lg text-slate-900 dark:text-white">
-                      {language === 'ar' ? 'تعديل بيانات الفوج' : 'Edit Group Details'}
+                      {language === 'ar' ? 'تعديل بيانات وإعدادات الفوج' : 'Edit Group Settings & Details'}
                     </h3>
                     <p className="text-xs text-slate-400 font-bold mt-0.5">
                       {group?.code} • {group?.name}
@@ -1237,35 +1299,123 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
                   />
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5">
-                    <Calendar size={13} className="text-amber-500" />
-                    <span>{language === 'ar' ? 'مواعيد وتوقيت الحصص' : 'Schedule Days & Times'}</span>
-                  </label>
-                  <input
-                    type="text"
-                    dir="auto"
-                    value={editSchedule}
-                    onChange={(e) => setEditSchedule(e.target.value)}
-                    placeholder={language === 'ar' ? 'مثال: الأحد + الثلاثاء (06:00 PM)' : 'e.g. Sun + Tue (06:00 PM)'}
-                    style={{ paddingLeft: '14px', paddingRight: '14px' }}
-                    className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/20"
-                  />
+                {/* Dynamic Schedule Editor */}
+                <div className="flex flex-col gap-2 pt-0.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5">
+                      <Calendar size={13} className="text-amber-500" />
+                      <span>{language === 'ar' ? 'مواعيد وأوقات الحصص' : 'Class Days & Schedule Times'}</span>
+                    </label>
+                    <span className="text-[11px] text-slate-400 font-medium">
+                      {language === 'ar' ? `${editSchedules.length} حصص أسبوعياً` : `${editSchedules.length} sessions/week`}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    {editSchedules.map((slot, index) => (
+                      <div
+                        key={slot.id}
+                        style={{ padding: '10px 12px' }}
+                        className="rounded-xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80"
+                      >
+                        <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2.5 items-end">
+                          {/* Day Selector */}
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-bold text-slate-400">
+                              {language === 'ar' ? `الحصة ${index + 1} (اليوم)` : `Session ${index + 1} (Day)`}
+                            </span>
+                            <select
+                              value={slot.day}
+                              onChange={(e) => handleUpdateEditSchedule(slot.id, 'day', e.target.value)}
+                              className="w-full h-9 bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-800 dark:text-slate-200 px-2.5 focus:ring-2 focus:ring-amber-500/20"
+                            >
+                              {DAYS_LIST.map((d) => (
+                                <option key={d.value} value={d.value}>
+                                  {language === 'ar' ? d.labelAr : d.labelEn}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Time & AM/PM Selector */}
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-bold text-slate-400">
+                              {language === 'ar' ? 'التوقيت' : 'Time'}
+                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="text"
+                                dir="ltr"
+                                value={slot.time}
+                                onChange={(e) => handleUpdateEditSchedule(slot.id, 'time', e.target.value)}
+                                placeholder="06:00"
+                                className="w-full h-9 bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-lg font-mono text-xs font-bold text-slate-800 dark:text-slate-200 px-2.5 focus:ring-2 focus:ring-amber-500/20 text-center"
+                              />
+                              <div className="flex rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 h-9">
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateEditSchedule(slot.id, 'period', 'AM')}
+                                  className={`px-2 text-[10px] font-black transition-colors ${
+                                    slot.period === 'AM'
+                                      ? 'bg-amber-500 text-slate-950'
+                                      : 'bg-white dark:bg-slate-850 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                                  }`}
+                                >
+                                  AM
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateEditSchedule(slot.id, 'period', 'PM')}
+                                  className={`px-2 text-[10px] font-black transition-colors ${
+                                    slot.period === 'PM'
+                                      ? 'bg-amber-500 text-slate-950'
+                                      : 'bg-white dark:bg-slate-850 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                                  }`}
+                                >
+                                  PM
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Delete Slot Button */}
+                          <div className="flex items-center justify-end pb-0.5">
+                            {editSchedules.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveEditSchedule(slot.id)}
+                                title={language === 'ar' ? 'حذف هذه الحصة' : 'Remove session'}
+                                className="h-9 w-9 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors border border-rose-200/60 dark:border-rose-900/40 cursor-pointer"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={handleAddEditSchedule}
+                      className="w-full py-2 border border-dashed border-slate-300 dark:border-slate-700 hover:border-amber-500/80 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 flex items-center justify-center gap-1.5 transition-colors cursor-pointer bg-slate-50/50 dark:bg-slate-800/30"
+                    >
+                      <Plus size={14} className="shrink-0" />
+                      <span>{language === 'ar' ? 'إضافة يوم ووقت آخر' : 'Add Another Day & Time'}</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5">
                       <Calendar size={13} className="text-amber-500" />
-                      <span>{language === 'ar' ? 'تاريخ بداية الفوج' : 'Start Date'}</span>
+                      <span>{language === 'ar' ? 'تاريخ بداية الفوج (DD/MM/YYYY)' : 'Start Date (DD/MM/YYYY)'}</span>
                     </label>
-                    <input
-                      type="date"
-                      dir="ltr"
+                    <DateInputDMY
                       value={editStartDate}
-                      onChange={(e) => setEditStartDate(e.target.value)}
-                      style={{ paddingLeft: '14px', paddingRight: '14px' }}
-                      className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/20"
+                      onChange={(val) => setEditStartDate(val)}
+                      className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 hover:border-amber-500/50 focus-within:ring-2 focus-within:ring-amber-500/20"
                     />
                   </div>
 
@@ -1297,7 +1447,7 @@ export function GroupDetailModal({ group, isOpen, onClose }: GroupDetailModalPro
                       min={1}
                       max={100}
                       value={editCapacity}
-                      onChange={(e) => setEditCapacity(Number(e.target.value) || 25)}
+                      onChange={(e) => setEditCapacity(Number(e.target.value) || 20)}
                       style={{ paddingLeft: '14px', paddingRight: '14px' }}
                       className="w-full h-11 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500/20"
                     />

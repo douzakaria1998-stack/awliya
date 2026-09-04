@@ -1033,24 +1033,31 @@ export function PerformanceScreen({
       {/* TAB 4: Teacher Feedback */}
       {/* ============================================================ */}
       {activeTab === 'feedback' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 animate-fade-in" style={{ paddingBottom: '40px' }}>
+        <div className="flex flex-col gap-4 animate-fade-in" style={{ paddingBottom: '40px' }}>
           {teacherFeedback.map((fb) => {
             let formattedDate = fb.date;
             let formattedTime = '';
             try {
-              const d = new Date(fb.date);
-              if (!isNaN(d.getTime())) {
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                formattedDate = `${year}-${month}-${day}`;
+              if (/^\d{4}-\d{2}-\d{2}$/.test((fb.date || '').trim())) {
+                formattedDate = fb.date.trim();
+                formattedTime = '';
+              } else {
+                const d = new Date(fb.date);
+                if (!isNaN(d.getTime())) {
+                  const year = d.getFullYear();
+                  const month = String(d.getMonth() + 1).padStart(2, '0');
+                  const day = String(d.getDate()).padStart(2, '0');
+                  formattedDate = `${year}-${month}-${day}`;
 
-                let hours = d.getHours();
-                const minutes = String(d.getMinutes()).padStart(2, '0');
-                const ampm = language === 'ar' ? (hours >= 12 ? 'م' : 'ص') : (hours >= 12 ? 'PM' : 'AM');
-                hours = hours % 12;
-                hours = hours ? hours : 12;
-                formattedTime = `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+                  if (fb.date.includes('T') || fb.date.includes(':')) {
+                    let hours = d.getHours();
+                    const minutes = String(d.getMinutes()).padStart(2, '0');
+                    const ampm = language === 'ar' ? (hours >= 12 ? 'م' : 'ص') : (hours >= 12 ? 'PM' : 'AM');
+                    hours = hours % 12;
+                    hours = hours ? hours : 12;
+                    formattedTime = `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+                  }
+                }
               }
             } catch {
               // fallback
@@ -1059,75 +1066,106 @@ export function PerformanceScreen({
             return (
               <div
                 key={fb.id}
-                className={`bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col justify-between ${isRTL ? 'text-right' : 'text-left'}`}
+                className="relative transition-all shadow-xs border"
                 style={{
-                  padding: '16px 20px',
+                  backgroundColor: `${theme.primary}0C`,
+                  borderColor: `${theme.primary}26`,
+                  padding: '18px 22px',
                   borderRadius: '18px',
                 }}
               >
-                <div>
-                  {/* Teacher Info */}
-                  <div
-                    className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5"
-                    style={{ marginBottom: '12px' }}
-                  >
-                    <div className="flex items-start gap-2.5 min-w-0">
-                      <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-xs shadow-xs shrink-0 mt-0.5"
-                        style={{ backgroundColor: theme.primaryDark }}
-                      >
-                        {fb.teacherNameAr.split(' ').slice(-1)[0]?.[0] || 'T'}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-x-2 gap-y-1 flex-wrap" style={{ marginBottom: '2px' }}>
-                          <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap">
-                            {fb.teacherNameAr}
-                          </span>
-                          {fb.badgeAr && (
-                            <span
-                              className="inline-flex items-center rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-300 shadow-2xs whitespace-nowrap px-2 py-0.5"
-                              style={{
-                                height: '22px',
-                              }}
-                            >
-                              {fb.badgeAr}
-                            </span>
-                          )}
-                        </div>
-                        <span
-                          className="text-[11px] text-slate-400 font-medium block"
-                          style={{ marginTop: '1px' }}
-                        >
-                          {fb.teacherRoleAr || (language === 'ar' ? 'معلم المسار الأكاديمي' : language === 'fr' ? 'Enseignant Pédagogique' : 'Academic Course Teacher')}
-                        </span>
-                      </div>
+                {/* Teacher Header */}
+                <div className="flex items-center justify-between gap-2.5" style={{ marginBottom: '12px' }}>
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className="rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-xs"
+                      style={{
+                        backgroundColor: theme.primary,
+                        width: '38px',
+                        height: '38px',
+                        minWidth: '38px',
+                      }}
+                    >
+                      {language === 'ar' ? 'أ.س' : 'T.M'}
                     </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                          {fb.teacherNameAr || (language === 'ar' ? 'مستر ديفيد ويلسون' : 'Mr. David Wilson')}
+                        </h4>
+                        {fb.badgeAr && (
+                          <span
+                            className="inline-flex items-center rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-300 shadow-2xs px-2 py-0.5"
+                          >
+                            {fb.badgeAr}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-400 font-medium">
+                        {fb.teacherRoleAr || t.quranSubject || (language === 'ar' ? 'اللغة الإنجليزية واللغة الفرنسية' : 'English & French Languages')}
+                      </p>
+                    </div>
+                  </div>
 
-                    {/* Date and Time (Aligned to top) */}
-                    <div className="flex items-center gap-1 shrink-0 self-start pt-0.5">
-                      <span className="text-[11px] text-slate-600 dark:text-slate-300 font-mono font-bold bg-slate-100 dark:bg-slate-800/90 border border-slate-200/60 dark:border-slate-700/60 px-2 py-0.5 rounded-md shadow-2xs">
-                        {formattedDate}
+                  {/* Date Badge */}
+                  <div className="flex items-center gap-1 shrink-0 self-start pt-0.5">
+                    <span className="text-[11px] text-slate-600 dark:text-slate-300 font-mono font-bold bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 px-2.5 py-0.5 rounded-md shadow-2xs">
+                      {formattedDate}
+                    </span>
+                    {formattedTime && (
+                      <span className="text-[11px] text-slate-600 dark:text-slate-300 font-mono font-bold bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 px-2.5 py-0.5 rounded-md shadow-2xs">
+                        {formattedTime}
                       </span>
-                      {formattedTime && (
-                        <span className="text-[11px] text-slate-600 dark:text-slate-300 font-mono font-bold bg-slate-100 dark:bg-slate-800/90 border border-slate-200/60 dark:border-slate-700/60 px-2 py-0.5 rounded-md shadow-2xs">
-                          {formattedTime}
-                        </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Note Bubble or Structured Teacher Guidance */}
+                {fb.teacherFeedbackDetails && (fb.teacherFeedbackDetails.strengths?.length || fb.teacherFeedbackDetails.needsImprovement?.length || fb.teacherFeedbackDetails.recommendations) ? (
+                  <div
+                    className="bg-emerald-50/70 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200/70 dark:border-emerald-800/50 space-y-2.5"
+                    style={{ padding: '16px 20px' }}
+                  >
+                    <span className="font-bold text-emerald-800 dark:text-emerald-300 block text-xs sm:text-sm">
+                      {language === 'ar' ? `توجيه المعلم (${fb.teacherNameAr}):` : `Teacher Guidance (${fb.teacherNameAr}):`}
+                    </span>
+                    <div className="space-y-1.5 text-slate-700 dark:text-slate-300 leading-relaxed text-xs sm:text-sm">
+                      {fb.teacherFeedbackDetails.strengths && fb.teacherFeedbackDetails.strengths.length > 0 && (
+                        <div>• <span className="font-bold">{language === 'ar' ? 'نقاط القوة:' : 'Strengths:'}</span> {Array.isArray(fb.teacherFeedbackDetails.strengths) ? fb.teacherFeedbackDetails.strengths.join(', ') : fb.teacherFeedbackDetails.strengths}</div>
+                      )}
+                      {fb.teacherFeedbackDetails.needsImprovement && fb.teacherFeedbackDetails.needsImprovement.length > 0 && (
+                        <div>• <span className="font-bold">{language === 'ar' ? 'بحاجة لتطوير:' : 'Needs Improvement:'}</span> {Array.isArray(fb.teacherFeedbackDetails.needsImprovement) ? fb.teacherFeedbackDetails.needsImprovement.join(', ') : fb.teacherFeedbackDetails.needsImprovement}</div>
+                      )}
+                      {fb.teacherFeedbackDetails.recommendations && (
+                        <div>• <span className="font-bold">{language === 'ar' ? 'توصية للمنزل:' : 'Home Recommendation:'}</span> "{fb.teacherFeedbackDetails.recommendations}"</div>
+                      )}
+                      {fb.teacherFeedbackDetails.generalComments && (
+                        <div className="pt-1 text-slate-600 dark:text-slate-300 italic">
+                          "{fb.teacherFeedbackDetails.generalComments}"
+                        </div>
                       )}
                     </div>
                   </div>
-
-                  {/* Message Content */}
+                ) : (
                   <div
-                    className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-750 text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-medium"
-                    style={{
-                      padding: '10px 14px',
-                      borderRadius: '12px',
-                      margin: '8px 0',
-                    }}
+                    className="bg-white dark:bg-slate-850 border border-slate-100 dark:border-slate-800 shadow-2xs relative flex items-center"
+                    style={{ padding: '14px 18px', borderRadius: '14px' }}
                   >
-                    "{translateTeacherNote(fb.messageAr, language)}"
+                    <div
+                      className="rounded-full shrink-0"
+                      style={{
+                        backgroundColor: theme.primary,
+                        width: '4px',
+                        height: '28px',
+                        marginLeft: isRTL ? '12px' : '0',
+                        marginRight: isRTL ? '0' : '12px',
+                      }}
+                    />
+                    <p className="text-slate-700 dark:text-slate-200 font-medium text-xs sm:text-sm leading-relaxed">
+                      {translateTeacherNote(fb.messageAr || t.teacherDefaultNote, language)}
+                    </p>
                   </div>
-                </div>
+                )}
               </div>
             );
           })}

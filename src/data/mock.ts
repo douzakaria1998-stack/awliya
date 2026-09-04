@@ -303,7 +303,27 @@ export function getAttendanceDataForStudent(studentId: string, isNewStudent?: bo
 export const mockAssessmentsMap: Record<string, Assessment[]> = {};
 
 // ---------- Teacher Feedback Messages ----------
-export const mockTeacherFeedbackMap: Record<string, TeacherFeedback[]> = {};
+export const mockTeacherFeedbackMap: Record<string, TeacherFeedback[]> = {
+  'stu-01': [
+    {
+      id: 'fb-01',
+      studentId: 'stu-01',
+      teacherNameAr: 'د. طارق المنصور',
+      messageAr: 'السلام عليكم ورحمة الله، احمد ما شاء الله طالب مجتهد وذكي جداً. أظهر اليوم تفاعلاً رائعاً في ورشة المحادثة والنطق بالإنجليزية، ونرجو منكم حثه على الاستماع والتكرار اليومي في المنزل لترسيخ المفردات والطلاقة اللغوية.',
+      date: '2026-09-03',
+      subjectAr: 'اللغة الإنجليزية واللغة الفرنسية',
+      isRead: true,
+      badgeAr: 'طالب متميز',
+      teacherRoleAr: 'اللغة الإنجليزية واللغة الفرنسية',
+      teacherFeedbackDetails: {
+        strengths: ['Good pronunciation', 'Active in class'],
+        needsImprovement: ['Spontaneous dialogue fluency'],
+        recommendations: 'Practice speaking 10 minutes daily at home.',
+        generalComments: 'الطالب متفاعل وملتزم بالحضور والواجبات.',
+      },
+    },
+  ],
+};
 
 // ---------- Fees & Financials Data ----------
 export const mockFees: Fee[] = [];

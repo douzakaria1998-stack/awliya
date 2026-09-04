@@ -89,9 +89,9 @@ export function StudentsManagementScreen() {
   const [lastNameEn, setLastNameEn] = useState('');
   const [birthDate, setBirthDate] = useState('2015-05-15');
   const [newGender, setNewGender] = useState<'male' | 'female'>('male');
-  const [newLanguage, setNewLanguage] = useState<'English' | 'French'>('English');
-  const [newLevel, setNewLevel] = useState<number>(1);
-  const [newGroupId, setNewGroupId] = useState<string>(groups[0]?.id || 'grp-a1-01');
+  const [newLanguage, setNewLanguage] = useState<'English' | 'French' | ''>('');
+  const [newLevel, setNewLevel] = useState<number | ''>('');
+  const [newGroupId, setNewGroupId] = useState<string>('');
 
   // Link to Parent Mode State
   const [parentLinkMode, setParentLinkMode] = useState<'existing' | 'new'>('existing');
@@ -180,8 +180,8 @@ export function StudentsManagementScreen() {
       ? `${firstNameEn.trim()} ${lastNameEn.trim()}`
       : fullNameAr;
 
-    const matchedGroup = groups.find((g) => g.id === newGroupId) || groups[0];
-    const matchedTeacher = teachers.find((t) => t.id === matchedGroup?.teacherId) || teachers[0];
+    const matchedGroup = newGroupId ? groups.find((g) => g.id === newGroupId) : undefined;
+    const matchedTeacher = matchedGroup ? teachers.find((t) => t.id === matchedGroup?.teacherId) : undefined;
 
     let parentId = 'par-01';
     let parentName = 'محمد بن علي';
@@ -219,13 +219,13 @@ export function StudentsManagementScreen() {
       fullNameAr,
       fullNameEn,
       gender: newGender,
-      language: newLanguage,
+      language: (newLanguage as any) || 'English',
       cefrLevel: 'A1',
-      currentLevel: newLevel,
-      groupId: matchedGroup?.id || 'grp-a1-01',
-      groupName: matchedGroup?.name || 'Group 1',
-      teacherId: matchedTeacher?.id || 'usr-teach-01',
-      teacherName: matchedTeacher?.fullNameEn || 'Sarah Benali',
+      currentLevel: typeof newLevel === 'number' && newLevel > 0 ? newLevel : 1,
+      groupId: matchedGroup?.id || '',
+      groupName: matchedGroup?.name || (language === 'ar' ? 'بدون فوج' : 'No Group'),
+      teacherId: matchedTeacher?.id || '',
+      teacherName: matchedTeacher ? (language === 'ar' ? matchedTeacher.fullNameAr : matchedTeacher.fullNameEn) : (language === 'ar' ? 'غير مسند' : 'Unassigned'),
       parentId,
       parentName,
       parentPhone,
@@ -240,9 +240,25 @@ export function StudentsManagementScreen() {
     setLastNameAr('');
     setFirstNameEn('');
     setLastNameEn('');
+    setNewLanguage('');
+    setNewLevel('');
+    setNewGroupId('');
     setCustomParentName('');
     setCustomParentPhone('');
     setIsAddStudentOpen(false);
+  };
+
+  const handleOpenAddStudent = () => {
+    setFirstNameAr('');
+    setLastNameAr('');
+    setFirstNameEn('');
+    setLastNameEn('');
+    setNewLanguage('');
+    setNewLevel('');
+    setNewGroupId('');
+    setCustomParentName('');
+    setCustomParentPhone('');
+    setIsAddStudentOpen(true);
   };
 
   return (
@@ -266,7 +282,7 @@ export function StudentsManagementScreen() {
           {/* Add New Student Button */}
           <button
             type="button"
-            onClick={() => setIsAddStudentOpen(true)}
+            onClick={handleOpenAddStudent}
             className="rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
             style={{ padding: '12px 24px' }}
           >
@@ -898,47 +914,7 @@ export function StudentsManagementScreen() {
                       </div>
                     )}
 
-                    {/* Linked Parent Live Info Badge */}
-                    {(() => {
-                      if (!selectedParentId) return null;
-                      const activeParent = parents.find((p) => p.id === selectedParentId);
-                      if (!activeParent) return null;
-                      return (
-                        <div
-                          className="flex items-center justify-between gap-2.5 rounded-xl bg-white/95 dark:bg-slate-850 border border-purple-200/90 dark:border-purple-900/60 shadow-2xs"
-                          style={{ padding: '8px 12px' }}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 flex items-center justify-center font-black text-xs shrink-0">
-                              {activeParent.fullNameAr.charAt(0)}
-                            </div>
-                            <div>
-                              <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
-                                {activeParent.fullNameAr} <span className="font-normal text-[11px] text-slate-500 font-mono">({activeParent.fullNameEn})</span>
-                              </div>
-                              <div className="text-[11px] font-mono text-purple-600 dark:text-purple-400 font-medium" dir="ltr">
-                                📱 {activeParent.phone}
-                              </div>
-                            </div>
-                          </div>
 
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 flex items-center gap-1">
-                              <Check size={12} />
-                              <span>{language === 'ar' ? 'تم الربط' : 'Linked'}</span>
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => setSelectedParentId('')}
-                              title={language === 'ar' ? 'إلغاء الربط' : 'Remove Link'}
-                              className="w-6 h-6 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer border border-rose-200/60 dark:border-rose-900/50 hover:scale-105 active:scale-95"
-                            >
-                              <X size={12} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })()}
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '4px' }}>
@@ -1069,6 +1045,7 @@ export function StudentsManagementScreen() {
                     className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
                     style={{ height: '42px', padding: '8px 12px' }}
                   >
+                    <option value="">{language === 'ar' ? 'بدون (لا شيء)' : 'None (Nothing)'}</option>
                     <option value="English">الإنجليزية (English)</option>
                     <option value="French">الفرنسية (Français)</option>
                   </select>
@@ -1084,10 +1061,11 @@ export function StudentsManagementScreen() {
                   </label>
                   <select
                     value={newLevel}
-                    onChange={(e) => setNewLevel(Number(e.target.value))}
+                    onChange={(e) => setNewLevel(e.target.value === '' ? '' : Number(e.target.value))}
                     className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
                     style={{ height: '42px', padding: '8px 12px' }}
                   >
+                    <option value="">{language === 'ar' ? 'بدون (لا شيء)' : 'None (Nothing)'}</option>
                     {availableCurriculumLevels.map((lvl) => (
                       <option key={lvl.levelNumber} value={lvl.levelNumber}>
                         {lvl.name}
@@ -1102,7 +1080,7 @@ export function StudentsManagementScreen() {
                     className="block text-xs font-bold text-slate-700 dark:text-slate-300"
                     style={{ marginBottom: '5px' }}
                   >
-                    {language === 'ar' ? 'الفوج (Group) *' : 'Group *'}
+                    {language === 'ar' ? 'الفوج (Group)' : 'Group'}
                   </label>
                   <select
                     value={newGroupId}
@@ -1110,9 +1088,10 @@ export function StudentsManagementScreen() {
                     className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
                     style={{ height: '42px', padding: '8px 12px' }}
                   >
+                    <option value="">{language === 'ar' ? 'بدون (لا شيء)' : 'None (Nothing)'}</option>
                     {groups.map((g) => (
                       <option key={g.id} value={g.id}>
-                        {g.name} — {isRTL ? g.daysAr : g.daysEn}
+                        {g.code ? `${g.code} — ` : ''}{g.name} — {isRTL ? g.daysAr : g.daysEn}
                       </option>
                     ))}
                   </select>

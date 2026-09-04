@@ -42,6 +42,7 @@ import {
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { CurriculumLevel, LessonProgressStatus, AdminGroup } from '@/types/admin';
+import { formatStudentCount } from '@/lib/utils';
 
 export function AdminAcademicPathScreen() {
   const {
@@ -290,11 +291,11 @@ export function AdminAcademicPathScreen() {
     const oldLvl = activeProgressGroup.level;
     const updatedName = activeProgressGroup.name.includes(oldLvl)
       ? activeProgressGroup.name.replace(oldLvl, nextCefr)
-      : `${activeProgressGroup.name} (${nextCefr})`;
+      : activeProgressGroup.name;
 
     const updatedCode = activeProgressGroup.code.includes(oldLvl)
       ? activeProgressGroup.code.replace(oldLvl, nextCefr)
-      : `${nextCefr}-${activeProgressGroup.code}`;
+      : activeProgressGroup.code;
 
     setTargetGroupName(updatedName);
     setTargetGroupCode(updatedCode);
@@ -1542,7 +1543,7 @@ export function AdminAcademicPathScreen() {
                                 className="inline-flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 whitespace-nowrap shadow-2xs"
                                 style={{ padding: '4px 14px', borderRadius: '9999px', lineHeight: '1.2' }}
                               >
-                                {studentCount} {language === 'ar' ? 'طلاب' : 'students'}
+                                {formatStudentCount(studentCount, language)}
                               </span>
                             </td>
 
@@ -1724,7 +1725,7 @@ export function AdminAcademicPathScreen() {
                     <span>•</span>
                     <span className="flex items-center gap-1.5">
                       <Users size={15} className="text-emerald-500" />
-                      {groupStudentsList.length} {language === 'ar' ? 'طلاب مسجلين' : 'Students'}
+                      {formatStudentCount(groupStudentsList.length, language)}
                     </span>
                     <span>•</span>
                     <span className="flex items-center gap-1.5">
@@ -2561,37 +2562,6 @@ export function AdminAcademicPathScreen() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3.5">
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
-                      {language === 'ar' ? 'درجة الاجتياز (%)' : 'Passing Score (%)'}
-                    </label>
-                    <input
-                      type="number"
-                      min={0}
-                      max={100}
-                      value={newLevelPassingScore}
-                      onChange={(e) => setNewLevelPassingScore(Number(e.target.value))}
-                      className="w-full h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs sm:text-sm font-bold focus:outline-none focus:border-indigo-500 transition-colors"
-                      style={{ paddingLeft: '16px', paddingRight: '16px' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
-                      {language === 'ar' ? 'تقدير مرتبة الشرف' : 'Honors Label'}
-                    </label>
-                    <input
-                      type="text"
-                      value={newLevelHonorsDegree}
-                      onChange={(e) => setNewLevelHonorsDegree(e.target.value)}
-                      placeholder="تقدير: ممتاز مرتفع (مع مرتبة الشرف)"
-                      className="w-full h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-semibold focus:outline-none focus:border-indigo-500 transition-colors"
-                      style={{ paddingLeft: '14px', paddingRight: '14px' }}
-                    />
-                  </div>
-                </div>
-
                 <div className="pt-2">
                   <button
                     type="submit"
@@ -3210,10 +3180,10 @@ export function AdminAcademicPathScreen() {
                         const newCefr = chosen.cefrCode;
                         const updatedName = activeProgressGroup.name.includes(oldLvl)
                           ? activeProgressGroup.name.replace(oldLvl, newCefr)
-                          : `${activeProgressGroup.name} (${newCefr})`;
+                          : activeProgressGroup.name;
                         const updatedCode = activeProgressGroup.code.includes(oldLvl)
                           ? activeProgressGroup.code.replace(oldLvl, newCefr)
-                          : `${newCefr}-${activeProgressGroup.code}`;
+                          : activeProgressGroup.code;
 
                         setTargetGroupName(updatedName);
                         setTargetGroupCode(updatedCode);
@@ -3272,7 +3242,7 @@ export function AdminAcademicPathScreen() {
                   <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
                     <Users size={19} className="text-indigo-600 dark:text-indigo-400" />
                     <span>{language === 'ar' ? 'تحديد مصير كل طالب في الفوج' : 'Set Outcome for Each Student'}</span>
-                    <span className="text-xs text-slate-400 font-normal">({groupStudentsList.length} {language === 'ar' ? 'طلاب' : 'students'})</span>
+                    <span className="text-xs text-slate-400 font-normal">({formatStudentCount(groupStudentsList.length, language)})</span>
                   </h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400" style={{ marginTop: '6px' }}>
                     {language === 'ar'

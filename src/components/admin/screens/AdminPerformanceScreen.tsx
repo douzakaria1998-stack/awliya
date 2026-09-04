@@ -316,7 +316,7 @@ export function AdminPerformanceScreen() {
                 <div>
                   <div className="flex flex-wrap items-center gap-2.5">
                     <span
-                      className="inline-flex items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-mono font-black text-xs border border-purple-200/60 dark:border-purple-800/60 shadow-2xs whitespace-nowrap"
+                      className="inline-flex items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-black text-xs border border-purple-200/60 dark:border-purple-800/60 shadow-2xs whitespace-nowrap"
                       style={{ height: '26px', padding: '0 12px' }}
                     >
                       {hw.groupName}
@@ -327,20 +327,22 @@ export function AdminPerformanceScreen() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                  <span className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-bold text-xs flex items-center gap-1.5">
-                    <Calendar size={13} className="text-purple-600" />
-                    <span>{language === 'ar' ? 'تاريخ الاستحقاق:' : 'Due Date:'} {hw.dueDate}</span>
+                  <span className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 shadow-2xs">
+                    <Calendar size={13} className="text-purple-600 shrink-0" />
+                    <span>{language === 'ar' ? 'تاريخ الاستحقاق:' : 'Due Date:'}</span>
+                    <span dir="ltr" className="font-mono font-bold">{hw.dueDate}</span>
                   </span>
-                  <span className="px-3 py-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-mono font-black text-xs border border-purple-200/60 dark:border-purple-800/60 flex items-center gap-1.5">
-                    <Award size={13} className="text-purple-600" />
-                    <span>{language === 'ar' ? 'الدرجة القصوى:' : 'Max Score:'} {hw.totalScore}</span>
+                  <span className="px-3 py-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 font-bold text-xs border border-purple-200/60 dark:border-purple-800/60 flex items-center gap-1.5 shadow-2xs">
+                    <Award size={13} className="text-purple-600 shrink-0" />
+                    <span>{language === 'ar' ? 'الدرجة القصوى:' : 'Max Score:'}</span>
+                    <span dir="ltr" className="font-mono font-black">{hw.totalScore}</span>
                   </span>
                   <button
                     type="button"
                     onClick={() => openGradeGroupModal(hw)}
                     className="px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-2xs hover:scale-102 active:scale-98 transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
                   >
-                    <CheckCircle2 size={13} />
+                    <CheckCircle2 size={13} className="shrink-0" />
                     <span>{language === 'ar' ? 'تصحيح وتقييم الفوج' : 'Grade Group'}</span>
                   </button>
                 </div>
@@ -386,10 +388,11 @@ export function AdminPerformanceScreen() {
                     >
                       <div>
                         <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white leading-snug">{ev.studentNameAr}</div>
-                        <div className="text-[11px] font-mono font-bold mt-1">
+                        <div className="text-[11px] font-bold mt-1">
                           {ev.score !== undefined ? (
-                            <span className="text-emerald-600 dark:text-emerald-400">
-                              {language === 'ar' ? `الدرجة: ${ev.score} / ${hw.totalScore}` : `Score: ${ev.score} / ${hw.totalScore}`}
+                            <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                              <span>{language === 'ar' ? 'الدرجة:' : 'Score:'}</span>
+                              <span dir="ltr" className="font-mono">{ev.score} / {hw.totalScore}</span>
                             </span>
                           ) : (
                             <span className="text-amber-600 dark:text-amber-400">
@@ -436,8 +439,9 @@ export function AdminPerformanceScreen() {
                     <h4 className="font-black text-base text-slate-900 dark:text-white">{asm.studentNameAr}</h4>
                     <span className="text-xs text-slate-400 mt-0.5 block font-medium">{asm.groupName} • {asm.level}</span>
                   </div>
-                  <span className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200/60 dark:border-indigo-800/60 font-mono font-black text-indigo-700 dark:text-indigo-300 text-xs shadow-2xs">
-                    {asm.scores.overall}% ({asm.gradeLetterAr})
+                  <span className="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200/60 dark:border-indigo-800/60 font-bold text-indigo-700 dark:text-indigo-300 text-xs shadow-2xs flex items-center gap-1.5">
+                    <span dir="ltr" className="font-mono font-black">{asm.scores.overall}%</span>
+                    <span>({asm.gradeLetterAr})</span>
                   </span>
                 </div>
 

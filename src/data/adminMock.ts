@@ -151,7 +151,25 @@ export const mockAdminAssessments: AdminAssessmentRecord[] = [];
 // =========================================================================
 // 10. Two-Way Feedback (Teacher ↔ Parent)
 // =========================================================================
-export const mockTwoWayFeedback: TwoWayFeedbackItem[] = [];
+export const mockTwoWayFeedback: TwoWayFeedbackItem[] = [
+  {
+    id: 'fb-01',
+    studentId: 'stu-01',
+    studentNameAr: 'احمد بوكوشة',
+    studentNameEn: 'Ahmed Boukoucha',
+    parentId: 'par-01',
+    parentName: 'رؤوف بوكوشة',
+    teacherId: 'usr-admin-01',
+    teacherName: 'د. طارق المنصور',
+    date: '2026-09-03',
+    teacherFeedback: {
+      strengths: ['Good pronunciation', 'Active in class'],
+      needsImprovement: ['Spontaneous dialogue fluency'],
+      recommendations: 'Practice speaking 10 minutes daily at home.',
+      generalComments: 'السلام عليكم ورحمة الله، احمد ما شاء الله طالب مجتهد وذكي جداً. أظهر اليوم تفاعلاً رائعاً في ورشة المحادثة والنطق بالإنجليزية، ونرجو منكم حثه على الاستماع والتكرار اليومي في المنزل لترسيخ المفردات والطلاقة اللغوية.',
+    },
+  },
+];
 
 // =========================================================================
 // 11. Role Permission Matrix (Section 32)

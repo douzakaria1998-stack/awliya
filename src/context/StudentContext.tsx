@@ -36,7 +36,7 @@ import {
   mockNotificationSettings,
   getFinancialSummaryForStudent,
 } from '@/data/mock';
-import { mockAdminStudents, mockAdminParents, mockCurricula } from '@/data/adminMock';
+import { mockAdminStudents, mockAdminParents, mockCurricula, mockTwoWayFeedback } from '@/data/adminMock';
 import { useTheme } from './ThemeContext';
 import { useAuth } from './AuthContext';
 
@@ -297,6 +297,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   const [adminHomeworkList, setAdminHomeworkList] = useState<AdminHomeworkAssignment[]>(() => {
     return getItem<AdminHomeworkAssignment[]>(STORAGE_KEYS.ADMIN_HOMEWORK) || [];
   });
+  const [adminFeedbackList, setAdminFeedbackList] = useState<any[]>(() => {
+    return getItem<any[]>(STORAGE_KEYS.ADMIN_FEEDBACK) || mockTwoWayFeedback;
+  });
 
   // Sync on parent change and listen to window storage and custom sync events
   useEffect(() => {
@@ -312,6 +315,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         ) || {};
       const freshAttendance = getItem<AttendanceSession[]>(STORAGE_KEYS.ADMIN_ATTENDANCE) || [];
       const freshAdminHw = getItem<AdminHomeworkAssignment[]>(STORAGE_KEYS.ADMIN_HOMEWORK) || [];
+      const freshFeedback = getItem<any[]>(STORAGE_KEYS.ADMIN_FEEDBACK) || mockTwoWayFeedback;
       const freshNotifs = getItem<Notification[]>(STORAGE_KEYS.NOTIFICATIONS);
 
       setCurricula(freshCurricula);
@@ -319,6 +323,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       setStudentLevelScores(freshScores);
       setAttendanceSessions(freshAttendance);
       setAdminHomeworkList(freshAdminHw);
+      setAdminFeedbackList(freshFeedback);
       if (freshNotifs) {
         setNotifications(freshNotifs);
       }
@@ -335,6 +340,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         e.key === STORAGE_KEYS.ADMIN_STUDENT_LEVEL_SCORES ||
         e.key === STORAGE_KEYS.ADMIN_ATTENDANCE ||
         e.key === STORAGE_KEYS.ADMIN_HOMEWORK ||
+        e.key === STORAGE_KEYS.ADMIN_FEEDBACK ||
         e.key === STORAGE_KEYS.NOTIFICATIONS
       ) {
         handleSync();
@@ -722,6 +728,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       };
 
       const records: AttendanceRecord[] = studentSessionsWithRecord.map(({ session, entry }, idx) => {
+        const isCovering = Boolean(session.isCoveringSession || session.id?.includes('cov') || (session as any).coveringType);
         return {
           id: `att-rec-${session.id}-${entry.studentId}-${idx}`,
           studentId: entry.studentId,
@@ -735,6 +742,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           noteAr: entry.note || undefined,
           sessionTimeAr: session.sessionTime || '04:30 PM - 06:00 PM',
           weekIndex: parseWeekIndex(session.date),
+          isCoveringSession: isCovering,
+          coveringType: session.coveringType || (isCovering ? 'counted' : undefined),
+          coveringReason: session.coveringReason,
         };
       });
 
@@ -811,23 +821,73 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     if (!activeStudent.id) return [];
 
     // 1. Check live feedback recorded by teachers in backoffice
-    const liveAdminFeedback = getItem<any[]>('myschool_admin_feedback_v11') || [];
-    const matched: TeacherFeedback[] = liveAdminFeedback
+    const liveList = adminFeedbackList.length > 0 ? adminFeedbackList : (getItem<any[]>('myschool_admin_feedback_v11') || []);
+    const matched: TeacherFeedback[] = liveList
       .filter((fb) => fb.studentId === activeStudent.id)
-      .map((fb) => ({
-        id: fb.id,
-        studentId: fb.studentId,
-        teacherNameAr: fb.teacherName || 'الأستاذ',
-        messageAr: fb.teacherFeedback?.generalComments || fb.feedback || 'أداء متميز وتفاعل إيجابي في الحصص التعليمية.',
-        date: fb.date,
-        subjectAr: activeStudent.enrolledPathAr?.includes('فرنسية') || activeStudent.language === 'French' ? 'اللغة الفرنسية' : 'اللغة الإنجليزية',
-        isRead: true,
-        badgeAr: 'طالب متميز',
-      }));
+      .map((fb) => {
+        let msg = '';
+        if (fb.teacherFeedback) {
+          const parts: string[] = [];
+          if (fb.teacherFeedback.strengths && (Array.isArray(fb.teacherFeedback.strengths) ? fb.teacherFeedback.strengths.length > 0 : fb.teacherFeedback.strengths)) {
+            parts.push(`نقاط القوة: ${Array.isArray(fb.teacherFeedback.strengths) ? fb.teacherFeedback.strengths.join('، ') : fb.teacherFeedback.strengths}`);
+          }
+          if (fb.teacherFeedback.needsImprovement && (Array.isArray(fb.teacherFeedback.needsImprovement) ? fb.teacherFeedback.needsImprovement.length > 0 : fb.teacherFeedback.needsImprovement)) {
+            parts.push(`بحاجة لتطوير: ${Array.isArray(fb.teacherFeedback.needsImprovement) ? fb.teacherFeedback.needsImprovement.join('، ') : fb.teacherFeedback.needsImprovement}`);
+          }
+          if (fb.teacherFeedback.recommendations) {
+            parts.push(`توصية للمنزل: "${fb.teacherFeedback.recommendations}"`);
+          }
+          if (fb.teacherFeedback.generalComments && fb.teacherFeedback.generalComments !== 'الطالب متفاعل وملتزم بالحضور والواجبات.') {
+            parts.push(fb.teacherFeedback.generalComments);
+          }
+          msg = parts.join(' • ');
+        }
+        if (!msg) {
+          msg = fb.messageAr || fb.feedback || fb.teacherFeedback?.generalComments || '';
+        }
+
+        return {
+          id: fb.id,
+          studentId: fb.studentId,
+          teacherNameAr: fb.teacherName || 'د. طارق المنصور',
+          messageAr: msg || `السلام عليكم ورحمة الله، ${activeStudent.fullNameAr || 'الطالب'} ما شاء الله طالب مجتهد وذكي جداً. أظهر تفاعلاً رائعاً في ورشة المحادثة والنطق بالإنجليزية، ونرجو منكم حثه على الاستماع والتكرار اليومي في المنزل لترسيخ المفردات والطلاقة اللغوية.`,
+          date: fb.date || '2026-09-03',
+          subjectAr: activeStudent.enrolledPathAr?.includes('فرنسية') || activeStudent.language === 'French' ? 'اللغة الفرنسية' : 'اللغة الإنجليزية واللغة الفرنسية',
+          isRead: true,
+          badgeAr: 'طالب متميز',
+          teacherRoleAr: 'اللغة الإنجليزية واللغة الفرنسية',
+          teacherFeedbackDetails: fb.teacherFeedback,
+        };
+      });
 
     if (matched.length > 0) return matched;
-    return mockTeacherFeedbackMap[activeStudent.id] || [];
-  }, [activeStudent.id, activeStudent.enrolledPathAr, activeStudent.language]);
+
+    if (mockTeacherFeedbackMap[activeStudent.id] && mockTeacherFeedbackMap[activeStudent.id].length > 0) {
+      return mockTeacherFeedbackMap[activeStudent.id];
+    }
+
+    // 2. Default feedback linked to the teacher comment from dashboard
+    const studentName = activeStudent.fullNameAr || 'احمد بوكوشة';
+    return [
+      {
+        id: `fb-default-${activeStudent.id}`,
+        studentId: activeStudent.id,
+        teacherNameAr: 'د. طارق المنصور',
+        messageAr: `السلام عليكم ورحمة الله، ${studentName} ما شاء الله طالب مجتهد وذكي جداً. أظهر اليوم تفاعلاً رائعاً في ورشة المحادثة والنطق بالإنجليزية، ونرجو منكم حثه على الاستماع والتكرار اليومي في المنزل لترسيخ المفردات والطلاقة اللغوية.`,
+        date: '2026-09-03',
+        subjectAr: activeStudent.enrolledPathAr?.includes('فرنسية') || activeStudent.language === 'French' ? 'اللغة الفرنسية' : 'اللغة الإنجليزية واللغة الفرنسية',
+        isRead: true,
+        badgeAr: 'طالب متميز',
+        teacherRoleAr: 'اللغة الإنجليزية واللغة الفرنسية',
+        teacherFeedbackDetails: {
+          strengths: ['Good pronunciation', 'Active in class'],
+          needsImprovement: ['Spontaneous dialogue fluency'],
+          recommendations: 'Practice speaking 10 minutes daily at home.',
+          generalComments: 'الطالب متفاعل وملتزم بالحضور والواجبات.',
+        },
+      },
+    ];
+  }, [activeStudent.id, activeStudent.fullNameAr, activeStudent.enrolledPathAr, activeStudent.language, adminFeedbackList]);
 
   const studentFees = useMemo(() => {
     return fees.filter((f) => f.studentId === activeStudent.id || !f.studentId);

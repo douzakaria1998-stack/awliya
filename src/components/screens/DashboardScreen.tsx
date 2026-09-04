@@ -412,28 +412,63 @@ export function DashboardScreen({
             </div>
           </div>
 
-          {/* Note Bubble */}
-          <div
-            className="bg-white dark:bg-slate-850 border border-slate-100 dark:border-slate-800 shadow-2xs relative flex items-center"
-            style={{ padding: '12px 16px', borderRadius: '12px' }}
-          >
-            {/* Colored vertical accent line */}
+          {/* Note Bubble or Structured Guidance */}
+          {latestFeedback?.teacherFeedbackDetails &&
+          (latestFeedback.teacherFeedbackDetails.strengths?.length ||
+            latestFeedback.teacherFeedbackDetails.needsImprovement?.length ||
+            latestFeedback.teacherFeedbackDetails.recommendations) ? (
             <div
-              className="rounded-full shrink-0"
-              style={{
-                backgroundColor: theme.primary,
-                width: '4px',
-                height: '24px',
-                marginLeft: isRTL ? '12px' : '0',
-                marginRight: isRTL ? '0' : '12px',
-              }}
-            />
-            <p
-              className="text-slate-700 dark:text-slate-200 font-medium text-xs sm:text-sm leading-relaxed"
+              className="bg-white dark:bg-slate-850 border border-slate-100 dark:border-slate-800 shadow-2xs relative rounded-2xl"
+              style={{ padding: '14px 18px' }}
             >
-              {translateTeacherNote(latestFeedback?.messageAr || t.teacherDefaultNote, language)}
-            </p>
-          </div>
+              <div className="space-y-1.5 text-slate-700 dark:text-slate-300 leading-relaxed text-xs sm:text-sm">
+                {latestFeedback.teacherFeedbackDetails.strengths && latestFeedback.teacherFeedbackDetails.strengths.length > 0 && (
+                  <div>
+                    • <span className="font-bold text-emerald-700 dark:text-emerald-400">{language === 'ar' ? 'نقاط القوة:' : 'Strengths:'}</span>{' '}
+                    {Array.isArray(latestFeedback.teacherFeedbackDetails.strengths)
+                      ? latestFeedback.teacherFeedbackDetails.strengths.join('، ')
+                      : latestFeedback.teacherFeedbackDetails.strengths}
+                  </div>
+                )}
+                {latestFeedback.teacherFeedbackDetails.needsImprovement && latestFeedback.teacherFeedbackDetails.needsImprovement.length > 0 && (
+                  <div>
+                    • <span className="font-bold text-amber-700 dark:text-amber-400">{language === 'ar' ? 'بحاجة لتطوير:' : 'Needs Improvement:'}</span>{' '}
+                    {Array.isArray(latestFeedback.teacherFeedbackDetails.needsImprovement)
+                      ? latestFeedback.teacherFeedbackDetails.needsImprovement.join('، ')
+                      : latestFeedback.teacherFeedbackDetails.needsImprovement}
+                  </div>
+                )}
+                {latestFeedback.teacherFeedbackDetails.recommendations && (
+                  <div>
+                    • <span className="font-bold text-purple-700 dark:text-purple-400">{language === 'ar' ? 'توصية للمنزل:' : 'Home Recommendation:'}</span>{' '}
+                    "{latestFeedback.teacherFeedbackDetails.recommendations}"
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div
+              className="bg-white dark:bg-slate-850 border border-slate-100 dark:border-slate-800 shadow-2xs relative flex items-center"
+              style={{ padding: '12px 16px', borderRadius: '12px' }}
+            >
+              {/* Colored vertical accent line */}
+              <div
+                className="rounded-full shrink-0"
+                style={{
+                  backgroundColor: theme.primary,
+                  width: '4px',
+                  height: '24px',
+                  marginLeft: isRTL ? '12px' : '0',
+                  marginRight: isRTL ? '0' : '12px',
+                }}
+              />
+              <p
+                className="text-slate-700 dark:text-slate-200 font-medium text-xs sm:text-sm leading-relaxed"
+              >
+                {translateTeacherNote(latestFeedback?.messageAr || t.teacherDefaultNote, language)}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

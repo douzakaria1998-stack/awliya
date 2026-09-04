@@ -227,73 +227,8 @@ export function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           </div>
         </div>
 
-        {/* 2. Admin User Profile & Role Switcher Banner */}
-        <div
-          className="rounded-2xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/70 shadow-xs shrink-0"
-          style={{
-            margin: '12px 14px',
-            padding: '10px 12px',
-          }}
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
-              {currentAdmin.fullNameAr[0]}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="font-black text-xs text-slate-900 dark:text-white truncate">
-                {currentAdmin.fullNameAr}
-              </div>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className={`w-1.5 h-1.5 rounded-full ${roleConfig[currentRole].dotClass}`} />
-                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 truncate">
-                  {language === 'ar' ? roleConfig[currentRole].labelAr : language === 'fr' ? roleConfig[currentRole].labelFr : roleConfig[currentRole].labelEn}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Interactive Role Switcher Pill */}
-          <div className="mt-2.5 pt-2 border-t border-slate-200/80 dark:border-slate-700/70 flex items-center justify-between text-[10px]">
-            <span className="text-slate-500 dark:text-slate-400 font-bold">
-              {language === 'ar' ? 'معاينة دور:' : language === 'fr' ? 'Tester:' : 'Preview:'}
-            </span>
-            <div className="flex gap-1">
-              <button
-                type="button"
-                onClick={() => switchRole('super_admin')}
-                className={`px-1.5 py-0.5 rounded text-[9px] font-bold cursor-pointer transition-colors ${
-                  currentRole === 'super_admin' ? 'bg-purple-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:text-white'
-                }`}
-                title="Super Admin"
-              >
-                Super
-              </button>
-              <button
-                type="button"
-                onClick={() => switchRole('administrator')}
-                className={`px-1.5 py-0.5 rounded text-[9px] font-bold cursor-pointer transition-colors ${
-                  currentRole === 'administrator' ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:text-white'
-                }`}
-                title="Admin"
-              >
-                Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => switchRole('teacher')}
-                className={`px-1.5 py-0.5 rounded text-[9px] font-bold cursor-pointer transition-colors ${
-                  currentRole === 'teacher' ? 'bg-emerald-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:text-white'
-                }`}
-                title="Teacher (Sarah Benali)"
-              >
-                Teacher
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. Navigation List grouped into 3 Categories (Section 33, 35) */}
-        <div className="space-y-4 px-3">
+        {/* Navigation List grouped into Categories (Section 33, 35) */}
+        <div className="space-y-4 px-3 mt-3">
           {navigationCategories.map((cat, catIdx) => {
             const visibleItems = cat.items.filter((item) => item.allowedRoles.includes(currentRole));
             if (visibleItems.length === 0) return null;

@@ -25,7 +25,7 @@ import {
 import { AdminTeacher } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { generateAutoPassword } from '@/lib/utils';
+import { generateAutoPassword, formatStudentCount } from '@/lib/utils';
 
 interface TeacherDetailModalProps {
   teacher: AdminTeacher | null;
@@ -573,7 +573,7 @@ export function TeacherDetailModal({ teacher, isOpen, onClose }: TeacherDetailMo
                             {grp.code}
                           </span>
                           <span className="font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-none">
-                            {grp.name}
+                            {grp.name.replace(/\s*\([A-Z0-9\.\+\-]+\)/g, '')}
                           </span>
                         </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2 flex-wrap pt-0.5">
@@ -585,7 +585,7 @@ export function TeacherDetailModal({ teacher, isOpen, onClose }: TeacherDetailMo
                             </>
                           )}
                           <span className="text-slate-300 dark:text-slate-600">•</span>
-                          <span>{grp.studentIds.length} {language === 'ar' ? 'طلاب مسجلين' : 'students'}</span>
+                          <span>{formatStudentCount(grp.studentIds.length, language)}</span>
                         </div>
                       </div>
 
