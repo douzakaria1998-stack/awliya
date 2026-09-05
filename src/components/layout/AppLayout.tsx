@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { NavTabKey, PerformanceTabKey } from '@/lib/constants';
+import { NavTabKey, PerformanceTabKey, STORAGE_KEYS } from '@/lib/constants';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { BottomNavigation } from './BottomNavigation';
@@ -26,14 +26,104 @@ export function AppLayout() {
   const { isAuthenticated, isLoading } = useAuth();
   const { students } = useStudent();
 
+  // 1. Hydrate activeTab and performanceSubTab from URL search params or localStorage on mount
   useEffect(() => {
     setMounted(true);
+    if (typeof window === 'undefined') return;
+
+    const validTabs: NavTabKey[] = ['dashboard', 'academic', 'performance', 'financials', 'profile'];
+    const validSubTabs: PerformanceTabKey[] = ['homework', 'attendance', 'assessments', 'feedback'];
+
+    const syncFromLocation = () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const urlTab = params.get('tab') as NavTabKey | null;
+        const urlSubTab = params.get('subTab') as PerformanceTabKey | null;
+        const savedTab = localStorage.getItem(STORAGE_KEYS.ACTIVE_TAB) as NavTabKey | null;
+        const savedSubTab = localStorage.getItem(STORAGE_KEYS.ACTIVE_PERFORMANCE_SUBTAB) as PerformanceTabKey | null;
+
+        const resolvedTab = (urlTab && validTabs.includes(urlTab))
+          ? urlTab
+          : (savedTab && validTabs.includes(savedTab))
+            ? savedTab
+            : 'dashboard';
+
+        const resolvedSubTab = (urlSubTab && validSubTabs.includes(urlSubTab))
+          ? urlSubTab
+          : (savedSubTab && validSubTabs.includes(savedSubTab))
+            ? savedSubTab
+            : 'homework';
+
+        setActiveTab(resolvedTab);
+        setPerformanceSubTab(resolvedSubTab);
+      } catch {
+        // ignore storage/url errors
+      }
+    };
+
+    syncFromLocation();
+    window.addEventListener('popstate', syncFromLocation);
+    return () => window.removeEventListener('popstate', syncFromLocation);
   }, []);
+
+  const handleTabChange = (tab: NavTabKey) => {
+    setActiveTab(tab);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEYS.ACTIVE_TAB, tab);
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab);
+        if (tab !== 'performance') {
+          url.searchParams.delete('subTab');
+        }
+        window.history.replaceState({}, '', url.toString());
+      } catch {
+        // ignore
+      }
+    }
+  };
+
+  const handlePerformanceSubTabChange = (subTab: PerformanceTabKey) => {
+    setPerformanceSubTab(subTab);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEYS.ACTIVE_PERFORMANCE_SUBTAB, subTab);
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', 'performance');
+        url.searchParams.set('subTab', subTab);
+        window.history.replaceState({}, '', url.toString());
+      } catch {
+        // ignore
+      }
+    }
+  };
 
   const handleNavigate = (tab: NavTabKey, subTab?: PerformanceTabKey) => {
     setActiveTab(tab);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEYS.ACTIVE_TAB, tab);
+      } catch {}
+    }
     if (subTab) {
       setPerformanceSubTab(subTab);
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(STORAGE_KEYS.ACTIVE_PERFORMANCE_SUBTAB, subTab);
+        } catch {}
+      }
+    }
+    if (typeof window !== 'undefined') {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab);
+        if (subTab) {
+          url.searchParams.set('subTab', subTab);
+        } else if (tab !== 'performance') {
+          url.searchParams.delete('subTab');
+        }
+        window.history.replaceState({}, '', url.toString());
+      } catch {}
     }
   };
 
@@ -66,7 +156,7 @@ export function AppLayout() {
       {/* 1. Desktop Sidebar (Exact 300px width with comfortable padding) */}
       <Sidebar
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         onOpenAddStudent={() => setIsAddStudentOpen(true)}
       />
 
@@ -113,6 +203,7 @@ export function AppLayout() {
                 {activeTab === 'performance' && (
                   <PerformanceScreen
                     initialTab={performanceSubTab}
+                    onTabChange={handlePerformanceSubTabChange}
                     onOpenAddStudent={() => setIsAddStudentOpen(true)}
                   />
                 )}
@@ -128,7 +219,7 @@ export function AppLayout() {
 
       {/* 3. Mobile Bottom Navigation */}
       <div className="block md:hidden">
-        <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <BottomNavigation activeTab={activeTab} onTabChange={handleTabChange} />
       </div>
 
       {/* Global Add Student Modal */}

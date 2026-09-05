@@ -201,6 +201,7 @@ const ADMIN_STORAGE_KEYS = {
   APPROVALS: 'myschool_admin_approvals_v11',
   LESSON_PROGRESS: 'myschool_admin_lesson_progress_v11',
   STUDENT_LEVEL_SCORES: 'myschool_admin_student_level_scores_v11',
+  ACTIVE_TAB: 'myschool_admin_active_tab_v11',
 };
 
 // Helper to guarantee strictly unique 4-digit codes across all class groups
@@ -245,7 +246,17 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   });
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>(mockAdminUsers);
   const [currentAdminId, setCurrentAdminId] = useState<string>(mockAdminUsers[0].id);
-  const [activeTab, setActiveTab] = useState<AdminTabKey>('overview');
+  const [activeTab, setActiveTabState] = useState<AdminTabKey>('overview');
+
+  const setActiveTab = useCallback((tab: AdminTabKey) => {
+    setActiveTabState(tab);
+    setItem(ADMIN_STORAGE_KEYS.ACTIVE_TAB, tab);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', tab);
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
 
   const [students, setStudents] = useState<AdminStudent[]>(mockAdminStudents);
   const [parents, setParents] = useState<AdminParent[]>(mockAdminParents);
@@ -273,6 +284,45 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   // Sync state from storage
   useEffect(() => {
+    // Restore active tab from URL query param or localStorage
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryTab = urlParams.get('tab') as AdminTabKey | null;
+      const storedTab = getItem<AdminTabKey>(ADMIN_STORAGE_KEYS.ACTIVE_TAB);
+      const validTabs: AdminTabKey[] = [
+        'overview',
+        'students',
+        'parents',
+        'teachers',
+        'groups',
+        'academic',
+        'attendance',
+        'performance',
+        'approvals',
+        'roles',
+        'settings',
+        'audit',
+        'notifications',
+      ];
+      if (queryTab && validTabs.includes(queryTab)) {
+        setActiveTabState(queryTab);
+      } else if (storedTab && validTabs.includes(storedTab)) {
+        setActiveTabState(storedTab);
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', storedTab);
+        window.history.replaceState({}, '', url.toString());
+      }
+
+      const handlePopState = () => {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab') as AdminTabKey | null;
+        if (tab && validTabs.includes(tab)) {
+          setActiveTabState(tab);
+        }
+      };
+      window.addEventListener('popstate', handlePopState);
+    }
+
     const sLoggedIn = getItem<boolean>(ADMIN_STORAGE_KEYS.IS_LOGGED_IN);
     if (typeof sLoggedIn === 'boolean') setIsAdminLoggedIn(sLoggedIn);
 

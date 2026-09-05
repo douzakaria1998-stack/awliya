@@ -148,11 +148,13 @@ const SUBJECT_CONTAINER_THEMES: Record<
 
 interface PerformanceScreenProps {
   initialTab?: PerformanceTabKey;
+  onTabChange?: (tab: PerformanceTabKey) => void;
   onOpenAddStudent: () => void;
 }
 
 export function PerformanceScreen({
   initialTab = 'homework',
+  onTabChange,
   onOpenAddStudent,
 }: PerformanceScreenProps) {
   const { activeStudent, homeworkList, attendanceData, assessments, teacherFeedback } = useStudent();
@@ -160,6 +162,12 @@ export function PerformanceScreen({
   const { t, isRTL, language } = useLanguage();
 
   const [activeTab, setActiveTab] = useState<PerformanceTabKey>(initialTab);
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
   const [selectedHomework, setSelectedHomework] = useState<Homework | null>(null);
   const [homeworkFilter, setHomeworkFilter] = useState<'all' | 'needs_revision' | 'completed'>('all');
   const [selectedWeekIndex, setSelectedWeekIndex] = useState<number>(0);
@@ -340,7 +348,10 @@ export function PerformanceScreen({
             <button
               key={tab.key}
               type="button"
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => {
+                setActiveTab(tab.key);
+                onTabChange?.(tab.key);
+              }}
               className={`flex-1 rounded-lg transition-all relative flex items-center justify-center gap-2 cursor-pointer select-none ${
                 isActive
                   ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
