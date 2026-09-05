@@ -392,7 +392,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           (s.fullNameEn && s.fullNameEn.toLowerCase().includes('dalila'))
       )?.id;
 
-      const cleanedHw = sHomework.map((h) => {
+      const validHomework = sHomework.filter(
+        (h) =>
+          h.assignmentNameAr?.trim() !== 'lkml' &&
+          h.assignmentNameAr?.trim() !== 'rethrth' &&
+          h.assignmentNameEn?.trim() !== 'lkml' &&
+          h.assignmentNameEn?.trim() !== 'rethrth'
+      );
+
+      const cleanedHw = validHomework.map((h) => {
         const targetGroup =
           cleanedGroupsState.find((g) => g.id === h.groupId) ||
           sGroups?.find((g) => g.id === h.groupId);

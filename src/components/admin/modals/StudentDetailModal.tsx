@@ -23,6 +23,7 @@ import {
   Edit3,
   Check,
   Save,
+  Trash2,
 } from 'lucide-react';
 import { AdminStudent } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
@@ -51,6 +52,7 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
     linkStudentToParent,
     unlinkStudentFromParent,
     updateStudent,
+    deleteHomework,
     recordAssessment,
   } = useAdmin();
   const { isRTL, language } = useLanguage();
@@ -811,11 +813,37 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                         className="rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800"
                         style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: '10px' }}
                       >
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between gap-3">
                           <span className="font-bold text-sm text-slate-900 dark:text-white">{hw.assignmentNameAr}</span>
-                          <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">
-                            {myEval?.score !== undefined ? `${myEval.score} / ${hw.totalScore}` : 'قيد التصحيح'}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-2.5 py-1 rounded-lg border border-purple-200/60 dark:border-purple-800/60">
+                              {myEval?.score !== undefined ? `${myEval.score} / ${hw.totalScore}` : (language === 'ar' ? 'قيد التصحيح' : 'Pending Evaluation')}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setConfirmConfig({
+                                  isOpen: true,
+                                  title: language === 'ar' ? 'تأكيد حذف الواجب' : 'Confirm Delete Homework',
+                                  message: language === 'ar'
+                                    ? `هل أنت متأكد من رغبتك في حذف هذا الواجب (${hw.assignmentNameAr})؟ سيتم حذفه نهائياً.`
+                                    : `Are you sure you want to delete the homework assignment (${hw.assignmentNameAr})? This cannot be undone.`,
+                                  confirmText: language === 'ar' ? 'تأكيد الحذف' : 'Delete',
+                                  cancelText: language === 'ar' ? 'إلغاء' : 'Cancel',
+                                  variant: 'danger',
+                                  icon: 'trash',
+                                  onConfirm: () => {
+                                    deleteHomework(hw.id);
+                                    setConfirmConfig((prev) => ({ ...prev, isOpen: false }));
+                                  },
+                                });
+                              }}
+                              className="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors cursor-pointer border border-rose-200/60 dark:border-rose-800/60"
+                              title={language === 'ar' ? 'حذف الواجب' : 'Delete Homework'}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{hw.descriptionAr}</p>
                         {myEval?.teacherComment && (

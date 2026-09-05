@@ -127,7 +127,17 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   // Sync from localStorage after client mount
   useEffect(() => {
     const storedHw = getItem<Record<string, Homework[]>>(STORAGE_KEYS.HOMEWORK);
-    if (storedHw) setHomeworkMap(storedHw);
+    if (storedHw) {
+      const cleanedMap: Record<string, Homework[]> = {};
+      Object.entries(storedHw).forEach(([stId, list]) => {
+        cleanedMap[stId] = list.filter(
+          (h) =>
+            h.titleAr?.trim() !== 'lkml' &&
+            h.titleAr?.trim() !== 'rethrth'
+        );
+      });
+      setHomeworkMap(cleanedMap);
+    }
 
     const storedFees = getItem<Fee[]>(STORAGE_KEYS.FEES);
     if (storedFees) {
