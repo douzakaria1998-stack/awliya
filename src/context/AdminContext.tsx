@@ -793,12 +793,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         language: data.language || 'English',
         groupId: data.groupId !== undefined ? data.groupId : '',
         groupName: data.groupName !== undefined ? data.groupName : '',
-        teacherId: data.teacherId || 'usr-teach-01',
-        teacherName: data.teacherName || 'Sarah Benali',
-        parentId: data.parentId || 'par-01',
-        parentName: data.parentName || 'محمد بن علي',
-        parentPhone: data.parentPhone || '+213 555 123 456',
-        relationship: data.relationship || 'Father',
+        teacherId: data.teacherId || '',
+        teacherName: data.teacherName || '',
+        parentId: data.parentId || '',
+        parentName: data.parentName || '',
+        parentPhone: data.parentPhone || '',
+        relationship: data.relationship || '',
         enrollmentDate: new Date().toISOString().substring(0, 10),
         status: data.status || 'active',
         overallProgress: data.overallProgress || 0,
@@ -814,6 +814,23 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         setItem(ADMIN_STORAGE_KEYS.STUDENTS, updated);
         return updated;
       });
+
+      // Synchronize parent's linkedStudentIds if student is explicitly linked
+      if (newStudent.parentId) {
+        setParents((prevParents) => {
+          const updated = prevParents.map((p) => {
+            if (p.id === newStudent.parentId) {
+              const currentIds = p.linkedStudentIds || [];
+              if (!currentIds.includes(newStudent.id)) {
+                return { ...p, linkedStudentIds: [...currentIds, newStudent.id] };
+              }
+            }
+            return p;
+          });
+          setItem(ADMIN_STORAGE_KEYS.PARENTS, updated);
+          return updated;
+        });
+      }
 
       // Synchronize group studentIds and group homework if student is assigned to a group
       if (newStudent.groupId) {

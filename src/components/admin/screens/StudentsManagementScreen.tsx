@@ -93,9 +93,9 @@ export function StudentsManagementScreen() {
   const [newLevel, setNewLevel] = useState<number | ''>('');
   const [newGroupId, setNewGroupId] = useState<string>('');
 
-  // Link to Parent Mode State
-  const [parentLinkMode, setParentLinkMode] = useState<'existing' | 'new'>('existing');
-  const [selectedParentId, setSelectedParentId] = useState<string>(parents[0]?.id || '');
+  // Link to Parent Mode State (Default: Unlinked)
+  const [parentLinkMode, setParentLinkMode] = useState<'none' | 'existing' | 'new'>('none');
+  const [selectedParentId, setSelectedParentId] = useState<string>('');
   const [parentSearchQuery, setParentSearchQuery] = useState('');
   const [customParentName, setCustomParentName] = useState('');
   const [customParentPhone, setCustomParentPhone] = useState('');
@@ -183,23 +183,21 @@ export function StudentsManagementScreen() {
     const matchedGroup = newGroupId ? groups.find((g) => g.id === newGroupId) : undefined;
     const matchedTeacher = matchedGroup ? teachers.find((t) => t.id === matchedGroup?.teacherId) : undefined;
 
-    let parentId = 'par-01';
-    let parentName = 'محمد بن علي';
-    let parentPhone = '+213 555 123 456';
-    let parentEmail = 'mohamed.benali@gmail.com';
+    let parentId = '';
+    let parentName = '';
+    let parentPhone = '';
 
-    if (parentLinkMode === 'existing') {
-      const existingParent = parents.find((p) => p.id === selectedParentId) || parents[0];
+    if (parentLinkMode === 'existing' && selectedParentId) {
+      const existingParent = parents.find((p) => p.id === selectedParentId);
       if (existingParent) {
         parentId = existingParent.id;
         parentName = existingParent.fullNameAr;
         parentPhone = existingParent.phone;
-        parentEmail = existingParent.email;
       }
-    } else {
+    } else if (parentLinkMode === 'new' && customParentName.trim()) {
       parentName = customParentName.trim() || 'ولي أمر الطالب';
       parentPhone = customParentPhone.trim() || '+213 550 000 000';
-      parentEmail = customParentEmail.trim() || 'parent@myschool.edu';
+      const parentEmail = customParentEmail.trim() || 'parent@myschool.edu';
       const newParentPassword = customParentPassword.trim() || generateAutoPassword();
       const newGeneratedParentId = `par-${Date.now()}`;
       parentId = newGeneratedParentId;
@@ -243,8 +241,11 @@ export function StudentsManagementScreen() {
     setNewLanguage('');
     setNewLevel('');
     setNewGroupId('');
+    setParentLinkMode('none');
+    setSelectedParentId('');
     setCustomParentName('');
     setCustomParentPhone('');
+    setCustomParentEmail('');
     setIsAddStudentOpen(false);
   };
 
@@ -807,16 +808,32 @@ export function StudentsManagementScreen() {
 
                   {/* Mode Toggles */}
                   <div
-                    className="inline-flex items-center gap-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-purple-200/50 dark:border-slate-800 shadow-inner shrink-0"
+                    className="inline-flex items-center gap-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-purple-200/50 dark:border-slate-800 shadow-inner shrink-0 flex-wrap"
                     style={{ padding: '3px 4px' }}
                   >
                     <button
                       type="button"
-                      onClick={() => setParentLinkMode('existing')}
-                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${parentLinkMode === 'existing'
+                      onClick={() => {
+                        setParentLinkMode('none');
+                        setSelectedParentId('');
+                      }}
+                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                        parentLinkMode === 'none'
                           ? 'bg-purple-600 text-white shadow-xs scale-[1.01]'
                           : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-                        }`}
+                      }`}
+                      style={{ padding: '6px 12px' }}
+                    >
+                      <span>{language === 'ar' ? 'بدون ربط (غير مربوط)' : 'Unlinked (No Parent)'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setParentLinkMode('existing')}
+                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                        parentLinkMode === 'existing'
+                          ? 'bg-purple-600 text-white shadow-xs scale-[1.01]'
+                          : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
+                      }`}
                       style={{ padding: '6px 12px' }}
                     >
                       <UserCheck size={13} />
@@ -824,11 +841,15 @@ export function StudentsManagementScreen() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setParentLinkMode('new')}
-                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${parentLinkMode === 'new'
+                      onClick={() => {
+                        setParentLinkMode('new');
+                        setSelectedParentId('');
+                      }}
+                      className={`rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                        parentLinkMode === 'new'
                           ? 'bg-purple-600 text-white shadow-xs scale-[1.01]'
                           : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-                        }`}
+                      }`}
                       style={{ padding: '6px 12px' }}
                     >
                       <UserPlus size={13} />
@@ -837,8 +858,50 @@ export function StudentsManagementScreen() {
                   </div>
                 </div>
 
-                {parentLinkMode === 'existing' ? (
+                {parentLinkMode === 'none' ? (
+                  <div className="rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 p-3.5 flex items-center gap-2.5 text-xs text-slate-600 dark:text-slate-400 font-medium">
+                    <Sparkles size={16} className="text-purple-500 shrink-0" />
+                    <span>
+                      {language === 'ar'
+                        ? 'سيتم إضافة الطالب كطالب مستقل بدون ربطه بأي ولي أمر. يمكنك ربطه بولي أمر لاحقاً في أي وقت من ملف الطالب.'
+                        : 'The student will be added unlinked without any parent. You can link a parent later from the student profile.'}
+                    </span>
+                  </div>
+                ) : parentLinkMode === 'existing' ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {/* Selected Parent Card */}
+                    {selectedParentId && (() => {
+                      const selParent = parents.find((p) => p.id === selectedParentId);
+                      if (!selParent) return null;
+                      return (
+                        <div className="p-3 rounded-xl bg-purple-50/90 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-purple-600 text-white flex items-center justify-center font-black text-xs">
+                              {selParent.fullNameAr.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold text-slate-900 dark:text-white">
+                                {selParent.fullNameAr}{' '}
+                                <span className="font-normal text-[11px] text-slate-500 font-mono">
+                                  ({selParent.fullNameEn})
+                                </span>
+                              </div>
+                              <div className="text-[11px] font-mono text-purple-700 dark:text-purple-300" dir="ltr">
+                                📱 {selParent.phone}
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedParentId('')}
+                            className="text-xs font-bold text-rose-500 hover:text-rose-700 dark:hover:text-rose-400 cursor-pointer"
+                          >
+                            {language === 'ar' ? 'إلغاء التحديد' : 'Deselect'}
+                          </button>
+                        </div>
+                      );
+                    })()}
+
                     {/* Search Container */}
                     <div className="relative w-full">
                       <input
@@ -859,23 +922,25 @@ export function StudentsManagementScreen() {
                       />
                       <Search
                         size={17}
-                        className={`absolute top-1/2 -translate-y-1/2 text-purple-600 ${isRTL ? 'right-4' : 'left-4'
-                          }`}
+                        className={`absolute top-1/2 -translate-y-1/2 text-purple-600 ${
+                          isRTL ? 'right-4' : 'left-4'
+                        }`}
                       />
                       {parentSearchQuery && (
                         <button
                           type="button"
                           onClick={() => setParentSearchQuery('')}
-                          className={`absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer ${isRTL ? 'left-3.5' : 'right-3.5'
-                            }`}
+                          className={`absolute top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer ${
+                            isRTL ? 'left-3.5' : 'right-3.5'
+                          }`}
                         >
                           <X size={15} />
                         </button>
                       )}
                     </div>
 
-                    {/* Search Results Dropdown List when typing */}
-                    {parentSearchQuery.trim() && (
+                    {/* Search Results Dropdown List when typing or browsing */}
+                    {(parentSearchQuery.trim() || !selectedParentId) && (
                       <div className="max-h-48 overflow-y-auto rounded-xl bg-white dark:bg-slate-850 border border-purple-200 dark:border-purple-800 divide-y divide-purple-50 dark:divide-slate-800 shadow-lg">
                         {filteredParents.length === 0 ? (
                           <div className="p-3.5 text-center text-xs text-slate-400 font-medium">
@@ -889,8 +954,9 @@ export function StudentsManagementScreen() {
                                 setSelectedParentId(p.id);
                                 setParentSearchQuery('');
                               }}
-                              className={`p-3 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-950/40 cursor-pointer transition-colors ${selectedParentId === p.id ? 'bg-purple-50/80 dark:bg-purple-950/60' : ''
-                                }`}
+                              className={`p-3 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-purple-950/40 cursor-pointer transition-colors ${
+                                selectedParentId === p.id ? 'bg-purple-50/80 dark:bg-purple-950/60' : ''
+                              }`}
                             >
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 flex items-center justify-center font-black text-xs">
@@ -898,7 +964,10 @@ export function StudentsManagementScreen() {
                                 </div>
                                 <div>
                                   <div className="text-xs font-bold text-slate-900 dark:text-white">
-                                    {p.fullNameAr} <span className="font-normal text-[11px] text-slate-500 font-mono">({p.fullNameEn})</span>
+                                    {p.fullNameAr}{' '}
+                                    <span className="font-normal text-[11px] text-slate-500 font-mono">
+                                      ({p.fullNameEn})
+                                    </span>
                                   </div>
                                   <div className="text-[11px] font-mono text-purple-600 dark:text-purple-400" dir="ltr">
                                     📱 {p.phone}
@@ -913,8 +982,6 @@ export function StudentsManagementScreen() {
                         )}
                       </div>
                     )}
-
-
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '4px' }}>
