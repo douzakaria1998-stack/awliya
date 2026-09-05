@@ -295,7 +295,7 @@ export function AdminAttendanceScreen() {
   const drawerStudents = useMemo(() => {
     if (!activeDrawerGroup) return [];
     return visibleStudents.filter(
-      (s) => activeDrawerGroup.studentIds.includes(s.id) || s.groupId === activeDrawerGroup.id
+      (s) => s.groupId === activeDrawerGroup.id || (activeDrawerGroup.studentIds && activeDrawerGroup.studentIds.includes(s.id) && (!s.groupId || s.groupId === activeDrawerGroup.id))
     );
   }, [activeDrawerGroup, visibleStudents]);
 

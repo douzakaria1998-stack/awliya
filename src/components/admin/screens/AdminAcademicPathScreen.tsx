@@ -168,7 +168,7 @@ export function AdminAcademicPathScreen() {
     let matched = visibleStudents.filter(
       (st) =>
         st.groupId === activeProgressGroup.id ||
-        (activeProgressGroup.studentIds && activeProgressGroup.studentIds.includes(st.id))
+        (activeProgressGroup.studentIds && activeProgressGroup.studentIds.includes(st.id) && (!st.groupId || st.groupId === activeProgressGroup.id))
     );
 
     // 2. Fallback for archived groups if studentIds happened to be empty in stored data:

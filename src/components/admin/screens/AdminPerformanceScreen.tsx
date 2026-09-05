@@ -138,34 +138,22 @@ export function AdminPerformanceScreen() {
     const grp =
       visibleGroups.find((g) => g.id === hw.groupId) ||
       groups.find((g) => g.id === hw.groupId) ||
-      visibleGroups.find((g) => g.code === hw.groupId || (g.code && hw.groupName?.includes(g.code))) ||
-      groups.find((g) => g.code === hw.groupId || (g.code && hw.groupName?.includes(g.code))) ||
-      visibleGroups.find((g) => g.name === hw.groupName) ||
-      groups.find((g) => g.name === hw.groupName);
+      visibleGroups.find((g) => g.code === hw.groupId) ||
+      groups.find((g) => g.code === hw.groupId);
 
-    // DYNAMIC MATCHING TO BRING ALL STUDENTS ENROLLED IN THIS GROUP:
+    // Filter students strictly belonging to this group
     const groupStudents = students.filter((s) => {
       if (s.fullNameAr?.includes('دليلة') || s.fullNameEn?.toLowerCase().includes('dalila')) {
         return false;
       }
-      if (!s.groupId || s.groupId === '' || s.groupName === 'بدون فوج' || s.groupName === 'No Group') {
-        if (grp?.studentIds && Array.isArray(grp.studentIds) && grp.studentIds.includes(s.id)) return true;
-        if (hw.studentIds && Array.isArray(hw.studentIds) && hw.studentIds.includes(s.id)) return true;
-        return false;
-      }
-
-      // 1. Direct hw.groupId match
-      if (hw.groupId && s.groupId === hw.groupId) return true;
-      // 2. Direct grp.id match
+      // 1. Direct groupId match with group ID
       if (grp?.id && s.groupId === grp.id) return true;
+      // 2. Direct groupId match with hw.groupId
+      if (hw.groupId && s.groupId === hw.groupId) return true;
       // 3. Match by group code
-      if (grp?.code && (s.groupId === grp.code || s.groupName?.includes(grp.code))) return true;
+      if (grp?.code && s.groupId === grp.code) return true;
       // 4. Group's studentIds array match
-      if (grp?.studentIds && Array.isArray(grp.studentIds) && grp.studentIds.includes(s.id)) return true;
-      // 5. hw.studentIds array match
-      if (hw.studentIds && Array.isArray(hw.studentIds) && hw.studentIds.includes(s.id)) return true;
-      // 6. Match by groupName
-      if (grp?.name && s.groupName === grp.name) return true;
+      if (grp?.studentIds && Array.isArray(grp.studentIds) && grp.studentIds.includes(s.id) && (!s.groupId || s.groupId === grp.id)) return true;
 
       return false;
     });
@@ -268,9 +256,8 @@ export function AdminPerformanceScreen() {
         !s.fullNameAr?.includes('دليلة') &&
         !s.fullNameEn?.toLowerCase().includes('dalila') &&
         ((grp?.id && s.groupId === grp.id) ||
-          (grp?.code && (s.groupId === grp.code || s.groupName?.includes(grp.code))) ||
-          (grp?.studentIds && Array.isArray(grp.studentIds) && grp.studentIds.includes(s.id)) ||
-          (grp?.name && s.groupName === grp.name))
+          (grp?.code && s.groupId === grp.code) ||
+          (grp?.studentIds && Array.isArray(grp.studentIds) && grp.studentIds.includes(s.id) && (!s.groupId || s.groupId === grp.id)))
     );
 
     createHomework({

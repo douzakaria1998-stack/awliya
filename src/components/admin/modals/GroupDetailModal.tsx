@@ -15,6 +15,7 @@ import {
   GraduationCap,
   Sparkles,
   UserPlus,
+  UserMinus,
   Plus,
   Search,
   Check,
@@ -65,6 +66,7 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
     homeworkList,
     assessments,
     assignStudentToGroup,
+    removeStudentFromGroup,
     addStudent,
     updateStudent,
     updateGroup,
@@ -644,6 +646,15 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
                         <span className="font-mono font-black text-xs sm:text-sm">{st.overallProgress}%</span>
                         <span className="text-xs font-bold text-purple-700/85 dark:text-purple-300/85">{language === 'ar' ? 'تقدم' : 'Prog.'}</span>
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => removeStudentFromGroup(group.id, st.id)}
+                        className="h-8 px-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800/60 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        title={language === 'ar' ? 'إلغاء الإسناد من الفوج' : 'Remove from group'}
+                      >
+                        <UserMinus size={13} />
+                        <span>{language === 'ar' ? 'إلغاء الإسناد' : 'Remove'}</span>
+                      </button>
                     </div>
                   </div>
                 ))}
