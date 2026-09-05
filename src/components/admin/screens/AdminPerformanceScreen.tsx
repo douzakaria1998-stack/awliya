@@ -433,13 +433,15 @@ export function AdminPerformanceScreen() {
             const grp =
               visibleGroups.find((g) => g.id === hw.groupId) ||
               groups.find((g) => g.id === hw.groupId) ||
+              visibleGroups.find((g) => g.code === hw.groupId) ||
+              groups.find((g) => g.code === hw.groupId) ||
               visibleGroups.find((g) => g.name === hw.groupName) ||
               groups.find((g) => g.name === hw.groupName);
             const groupName = grp?.name || hw.groupName;
             const displayGroupId =
               grp?.code && grp.code.trim() && !grp.code.startsWith('grp-')
                 ? grp.code.trim()
-                : grp?.code || hw.groupId?.replace('grp-', '') || '3927';
+                : grp?.code || (hw.groupId && !hw.groupId.startsWith('grp-') ? hw.groupId : '');
             const groupLanguage = grp?.language || 'English';
             const groupTiming = getCleanGroupScheduleStr(grp);
 
@@ -826,7 +828,7 @@ export function AdminPerformanceScreen() {
                 <SearchableSelect
                   options={visibleGroups.map((g) => ({
                     value: g.id,
-                    label: `${g.name} (${g.code || '3925'}) • ${g.language}`,
+                    label: `${g.name} ${g.code ? `(${g.code})` : ''} • ${g.language}`,
                     subLabel: getCleanGroupScheduleStr(g),
                   }))}
                   value={newHwGroupId}
@@ -968,7 +970,7 @@ export function AdminPerformanceScreen() {
                 <SearchableSelect
                   options={visibleGroups.map((g) => ({
                     value: g.id,
-                    label: `${g.name} (${g.code || '3925'}) • ${g.language}`,
+                    label: `${g.name} ${g.code ? `(${g.code})` : ''} • ${g.language}`,
                     subLabel: getCleanGroupScheduleStr(g),
                   }))}
                   value={editHwGroupId}
@@ -1085,13 +1087,15 @@ export function AdminPerformanceScreen() {
               const modalGrp =
                 visibleGroups.find((g) => g.id === selectedHwToGrade.groupId) ||
                 groups.find((g) => g.id === selectedHwToGrade.groupId) ||
+                visibleGroups.find((g) => g.code === selectedHwToGrade.groupId) ||
+                groups.find((g) => g.code === selectedHwToGrade.groupId) ||
                 visibleGroups.find((g) => g.name === selectedHwToGrade.groupName) ||
                 groups.find((g) => g.name === selectedHwToGrade.groupName);
               const modalGroupName = modalGrp?.name || selectedHwToGrade.groupName;
               const modalDisplayGroupId =
                 modalGrp?.code && modalGrp.code.trim() && !modalGrp.code.startsWith('grp-')
                   ? modalGrp.code.trim()
-                  : modalGrp?.code || selectedHwToGrade.groupId?.replace('grp-', '') || '3927';
+                  : modalGrp?.code || (selectedHwToGrade.groupId && !selectedHwToGrade.groupId.startsWith('grp-') ? selectedHwToGrade.groupId : '');
               const modalGroupLanguage = modalGrp?.language || 'English';
               const modalGroupTiming = getCleanGroupScheduleStr(modalGrp);
 
