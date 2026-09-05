@@ -334,43 +334,68 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
     const sGroups = getItem<AdminGroup[]>(ADMIN_STORAGE_KEYS.GROUPS);
     const sStudents = getItem<AdminStudent[]>(ADMIN_STORAGE_KEYS.STUDENTS);
-    let cleanedStudents = sStudents || [];
 
+    const isDalilaRecord = (item?: {
+      fullNameAr?: string;
+      fullNameEn?: string;
+      studentNameAr?: string;
+      studentNameEn?: string;
+      id?: string;
+      studentId?: string;
+    }) => {
+      if (!item) return false;
+      const ar = `${item.fullNameAr || ''} ${item.studentNameAr || ''}`.trim().toLowerCase();
+      const en = `${item.fullNameEn || ''} ${item.studentNameEn || ''}`.trim().toLowerCase();
+      return (
+        ar.includes('دليلة') ||
+        ar.includes('مصطفاوي') ||
+        en.includes('dalila') ||
+        en.includes('mostafaoui')
+      );
+    };
+
+    // Track all student IDs associated with Dalila Mostafaoui
+    const dalilaStudentIds = new Set<string>();
+    (sStudents || []).forEach((s) => {
+      if (isDalilaRecord(s)) {
+        dalilaStudentIds.add(s.id);
+      }
+    });
+
+    let cleanedStudents: AdminStudent[] = [];
     if (sStudents?.length) {
-      // Normalize student group assignments
-      cleanedStudents = sStudents.map((s) => {
-        if (
-          (s.fullNameAr && (s.fullNameAr.includes('دليلة') || s.fullNameAr.includes('مصطفاوي'))) ||
-          (s.fullNameEn && s.fullNameEn.toLowerCase().includes('dalila'))
-        ) {
-          return {
-            ...s,
-            groupId: '',
-            groupName: 'بدون فوج',
-          };
-        }
-
-        if (s.groupId && sGroups?.length) {
-          const matchedGroup = sGroups.find((g) => g.id === s.groupId || g.code === s.groupId);
-          if (matchedGroup) {
-            return {
-              ...s,
-              groupId: matchedGroup.id,
-              groupName: matchedGroup.name,
-              teacherId: matchedGroup.teacherId || s.teacherId,
-              teacherName: matchedGroup.teacherName || s.teacherName,
-            };
+      // Completely remove Dalila Mostafaoui from students data and normalize group assignments
+      cleanedStudents = sStudents
+        .filter((s) => !isDalilaRecord(s) && !dalilaStudentIds.has(s.id))
+        .map((s) => {
+          if (s.groupId && sGroups?.length) {
+            const matchedGroup = sGroups.find((g) => g.id === s.groupId || g.code === s.groupId);
+            if (matchedGroup) {
+              return {
+                ...s,
+                groupId: matchedGroup.id,
+                groupName: matchedGroup.name,
+                teacherId: matchedGroup.teacherId || s.teacherId,
+                teacherName: matchedGroup.teacherName || s.teacherName,
+              };
+            }
           }
-        }
-        return s;
-      });
+          return s;
+        });
 
       setItem(ADMIN_STORAGE_KEYS.STUDENTS, cleanedStudents);
       setStudents(cleanedStudents);
     }
 
     const sParents = getItem<AdminParent[]>(ADMIN_STORAGE_KEYS.PARENTS);
-    if (sParents?.length) setParents(sParents);
+    if (sParents?.length) {
+      const cleanedParents = sParents.map((p) => ({
+        ...p,
+        linkedStudentIds: (p.linkedStudentIds || []).filter((id) => !dalilaStudentIds.has(id)),
+      }));
+      setParents(cleanedParents);
+      setItem(ADMIN_STORAGE_KEYS.PARENTS, cleanedParents);
+    }
 
     const sTeachers = getItem<AdminTeacher[]>(ADMIN_STORAGE_KEYS.TEACHERS);
     if (sTeachers?.length) setTeachers(sTeachers);
@@ -382,9 +407,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       const cleanedGroups = sGroups.map((g) => {
         const groupCode = generateUniqueGroupCode(g.code, usedCodes);
 
-        // Strict 1-to-1 matching: only include students whose active groupId is this group's ID
+        // Strict 1-to-1 matching: only include valid students
         const matchedStudentIds = (cleanedStudents || [])
-          .filter((s) => s.groupId === g.id || (g.code && s.groupId === g.code))
+          .filter((s) => !dalilaStudentIds.has(s.id) && (s.groupId === g.id || (g.code && s.groupId === g.code)))
           .map((s) => s.id);
 
         return {
@@ -409,6 +434,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       // Seed realistic initial lesson progress for mock students based on their overall progress
       const initialMap: Record<string, LessonProgressStatus> = {};
       mockAdminStudents.forEach((st) => {
+        if (isDalilaRecord(st)) return;
         const studentLevel = mockCurricula.find(
           (c) => (c.levelNumber === st.currentLevel || c.cefrCode === st.cefrLevel) && c.language === (st.language === 'French' ? 'French' : 'English')
         ) || mockCurricula[0];
@@ -432,16 +458,17 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     }
 
     const sAttendance = getItem<AttendanceSession[]>(ADMIN_STORAGE_KEYS.ATTENDANCE);
-    if (sAttendance?.length) setAttendanceSessions(sAttendance);
+    if (sAttendance?.length) {
+      const cleanedAttendance = sAttendance.map((sess) => ({
+        ...sess,
+        records: (sess.records || []).filter((r) => !dalilaStudentIds.has(r.studentId)),
+      }));
+      setAttendanceSessions(cleanedAttendance);
+      setItem(ADMIN_STORAGE_KEYS.ATTENDANCE, cleanedAttendance);
+    }
 
     const sHomework = getItem<AdminHomeworkAssignment[]>(ADMIN_STORAGE_KEYS.HOMEWORK);
     if (sHomework?.length) {
-      const dalilaId = cleanedStudents?.find(
-        (s) =>
-          (s.fullNameAr && (s.fullNameAr.includes('دليلة') || s.fullNameAr.includes('مصطفاوي'))) ||
-          (s.fullNameEn && s.fullNameEn.toLowerCase().includes('dalila'))
-      )?.id;
-
       const validHomework = sHomework.filter(
         (h) =>
           h.assignmentNameAr?.trim() !== 'lkml' &&
@@ -459,13 +486,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         // Matching students for this homework: STRICTLY by groupId / group's studentIds
         const matchingStudents = (cleanedStudents || []).filter(
           (s) =>
-            s.id !== dalilaId &&
+            !dalilaStudentIds.has(s.id) &&
+            !isDalilaRecord(s) &&
             (groupStudentIds.includes(s.id) || (h.groupId && s.groupId === h.groupId))
         );
 
         const targetStudentIds = matchingStudents.map((s) => s.id);
         const existingEvals = (h.evaluations || []).filter(
-          (e) => e.studentId !== dalilaId && targetStudentIds.includes(e.studentId)
+          (e) => !dalilaStudentIds.has(e.studentId) && !isDalilaRecord(e) && targetStudentIds.includes(e.studentId)
         );
         const evalMap = new Map(existingEvals.map((e) => [e.studentId, e]));
 
@@ -491,10 +519,22 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     }
 
     const sAssessments = getItem<AdminAssessmentRecord[]>(ADMIN_STORAGE_KEYS.ASSESSMENTS);
-    if (sAssessments?.length) setAssessments(sAssessments);
+    if (sAssessments?.length) {
+      const cleanedAssessments = sAssessments.filter(
+        (a) => !dalilaStudentIds.has(a.studentId) && !isDalilaRecord(a)
+      );
+      setAssessments(cleanedAssessments);
+      setItem(ADMIN_STORAGE_KEYS.ASSESSMENTS, cleanedAssessments);
+    }
 
     const sFeedback = getItem<TwoWayFeedbackItem[]>(ADMIN_STORAGE_KEYS.FEEDBACK);
-    if (sFeedback?.length) setFeedbackList(sFeedback);
+    if (sFeedback?.length) {
+      const cleanedFeedback = sFeedback.filter(
+        (f) => !dalilaStudentIds.has(f.studentId) && !isDalilaRecord(f)
+      );
+      setFeedbackList(cleanedFeedback);
+      setItem(ADMIN_STORAGE_KEYS.FEEDBACK, cleanedFeedback);
+    }
 
     const sLogs = getItem<AuditLogEntry[]>(ADMIN_STORAGE_KEYS.AUDIT_LOGS);
     if (sLogs?.length) setAuditLogs(sLogs);
@@ -503,15 +543,29 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (sNotifs?.length) setNotifications(sNotifs);
 
     const sApprovals = getItem<PendingStudentApproval[]>(ADMIN_STORAGE_KEYS.APPROVALS);
-    if (sApprovals?.length) setPendingApprovals(sApprovals);
+    if (sApprovals?.length) {
+      const cleanedApprovals = sApprovals.filter((a) => !isDalilaRecord(a));
+      setPendingApprovals(cleanedApprovals);
+      setItem(ADMIN_STORAGE_KEYS.APPROVALS, cleanedApprovals);
+    }
 
     // Dynamic sync listener for cross-context / Parent Portal updates
     const handleSync = () => {
       const liveParents = getItem<AdminParent[]>(ADMIN_STORAGE_KEYS.PARENTS);
-      if (liveParents?.length) setParents(liveParents);
+      if (liveParents?.length) {
+        setParents(
+          liveParents.map((p) => ({
+            ...p,
+            linkedStudentIds: (p.linkedStudentIds || []).filter((id) => !dalilaStudentIds.has(id)),
+          }))
+        );
+      }
 
       const liveStudents = getItem<AdminStudent[]>(ADMIN_STORAGE_KEYS.STUDENTS);
-      if (liveStudents?.length) setStudents(liveStudents);
+      if (liveStudents?.length) {
+        const filtered = liveStudents.filter((s) => !isDalilaRecord(s) && !dalilaStudentIds.has(s.id));
+        setStudents(filtered);
+      }
 
       const liveScores = getItem<Record<string, { score: number; honorsDegreeAr?: string; completedDate?: string }>>(
         ADMIN_STORAGE_KEYS.STUDENT_LEVEL_SCORES
@@ -675,11 +729,19 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [currentRole, groups, teacherAssignedGroupIds, currentAdmin.id]);
 
   const visibleStudents = useMemo(() => {
+    const isDalila = (item?: { fullNameAr?: string; fullNameEn?: string }) => {
+      if (!item) return false;
+      const ar = (item.fullNameAr || '').toLowerCase();
+      const en = (item.fullNameEn || '').toLowerCase();
+      return ar.includes('دليلة') || ar.includes('مصطفاوي') || en.includes('dalila') || en.includes('mostafaoui');
+    };
+    const validStudents = students.filter((s) => !isDalila(s));
+
     if (currentRole === 'teacher') {
       const allowedGroupIds = visibleGroups.map((g) => g.id);
-      return students.filter((s) => allowedGroupIds.includes(s.groupId) || s.teacherId === currentAdmin.id);
+      return validStudents.filter((s) => allowedGroupIds.includes(s.groupId) || s.teacherId === currentAdmin.id);
     }
-    return students;
+    return validStudents;
   }, [currentRole, students, visibleGroups, currentAdmin.id]);
 
   const visibleParents = useMemo(() => {

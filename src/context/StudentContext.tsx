@@ -202,10 +202,16 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       }) ||
       activeParent;
 
+    const isDalila = (st: { fullNameAr?: string; fullNameEn?: string }) => {
+      const ar = (st.fullNameAr || '').toLowerCase();
+      const en = (st.fullNameEn || '').toLowerCase();
+      return ar.includes('دليلة') || ar.includes('مصطفاوي') || en.includes('dalila') || en.includes('mostafaoui');
+    };
+
     const combinedAdminStudentsMap = new Map<string, AdminStudent>();
-    mockAdminStudents.forEach((st) => combinedAdminStudentsMap.set(st.id, st));
+    mockAdminStudents.filter((st) => !isDalila(st)).forEach((st) => combinedAdminStudentsMap.set(st.id, st));
     const storedAdminStudents = getItem<AdminStudent[]>(STORAGE_KEYS.ADMIN_STUDENTS) || [];
-    storedAdminStudents.forEach((st) => combinedAdminStudentsMap.set(st.id, st));
+    storedAdminStudents.filter((st) => !isDalila(st)).forEach((st) => combinedAdminStudentsMap.set(st.id, st));
     const allAdminStudents = Array.from(combinedAdminStudentsMap.values());
 
     // Strict set of linked student IDs for this parent
@@ -216,6 +222,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     // 1. Check all admin students linked to this parent (PRIMARY SOURCE OF TRUTH)
     allAdminStudents.forEach((adminStu) => {
+      if (isDalila(adminStu)) return;
       const isLinked =
         parentLinkedIds.has(adminStu.id) ||
         adminStu.parentId === currentParentRecord.id;
@@ -254,7 +261,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     // 2. Also check if any portal-added students were specifically registered with this parent's id
     const storedPortalStudents = getItem<Student[]>(STORAGE_KEYS.STUDENTS_LIST) || [];
-    storedPortalStudents.forEach((s) => {
+    storedPortalStudents.filter((s) => !isDalila(s)).forEach((s) => {
       const isMatch = parentLinkedIds.has(s.id) || s.parentId === currentParentRecord.id;
       if (isMatch && !seenIds.has(s.id)) {
         seenIds.add(s.id);
