@@ -86,18 +86,35 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
     }
   }, [student, isOpen]);
 
-  // Available Curriculum Levels
+  // Available Curriculum Levels filtered strictly by selected student language
   const availableCurriculumLevels = useMemo(() => {
-    if (curricula && curricula.length > 0) {
+    const targetLanguage =
+      editLanguage === 'French'
+        ? 'French'
+        : editLanguage === 'English'
+        ? 'English'
+        : student?.language === 'French'
+        ? 'French'
+        : 'English';
+
+    const langCurricula = (curricula || []).filter(
+      (c) => c.language === targetLanguage
+    );
+
+    if (langCurricula && langCurricula.length > 0) {
       const seen = new Set<number>();
       const list: { levelNumber: number; name: string }[] = [];
-      const sorted = [...curricula].sort((a, b) => (a.levelNumber || 0) - (b.levelNumber || 0));
+      const sorted = [...langCurricula].sort((a, b) => (a.levelNumber || 0) - (b.levelNumber || 0));
       sorted.forEach((c) => {
         if (!seen.has(c.levelNumber)) {
           seen.add(c.levelNumber);
+          const baseName =
+            language === 'ar'
+              ? c.nameAr || `المستوى ${c.levelNumber}`
+              : c.nameEn || c.nameAr || `Level ${c.levelNumber}`;
           list.push({
             levelNumber: c.levelNumber,
-            name: language === 'ar' ? (c.nameAr || `المستوى ${c.levelNumber}`) : (c.nameEn || c.nameAr || `Level ${c.levelNumber}`),
+            name: baseName,
           });
         }
       });
@@ -107,7 +124,7 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
       levelNumber: lvl,
       name: language === 'ar' ? `المستوى ${lvl}` : `Level ${lvl}`,
     }));
-  }, [curricula, language]);
+  }, [curricula, editLanguage, student?.language, language]);
 
   // Confirmation Modal State
   const [confirmConfig, setConfirmConfig] = useState<{

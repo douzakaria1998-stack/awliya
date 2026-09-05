@@ -59,29 +59,6 @@ export function StudentsManagementScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
 
-  // Available Curriculum Levels with dynamic custom names
-  const availableCurriculumLevels = useMemo(() => {
-    if (curricula && curricula.length > 0) {
-      const seen = new Set<number>();
-      const list: { levelNumber: number; name: string }[] = [];
-      const sorted = [...curricula].sort((a, b) => (a.levelNumber || 0) - (b.levelNumber || 0));
-      sorted.forEach((c) => {
-        if (!seen.has(c.levelNumber)) {
-          seen.add(c.levelNumber);
-          list.push({
-            levelNumber: c.levelNumber,
-            name: language === 'ar' ? (c.nameAr || `المستوى ${c.levelNumber}`) : (c.nameEn || c.nameAr || `Level ${c.levelNumber}`),
-          });
-        }
-      });
-      return list;
-    }
-    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((lvl) => ({
-      levelNumber: lvl,
-      name: language === 'ar' ? `المستوى ${lvl}` : `Level ${lvl}`,
-    }));
-  }, [curricula, language]);
-
   // New Student Form State (First Name, Last Name, Birthday, Link to Parent, etc.)
   const [firstNameAr, setFirstNameAr] = useState('');
   const [lastNameAr, setLastNameAr] = useState('');
@@ -103,6 +80,68 @@ export function StudentsManagementScreen() {
   const [customParentPassword, setCustomParentPassword] = useState(() => generateAutoPassword());
   const [showCustomPassword, setShowCustomPassword] = useState(true);
   const [isCustomPassCopied, setIsCustomPassCopied] = useState(false);
+
+  // Available Curriculum Levels for Top Filter Bar (dynamic custom names)
+  const availableCurriculumLevels = useMemo(() => {
+    const targetLanguage = selectedLanguage !== 'all' ? selectedLanguage : undefined;
+    const langCurricula = targetLanguage
+      ? (curricula || []).filter((c) => c.language === targetLanguage)
+      : curricula || [];
+
+    if (langCurricula && langCurricula.length > 0) {
+      const seen = new Set<number>();
+      const list: { levelNumber: number; name: string }[] = [];
+      const sorted = [...langCurricula].sort((a, b) => (a.levelNumber || 0) - (b.levelNumber || 0));
+      sorted.forEach((c) => {
+        if (!seen.has(c.levelNumber)) {
+          seen.add(c.levelNumber);
+          const baseName =
+            language === 'ar'
+              ? c.nameAr || `المستوى ${c.levelNumber}`
+              : c.nameEn || c.nameAr || `Level ${c.levelNumber}`;
+          list.push({
+            levelNumber: c.levelNumber,
+            name: baseName,
+          });
+        }
+      });
+      return list;
+    }
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((lvl) => ({
+      levelNumber: lvl,
+      name: language === 'ar' ? `المستوى ${lvl}` : `Level ${lvl}`,
+    }));
+  }, [curricula, selectedLanguage, language]);
+
+  // Available Curriculum Levels for Add Student Modal (filtered strictly by selected newLanguage)
+  const addModalCurriculumLevels = useMemo(() => {
+    const targetLanguage = newLanguage || 'English';
+    const langCurricula = (curricula || []).filter((c) => c.language === targetLanguage);
+
+    if (langCurricula && langCurricula.length > 0) {
+      const seen = new Set<number>();
+      const list: { levelNumber: number; name: string }[] = [];
+      const sorted = [...langCurricula].sort((a, b) => (a.levelNumber || 0) - (b.levelNumber || 0));
+      sorted.forEach((c) => {
+        if (!seen.has(c.levelNumber)) {
+          seen.add(c.levelNumber);
+          const baseName =
+            language === 'ar'
+              ? c.nameAr || `المستوى ${c.levelNumber}`
+              : c.nameEn || c.nameAr || `Level ${c.levelNumber}`;
+          list.push({
+            levelNumber: c.levelNumber,
+            name: baseName,
+          });
+        }
+      });
+      return list;
+    }
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((lvl) => ({
+      levelNumber: lvl,
+      name: language === 'ar' ? `المستوى ${lvl}` : `Level ${lvl}`,
+    }));
+  }, [curricula, newLanguage, language]);
 
   // Filtered Parents for Link to Parent search
   const filteredParents = useMemo(() => {
@@ -1133,7 +1172,7 @@ export function StudentsManagementScreen() {
                     style={{ height: '42px', padding: '8px 12px' }}
                   >
                     <option value="">{language === 'ar' ? 'بدون (لا شيء)' : 'None (Nothing)'}</option>
-                    {availableCurriculumLevels.map((lvl) => (
+                    {addModalCurriculumLevels.map((lvl) => (
                       <option key={lvl.levelNumber} value={lvl.levelNumber}>
                         {lvl.name}
                       </option>
