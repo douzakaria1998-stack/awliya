@@ -58,3 +58,31 @@ export async function createParentInDb(parent: Partial<AdminParent>): Promise<Ad
     createdAt: data.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
   } as AdminParent;
 }
+
+export async function updateParentInDb(id: string, updates: Partial<AdminParent>): Promise<void> {
+  if (!id || id.startsWith('par-')) return;
+  const updatePayload: Record<string, any> = {};
+
+  if (updates.fullNameAr !== undefined) updatePayload.full_name_ar = updates.fullNameAr;
+  if (updates.fullNameEn !== undefined) updatePayload.full_name_en = updates.fullNameEn;
+  if (updates.phone !== undefined) updatePayload.phone = updates.phone;
+  if (updates.email !== undefined) updatePayload.email = updates.email || null;
+  if (updates.nationalId !== undefined) updatePayload.national_id = updates.nationalId || null;
+  if (updates.address !== undefined) updatePayload.address = updates.address || null;
+  if (updates.status !== undefined) updatePayload.status = updates.status;
+
+  if (Object.keys(updatePayload).length === 0) return;
+
+  const { error } = await supabase.from('parents').update(updatePayload).eq('id', id);
+  if (error) {
+    console.error('Error updating parent in Supabase:', error);
+  }
+}
+
+export async function deleteParentFromDb(id: string): Promise<void> {
+  if (!id || id.startsWith('par-')) return;
+  const { error } = await supabase.from('parents').delete().eq('id', id);
+  if (error) {
+    console.error('Error deleting parent from Supabase:', error);
+  }
+}

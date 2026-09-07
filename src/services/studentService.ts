@@ -141,12 +141,31 @@ export async function updateStudentInDb(id: string, updates: Partial<AdminStuden
   if (updates.nicknameAr !== undefined) updatePayload.nickname_ar = updates.nicknameAr;
   if (updates.dateOfBirth !== undefined) updatePayload.date_of_birth = updates.dateOfBirth || null;
   if (updates.gender !== undefined) updatePayload.gender = updates.gender;
+  if (updates.bloodType !== undefined) updatePayload.blood_type = updates.bloodType;
   if (updates.currentLevel !== undefined) updatePayload.current_level = updates.currentLevel;
   if (updates.cefrLevel !== undefined) updatePayload.cefr_level = updates.cefrLevel;
-  if (updates.groupId !== undefined) updatePayload.group_id = updates.groupId || null;
-  if (updates.parentId !== undefined) updatePayload.parent_id = updates.parentId || null;
+  if (updates.enrolledPathAr !== undefined) updatePayload.enrolled_path_ar = updates.enrolledPathAr;
+  if (updates.enrolledPathEn !== undefined) updatePayload.enrolled_path_en = updates.enrolledPathEn;
+  if (updates.language !== undefined) updatePayload.language = updates.language;
+  if (updates.groupId !== undefined) updatePayload.group_id = updates.groupId && updates.groupId.length > 10 ? updates.groupId : null;
+  if (updates.parentId !== undefined) updatePayload.parent_id = updates.parentId && updates.parentId.length > 10 ? updates.parentId : null;
   if (updates.relationship !== undefined) updatePayload.relationship = updates.relationship;
+  if (updates.avatarUrl !== undefined) updatePayload.avatar_url = updates.avatarUrl;
   if (updates.status !== undefined) updatePayload.status = updates.status;
+  if (updates.overallProgress !== undefined) updatePayload.overall_progress = updates.overallProgress;
+  if (updates.attendanceRate !== undefined) updatePayload.attendance_rate = updates.attendanceRate;
+  if (updates.averagePerformance !== undefined) updatePayload.average_performance = updates.averagePerformance;
+  if (updates.completedLessonsCount !== undefined) updatePayload.completed_lessons_count = updates.completedLessonsCount;
+  if (updates.totalLessonsCount !== undefined) updatePayload.total_lessons_count = updates.totalLessonsCount;
+  
+  if (updates.skills) {
+    if (updates.skills.listening !== undefined) updatePayload.skills_listening = updates.skills.listening;
+    if (updates.skills.speaking !== undefined) updatePayload.skills_speaking = updates.skills.speaking;
+    if (updates.skills.reading !== undefined) updatePayload.skills_reading = updates.skills.reading;
+    if (updates.skills.writing !== undefined) updatePayload.skills_writing = updates.skills.writing;
+  }
+
+  if (Object.keys(updatePayload).length === 0) return;
 
   const { error } = await supabase.from('students').update(updatePayload).eq('id', id);
   if (error) {

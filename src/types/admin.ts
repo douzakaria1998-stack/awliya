@@ -54,6 +54,8 @@ export interface AdminStudent {
   phone?: string;
   dateOfBirth?: string;
   gender: 'male' | 'female';
+  bloodType?: string;
+  avatarUrl?: string;
   currentLevel: number; // 1-10 or CEFR
   cefrLevel: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
   enrolledPathAr: string;

@@ -44,8 +44,17 @@ import { useStudent } from '@/context/StudentContext';
 import { STORAGE_KEYS } from '@/lib/constants';
 import { supabase } from '@/lib/supabase/client';
 import { fetchStudentsFromDb, createStudentInDb, updateStudentInDb, deleteStudentFromDb } from '@/services/studentService';
-import { fetchParentsFromDb, createParentInDb } from '@/services/parentService';
-import { fetchGroupsFromDb, fetchTeachersFromDb } from '@/services/groupService';
+import { fetchParentsFromDb, createParentInDb, updateParentInDb, deleteParentFromDb } from '@/services/parentService';
+import {
+  fetchGroupsFromDb,
+  createGroupInDb,
+  updateGroupInDb,
+  deleteGroupFromDb,
+  fetchTeachersFromDb,
+  createTeacherInDb,
+  updateTeacherInDb,
+  deleteTeacherFromDb,
+} from '@/services/groupService';
 import { saveAttendanceRecordsInDb } from '@/services/attendanceService';
 import { createHomeworkInDb, evaluateHomeworkInDb } from '@/services/homeworkService';
 
@@ -1082,6 +1091,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const updateParent = useCallback(
     (parentId: string, updates: Partial<AdminParent>) => {
+      // Persist to Supabase
+      updateParentInDb(parentId, updates).catch((err) => {
+        console.warn('Supabase update parent warning:', err);
+      });
+
       setParents((prev) => {
         const updated = prev.map((p) => (p.id === parentId ? { ...p, ...updates } : p));
         setItem(ADMIN_STORAGE_KEYS.PARENTS, updated);
@@ -1139,6 +1153,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const deleteParent = useCallback(
     (parentId: string) => {
+      // Persist deletion to Supabase
+      deleteParentFromDb(parentId).catch((err) => {
+        console.warn('Supabase delete parent warning:', err);
+      });
+
       setParents((prev) => {
         const updated = prev.filter((p) => p.id !== parentId);
         setItem(ADMIN_STORAGE_KEYS.PARENTS, updated);
@@ -1291,6 +1310,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         createdAt: new Date().toISOString().substring(0, 10),
       };
 
+      // Persist to Supabase
+      createTeacherInDb(data).catch((err) => {
+        console.warn('Supabase create teacher warning:', err);
+      });
+
       setTeachers((prev) => {
         const updated = [newTeacher, ...prev];
         setItem(ADMIN_STORAGE_KEYS.TEACHERS, updated);
@@ -1333,6 +1357,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const updateTeacher = useCallback(
     (teacherId: string, updates: Partial<AdminTeacher>) => {
+      // Persist to Supabase
+      updateTeacherInDb(teacherId, updates).catch((err) => {
+        console.warn('Supabase update teacher warning:', err);
+      });
+
       setTeachers((prev) => {
         const updated = prev.map((t) => (t.id === teacherId ? { ...t, ...updates } : t));
         setItem(ADMIN_STORAGE_KEYS.TEACHERS, updated);
@@ -1399,6 +1428,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         status: data.status || 'active',
       };
 
+      // Persist to Supabase
+      createGroupInDb(newGroup).catch((err) => {
+        console.warn('Supabase create group warning:', err);
+      });
+
       setGroups((prev) => {
         const updated = [newGroup, ...prev];
         setItem(ADMIN_STORAGE_KEYS.GROUPS, updated);
@@ -1436,6 +1470,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const updateGroup = useCallback(
     (groupId: string, updates: Partial<AdminGroup>) => {
+      // Persist to Supabase
+      updateGroupInDb(groupId, updates).catch((err) => {
+        console.warn('Supabase update group warning:', err);
+      });
+
       setGroups((prev) => {
         let codeToSet = updates.code;
         if (codeToSet) {
