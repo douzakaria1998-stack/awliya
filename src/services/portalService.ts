@@ -56,15 +56,15 @@ export async function fetchParentPortalBundle(parentId?: string) {
     attendanceRate: Number(s.attendance_rate || 95),
     averagePerformance: Number(s.average_performance || 85),
     skills: {
-      listening: Number(s.skills_listening || 80),
-      speaking: Number(s.skills_speaking || 80),
-      reading: Number(s.skills_reading || 80),
-      writing: Number(s.skills_writing || 80),
+      listening: Number(s.skills_listening !== null && s.skills_listening !== undefined ? s.skills_listening : 0),
+      speaking: Number(s.skills_speaking !== null && s.skills_speaking !== undefined ? s.skills_speaking : 0),
+      reading: Number(s.skills_reading !== null && s.skills_reading !== undefined ? s.skills_reading : 0),
+      writing: Number(s.skills_writing !== null && s.skills_writing !== undefined ? s.skills_writing : 0),
       overall: Math.round(
-        (Number(s.skills_listening || 80) +
-          Number(s.skills_speaking || 80) +
-          Number(s.skills_reading || 80) +
-          Number(s.skills_writing || 80)) / 4
+        (Number(s.skills_listening !== null && s.skills_listening !== undefined ? s.skills_listening : 0) +
+          Number(s.skills_speaking !== null && s.skills_speaking !== undefined ? s.skills_speaking : 0) +
+          Number(s.skills_reading !== null && s.skills_reading !== undefined ? s.skills_reading : 0) +
+          Number(s.skills_writing !== null && s.skills_writing !== undefined ? s.skills_writing : 0)) / 4
       ),
     },
   }));

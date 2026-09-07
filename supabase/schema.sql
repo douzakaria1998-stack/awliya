@@ -97,10 +97,10 @@ CREATE TABLE IF NOT EXISTS public.students (
   completed_lessons_count INT DEFAULT 15,
   total_lessons_count INT DEFAULT 24,
   is_falling_behind BOOLEAN DEFAULT FALSE,
-  skills_listening NUMERIC DEFAULT 85,
-  skills_speaking NUMERIC DEFAULT 78,
-  skills_reading NUMERIC DEFAULT 90,
-  skills_writing NUMERIC DEFAULT 82,
+  skills_listening NUMERIC DEFAULT 0,
+  skills_speaking NUMERIC DEFAULT 0,
+  skills_reading NUMERIC DEFAULT 0,
+  skills_writing NUMERIC DEFAULT 0,
   enrollment_date DATE DEFAULT CURRENT_DATE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

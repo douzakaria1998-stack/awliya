@@ -61,15 +61,15 @@ export async function fetchStudentsFromDb(): Promise<AdminStudent[]> {
     totalLessonsCount: row.total_lessons_count || 24,
     isFallingBehind: Boolean(row.is_falling_behind),
     skills: {
-      listening: Number(row.skills_listening || 80),
-      speaking: Number(row.skills_speaking || 80),
-      reading: Number(row.skills_reading || 80),
-      writing: Number(row.skills_writing || 80),
+      listening: Number(row.skills_listening !== null && row.skills_listening !== undefined ? row.skills_listening : 0),
+      speaking: Number(row.skills_speaking !== null && row.skills_speaking !== undefined ? row.skills_speaking : 0),
+      reading: Number(row.skills_reading !== null && row.skills_reading !== undefined ? row.skills_reading : 0),
+      writing: Number(row.skills_writing !== null && row.skills_writing !== undefined ? row.skills_writing : 0),
       overall: Math.round(
-        (Number(row.skills_listening || 80) +
-          Number(row.skills_speaking || 80) +
-          Number(row.skills_reading || 80) +
-          Number(row.skills_writing || 80)) / 4
+        (Number(row.skills_listening !== null && row.skills_listening !== undefined ? row.skills_listening : 0) +
+          Number(row.skills_speaking !== null && row.skills_speaking !== undefined ? row.skills_speaking : 0) +
+          Number(row.skills_reading !== null && row.skills_reading !== undefined ? row.skills_reading : 0) +
+          Number(row.skills_writing !== null && row.skills_writing !== undefined ? row.skills_writing : 0)) / 4
       ),
     },
   }));
@@ -93,13 +93,13 @@ export async function createStudentInDb(student: Partial<AdminStudent>): Promise
     status: student.status || 'active',
     overall_progress: student.overallProgress ?? 0,
     attendance_rate: student.attendanceRate ?? 100,
-    average_performance: student.averagePerformance ?? 80,
+    average_performance: student.averagePerformance ?? 0,
     completed_lessons_count: student.completedLessonsCount ?? 0,
     total_lessons_count: student.totalLessonsCount ?? 24,
-    skills_listening: student.skills?.listening ?? 80,
-    skills_speaking: student.skills?.speaking ?? 80,
-    skills_reading: student.skills?.reading ?? 80,
-    skills_writing: student.skills?.writing ?? 80,
+    skills_listening: student.skills?.listening ?? 0,
+    skills_speaking: student.skills?.speaking ?? 0,
+    skills_reading: student.skills?.reading ?? 0,
+    skills_writing: student.skills?.writing ?? 0,
   };
 
   const { data, error } = await supabase
@@ -128,7 +128,7 @@ export async function createStudentInDb(student: Partial<AdminStudent>): Promise
     teacherName: student.teacherName || 'غير محدد',
     parentName: student.parentName || 'غير محدد',
     parentPhone: student.parentPhone || '',
-    skills: student.skills || { listening: 80, speaking: 80, reading: 80, writing: 80, overall: 80 },
+    skills: student.skills || { listening: 0, speaking: 0, reading: 0, writing: 0, overall: 0 },
   } as AdminStudent;
 }
 
