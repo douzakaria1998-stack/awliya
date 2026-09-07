@@ -10,12 +10,12 @@ export const levelThemes: Record<LevelId, LevelTheme> = {
     nameAr: 'المستوى الأول: التأسيس الصوتي والمفردات الأولية (Starter A1.1)',
     shortNameAr: 'المستوى الأول',
     stageAr: 'مرحلة التأسيس والحروف والنطق (Phonetics & Basics)',
-    primary: '#2563EB', // Vibrant Blue
-    primaryLight: '#DBEAFE',
-    primaryDark: '#1D4ED8',
-    primaryRgb: '37, 99, 235',
-    gradient: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
-    accentColor: '#60A5FA',
+    primary: '#EA580C', // Vibrant Orange / Sunset
+    primaryLight: '#FFEDD5',
+    primaryDark: '#C2410C',
+    primaryRgb: '234, 88, 12',
+    gradient: 'linear-gradient(135deg, #EA580C 0%, #C2410C 100%)',
+    accentColor: '#FB923C',
     descriptionAr: 'تعلم الأبجدية، مخارج الأصوات الصوتية، التحيات اليومية، والمفردات التأسيسية بالإنجليزية والفرنسية',
   },
   2: {
@@ -127,12 +127,12 @@ export const levelThemes: Record<LevelId, LevelTheme> = {
     nameAr: 'المستوى العاشر: الطلاقة الشاملة والإتقان التام (Bilingual Mastery C2)',
     shortNameAr: 'المستوى العاشر',
     stageAr: 'مرحلة الإتقان والطلاقة ثنائية اللغة التامة (Native-like Mastery)',
-    primary: '#EA580C', // Royal Sunset / Coral Gold
-    primaryLight: '#FFEDD5',
-    primaryDark: '#C2410C',
-    primaryRgb: '234, 88, 12',
-    gradient: 'linear-gradient(135deg, #EA580C 0%, #9A3412 100%)',
-    accentColor: '#FB923C',
+    primary: '#2563EB', // Vibrant Blue / Sapphire
+    primaryLight: '#DBEAFE',
+    primaryDark: '#1D4ED8',
+    primaryRgb: '37, 99, 235',
+    gradient: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+    accentColor: '#60A5FA',
     descriptionAr: 'الوصول إلى الطلاقة التامة والتحدث والتفكير العفوي بالإنجليزية والفرنسية كالمتحدثين الأصليين',
   },
 };

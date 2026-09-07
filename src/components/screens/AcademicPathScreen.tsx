@@ -15,7 +15,7 @@ import { useStudent } from '@/context/StudentContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { levelThemes } from '@/lib/themes';
-import { AcademicLevel } from '@/types';
+import { AcademicLevel, LevelId } from '@/types';
 import { LEVEL_TITLES_EN, LEVEL_TITLES_FR } from '@/lib/constants';
 import { LevelDetailModal } from '../modals/LevelDetailModal';
 import { StudentSwitcher } from '../layout/StudentSwitcher';
@@ -176,6 +176,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
           const isStudied = lvl.status === 'studied';
           const isCurrent = lvl.status === 'current';
           const isLocked = lvl.status === 'locked';
+          const lvlTheme = levelThemes[lvl.level as LevelId] || levelThemes[1];
 
           return (
             <div
@@ -195,7 +196,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
                 padding: isCurrent ? '16px 20px' : '14px 18px',
                 borderRadius: '18px',
                 borderWidth: isCurrent ? '2px' : '1px',
-                borderColor: isCurrent ? theme.primary : undefined,
+                borderColor: isCurrent ? lvlTheme.primary : undefined,
               }}
             >
               <div>
@@ -212,7 +213,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
                           : 'bg-slate-300 dark:bg-slate-700 text-slate-500'
                       }`}
                       style={{
-                        backgroundColor: isCurrent ? theme.primary : isStudied ? '#16A34A' : undefined,
+                        backgroundColor: isCurrent ? lvlTheme.primary : isStudied ? '#16A34A' : undefined,
                         width: '38px',
                         height: '38px',
                         minWidth: '38px',
@@ -274,7 +275,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
                       <span
                         className="inline-flex items-center rounded-full font-bold text-white shadow-2xs whitespace-nowrap select-none animate-pulse"
                         style={{
-                          backgroundColor: theme.primary,
+                          backgroundColor: lvlTheme.primary,
                           height: '28px',
                           paddingRight: '14px',
                           paddingLeft: '14px',
@@ -313,7 +314,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
                   <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1.5">
                     <div className="flex items-center justify-between text-xs font-bold">
                       <span className="text-slate-700 dark:text-slate-200">{t.currentProgressRate}</span>
-                      <span style={{ color: theme.primary }} className="font-mono text-sm sm:text-base font-bold">
+                      <span style={{ color: lvlTheme.primary }} className="font-mono text-sm sm:text-base font-bold">
                         {lvl.progress !== undefined ? lvl.progress : activeStudent.currentLevelProgress}%
                       </span>
                     </div>
@@ -322,7 +323,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
                         className="h-full rounded-full transition-all duration-700"
                         style={{
                           width: `${lvl.progress !== undefined ? lvl.progress : activeStudent.currentLevelProgress}%`,
-                          backgroundColor: theme.primary,
+                          backgroundColor: lvlTheme.primary,
                         }}
                       />
                     </div>
