@@ -119,9 +119,13 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   const { setLevel } = useTheme();
   const { parent } = useAuth();
 
-  // 1. Initial states are strictly deterministic for SSR matching
-  const [students, setStudents] = useState<Student[]>(mockStudents);
-  const [activeStudentId, setActiveStudentIdState] = useState<string>(mockStudents[0]?.id || '');
+  // 1. Initial states
+  const [students, setStudents] = useState<Student[]>(() => {
+    return getItem<Student[]>(STORAGE_KEYS.STUDENTS_LIST) || [];
+  });
+  const [activeStudentId, setActiveStudentIdState] = useState<string>(() => {
+    return getItem<string>(STORAGE_KEYS.ACTIVE_STUDENT_ID) || '';
+  });
   const [homeworkMap, setHomeworkMap] = useState<Record<string, Homework[]>>(mockHomeworkMap);
   const [fees, setFees] = useState<Fee[]>(mockFees);
   const [payments, setPayments] = useState<PaymentRecord[]>(mockPayments);
@@ -232,11 +236,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const combinedParentsMap = new Map<string, AdminParent>();
-    mockAdminParents.forEach((p) => combinedParentsMap.set(p.id, p));
-    const storedAdminParents = getItem<AdminParent[]>(STORAGE_KEYS.ADMIN_PARENTS) || [];
-    storedAdminParents.forEach((p) => combinedParentsMap.set(p.id, p));
-    const allAdminParents = Array.from(combinedParentsMap.values());
+    const storedAdminParents = getItem<AdminParent[]>(STORAGE_KEYS.ADMIN_PARENTS);
+    const allAdminParents = storedAdminParents !== null && storedAdminParents !== undefined ? storedAdminParents : mockAdminParents;
 
     const cleanActivePhone = (activeParent.phone || '').replace(/[\s\-+()]/g, '');
     const cleanActiveEmail = (activeParent.email || '').toLowerCase().trim();
@@ -244,7 +245,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     // Match exact parent record in admin database
     const currentParentRecord =
-      storedAdminParents.find((p) => p.id === activeParent.id) ||
+      (storedAdminParents || []).find((p) => p.id === activeParent.id) ||
       allAdminParents.find((p) => {
         const pPhone = (p.phone || '').replace(/[\s\-+()]/g, '');
         const pEmail = (p.email || '').toLowerCase().trim();
@@ -264,11 +265,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       return ar.includes('دليلة') || ar.includes('مصطفاوي') || en.includes('dalila') || en.includes('mostafaoui');
     };
 
-    const combinedAdminStudentsMap = new Map<string, AdminStudent>();
-    mockAdminStudents.filter((st) => !isDalila(st)).forEach((st) => combinedAdminStudentsMap.set(st.id, st));
-    const storedAdminStudents = getItem<AdminStudent[]>(STORAGE_KEYS.ADMIN_STUDENTS) || [];
-    storedAdminStudents.filter((st) => !isDalila(st)).forEach((st) => combinedAdminStudentsMap.set(st.id, st));
-    const allAdminStudents = Array.from(combinedAdminStudentsMap.values());
+    const storedAdminStudents = getItem<AdminStudent[]>(STORAGE_KEYS.ADMIN_STUDENTS);
+    const allAdminStudents = (storedAdminStudents !== null && storedAdminStudents !== undefined ? storedAdminStudents : mockAdminStudents).filter((st) => !isDalila(st));
 
     // Strict set of linked student IDs for this parent
     const parentLinkedIds = new Set<string>(currentParentRecord.linkedStudentIds || []);

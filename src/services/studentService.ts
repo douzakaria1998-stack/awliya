@@ -92,7 +92,7 @@ export async function createStudentInDb(student: Partial<AdminStudent>): Promise
     relationship: student.relationship || 'أب',
     status: student.status || 'active',
     overall_progress: student.overallProgress ?? 0,
-    attendance_rate: student.attendanceRate ?? 100,
+    attendance_rate: student.attendanceRate ?? 0,
     average_performance: student.averagePerformance ?? 0,
     completed_lessons_count: student.completedLessonsCount ?? 0,
     total_lessons_count: student.totalLessonsCount ?? 24,

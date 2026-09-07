@@ -96,6 +96,7 @@ interface AdminContextType {
   // Action methods
   addStudent: (studentData: Partial<AdminStudent>) => void;
   updateStudent: (studentId: string, updates: Partial<AdminStudent>) => void;
+  deleteStudent: (studentId: string) => void;
   archiveStudent: (studentId: string) => void;
   
   addParent: (parentData: Partial<AdminParent>) => void;
@@ -106,9 +107,11 @@ interface AdminContextType {
 
   addTeacher: (teacherData: Partial<AdminTeacher>) => void;
   updateTeacher: (teacherId: string, updates: Partial<AdminTeacher>) => void;
+  deleteTeacher: (teacherId: string) => void;
 
   addGroup: (groupData: Partial<AdminGroup>) => void;
   updateGroup: (groupId: string, updates: Partial<AdminGroup>) => void;
+  deleteGroup: (groupId: string) => void;
   assignStudentToGroup: (groupId: string, studentId: string) => void;
   removeStudentFromGroup: (groupId: string, studentId: string) => void;
 
@@ -273,10 +276,18 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const [students, setStudents] = useState<AdminStudent[]>(mockAdminStudents);
-  const [parents, setParents] = useState<AdminParent[]>(mockAdminParents);
-  const [teachers, setTeachers] = useState<AdminTeacher[]>(mockAdminTeachers);
-  const [groups, setGroups] = useState<AdminGroup[]>(mockAdminGroups);
+  const [students, setStudents] = useState<AdminStudent[]>(() => {
+    return getItem<AdminStudent[]>(ADMIN_STORAGE_KEYS.STUDENTS) || [];
+  });
+  const [parents, setParents] = useState<AdminParent[]>(() => {
+    return getItem<AdminParent[]>(ADMIN_STORAGE_KEYS.PARENTS) || [];
+  });
+  const [teachers, setTeachers] = useState<AdminTeacher[]>(() => {
+    return getItem<AdminTeacher[]>(ADMIN_STORAGE_KEYS.TEACHERS) || [];
+  });
+  const [groups, setGroups] = useState<AdminGroup[]>(() => {
+    return getItem<AdminGroup[]>(ADMIN_STORAGE_KEYS.GROUPS) || [];
+  });
   const [curricula, setCurricula] = useState<CurriculumLevel[]>(mockCurricula);
   const [studentLevelScores, setStudentLevelScores] = useState<
     Record<string, { score: number; honorsDegreeAr?: string; completedDate?: string }>
@@ -603,19 +614,19 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           fetchTeachersFromDb().catch(() => []),
         ]);
 
-        if (dbStudents && dbStudents.length > 0) {
+        if (Array.isArray(dbStudents)) {
           setStudents(dbStudents);
           setItem(ADMIN_STORAGE_KEYS.STUDENTS, dbStudents);
         }
-        if (dbParents && dbParents.length > 0) {
+        if (Array.isArray(dbParents)) {
           setParents(dbParents);
           setItem(ADMIN_STORAGE_KEYS.PARENTS, dbParents);
         }
-        if (dbGroups && dbGroups.length > 0) {
+        if (Array.isArray(dbGroups)) {
           setGroups(dbGroups);
           setItem(ADMIN_STORAGE_KEYS.GROUPS, dbGroups);
         }
-        if (dbTeachers && dbTeachers.length > 0) {
+        if (Array.isArray(dbTeachers)) {
           setTeachers(dbTeachers);
           setItem(ADMIN_STORAGE_KEYS.TEACHERS, dbTeachers);
         }
@@ -631,7 +642,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       .channel('admin-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, () => {
         fetchStudentsFromDb().then((fresh) => {
-          if (fresh?.length) {
+          if (Array.isArray(fresh)) {
             setStudents(fresh);
             setItem(ADMIN_STORAGE_KEYS.STUDENTS, fresh);
           }
@@ -639,9 +650,25 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'parents' }, () => {
         fetchParentsFromDb().then((fresh) => {
-          if (fresh?.length) {
+          if (Array.isArray(fresh)) {
             setParents(fresh);
             setItem(ADMIN_STORAGE_KEYS.PARENTS, fresh);
+          }
+        }).catch(() => {});
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'teachers' }, () => {
+        fetchTeachersFromDb().then((fresh) => {
+          if (Array.isArray(fresh)) {
+            setTeachers(fresh);
+            setItem(ADMIN_STORAGE_KEYS.TEACHERS, fresh);
+          }
+        }).catch(() => {});
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'groups' }, () => {
+        fetchGroupsFromDb().then((fresh) => {
+          if (Array.isArray(fresh)) {
+            setGroups(fresh);
+            setItem(ADMIN_STORAGE_KEYS.GROUPS, fresh);
           }
         }).catch(() => {});
       })
@@ -879,6 +906,19 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         skills: data.skills || { listening: 0, speaking: 0, reading: 0, writing: 0, overall: 0 },
       };
 
+      // Persist to Supabase
+      createStudentInDb(newStudent).then((created) => {
+        if (created?.id && created.id !== newStudent.id) {
+          setStudents((prev) => {
+            const updated = prev.map((s) => (s.id === newStudent.id ? { ...s, id: created.id } : s));
+            setItem(ADMIN_STORAGE_KEYS.STUDENTS, updated);
+            return updated;
+          });
+        }
+      }).catch((err) => {
+        console.warn('Supabase create student warning:', err);
+      });
+
       setStudents((prev) => {
         const updated = [newStudent, ...prev];
         setItem(ADMIN_STORAGE_KEYS.STUDENTS, updated);
@@ -1049,6 +1089,27 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       updateStudent(studentId, { status: 'archived' });
     },
     [updateStudent]
+  );
+
+  const deleteStudent = useCallback(
+    (studentId: string) => {
+      deleteStudentFromDb(studentId).catch((err) => {
+        console.warn('Supabase delete student warning:', err);
+      });
+
+      setStudents((prev) => {
+        const updated = prev.filter((s) => s.id !== studentId);
+        setItem(ADMIN_STORAGE_KEYS.STUDENTS, updated);
+        return updated;
+      });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+      }
+
+      logAudit(`حذف ملف الطالب: ${studentId}`, `Deleted student file ${studentId}`, 'student');
+    },
+    [logAudit]
   );
 
   // ==========================================
@@ -1396,6 +1457,29 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     [logAudit]
   );
 
+  const deleteTeacher = useCallback(
+    (teacherId: string) => {
+      deleteTeacherFromDb(teacherId).catch((err) => {
+        console.warn('Supabase delete teacher warning:', err);
+      });
+
+      setTeachers((prev) => {
+        const updated = prev.filter((t) => t.id !== teacherId);
+        setItem(ADMIN_STORAGE_KEYS.TEACHERS, updated);
+        return updated;
+      });
+
+      setAdminUsers((prev) => {
+        const updated = prev.filter((u) => u.id !== teacherId);
+        setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
+        return updated;
+      });
+
+      logAudit(`حذف حساب المعلم: ${teacherId}`, `Deleted teacher account ${teacherId}`, 'teacher');
+    },
+    [logAudit]
+  );
+
   // ==========================================
   // Group Actions (Class Hub)
   // ==========================================
@@ -1525,6 +1609,23 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         `Updated group details for ${groupId}`,
         'group'
       );
+    },
+    [logAudit]
+  );
+
+  const deleteGroup = useCallback(
+    (groupId: string) => {
+      deleteGroupFromDb(groupId).catch((err) => {
+        console.warn('Supabase delete group warning:', err);
+      });
+
+      setGroups((prev) => {
+        const updated = prev.filter((g) => g.id !== groupId);
+        setItem(ADMIN_STORAGE_KEYS.GROUPS, updated);
+        return updated;
+      });
+
+      logAudit(`حذف الفوج: ${groupId}`, `Deleted group ${groupId}`, 'group');
     },
     [logAudit]
   );
@@ -2746,6 +2847,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         visibleAssessments,
         addStudent,
         updateStudent,
+        deleteStudent,
         archiveStudent,
         addParent,
         updateParent,
@@ -2754,8 +2856,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         unlinkStudentFromParent,
         addTeacher,
         updateTeacher,
+        deleteTeacher,
         addGroup,
         updateGroup,
+        deleteGroup,
         assignStudentToGroup,
         removeStudentFromGroup,
         addCurriculumLevel,
