@@ -46,6 +46,8 @@ import { supabase } from '@/lib/supabase/client';
 import { fetchStudentsFromDb, createStudentInDb, updateStudentInDb, deleteStudentFromDb } from '@/services/studentService';
 import { fetchParentsFromDb, createParentInDb } from '@/services/parentService';
 import { fetchGroupsFromDb, fetchTeachersFromDb } from '@/services/groupService';
+import { saveAttendanceRecordsInDb } from '@/services/attendanceService';
+import { createHomeworkInDb, evaluateHomeworkInDb } from '@/services/homeworkService';
 
 interface AdminContextType {
   // Current user & role & auth
@@ -1966,6 +1968,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
+      // Persist attendance records to Supabase
+      if (sessionMeta?.groupId) {
+        saveAttendanceRecordsInDb(sessionMeta.groupId, records, {
+          date: sessionMeta.date || new Date().toISOString().split('T')[0],
+          dayNameAr: sessionMeta.dayNameAr || 'اليوم',
+          sessionTime: sessionMeta.sessionTime,
+        }).catch((err) => console.warn('Supabase attendance sync warning:', err));
+      }
+
       // Broadcast real-time sync event across contexts
       if (typeof window !== 'undefined') {
         setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
@@ -2120,6 +2131,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         });
       });
 
+      // Save homework to Supabase
+      createHomeworkInDb(newHw).catch((err) => console.warn('Supabase create homework warning:', err));
+
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('awliya-data-sync'));
       }
@@ -2203,6 +2217,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     (hwId: string, studentId: string, score: number, comment: string, status: 'completed' | 'needs_revision') => {
       let targetHwTitle = 'الواجب المنزلي';
       let targetHwMaxScore = 20;
+
+      // Persist evaluation to Supabase
+      evaluateHomeworkInDb(hwId, score, comment, status).catch((err) =>
+        console.warn('Supabase evaluate homework warning:', err)
+      );
 
       setHomeworkList((prev) => {
         const updated = prev.map((hw) => {
