@@ -258,59 +258,16 @@ export function DashboardScreen({
 
         {/* Notification Cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {/* Card 1: Homework Revision */}
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => {
-              if (revisionHomework && onOpenHomeworkDetail) onOpenHomeworkDetail(revisionHomework.id);
-              else onNavigate('performance', 'homework');
-            }}
-            onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'homework')}
-            className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex items-center justify-between cursor-pointer"
-            style={{
-              minHeight: '60px',
-              padding: '12px 16px',
-              borderRadius: '14px',
-              gap: '12px',
-            }}
-          >
-            <div className="flex items-center min-w-0" style={{ gap: '12px' }}>
-              <div
-                className="rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 border border-amber-200/70 dark:border-amber-800/60 flex items-center justify-center shrink-0"
-                style={{ width: '36px', height: '36px', minWidth: '36px' }}
-              >
-                <FileText size={18} />
-              </div>
-              <div className="min-w-0">
-                <h4
-                  className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm"
-                  style={{ marginBottom: '2px' }}
-                >
-                  {t.homeworkNeedsRevision}
-                </h4>
-                <p
-                  className="text-slate-400 font-medium truncate text-[11px]"
-                >
-                  {t.homeworkNeedsRevisionDesc}
-                </p>
-              </div>
-            </div>
-
-            <span
-              className="text-slate-400 font-semibold whitespace-nowrap shrink-0 text-[11px]"
-            >
-              {t.twoHoursAgo}
-            </span>
-          </div>
-
-          {/* Card 2: Course Expiry / Payment Alert */}
-          {SHOW_FINANCIALS_TAB && (
+          {/* Card 1: Homework Revision (only if student actually has revision homework) */}
+          {revisionHomework && (
             <div
               role="button"
               tabIndex={0}
-              onClick={() => onNavigate('financials')}
-              onKeyDown={(e) => e.key === 'Enter' && onNavigate('financials')}
+              onClick={() => {
+                if (onOpenHomeworkDetail) onOpenHomeworkDetail(revisionHomework.id);
+                else onNavigate('performance', 'homework');
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'homework')}
               className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex items-center justify-between cursor-pointer"
               style={{
                 minHeight: '60px',
@@ -321,22 +278,22 @@ export function DashboardScreen({
             >
               <div className="flex items-center min-w-0" style={{ gap: '12px' }}>
                 <div
-                  className="rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-500 border border-orange-200/70 dark:border-orange-800/60 flex items-center justify-center shrink-0"
+                  className="rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 border border-amber-200/70 dark:border-amber-800/60 flex items-center justify-center shrink-0"
                   style={{ width: '36px', height: '36px', minWidth: '36px' }}
                 >
-                  <Clock size={18} />
+                  <FileText size={18} />
                 </div>
                 <div className="min-w-0">
                   <h4
                     className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm"
                     style={{ marginBottom: '2px' }}
                   >
-                    {t.courseEndingSoon}
+                    {t.homeworkNeedsRevision}
                   </h4>
                   <p
                     className="text-slate-400 font-medium truncate text-[11px]"
                   >
-                    {t.courseEndingSoonDesc}
+                    {revisionHomework.titleAr || t.homeworkNeedsRevisionDesc}
                   </p>
                 </div>
               </div>
@@ -344,8 +301,15 @@ export function DashboardScreen({
               <span
                 className="text-slate-400 font-semibold whitespace-nowrap shrink-0 text-[11px]"
               >
-                {t.yesterday}
+                {t.twoHoursAgo}
               </span>
+            </div>
+          )}
+
+          {/* Fallback when no notifications */}
+          {!revisionHomework && (
+            <div className="bg-white dark:bg-slate-850 border border-slate-200/70 dark:border-slate-800 shadow-2xs rounded-2xl p-4 text-center text-xs text-slate-400 font-medium">
+              {language === 'ar' ? 'لا توجد تنبيهات جديدة في الوقت الحالي' : 'No new notifications at this time'}
             </div>
           )}
         </div>
@@ -369,107 +333,110 @@ export function DashboardScreen({
           {t.latestTeacherNote}
         </h3>
 
-        {/* Teacher Card */}
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => onNavigate('performance', 'feedback')}
-          onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'feedback')}
-          className="border shadow-2xs transition-all cursor-pointer"
-          style={{
-            backgroundColor: `${theme.primary}0C`,
-            borderColor: `${theme.primary}26`,
-            padding: '16px 20px',
-            borderRadius: '16px',
-          }}
-        >
-          {/* Teacher Header */}
-          <div className="flex items-center gap-2.5" style={{ marginBottom: '10px' }}>
-            <div
-              className="rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-xs"
-              style={{
-                backgroundColor: theme.primary,
-                width: '36px',
-                height: '36px',
-                minWidth: '36px',
-              }}
-            >
-              {language === 'ar' ? 'أ.س' : 'T.M'}
-            </div>
-            <div>
-              <h4
-                className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm"
-              >
-                {language === 'ar'
-                  ? latestFeedback?.teacherNameAr || 'مستر ديفيد ويلسون'
-                  : language === 'fr'
-                  ? 'M. David Wilson'
-                  : 'Mr. David Wilson'}
-              </h4>
-              <p className="text-[11px] text-slate-400 font-medium">
-                {t.quranSubject}
-              </p>
-            </div>
-          </div>
-
-          {/* Note Bubble or Structured Guidance */}
-          {latestFeedback?.teacherFeedbackDetails &&
-          (latestFeedback.teacherFeedbackDetails.strengths?.length ||
-            latestFeedback.teacherFeedbackDetails.needsImprovement?.length ||
-            latestFeedback.teacherFeedbackDetails.recommendations) ? (
-            <div
-              className="bg-white dark:bg-slate-850 border border-slate-100 dark:border-slate-800 shadow-2xs relative rounded-2xl"
-              style={{ padding: '14px 18px' }}
-            >
-              <div className="space-y-1.5 text-slate-700 dark:text-slate-300 leading-relaxed text-xs sm:text-sm">
-                {latestFeedback.teacherFeedbackDetails.strengths && latestFeedback.teacherFeedbackDetails.strengths.length > 0 && (
-                  <div>
-                    • <span className="font-bold text-emerald-700 dark:text-emerald-400">{language === 'ar' ? 'نقاط القوة:' : 'Strengths:'}</span>{' '}
-                    {Array.isArray(latestFeedback.teacherFeedbackDetails.strengths)
-                      ? latestFeedback.teacherFeedbackDetails.strengths.join('، ')
-                      : latestFeedback.teacherFeedbackDetails.strengths}
-                  </div>
-                )}
-                {latestFeedback.teacherFeedbackDetails.needsImprovement && latestFeedback.teacherFeedbackDetails.needsImprovement.length > 0 && (
-                  <div>
-                    • <span className="font-bold text-amber-700 dark:text-amber-400">{language === 'ar' ? 'بحاجة لتطوير:' : 'Needs Improvement:'}</span>{' '}
-                    {Array.isArray(latestFeedback.teacherFeedbackDetails.needsImprovement)
-                      ? latestFeedback.teacherFeedbackDetails.needsImprovement.join('، ')
-                      : latestFeedback.teacherFeedbackDetails.needsImprovement}
-                  </div>
-                )}
-                {latestFeedback.teacherFeedbackDetails.recommendations && (
-                  <div>
-                    • <span className="font-bold text-purple-700 dark:text-purple-400">{language === 'ar' ? 'توصية للمنزل:' : 'Home Recommendation:'}</span>{' '}
-                    "{latestFeedback.teacherFeedbackDetails.recommendations}"
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div
-              className="bg-white dark:bg-slate-850 border border-slate-100 dark:border-slate-800 shadow-2xs relative flex items-center"
-              style={{ padding: '12px 16px', borderRadius: '12px' }}
-            >
-              {/* Colored vertical accent line */}
+        {/* Teacher Card if exists, or clean empty placeholder */}
+        {latestFeedback ? (
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => onNavigate('performance', 'feedback')}
+            onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'feedback')}
+            className="border shadow-2xs transition-all cursor-pointer"
+            style={{
+              backgroundColor: `${theme.primary}0C`,
+              borderColor: `${theme.primary}26`,
+              padding: '16px 20px',
+              borderRadius: '16px',
+            }}
+          >
+            {/* Teacher Header */}
+            <div className="flex items-center gap-2.5" style={{ marginBottom: '10px' }}>
               <div
-                className="rounded-full shrink-0"
+                className="rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-xs"
                 style={{
                   backgroundColor: theme.primary,
-                  width: '4px',
-                  height: '24px',
-                  marginLeft: isRTL ? '12px' : '0',
-                  marginRight: isRTL ? '0' : '12px',
+                  width: '36px',
+                  height: '36px',
+                  minWidth: '36px',
                 }}
-              />
-              <p
-                className="text-slate-700 dark:text-slate-200 font-medium text-xs sm:text-sm leading-relaxed"
               >
-                {translateTeacherNote(latestFeedback?.messageAr || t.teacherDefaultNote, language)}
-              </p>
+                {language === 'ar' ? 'أ.س' : 'T.M'}
+              </div>
+              <div>
+                <h4
+                  className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm"
+                >
+                  {latestFeedback.teacherNameAr || 'معلم المادة'}
+                </h4>
+                <p className="text-[11px] text-slate-400 font-medium">
+                  {latestFeedback.subjectAr || t.quranSubject}
+                </p>
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Note Bubble or Structured Guidance */}
+            {latestFeedback.teacherFeedbackDetails &&
+            (latestFeedback.teacherFeedbackDetails.strengths?.length ||
+              latestFeedback.teacherFeedbackDetails.needsImprovement?.length ||
+              latestFeedback.teacherFeedbackDetails.recommendations) ? (
+              <div
+                className="bg-white dark:bg-slate-850 border border-slate-100 dark:border-slate-800 shadow-2xs relative rounded-2xl"
+                style={{ padding: '14px 18px' }}
+              >
+                <div className="space-y-1.5 text-slate-700 dark:text-slate-300 leading-relaxed text-xs sm:text-sm">
+                  {latestFeedback.teacherFeedbackDetails.strengths && latestFeedback.teacherFeedbackDetails.strengths.length > 0 && (
+                    <div>
+                      • <span className="font-bold text-emerald-700 dark:text-emerald-400">{language === 'ar' ? 'نقاط القوة:' : 'Strengths:'}</span>{' '}
+                      {Array.isArray(latestFeedback.teacherFeedbackDetails.strengths)
+                        ? latestFeedback.teacherFeedbackDetails.strengths.join('، ')
+                        : latestFeedback.teacherFeedbackDetails.strengths}
+                    </div>
+                  )}
+                  {latestFeedback.teacherFeedbackDetails.needsImprovement && latestFeedback.teacherFeedbackDetails.needsImprovement.length > 0 && (
+                    <div>
+                      • <span className="font-bold text-amber-700 dark:text-amber-400">{language === 'ar' ? 'بحاجة لتطوير:' : 'Needs Improvement:'}</span>{' '}
+                      {Array.isArray(latestFeedback.teacherFeedbackDetails.needsImprovement)
+                        ? latestFeedback.teacherFeedbackDetails.needsImprovement.join('، ')
+                        : latestFeedback.teacherFeedbackDetails.needsImprovement}
+                    </div>
+                  )}
+                  {latestFeedback.teacherFeedbackDetails.recommendations && (
+                    <div>
+                      • <span className="font-bold text-purple-700 dark:text-purple-400">{language === 'ar' ? 'توصية للمنزل:' : 'Home Recommendation:'}</span>{' '}
+                      "{latestFeedback.teacherFeedbackDetails.recommendations}"
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div
+                className="bg-white dark:bg-slate-850 border border-slate-100 dark:border-slate-800 shadow-2xs relative flex items-center"
+                style={{ padding: '12px 16px', borderRadius: '12px' }}
+              >
+                <div
+                  className="rounded-full shrink-0"
+                  style={{
+                    backgroundColor: theme.primary,
+                    width: '4px',
+                    height: '24px',
+                    marginLeft: isRTL ? '12px' : '0',
+                    marginRight: isRTL ? '0' : '12px',
+                  }}
+                />
+                <p
+                  className="text-slate-700 dark:text-slate-200 font-medium text-xs sm:text-sm leading-relaxed"
+                >
+                  {translateTeacherNote(latestFeedback.messageAr || t.teacherDefaultNote, language)}
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="bg-white dark:bg-slate-850 border border-slate-200/70 dark:border-slate-800 shadow-2xs rounded-2xl p-5 text-center text-xs text-slate-400 font-medium">
+            {language === 'ar'
+              ? 'لم يتم تسجيل ملاحظات أو توجيهات لهذا الطالب بعد من قِبل المعلم.'
+              : 'No teacher notes or feedback recorded for this student yet.'}
+          </div>
+        )}
       </div>
     </div>
   );

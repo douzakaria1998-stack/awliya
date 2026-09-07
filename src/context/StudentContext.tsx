@@ -923,27 +923,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       return mockTeacherFeedbackMap[activeStudent.id];
     }
 
-    // 2. Default feedback linked to the teacher comment from dashboard
-    const studentName = activeStudent.fullNameAr || 'احمد بوكوشة';
-    return [
-      {
-        id: `fb-default-${activeStudent.id}`,
-        studentId: activeStudent.id,
-        teacherNameAr: 'د. طارق المنصور',
-        messageAr: `السلام عليكم ورحمة الله، ${studentName} ما شاء الله طالب مجتهد وذكي جداً. أظهر اليوم تفاعلاً رائعاً في ورشة المحادثة والنطق بالإنجليزية، ونرجو منكم حثه على الاستماع والتكرار اليومي في المنزل لترسيخ المفردات والطلاقة اللغوية.`,
-        date: '2026-09-03',
-        subjectAr: activeStudent.enrolledPathAr?.includes('فرنسية') || activeStudent.language === 'French' ? 'اللغة الفرنسية' : 'اللغة الإنجليزية واللغة الفرنسية',
-        isRead: true,
-        badgeAr: 'طالب متميز',
-        teacherRoleAr: 'اللغة الإنجليزية واللغة الفرنسية',
-        teacherFeedbackDetails: {
-          strengths: ['Good pronunciation', 'Active in class'],
-          needsImprovement: ['Spontaneous dialogue fluency'],
-          recommendations: 'Practice speaking 10 minutes daily at home.',
-          generalComments: 'الطالب متفاعل وملتزم بالحضور والواجبات.',
-        },
-      },
-    ];
+    return [];
   }, [activeStudent.id, activeStudent.fullNameAr, activeStudent.enrolledPathAr, activeStudent.language, adminFeedbackList]);
 
   const studentFees = useMemo(() => {
