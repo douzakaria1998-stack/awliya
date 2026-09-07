@@ -39,6 +39,8 @@ import {
 import { mockAdminStudents, mockAdminParents, mockCurricula, mockTwoWayFeedback } from '@/data/adminMock';
 import { useTheme } from './ThemeContext';
 import { useAuth } from './AuthContext';
+import { supabase } from '@/lib/supabase/client';
+import { fetchParentPortalBundle } from '@/services/portalService';
 
 const emptyAttendanceSummary: AttendanceSummary = {
   totalDays: 0,
@@ -162,6 +164,44 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     const storedSettings = getItem<NotificationSettings>(STORAGE_KEYS.NOTIFICATION_SETTINGS);
     if (storedSettings) setNotificationSettings(storedSettings);
+
+    // Live Supabase sync for Parent Portal
+    const syncFromSupabase = async () => {
+      try {
+        const bundle = await fetchParentPortalBundle();
+        if (bundle.students && bundle.students.length > 0) {
+          setStudents(bundle.students);
+          if (!activeStudentId || !bundle.students.some((s) => s.id === activeStudentId)) {
+            setActiveStudentIdState(bundle.students[0].id);
+          }
+        }
+        if (bundle.notifications && bundle.notifications.length > 0) {
+          setNotifications(bundle.notifications);
+        }
+      } catch (err) {
+        console.warn('Supabase parent portal sync notice:', err);
+      }
+    };
+
+    syncFromSupabase();
+
+    // Supabase Realtime Channel for live attendance and announcements
+    const channel = supabase
+      .channel('portal-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, () => {
+        syncFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => {
+        syncFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'homeworks' }, () => {
+        syncFromSupabase();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Dynamically resolve students belonging to the authenticated parent

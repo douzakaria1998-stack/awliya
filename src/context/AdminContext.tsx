@@ -42,6 +42,10 @@ import { getItem, setItem } from '@/lib/localStorage';
 import { generateAutoPassword } from '@/lib/utils';
 import { useStudent } from '@/context/StudentContext';
 import { STORAGE_KEYS } from '@/lib/constants';
+import { supabase } from '@/lib/supabase/client';
+import { fetchStudentsFromDb, createStudentInDb, updateStudentInDb, deleteStudentFromDb } from '@/services/studentService';
+import { fetchParentsFromDb, createParentInDb } from '@/services/parentService';
+import { fetchGroupsFromDb, fetchTeachersFromDb } from '@/services/groupService';
 
 interface AdminContextType {
   // Current user & role & auth
@@ -578,11 +582,66 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       window.addEventListener('storage', handleSync);
     }
 
+    // Live Supabase Sync & Realtime Data Sync
+    const syncFromSupabase = async () => {
+      try {
+        const [dbStudents, dbParents, dbGroups, dbTeachers] = await Promise.all([
+          fetchStudentsFromDb().catch(() => []),
+          fetchParentsFromDb().catch(() => []),
+          fetchGroupsFromDb().catch(() => []),
+          fetchTeachersFromDb().catch(() => []),
+        ]);
+
+        if (dbStudents && dbStudents.length > 0) {
+          setStudents(dbStudents);
+          setItem(ADMIN_STORAGE_KEYS.STUDENTS, dbStudents);
+        }
+        if (dbParents && dbParents.length > 0) {
+          setParents(dbParents);
+          setItem(ADMIN_STORAGE_KEYS.PARENTS, dbParents);
+        }
+        if (dbGroups && dbGroups.length > 0) {
+          setGroups(dbGroups);
+          setItem(ADMIN_STORAGE_KEYS.GROUPS, dbGroups);
+        }
+        if (dbTeachers && dbTeachers.length > 0) {
+          setTeachers(dbTeachers);
+          setItem(ADMIN_STORAGE_KEYS.TEACHERS, dbTeachers);
+        }
+      } catch (err) {
+        console.warn('Supabase sync notice:', err);
+      }
+    };
+
+    syncFromSupabase();
+
+    // Supabase Realtime Channel
+    const channel = supabase
+      .channel('admin-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, () => {
+        fetchStudentsFromDb().then((fresh) => {
+          if (fresh?.length) {
+            setStudents(fresh);
+            setItem(ADMIN_STORAGE_KEYS.STUDENTS, fresh);
+          }
+        }).catch(() => {});
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'parents' }, () => {
+        fetchParentsFromDb().then((fresh) => {
+          if (fresh?.length) {
+            setParents(fresh);
+            setItem(ADMIN_STORAGE_KEYS.PARENTS, fresh);
+          }
+        }).catch(() => {});
+      })
+      .subscribe();
+
     return () => {
       if (typeof window !== 'undefined') {
         window.removeEventListener('awliya-data-sync', handleSync);
         window.removeEventListener('storage', handleSync);
       }
+      supabase.removeChannel(channel);
     };
   }, []);
 
@@ -877,6 +936,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         });
       }
 
+      // Save asynchronously to Supabase
+      createStudentInDb(data).catch((err) => {
+        console.warn('Supabase create student warning:', err);
+      });
+
       logAudit(
         `إضافة طالب جديد: ${newStudent.fullNameAr}`,
         `Added new student: ${newStudent.fullNameEn}`,
@@ -891,6 +955,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const updateStudent = useCallback(
     (studentId: string, updates: Partial<AdminStudent>) => {
+      // Save asynchronously to Supabase
+      updateStudentInDb(studentId, updates).catch((err) => {
+        console.warn('Supabase update student warning:', err);
+      });
+
       setStudents((prev) => {
         const prevStudent = prev.find((s) => s.id === studentId);
         const updated = prev.map((s) => (s.id === studentId ? { ...s, ...updates } : s));
@@ -988,6 +1057,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         status: data.status || 'active',
         createdAt: new Date().toISOString().substring(0, 10),
       };
+
+      // Save asynchronously to Supabase
+      createParentInDb(data).catch((err) => {
+        console.warn('Supabase create parent warning:', err);
+      });
 
       setParents((prev) => {
         const updated = [newParent, ...prev];
