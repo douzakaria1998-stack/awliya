@@ -262,8 +262,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
     return getItem<boolean>(ADMIN_STORAGE_KEYS.IS_LOGGED_IN) ?? false;
   });
-  const [adminUsers, setAdminUsers] = useState<AdminUser[]>(mockAdminUsers);
-  const [currentAdminId, setCurrentAdminId] = useState<string>(mockAdminUsers[0].id);
+  const [adminStaffUsers, setAdminStaffUsers] = useState<AdminUser[]>(() => {
+    const sUsers = getItem<AdminUser[]>(ADMIN_STORAGE_KEYS.ADMIN_USERS);
+    if (sUsers?.length) {
+      return sUsers.filter((u) => u.role !== 'teacher');
+    }
+    return mockAdminUsers.filter((u) => u.role !== 'teacher');
+  });
+  const [currentAdminId, setCurrentAdminId] = useState<string>('usr-super-01');
   const [activeTab, setActiveTabState] = useState<AdminTabKey>('overview');
 
   const setActiveTab = useCallback((tab: AdminTabKey) => {
@@ -353,7 +359,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (typeof sLoggedIn === 'boolean') setIsAdminLoggedIn(sLoggedIn);
 
     const sUsers = getItem<AdminUser[]>(ADMIN_STORAGE_KEYS.ADMIN_USERS);
-    if (sUsers?.length) setAdminUsers(sUsers);
+    if (sUsers?.length) setAdminStaffUsers(sUsers.filter((u) => u.role !== 'teacher'));
 
     const sAdminId = getItem<string>(ADMIN_STORAGE_KEYS.CURRENT_USER_ID);
     if (sAdminId) setCurrentAdminId(sAdminId);
@@ -682,6 +688,31 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const adminUsers = useMemo<AdminUser[]>(() => {
+    const teacherUsers: AdminUser[] = (teachers || []).map((t) => ({
+      id: t.id,
+      fullNameAr: t.fullNameAr,
+      fullNameEn: t.fullNameEn || t.fullNameAr,
+      username: t.username,
+      email: t.email,
+      role: 'teacher',
+      phone: t.phone,
+      departmentAr: `هيئة التدريس (${(t.languagesTaught || ['English']).join(' & ')})`,
+      departmentEn: `Teaching Staff (${(t.languagesTaught || ['English']).join(' & ')})`,
+      languagesTaught: t.languagesTaught,
+      specialization: t.specialization,
+      experience: t.experience,
+      assignedGroups: t.assignedGroupIds,
+      createdAt: t.createdAt,
+      status: t.status as any,
+    }));
+
+    const teacherIds = new Set(teacherUsers.map((t) => t.id));
+    const nonTeacherStaff = adminStaffUsers.filter((u) => u.role !== 'teacher' && !teacherIds.has(u.id));
+
+    return [...nonTeacherStaff, ...teacherUsers];
+  }, [adminStaffUsers, teachers]);
 
   const currentAdmin = useMemo(() => {
     return adminUsers.find((u) => u.id === currentAdminId) || adminUsers[0];
@@ -1372,38 +1403,21 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       };
 
       // Persist to Supabase
-      createTeacherInDb(data).catch((err) => {
+      createTeacherInDb(data).then((created) => {
+        if (created?.id && created.id !== newTeacher.id) {
+          setTeachers((prev) => {
+            const updated = prev.map((t) => (t.id === newTeacher.id ? { ...t, id: created.id } : t));
+            setItem(ADMIN_STORAGE_KEYS.TEACHERS, updated);
+            return updated;
+          });
+        }
+      }).catch((err) => {
         console.warn('Supabase create teacher warning:', err);
       });
 
       setTeachers((prev) => {
         const updated = [newTeacher, ...prev];
         setItem(ADMIN_STORAGE_KEYS.TEACHERS, updated);
-        return updated;
-      });
-
-      // Also add to adminUsers
-      const newAdminUser: AdminUser = {
-        id: newTeacher.id,
-        fullNameAr: newTeacher.fullNameAr,
-        fullNameEn: newTeacher.fullNameEn,
-        username: newTeacher.username,
-        email: newTeacher.email,
-        role: 'teacher',
-        phone: newTeacher.phone,
-        departmentAr: `هيئة التدريس (${newTeacher.languagesTaught.join(' & ')})`,
-        departmentEn: `Teaching Staff (${newTeacher.languagesTaught.join(' & ')})`,
-        languagesTaught: newTeacher.languagesTaught,
-        specialization: newTeacher.specialization,
-        experience: newTeacher.experience,
-        assignedGroups: newTeacher.assignedGroupIds,
-        createdAt: newTeacher.createdAt,
-        status: 'active',
-      };
-
-      setAdminUsers((prev) => {
-        const updated = [newAdminUser, ...prev];
-        setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
         return updated;
       });
 
@@ -1429,25 +1443,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return updated;
       });
 
-      setAdminUsers((prev) => {
-        const updated = prev.map((u) => {
-          if (u.id === teacherId) {
-            return {
-              ...u,
-              fullNameAr: updates.fullNameAr || u.fullNameAr,
-              fullNameEn: updates.fullNameEn || u.fullNameEn,
-              username: updates.username || u.username,
-              email: updates.email || u.email,
-              phone: updates.phone || u.phone,
-              languagesTaught: updates.languagesTaught || u.languagesTaught,
-            };
-          }
-          return u;
-        });
-        setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
-        return updated;
-      });
-
       logAudit(
         `تحديث بيانات المعلم: ${updates.fullNameAr || teacherId}${updates.password ? ' (تم تغيير كلمة المرور)' : ''}`,
         `Updated teacher details for ${teacherId}`,
@@ -1466,12 +1461,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       setTeachers((prev) => {
         const updated = prev.filter((t) => t.id !== teacherId);
         setItem(ADMIN_STORAGE_KEYS.TEACHERS, updated);
-        return updated;
-      });
-
-      setAdminUsers((prev) => {
-        const updated = prev.filter((u) => u.id !== teacherId);
-        setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
         return updated;
       });
 
@@ -2677,11 +2666,21 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         status: 'active',
       };
 
-      setAdminUsers((prev) => {
-        const updated = [newUser, ...prev];
-        setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
-        return updated;
-      });
+      if (newUser.role === 'teacher') {
+        addTeacher({
+          fullNameAr: newUser.fullNameAr,
+          fullNameEn: newUser.fullNameEn,
+          username: newUser.username,
+          email: newUser.email,
+          phone: newUser.phone,
+        });
+      } else {
+        setAdminStaffUsers((prev) => {
+          const updated = [newUser, ...prev];
+          setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
+          return updated;
+        });
+      }
 
       logAudit(
         `إضافة مستخدم إداري جديد: ${newUser.fullNameAr} (${newUser.role})`,
@@ -2689,16 +2688,21 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         'role'
       );
     },
-    [logAudit]
+    [addTeacher, logAudit]
   );
 
   const updateAdminUser = useCallback(
     (userId: string, updates: Partial<AdminUser>) => {
-      setAdminUsers((prev) => {
-        const updated = prev.map((u) => (u.id === userId ? { ...u, ...updates } : u));
-        setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
-        return updated;
-      });
+      const isTeacher = teachers.some((t) => t.id === userId);
+      if (isTeacher) {
+        updateTeacher(userId, updates as Partial<AdminTeacher>);
+      } else {
+        setAdminStaffUsers((prev) => {
+          const updated = prev.map((u) => (u.id === userId ? { ...u, ...updates } : u));
+          setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
+          return updated;
+        });
+      }
       const target = adminUsers.find((u) => u.id === userId);
       if (target) {
         logAudit(
@@ -2708,17 +2712,22 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         );
       }
     },
-    [adminUsers, logAudit]
+    [adminUsers, teachers, updateTeacher, logAudit]
   );
 
   const deleteAdminUser = useCallback(
     (userId: string) => {
+      const isTeacher = teachers.some((t) => t.id === userId);
+      if (isTeacher) {
+        deleteTeacher(userId);
+      } else {
+        setAdminStaffUsers((prev) => {
+          const updated = prev.filter((u) => u.id !== userId);
+          setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
+          return updated;
+        });
+      }
       const target = adminUsers.find((u) => u.id === userId);
-      setAdminUsers((prev) => {
-        const updated = prev.filter((u) => u.id !== userId);
-        setItem(ADMIN_STORAGE_KEYS.ADMIN_USERS, updated);
-        return updated;
-      });
       if (target) {
         logAudit(
           `حذف حساب إداري: ${target.fullNameAr} (@${target.username})`,
@@ -2727,7 +2736,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         );
       }
     },
-    [adminUsers, logAudit]
+    [adminUsers, teachers, deleteTeacher, logAudit]
   );
 
   // ==========================================
