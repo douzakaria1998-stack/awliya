@@ -1,11 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Check,
   FileText,
   Clock,
   Layers,
+  BookOpen,
+  Award,
+  Bell,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  ArrowUpRight,
 } from 'lucide-react';
 import { useStudent } from '@/context/StudentContext';
 import { useAuth } from '@/context/AuthContext';
@@ -31,6 +38,7 @@ export function DashboardScreen({
     homeworkList,
     teacherFeedback,
     academicLevels,
+    notifications,
   } = useStudent();
   const { theme } = useTheme();
   const { t, language, isRTL } = useLanguage();
@@ -40,7 +48,77 @@ export function DashboardScreen({
     activeStudent.currentLevel,
     currentLevelObj?.color || (currentLevelObj as any)?.themeColor
   );
-  const revisionHomework = homeworkList.find((h) => h.status === 'needs_revision');
+
+  // Derive rich, dynamic notifications linked directly with Homework and Student updates
+  const recentHomeworkNotifications = useMemo(() => {
+    // 1. Revision homework (highest priority)
+    const revision = (homeworkList || [])
+      .filter((h) => h.status === 'needs_revision')
+      .map((h) => ({
+        id: `hw-rev-${h.id}`,
+        homeworkId: h.id,
+        type: 'revision' as const,
+        title: language === 'ar' ? 'واجب يحتاج إلى مراجعة وتعديل' : language === 'fr' ? 'Devoir à réviser' : 'Homework Needs Revision',
+        description: h.titleAr || t.homeworkNeedsRevisionDesc,
+        time: h.dueDate ? (language === 'ar' ? `الموعد: ${h.dueDate}` : `Due: ${h.dueDate}`) : t.twoHoursAgo,
+        icon: AlertCircle,
+        colorClass: 'bg-amber-50 dark:bg-amber-950/40 text-amber-500 border-amber-200/70 dark:border-amber-800/60',
+        badgeText: language === 'ar' ? 'مراجعة' : language === 'fr' ? 'À réviser' : 'Revision',
+        badgeClass: 'bg-amber-500 text-white',
+      }));
+
+    // 2. Pending & Not Started Homework
+    const pending = (homeworkList || [])
+      .filter((h) => h.status === 'pending' || h.status === 'not_started')
+      .map((h) => ({
+        id: `hw-pen-${h.id}`,
+        homeworkId: h.id,
+        type: 'pending' as const,
+        title: language === 'ar' ? 'واجب منزلي مطلوب تسليمه' : language === 'fr' ? 'Devoir à rendre' : 'Homework Assigned',
+        description: `${h.titleAr} • ${h.subjectAr || (language === 'ar' ? 'اللغة الإنجليزية' : 'English')}`,
+        time: h.dueDate ? (language === 'ar' ? `الموعد: ${h.dueDate}` : `Due: ${h.dueDate}`) : (language === 'ar' ? 'قريباً' : 'Soon'),
+        icon: BookOpen,
+        colorClass: 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border-indigo-200/70 dark:border-indigo-800/60',
+        badgeText: language === 'ar' ? 'مطلوب' : language === 'fr' ? 'Requis' : 'Pending',
+        badgeClass: 'bg-indigo-600 text-white',
+      }));
+
+    // 3. Completed & Evaluated Homework
+    const completed = (homeworkList || [])
+      .filter((h) => h.status === 'completed')
+      .map((h) => ({
+        id: `hw-comp-${h.id}`,
+        homeworkId: h.id,
+        type: 'completed' as const,
+        title: language === 'ar' ? 'تم تقييم واعتماد الواجب المنزلي' : language === 'fr' ? 'Devoir évalué' : 'Homework Evaluated',
+        description: `${h.titleAr} • ${h.score !== undefined ? (language === 'ar' ? `الدرجة: ${h.score}/${h.totalScore || 20}` : `Score: ${h.score}/${h.totalScore || 20}`) : (language === 'ar' ? 'مكتمل بنجاح' : 'Completed')}`,
+        time: h.dueDate || (language === 'ar' ? 'مكتمل' : 'Completed'),
+        icon: Award,
+        colorClass: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200/70 dark:border-emerald-800/60',
+        badgeText: h.score !== undefined ? `${h.score}/${h.totalScore || 20}` : (language === 'ar' ? 'مكتمل' : 'Done'),
+        badgeClass: 'bg-emerald-600 text-white',
+      }));
+
+    // 4. System notifications for this student
+    const studentNotifs = (notifications || [])
+      .filter((n) => !n.studentId || n.studentId === activeStudent.id)
+      .map((n) => ({
+        id: `sys-${n.id}`,
+        homeworkId: (n.actionPayload as any)?.homeworkId || (n.actionPayload as any)?.itemId,
+        type: 'system' as const,
+        title: n.titleAr || (language === 'ar' ? 'إشعار جديد' : 'New Notification'),
+        description: n.messageAr || '',
+        time: n.date || (language === 'ar' ? 'اليوم' : 'Today'),
+        icon: Bell,
+        colorClass: 'bg-cyan-50 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400 border-cyan-200/70 dark:border-cyan-800/60',
+        badgeText: language === 'ar' ? 'إشعار' : 'Notice',
+        badgeClass: 'bg-cyan-600 text-white',
+      }));
+
+    const all = [...revision, ...pending, ...completed, ...studentNotifs];
+    return all.slice(0, 3);
+  }, [homeworkList, notifications, activeStudent.id, language, t]);
+
   const latestFeedback = teacherFeedback[0];
 
   const studentFirstName = activeStudent.fullNameAr.split(' ')[0] || 'Youssef';
@@ -244,77 +322,131 @@ export function DashboardScreen({
       </div>
 
       {/* =========================================================================
-          3. Notifications Section
+          3. Notifications & Homework Alerts Section
           ========================================================================= */}
       <div style={{ marginBottom: '18px' }}>
-        <h3
-          className="text-slate-900 dark:text-white"
-          style={{
-            fontSize: '16px',
-            fontWeight: '700',
-            lineHeight: '24px',
-            marginBottom: '10px',
-            paddingRight: isRTL ? '4px' : '0',
-            paddingLeft: isRTL ? '0' : '4px',
-          }}
-        >
-          {t.recentNotifications}
-        </h3>
+        <div className="flex items-center justify-between" style={{ marginBottom: '10px' }}>
+          <h3
+            className="text-slate-900 dark:text-white"
+            style={{
+              fontSize: '16px',
+              fontWeight: '700',
+              lineHeight: '24px',
+              paddingRight: isRTL ? '4px' : '0',
+              paddingLeft: isRTL ? '0' : '4px',
+            }}
+          >
+            {t.recentNotifications}
+          </h3>
+
+          <button
+            type="button"
+            onClick={() => onNavigate('performance', 'homework')}
+            className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 flex items-center gap-1 cursor-pointer transition-colors"
+          >
+            <span>{language === 'ar' ? 'الواجبات المنزلية' : language === 'fr' ? 'Devoirs' : 'Homework'}</span>
+            {isRTL ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+          </button>
+        </div>
 
         {/* Notification Cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {/* Card 1: Homework Revision (only if student actually has revision homework) */}
-          {revisionHomework && (
+          {recentHomeworkNotifications.length > 0 ? (
+            recentHomeworkNotifications.map((notif) => {
+              const IconComp = notif.icon;
+              return (
+                <div
+                  key={notif.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => {
+                    if (notif.homeworkId && onOpenHomeworkDetail) {
+                      onOpenHomeworkDetail(notif.homeworkId);
+                    } else {
+                      onNavigate('performance', 'homework');
+                    }
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'homework')}
+                  className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                  style={{
+                    minHeight: '64px',
+                    padding: '12px 16px',
+                    borderRadius: '16px',
+                    gap: '12px',
+                  }}
+                >
+                  <div className="flex items-center min-w-0" style={{ gap: '12px' }}>
+                    <div
+                      className={`rounded-xl flex items-center justify-center shrink-0 border ${notif.colorClass}`}
+                      style={{ width: '38px', height: '38px', minWidth: '38px' }}
+                    >
+                      <IconComp size={18} />
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h4 className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm">
+                          {notif.title}
+                        </h4>
+                        {notif.badgeText && (
+                          <span
+                            className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${notif.badgeClass} shrink-0`}
+                          >
+                            {notif.badgeText}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-slate-500 dark:text-slate-400 font-medium truncate text-[11.5px]">
+                        {notif.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-slate-400 font-semibold whitespace-nowrap text-[11px]">
+                      {notif.time}
+                    </span>
+                    <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      {isRTL ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
             <div
               role="button"
               tabIndex={0}
-              onClick={() => {
-                if (onOpenHomeworkDetail) onOpenHomeworkDetail(revisionHomework.id);
-                else onNavigate('performance', 'homework');
-              }}
+              onClick={() => onNavigate('performance', 'homework')}
               onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'homework')}
-              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex items-center justify-between cursor-pointer"
+              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-700 transition-all flex items-center justify-between cursor-pointer"
               style={{
                 minHeight: '60px',
                 padding: '12px 16px',
-                borderRadius: '14px',
+                borderRadius: '16px',
                 gap: '12px',
               }}
             >
               <div className="flex items-center min-w-0" style={{ gap: '12px' }}>
                 <div
-                  className="rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 border border-amber-200/70 dark:border-amber-800/60 flex items-center justify-center shrink-0"
-                  style={{ width: '36px', height: '36px', minWidth: '36px' }}
+                  className="rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 border border-indigo-200/70 dark:border-indigo-800/60 flex items-center justify-center shrink-0"
+                  style={{ width: '38px', height: '38px', minWidth: '38px' }}
                 >
-                  <FileText size={18} />
+                  <BookOpen size={18} />
                 </div>
                 <div className="min-w-0">
-                  <h4
-                    className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm"
-                    style={{ marginBottom: '2px' }}
-                  >
-                    {t.homeworkNeedsRevision}
+                  <h4 className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm" style={{ marginBottom: '2px' }}>
+                    {language === 'ar' ? 'قسم الواجبات والأنشطة المدرسية' : 'Homework & Activities Section'}
                   </h4>
-                  <p
-                    className="text-slate-400 font-medium truncate text-[11px]"
-                  >
-                    {revisionHomework.titleAr || t.homeworkNeedsRevisionDesc}
+                  <p className="text-slate-400 font-medium truncate text-[11px]">
+                    {language === 'ar' ? 'اضغط هنا لمتابعة المهام والواجبات المطلوبة لهذا الأسبوع' : 'Click here to view assigned homework and tasks'}
                   </p>
                 </div>
               </div>
-
-              <span
-                className="text-slate-400 font-semibold whitespace-nowrap shrink-0 text-[11px]"
-              >
-                {t.twoHoursAgo}
-              </span>
-            </div>
-          )}
-
-          {/* Fallback when no notifications */}
-          {!revisionHomework && (
-            <div className="bg-white dark:bg-slate-850 border border-slate-200/70 dark:border-slate-800 shadow-2xs rounded-2xl p-4 text-center text-xs text-slate-400 font-medium">
-              {language === 'ar' ? 'لا توجد تنبيهات جديدة في الوقت الحالي' : 'No new notifications at this time'}
+              <div className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 text-xs font-bold shrink-0">
+                <span>{language === 'ar' ? 'فتح' : 'Open'}</span>
+                {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+              </div>
             </div>
           )}
         </div>
