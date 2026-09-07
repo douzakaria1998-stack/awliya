@@ -355,7 +355,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     return getItem<AdminHomeworkAssignment[]>(STORAGE_KEYS.ADMIN_HOMEWORK) || [];
   });
   const [adminFeedbackList, setAdminFeedbackList] = useState<any[]>(() => {
-    return getItem<any[]>(STORAGE_KEYS.ADMIN_FEEDBACK) || mockTwoWayFeedback;
+    return getItem<any[]>(STORAGE_KEYS.ADMIN_FEEDBACK) || [];
   });
 
   // Sync on parent change and listen to window storage and custom sync events
@@ -372,7 +372,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         ) || {};
       const freshAttendance = getItem<AttendanceSession[]>(STORAGE_KEYS.ADMIN_ATTENDANCE) || [];
       const freshAdminHw = getItem<AdminHomeworkAssignment[]>(STORAGE_KEYS.ADMIN_HOMEWORK) || [];
-      const freshFeedback = getItem<any[]>(STORAGE_KEYS.ADMIN_FEEDBACK) || mockTwoWayFeedback;
+      const freshFeedback = getItem<any[]>(STORAGE_KEYS.ADMIN_FEEDBACK) || [];
       const freshNotifs = getItem<Notification[]>(STORAGE_KEYS.NOTIFICATIONS);
 
       setCurricula(freshCurricula);
@@ -877,10 +877,10 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   const teacherFeedback = useMemo(() => {
     if (!activeStudent.id) return [];
 
-    // 1. Check live feedback recorded by teachers in backoffice
-    const liveList = adminFeedbackList.length > 0 ? adminFeedbackList : (getItem<any[]>('myschool_admin_feedback_v11') || []);
+    // 1. Check live feedback recorded by teachers in backoffice / Supabase
+    const liveList = adminFeedbackList.length > 0 ? adminFeedbackList : (getItem<any[]>(STORAGE_KEYS.ADMIN_FEEDBACK) || []);
     const matched: TeacherFeedback[] = liveList
-      .filter((fb) => fb.studentId === activeStudent.id)
+      .filter((fb) => fb && fb.studentId === activeStudent.id)
       .map((fb) => {
         let msg = '';
         if (fb.teacherFeedback) {
@@ -906,24 +906,18 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         return {
           id: fb.id,
           studentId: fb.studentId,
-          teacherNameAr: fb.teacherName || 'د. طارق المنصور',
-          messageAr: msg || `السلام عليكم ورحمة الله، ${activeStudent.fullNameAr || 'الطالب'} ما شاء الله طالب مجتهد وذكي جداً. أظهر تفاعلاً رائعاً في ورشة المحادثة والنطق بالإنجليزية، ونرجو منكم حثه على الاستماع والتكرار اليومي في المنزل لترسيخ المفردات والطلاقة اللغوية.`,
-          date: fb.date || '2026-09-03',
-          subjectAr: activeStudent.enrolledPathAr?.includes('فرنسية') || activeStudent.language === 'French' ? 'اللغة الفرنسية' : 'اللغة الإنجليزية واللغة الفرنسية',
+          teacherNameAr: fb.teacherName || fb.teacherNameAr || (fb.teacherFeedback ? 'توجيه المعلم' : ''),
+          messageAr: msg,
+          date: fb.date || new Date().toISOString().split('T')[0],
+          subjectAr: activeStudent.enrolledPathAr?.includes('فرنسية') || activeStudent.language === 'French' ? 'اللغة الفرنسية' : 'اللغة الإنجليزية',
           isRead: true,
-          badgeAr: 'طالب متميز',
-          teacherRoleAr: 'اللغة الإنجليزية واللغة الفرنسية',
+          badgeAr: fb.badgeAr || 'ملاحظة المعلم',
+          teacherRoleAr: fb.teacherRoleAr || (activeStudent.language === 'French' ? 'اللغة الفرنسية' : 'اللغة الإنجليزية'),
           teacherFeedbackDetails: fb.teacherFeedback,
         };
       });
 
-    if (matched.length > 0) return matched;
-
-    if (mockTeacherFeedbackMap[activeStudent.id] && mockTeacherFeedbackMap[activeStudent.id].length > 0) {
-      return mockTeacherFeedbackMap[activeStudent.id];
-    }
-
-    return [];
+    return matched;
   }, [activeStudent.id, activeStudent.fullNameAr, activeStudent.enrolledPathAr, activeStudent.language, adminFeedbackList]);
 
   const studentFees = useMemo(() => {
