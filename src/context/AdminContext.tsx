@@ -2430,6 +2430,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (newAsm.studentId) {
+        // Persist skills to Supabase
+        updateStudentInDb(newAsm.studentId, {
+          skills: newAsm.scores,
+          averagePerformance: newAsm.scores.overall,
+        }).catch((err) => {
+          console.warn('Supabase update student skills warning:', err);
+        });
+
         setStudents((prev) => {
           const updated = prev.map((s) =>
             s.id === newAsm.studentId

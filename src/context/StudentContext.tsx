@@ -41,6 +41,8 @@ import { useTheme } from './ThemeContext';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { fetchParentPortalBundle } from '@/services/portalService';
+import { fetchStudentsFromDb } from '@/services/studentService';
+import { fetchParentsFromDb } from '@/services/parentService';
 
 const emptyAttendanceSummary: AttendanceSummary = {
   totalDays: 0,
@@ -168,16 +170,24 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     // Live Supabase sync for Parent Portal
     const syncFromSupabase = async () => {
       try {
-        const bundle = await fetchParentPortalBundle();
-        if (bundle.students && bundle.students.length > 0) {
-          setStudents(bundle.students);
-          if (!activeStudentId || !bundle.students.some((s) => s.id === activeStudentId)) {
-            setActiveStudentIdState(bundle.students[0].id);
-          }
+        const [dbStudents, dbParents] = await Promise.all([
+          fetchStudentsFromDb().catch(() => []),
+          fetchParentsFromDb().catch(() => []),
+        ]);
+
+        if (dbStudents && dbStudents.length > 0) {
+          setItem(STORAGE_KEYS.ADMIN_STUDENTS, dbStudents);
         }
+        if (dbParents && dbParents.length > 0) {
+          setItem(STORAGE_KEYS.ADMIN_PARENTS, dbParents);
+        }
+
+        const bundle = await fetchParentPortalBundle();
         if (bundle.notifications && bundle.notifications.length > 0) {
           setNotifications(bundle.notifications);
         }
+
+        syncParentStudents();
       } catch (err) {
         console.warn('Supabase parent portal sync notice:', err);
       }
@@ -185,9 +195,15 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     syncFromSupabase();
 
-    // Supabase Realtime Channel for live attendance and announcements
+    // Supabase Realtime Channel for live students, attendance, homeworks and announcements
     const channel = supabase
       .channel('portal-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, () => {
+        syncFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'parent_students' }, () => {
+        syncFromSupabase();
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, () => {
         syncFromSupabase();
       })
@@ -260,6 +276,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     const parentChildren: Student[] = [];
     const seenIds = new Set<string>();
 
+    const allAsms = getItem<any[]>(STORAGE_KEYS.ADMIN_ASSESSMENTS) || [];
+
     // 1. Check all admin students linked to this parent (PRIMARY SOURCE OF TRUTH)
     allAdminStudents.forEach((adminStu) => {
       if (isDalila(adminStu)) return;
@@ -270,6 +288,14 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       if (isLinked && !seenIds.has(adminStu.id)) {
         seenIds.add(adminStu.id);
         const nameParts = adminStu.fullNameAr.trim().split(' ');
+        
+        // Find latest assessment for this student if any
+        const studentLatestAsm = allAsms.find((a: any) => a.studentId === adminStu.id && a.scores);
+        const resolvedSkills = adminStu.skills || studentLatestAsm?.scores || { listening: 0, speaking: 0, reading: 0, writing: 0, overall: 0 };
+        const resolvedPerf = adminStu.averagePerformance !== undefined && adminStu.averagePerformance !== null
+          ? adminStu.averagePerformance
+          : (studentLatestAsm?.scores?.overall !== undefined ? studentLatestAsm.scores.overall : 0);
+
         parentChildren.push({
           id: adminStu.id,
           parentId: currentParentRecord.id,
@@ -292,9 +318,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           age: 10,
           language: adminStu.language,
           cefrLevel: adminStu.cefrLevel,
-          attendanceRate: adminStu.attendanceRate !== undefined ? adminStu.attendanceRate : 0,
-          averagePerformance: adminStu.averagePerformance !== undefined ? adminStu.averagePerformance : 0,
-          skills: adminStu.skills || { listening: 0, speaking: 0, reading: 0, writing: 0, overall: 0 },
+          attendanceRate: adminStu.attendanceRate !== undefined && adminStu.attendanceRate !== null ? adminStu.attendanceRate : 0,
+          averagePerformance: resolvedPerf,
+          skills: resolvedSkills,
         });
       }
     });
@@ -354,6 +380,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   const [adminHomeworkList, setAdminHomeworkList] = useState<AdminHomeworkAssignment[]>(() => {
     return getItem<AdminHomeworkAssignment[]>(STORAGE_KEYS.ADMIN_HOMEWORK) || [];
   });
+  const [adminAssessmentsList, setAdminAssessmentsList] = useState<any[]>(() => {
+    return getItem<any[]>(STORAGE_KEYS.ADMIN_ASSESSMENTS) || [];
+  });
   const [adminFeedbackList, setAdminFeedbackList] = useState<any[]>(() => {
     return getItem<any[]>(STORAGE_KEYS.ADMIN_FEEDBACK) || [];
   });
@@ -372,6 +401,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         ) || {};
       const freshAttendance = getItem<AttendanceSession[]>(STORAGE_KEYS.ADMIN_ATTENDANCE) || [];
       const freshAdminHw = getItem<AdminHomeworkAssignment[]>(STORAGE_KEYS.ADMIN_HOMEWORK) || [];
+      const freshAdminAssessments = getItem<any[]>(STORAGE_KEYS.ADMIN_ASSESSMENTS) || [];
       const freshFeedback = getItem<any[]>(STORAGE_KEYS.ADMIN_FEEDBACK) || [];
       const freshNotifs = getItem<Notification[]>(STORAGE_KEYS.NOTIFICATIONS);
 
@@ -380,6 +410,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       setStudentLevelScores(freshScores);
       setAttendanceSessions(freshAttendance);
       setAdminHomeworkList(freshAdminHw);
+      setAdminAssessmentsList(freshAdminAssessments);
       setAdminFeedbackList(freshFeedback);
       if (freshNotifs) {
         setNotifications(freshNotifs);
@@ -397,6 +428,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         e.key === STORAGE_KEYS.ADMIN_STUDENT_LEVEL_SCORES ||
         e.key === STORAGE_KEYS.ADMIN_ATTENDANCE ||
         e.key === STORAGE_KEYS.ADMIN_HOMEWORK ||
+        e.key === STORAGE_KEYS.ADMIN_ASSESSMENTS ||
         e.key === STORAGE_KEYS.ADMIN_FEEDBACK ||
         e.key === STORAGE_KEYS.NOTIFICATIONS
       ) {
@@ -853,7 +885,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     if (!activeStudent.id) return [];
 
     // 1. Check live assessments recorded by teachers/admins in backoffice
-    const liveAdminAssessments = getItem<any[]>('myschool_admin_assessments_v11') || [];
+    const liveAdminAssessments = adminAssessmentsList.length > 0
+      ? adminAssessmentsList
+      : (getItem<any[]>(STORAGE_KEYS.ADMIN_ASSESSMENTS) || []);
     const matched: Assessment[] = liveAdminAssessments
       .filter((a) => a.studentId === activeStudent.id)
       .map((a) => ({
@@ -872,7 +906,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     if (matched.length > 0) return matched;
     return mockAssessmentsMap[activeStudent.id] || [];
-  }, [activeStudent.id, activeStudent.enrolledPathAr, activeStudent.language, activeStudent.currentLevel]);
+  }, [activeStudent.id, activeStudent.enrolledPathAr, activeStudent.language, activeStudent.currentLevel, adminAssessmentsList]);
 
   const teacherFeedback = useMemo(() => {
     if (!activeStudent.id) return [];

@@ -53,8 +53,8 @@ export async function fetchParentPortalBundle(parentId?: string) {
     status: s.status || 'active',
     enrollmentDate: s.enrollment_date || s.created_at?.split('T')[0] || '',
     age: s.date_of_birth ? new Date().getFullYear() - new Date(s.date_of_birth).getFullYear() : 11,
-    attendanceRate: Number(s.attendance_rate || 95),
-    averagePerformance: Number(s.average_performance || 85),
+    attendanceRate: Number(s.attendance_rate !== null && s.attendance_rate !== undefined ? s.attendance_rate : 0),
+    averagePerformance: Number(s.average_performance !== null && s.average_performance !== undefined ? s.average_performance : 0),
     skills: {
       listening: Number(s.skills_listening !== null && s.skills_listening !== undefined ? s.skills_listening : 0),
       speaking: Number(s.skills_speaking !== null && s.skills_speaking !== undefined ? s.skills_speaking : 0),
