@@ -57,6 +57,7 @@ import {
 } from '@/services/groupService';
 import { saveAttendanceRecordsInDb } from '@/services/attendanceService';
 import { createHomeworkInDb, evaluateHomeworkInDb } from '@/services/homeworkService';
+import { saveCustomLevelColor } from '@/lib/themes';
 
 interface AdminContextType {
   // Current user & role & auth
@@ -1685,6 +1686,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   // ==========================================
   const addCurriculumLevel = useCallback(
     (levelData: CurriculumLevel) => {
+      if (levelData.color) {
+        saveCustomLevelColor(levelData.levelNumber, levelData.color);
+      }
+
       setCurricula((prev) => {
         const existingIdx = prev.findIndex(
           (c) => c.levelNumber === levelData.levelNumber && c.language === levelData.language
@@ -1717,6 +1722,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const updateCurriculumLevel = useCallback(
     (oldLevelNumber: number, lang: 'English' | 'French', levelData: CurriculumLevel) => {
+      if (levelData.color) {
+        saveCustomLevelColor(levelData.levelNumber, levelData.color);
+      }
+
       setCurricula((prev) => {
         const updated = prev.map((c) =>
           c.levelNumber === oldLevelNumber && c.language === lang ? levelData : c

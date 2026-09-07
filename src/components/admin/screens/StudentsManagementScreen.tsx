@@ -39,6 +39,8 @@ import {
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdminStudent, EntityStatus } from '@/types/admin';
+import { LevelId } from '@/types';
+import { getThemeForLevel } from '@/lib/themes';
 import { generateAutoPassword } from '@/lib/utils';
 import { StudentDetailModal } from '../modals/StudentDetailModal';
 
@@ -577,8 +579,11 @@ export function StudentsManagementScreen() {
                     {/* Level */}
                     <td className="py-3.5 px-4 text-center">
                       <span
-                        className="rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs"
-                        style={{ padding: '5px 10px' }}
+                        className="rounded-full text-white font-bold text-xs inline-flex items-center justify-center shadow-2xs transition-colors"
+                        style={{
+                          backgroundColor: getThemeForLevel(st.currentLevel as LevelId).primary,
+                          padding: '4px 14px',
+                        }}
                       >
                         {language === 'ar' ? `المستوى ${st.currentLevel}` : `Level ${st.currentLevel}`}
                       </span>

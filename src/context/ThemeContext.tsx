@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { LevelId, LevelTheme } from '@/types';
 import { getThemeForLevel, applyThemeCSS } from '@/lib/themes';
 import { getItem, setItem } from '@/lib/localStorage';
@@ -21,11 +21,38 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [currentLevel, setCurrentLevel] = useState<LevelId>(mockStudent?.currentLevel || (1 as LevelId));
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
+  const [themeVersion, setThemeVersion] = useState<number>(0);
+
   const setLevel = useCallback((level: LevelId) => {
     setCurrentLevel(level);
     setItem(STORAGE_KEYS.CURRENT_LEVEL, level);
     applyThemeCSS(level);
   }, []);
+
+  // Listen for backoffice curriculum & level color updates in real time
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleSync = () => {
+      setThemeVersion((v) => v + 1);
+    };
+
+    window.addEventListener('awliya-data-sync', handleSync);
+    window.addEventListener('storage', handleSync);
+
+    return () => {
+      window.removeEventListener('awliya-data-sync', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, []);
+
+  const theme = useMemo(() => {
+    return getThemeForLevel(currentLevel);
+  }, [currentLevel, themeVersion]);
+
+  useEffect(() => {
+    applyThemeCSS(currentLevel, theme);
+  }, [currentLevel, theme]);
 
   const toggleDarkMode = useCallback(() => {
     setIsDarkMode((prev) => {
@@ -87,8 +114,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.setAttribute('data-theme', 'light');
     }
   }, []);
-
-  const theme = getThemeForLevel(currentLevel);
 
   return (
     <ThemeContext.Provider value={{ currentLevel, theme, setLevel, isDarkMode, toggleDarkMode }}>

@@ -22,6 +22,8 @@ import {
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { formatStudentCount } from '@/lib/utils';
+import { LevelId } from '@/types';
+import { getThemeForLevel } from '@/lib/themes';
 
 export function AdminDashboardScreen() {
   const {
@@ -108,6 +110,7 @@ export function AdminDashboardScreen() {
       language: curricLevel.language,
       count,
       progress,
+      color: curricLevel.color,
     };
   });
 
@@ -535,8 +538,11 @@ export function AdminDashboardScreen() {
                     </div>
                     <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200/40 dark:border-slate-700/40">
                       <div
-                        className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-purple-600 rounded-full transition-all"
-                        style={{ width: `${item.progress}%` }}
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${item.progress}%`,
+                          backgroundColor: item.color || getThemeForLevel(item.levelNumber as LevelId).primary,
+                        }}
                       />
                     </div>
                   </div>

@@ -137,13 +137,110 @@ export const levelThemes: Record<LevelId, LevelTheme> = {
   },
 };
 
-export function getThemeForLevel(level: LevelId): LevelTheme {
+// Helper to convert hex to RGB
+export function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  let cleanHex = hex.replace('#', '').trim();
+  if (cleanHex.length === 3) {
+    cleanHex = cleanHex.split('').map((c) => c + c).join('');
+  }
+  const num = parseInt(cleanHex, 16);
+  if (isNaN(num) || cleanHex.length !== 6) {
+    return { r: 234, g: 88, b: 12 }; // Default orange fallback
+  }
+  return {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255,
+  };
+}
+
+// Helper to adjust color brightness (positive percent = lighter, negative = darker)
+export function adjustBrightness(hex: string, percent: number): string {
+  const { r, g, b } = hexToRgb(hex);
+  const factor = 1 + percent / 100;
+  const clamp = (val: number) => Math.min(255, Math.max(0, Math.round(val)));
+  const toHex = (val: number) => clamp(val).toString(16).padStart(2, '0');
+  return `#${toHex(r * factor)}${toHex(g * factor)}${toHex(b * factor)}`;
+}
+
+// Key for storing dynamic level colors in browser storage
+export const CUSTOM_LEVEL_COLORS_KEY = 'myschool_custom_level_colors_v1';
+
+// Retrieve custom color for a level from localStorage (or curriculum data)
+export function getCustomLevelColor(levelNumber: number): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const rawCustom = localStorage.getItem(CUSTOM_LEVEL_COLORS_KEY);
+    if (rawCustom) {
+      const parsed = JSON.parse(rawCustom);
+      if (parsed && parsed[levelNumber]) return parsed[levelNumber];
+    }
+
+    // Also check admin curricula storage
+    const rawCurricula = localStorage.getItem('myschool_admin_curricula_v11');
+    if (rawCurricula) {
+      const curricula = JSON.parse(rawCurricula);
+      if (Array.isArray(curricula)) {
+        const match = curricula.find((c: any) => c.levelNumber === levelNumber);
+        if (match && match.color) return match.color;
+      }
+    }
+  } catch {
+    // Ignore storage parse errors
+  }
+  return null;
+}
+
+// Save custom level color
+export function saveCustomLevelColor(levelNumber: number, hexColor: string): void {
+  if (typeof window === 'undefined' || !hexColor) return;
+  try {
+    const raw = localStorage.getItem(CUSTOM_LEVEL_COLORS_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    parsed[levelNumber] = hexColor;
+    localStorage.setItem(CUSTOM_LEVEL_COLORS_KEY, JSON.stringify(parsed));
+    window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+// Dynamically construct a LevelTheme object given any hex color
+export function createDynamicTheme(level: LevelId, hexColor: string): LevelTheme {
+  const base = levelThemes[level] || levelThemes[1];
+  const rgb = hexToRgb(hexColor);
+  const primaryDark = adjustBrightness(hexColor, -25);
+  const primaryLight = adjustBrightness(hexColor, 45);
+  const accentColor = adjustBrightness(hexColor, 20);
+
+  return {
+    ...base,
+    id: level,
+    primary: hexColor,
+    primaryLight,
+    primaryDark,
+    primaryRgb: `${rgb.r}, ${rgb.g}, ${rgb.b}`,
+    gradient: `linear-gradient(135deg, ${hexColor} 0%, ${primaryDark} 100%)`,
+    accentColor,
+  };
+}
+
+export function getThemeForLevel(level: LevelId, customColor?: string): LevelTheme {
+  if (customColor) {
+    return createDynamicTheme(level, customColor);
+  }
+
+  const storedColor = getCustomLevelColor(level);
+  if (storedColor) {
+    return createDynamicTheme(level, storedColor);
+  }
+
   return levelThemes[level] || levelThemes[1];
 }
 
-export function applyThemeCSS(level: LevelId): void {
+export function applyThemeCSS(level: LevelId, customTheme?: LevelTheme): void {
   if (typeof document === 'undefined') return;
-  const theme = getThemeForLevel(level);
+  const theme = customTheme || getThemeForLevel(level);
   const root = document.documentElement;
 
   root.style.setProperty('--color-primary', theme.primary);
