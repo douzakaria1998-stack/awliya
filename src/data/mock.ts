@@ -19,6 +19,7 @@ import {
   NotificationSettings,
   LevelId,
 } from '@/types';
+import { getCustomLevelColor, levelThemes } from '@/lib/themes';
 
 // ---------- Parent Profile ----------
 export const mockParent: Parent = {
@@ -192,6 +193,7 @@ export function getAcademicLevelsForStudent(currentLevel: LevelId): AcademicLeve
       completedDate,
       score,
       certificateAvailable,
+      color: getCustomLevelColor(lvl) || levelThemes[lvl]?.primary,
       modules: template.modules.map((m, idx) => ({
         ...m,
         isCompleted: status === 'studied' || (status === 'current' && idx === 0),

@@ -167,22 +167,41 @@ export function adjustBrightness(hex: string, percent: number): string {
 export const CUSTOM_LEVEL_COLORS_KEY = 'myschool_custom_level_colors_v1';
 
 // Retrieve custom color for a level from localStorage (or curriculum data)
-export function getCustomLevelColor(levelNumber: number): string | null {
+export function getCustomLevelColor(levelNumber: number | string): string | null {
   if (typeof window === 'undefined') return null;
+  const num = Number(levelNumber);
+  if (isNaN(num)) return null;
+
   try {
+    // 1. Direct custom level colors map
     const rawCustom = localStorage.getItem(CUSTOM_LEVEL_COLORS_KEY);
     if (rawCustom) {
       const parsed = JSON.parse(rawCustom);
-      if (parsed && parsed[levelNumber]) return parsed[levelNumber];
+      if (parsed && (parsed[num] || parsed[String(num)])) {
+        return parsed[num] || parsed[String(num)];
+      }
     }
 
-    // Also check admin curricula storage
-    const rawCurricula = localStorage.getItem('myschool_admin_curricula_v11');
-    if (rawCurricula) {
-      const curricula = JSON.parse(rawCurricula);
-      if (Array.isArray(curricula)) {
-        const match = curricula.find((c: any) => c.levelNumber === levelNumber);
-        if (match && match.color) return match.color;
+    // 2. Check admin curricula storage keys
+    const storageKeysToCheck = [
+      'myschool_admin_curricula_v11',
+      'myschool_curricula_v11',
+      'myschool_curricula',
+      'curricula',
+    ];
+
+    for (const key of storageKeysToCheck) {
+      const rawCurricula = localStorage.getItem(key);
+      if (rawCurricula) {
+        const list = JSON.parse(rawCurricula);
+        if (Array.isArray(list)) {
+          const match = list.find(
+            (c: any) => Number(c?.levelNumber) === num || Number(c?.level) === num || Number(c?.id) === num
+          );
+          if (match && match.color && typeof match.color === 'string') {
+            return match.color;
+          }
+        }
       }
     }
   } catch {
@@ -198,6 +217,7 @@ export function saveCustomLevelColor(levelNumber: number, hexColor: string): voi
     const raw = localStorage.getItem(CUSTOM_LEVEL_COLORS_KEY);
     const parsed = raw ? JSON.parse(raw) : {};
     parsed[levelNumber] = hexColor;
+    parsed[String(levelNumber)] = hexColor;
     localStorage.setItem(CUSTOM_LEVEL_COLORS_KEY, JSON.stringify(parsed));
     window.dispatchEvent(new CustomEvent('awliya-data-sync'));
   } catch {

@@ -14,7 +14,7 @@ import {
 import { useStudent } from '@/context/StudentContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { levelThemes } from '@/lib/themes';
+import { levelThemes, getThemeForLevel } from '@/lib/themes';
 import { AcademicLevel, LevelId } from '@/types';
 import { LEVEL_TITLES_EN, LEVEL_TITLES_FR } from '@/lib/constants';
 import { LevelDetailModal } from '../modals/LevelDetailModal';
@@ -29,6 +29,12 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
   const { activeStudent, academicLevels } = useStudent();
   const { theme } = useTheme();
   const { t, isRTL, language } = useLanguage();
+
+  const currentLevelObj = academicLevels.find((l) => Number(l.level) === Number(activeStudent.currentLevel));
+  const activeLevelTheme = getThemeForLevel(
+    activeStudent.currentLevel,
+    currentLevelObj?.color || (currentLevelObj as any)?.themeColor
+  );
 
   const [selectedLevel, setSelectedLevel] = useState<AcademicLevel | null>(null);
 
@@ -73,7 +79,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
           <div
             className="inline-flex items-center rounded-full font-bold text-white shadow-xs select-none"
             style={{
-              backgroundColor: theme.primary,
+              backgroundColor: activeLevelTheme.primary,
               height: '32px',
               paddingRight: isRTL ? '14px' : '16px',
               paddingLeft: isRTL ? '16px' : '14px',
@@ -83,7 +89,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
           >
             <Sparkles size={14} className="shrink-0" />
             <span className="whitespace-nowrap leading-none">
-              {t.currentLevelBadge}: {language === 'ar' ? theme.shortNameAr : language === 'fr' ? `Niveau ${activeStudent.currentLevel}` : `Level ${activeStudent.currentLevel}`}
+              {t.currentLevelBadge}: {language === 'ar' ? activeLevelTheme.shortNameAr : language === 'fr' ? `Niveau ${activeStudent.currentLevel}` : `Level ${activeStudent.currentLevel}`}
             </span>
           </div>
         </div>
@@ -108,7 +114,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
           <div className="flex items-center gap-2.5">
             <span
               className="w-3 h-3 rounded-full shrink-0"
-              style={{ backgroundColor: theme.primary }}
+              style={{ backgroundColor: activeLevelTheme.primary }}
             />
             <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
               {t.studentTrack}: <span className="font-mono text-slate-600 dark:text-slate-300 font-semibold">{translateTrack(activeStudent.enrolledPathAr, language)}</span>
@@ -123,9 +129,10 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
         <div className="mb-4">
           <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex mb-2">
             {academicLevels.map((lvl) => {
+              const lvlObjTheme = getThemeForLevel(lvl.level as LevelId, lvl.color);
               let bg = '#E2E8F0';
               if (lvl.status === 'studied') bg = '#16A34A';
-              else if (lvl.status === 'current') bg = theme.primary;
+              else if (lvl.status === 'current') bg = lvlObjTheme.primary;
 
               return (
                 <div
@@ -140,7 +147,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
 
           <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
             <span>{academicLevels.length > 0 ? `${t.level} ${academicLevels[0].level}` : t.levelMilestone1}</span>
-            <span style={{ color: theme.primary }} className="font-bold">
+            <span style={{ color: activeLevelTheme.primary }} className="font-bold">
               {t.levelMilestoneCurrent} ({activeStudent.currentLevel})
             </span>
             <span>
@@ -157,8 +164,8 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0" />
             <span>{t.statusStudied} ({completedCount})</span>
           </div>
-          <div className="flex items-center gap-1.5" style={{ color: theme.primary }}>
-            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: theme.primary }} />
+          <div className="flex items-center gap-1.5" style={{ color: activeLevelTheme.primary }}>
+            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: activeLevelTheme.primary }} />
             <span>{t.statusCurrent} (1)</span>
           </div>
           <div className="flex items-center gap-1.5 text-slate-400">
@@ -176,7 +183,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
           const isStudied = lvl.status === 'studied';
           const isCurrent = lvl.status === 'current';
           const isLocked = lvl.status === 'locked';
-          const lvlTheme = levelThemes[lvl.level as LevelId] || levelThemes[1];
+          const lvlTheme = getThemeForLevel(lvl.level as LevelId, lvl.color);
 
           return (
             <div

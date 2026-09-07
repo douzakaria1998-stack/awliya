@@ -12,7 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { NavTabKey, PerformanceTabKey, SHOW_FINANCIALS_TAB, getStudentGenderNoun } from '@/lib/constants';
-import { levelThemes } from '@/lib/themes';
+import { levelThemes, getThemeForLevel } from '@/lib/themes';
 import { translateHomeworkTitle, translateTeacherNote, translateSubject } from '@/lib/translations';
 
 interface DashboardScreenProps {
@@ -30,11 +30,16 @@ export function DashboardScreen({
     activeStudent,
     homeworkList,
     teacherFeedback,
+    academicLevels,
   } = useStudent();
   const { theme } = useTheme();
   const { t, language, isRTL } = useLanguage();
 
-  const activeLevelTheme = levelThemes[activeStudent.currentLevel] || levelThemes[4];
+  const currentLevelObj = academicLevels.find((l) => Number(l.level) === Number(activeStudent.currentLevel));
+  const activeLevelTheme = getThemeForLevel(
+    activeStudent.currentLevel,
+    currentLevelObj?.color || (currentLevelObj as any)?.themeColor
+  );
   const revisionHomework = homeworkList.find((h) => h.status === 'needs_revision');
   const latestFeedback = teacherFeedback[0];
 
@@ -98,7 +103,7 @@ export function DashboardScreen({
       <div
         className="text-white shadow-md relative overflow-hidden flex flex-col justify-between"
         style={{
-          backgroundColor: theme.primary,
+          backgroundColor: activeLevelTheme.primary,
           minHeight: '130px',
           padding: '18px 22px',
           borderRadius: '18px',
@@ -194,7 +199,7 @@ export function DashboardScreen({
             <div
               className="rounded-full flex items-center justify-center text-white shrink-0 shadow-xs"
               style={{
-                backgroundColor: theme.primary,
+                backgroundColor: activeLevelTheme.primary,
                 width: '38px',
                 height: '38px',
                 minWidth: '38px',
@@ -216,7 +221,7 @@ export function DashboardScreen({
           {/* Percentage text */}
           <div
             className="text-xl sm:text-2xl font-bold font-mono tracking-tight"
-            style={{ color: theme.primary }}
+            style={{ color: activeLevelTheme.primary }}
           >
             % {activeStudent.currentLevelProgress ?? 0}
           </div>
@@ -231,7 +236,7 @@ export function DashboardScreen({
             className="h-full transition-all duration-700"
             style={{
               width: `${activeStudent.currentLevelProgress ?? 0}%`,
-              backgroundColor: theme.primary,
+              backgroundColor: activeLevelTheme.primary,
               borderRadius: '6px',
             }}
           />

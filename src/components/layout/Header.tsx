@@ -23,8 +23,8 @@ import { useStudent } from '@/context/StudentContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { levelThemes } from '@/lib/themes';
-import { LevelId } from '@/types';
+import { levelThemes, getThemeForLevel } from '@/lib/themes';
+import { LevelId, LevelTheme } from '@/types';
 import { NavTabKey, PerformanceTabKey, getStudentGenderNoun, SHOW_ADD_STUDENT_BUTTON } from '@/lib/constants';
 import { Language, translateHomeworkTitle, translateTeacherNote } from '@/lib/translations';
 
@@ -341,7 +341,7 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                       const details = getNotificationDetails(notif.type);
                       const notifStudent = students.find((s) => s.id === notif.studentId);
                       const stTheme = notifStudent
-                        ? levelThemes[notifStudent.currentLevel as LevelId] || levelThemes[1]
+                        ? getThemeForLevel(notifStudent.currentLevel as LevelId)
                         : undefined;
 
                       return (
@@ -519,7 +519,7 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                   ) : (
                     students.map((st) => {
                       const isSelected = activeStudent ? st.id === activeStudent.id : false;
-                      const stTheme = levelThemes[st.currentLevel as LevelId] || levelThemes[1];
+                      const stTheme = getThemeForLevel(st.currentLevel as LevelId);
 
                       return (
                         <button

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { ChevronDown, UserPlus, Sparkles, Check, Clock } from 'lucide-react';
 import { useStudent } from '@/context/StudentContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { levelThemes } from '@/lib/themes';
+import { levelThemes, getThemeForLevel } from '@/lib/themes';
 import { LevelId } from '@/types';
 import { SHOW_ADD_STUDENT_BUTTON } from '@/lib/constants';
 import { translateTrack } from '@/lib/translations';
@@ -14,11 +14,15 @@ interface StudentSwitcherProps {
 }
 
 export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
-  const { students, activeStudent, setActiveStudentId } = useStudent();
+  const { students, activeStudent, setActiveStudentId, academicLevels } = useStudent();
   const { t, isRTL, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
-  const activeLevelTheme = levelThemes[activeStudent.currentLevel] || levelThemes[1];
+  const currentLevelObj = academicLevels.find((l) => Number(l.level) === Number(activeStudent.currentLevel));
+  const activeLevelTheme = getThemeForLevel(
+    activeStudent.currentLevel,
+    currentLevelObj?.color || (currentLevelObj as any)?.themeColor
+  );
 
   const handleSelectStudent = (id: string) => {
     setActiveStudentId(id);
@@ -107,26 +111,27 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
           <div className="space-y-1.5 my-1.5 max-h-60 overflow-y-auto">
             {students.map((student) => {
               const isSelected = student.id === activeStudent.id;
-              const theme = levelThemes[student.currentLevel as LevelId] || levelThemes[1];
+              const stLevelObj = academicLevels.find((l) => Number(l.level) === Number(student.currentLevel));
+              const stTheme = getThemeForLevel(student.currentLevel, stLevelObj?.color || (stLevelObj as any)?.themeColor);
 
               return (
                 <button
                   key={student.id}
                   type="button"
                   onClick={() => handleSelectStudent(student.id)}
-                  className={`w-full flex items-center justify-between p-2 rounded-xl transition-all cursor-pointer ${isRTL ? 'text-right' : 'text-left'} ${
+                  className={`w-full flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-slate-50 dark:bg-slate-800/80 ring-1.5 ring-offset-1'
-                      : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/50'
+                      ? 'bg-slate-50 dark:bg-slate-800/80 border-slate-300 dark:border-slate-600'
+                      : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/50 border-transparent'
                   }`}
                   style={{
-                    borderColor: isSelected ? theme.primary : 'transparent',
+                    borderColor: isSelected ? stTheme.primary : 'transparent',
                   }}
                 >
                   <div className="flex items-center gap-2.5">
                     <div
                       className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-black shadow-xs shrink-0"
-                      style={{ background: theme.gradient }}
+                      style={{ background: stTheme.gradient }}
                     >
                       {student.nicknameAr ? student.nicknameAr[0] : student.fullNameAr[0]}
                     </div>
@@ -143,7 +148,7 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
                         ) : (
                           <span
                             className="px-1.5 py-0.2 rounded text-[10px] font-bold text-white"
-                            style={{ backgroundColor: theme.primary }}
+                            style={{ backgroundColor: stTheme.primary }}
                           >
                             {t.level} {student.currentLevel}
                           </span>
@@ -169,7 +174,7 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
                   {isSelected && (
                     <div
                       className="w-6 h-6 rounded-full flex items-center justify-center text-white"
-                      style={{ backgroundColor: theme.primary }}
+                      style={{ backgroundColor: stTheme.primary }}
                     >
                       <Check size={14} strokeWidth={3} />
                     </div>

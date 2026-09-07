@@ -14,7 +14,7 @@ import {
   Check,
 } from 'lucide-react';
 import { AcademicLevel } from '@/types';
-import { levelThemes } from '@/lib/themes';
+import { levelThemes, getThemeForLevel } from '@/lib/themes';
 import { LEVEL_TITLES_EN, LEVEL_TITLES_FR } from '@/lib/constants';
 import { useLanguage } from '@/context/LanguageContext';
 import { useStudent } from '@/context/StudentContext';
@@ -34,7 +34,7 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
 
   if (!isOpen || !level) return null;
 
-  const theme = levelThemes[level.level] || levelThemes[1];
+  const theme = getThemeForLevel(level.level, level.color);
 
   const handleDownloadCertificate = () => {
     setDownloaded(true);

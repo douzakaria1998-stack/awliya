@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Palette, ChevronDown, Sparkles } from 'lucide-react';
 import { useStudent } from '@/context/StudentContext';
 import { useTheme } from '@/context/ThemeContext';
-import { levelThemes } from '@/lib/themes';
+import { levelThemes, getThemeForLevel } from '@/lib/themes';
 import { LevelId } from '@/types';
 
 export function LevelThemeTester() {
@@ -12,7 +12,7 @@ export function LevelThemeTester() {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
-  const currentTheme = levelThemes[activeStudent.currentLevel];
+  const currentTheme = getThemeForLevel(activeStudent.currentLevel);
 
   return (
     <div className="w-full bg-slate-900 text-white text-xs border-b border-slate-800 px-3 py-1.5 transition-all">
@@ -55,7 +55,7 @@ export function LevelThemeTester() {
 
           <div className="grid grid-cols-10 gap-1 my-1">
             {([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as LevelId[]).map((lvl) => {
-              const th = levelThemes[lvl];
+              const th = getThemeForLevel(lvl);
               const isActive = activeStudent.currentLevel === lvl;
 
               return (

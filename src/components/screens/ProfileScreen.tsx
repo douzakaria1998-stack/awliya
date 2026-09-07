@@ -23,7 +23,7 @@ import { useStudent } from '@/context/StudentContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { levelThemes } from '@/lib/themes';
+import { levelThemes, getThemeForLevel } from '@/lib/themes';
 import { LevelId } from '@/types';
 import { SHOW_FINANCIALS_TAB, SHOW_ADD_STUDENT_BUTTON } from '@/lib/constants';
 import { StudentSwitcher } from '../layout/StudentSwitcher';
@@ -446,7 +446,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
 
             <div className="space-y-2.5">
               {students.map((st) => {
-                const stTheme = levelThemes[st.currentLevel as LevelId] || levelThemes[1];
+                const stTheme = getThemeForLevel(st.currentLevel as LevelId);
                 const isSelected = st.id === activeStudent.id;
 
                 return (
