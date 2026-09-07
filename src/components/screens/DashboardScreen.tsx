@@ -218,7 +218,7 @@ export function DashboardScreen({
             className="text-xl sm:text-2xl font-bold font-mono tracking-tight"
             style={{ color: theme.primary }}
           >
-            % {activeStudent.currentLevelProgress || 40}
+            % {activeStudent.currentLevelProgress ?? 0}
           </div>
         </div>
 
@@ -230,7 +230,7 @@ export function DashboardScreen({
           <div
             className="h-full transition-all duration-700"
             style={{
-              width: `${activeStudent.currentLevelProgress || 40}%`,
+              width: `${activeStudent.currentLevelProgress ?? 0}%`,
               backgroundColor: theme.primary,
               borderRadius: '6px',
             }}
