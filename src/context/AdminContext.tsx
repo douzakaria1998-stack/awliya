@@ -56,9 +56,9 @@ import {
   deleteTeacherFromDb,
 } from '@/services/groupService';
 import { saveAttendanceRecordsInDb } from '@/services/attendanceService';
-import { createHomeworkInDb, evaluateHomeworkInDb } from '@/services/homeworkService';
-import { saveCustomLevelColor, CUSTOM_LEVEL_COLORS_KEY } from '@/lib/themes';
-import { fetchSystemConfigFromDb, saveSystemConfigInDb } from '@/services/systemConfigService';
+import { fetchHomeworkFromDb, createHomeworkInDb, updateHomeworkInDb, deleteHomeworkInDb, evaluateHomeworkInDb } from '@/services/homeworkService';
+import { fetchCurriculaFromDb, saveCurriculumLevelInDb, deleteCurriculumLevelInDb, saveAllCurriculaInDb } from '@/services/curriculumService';
+import { saveCustomLevelColor } from '@/lib/themes';
 
 interface AdminContextType {
   // Current user & role & auth
@@ -461,32 +461,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     const sCurricula = getItem<CurriculumLevel[]>(ADMIN_STORAGE_KEYS.CURRICULA);
     if (sCurricula?.length) setCurricula(sCurricula);
 
-    // Sync curricula & level colors from / to Supabase
-    fetchSystemConfigFromDb<CurriculumLevel[]>('curricula').then((remote) => {
-      if (remote && remote.length > 0) {
-        setCurricula(remote);
-        setItem(ADMIN_STORAGE_KEYS.CURRICULA, remote);
-      } else if (sCurricula && sCurricula.length > 0) {
-        saveSystemConfigInDb('curricula', sCurricula);
-      }
-    }).catch((err) => console.warn('Supabase curricula sync error:', err));
-
-    fetchSystemConfigFromDb<Record<string, string>>('level_colors').then((remoteColors) => {
-      if (remoteColors && Object.keys(remoteColors).length > 0) {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(CUSTOM_LEVEL_COLORS_KEY, JSON.stringify(remoteColors));
-          window.dispatchEvent(new CustomEvent('awliya-data-sync'));
-        }
-      } else if (typeof window !== 'undefined') {
-        const raw = localStorage.getItem(CUSTOM_LEVEL_COLORS_KEY);
-        if (raw) {
-          try {
-            saveSystemConfigInDb('level_colors', JSON.parse(raw));
-          } catch {}
-        }
-      }
-    }).catch((err) => console.warn('Supabase level colors sync error:', err));
-
     const sProgress = getItem<Record<string, LessonProgressStatus>>(ADMIN_STORAGE_KEYS.LESSON_PROGRESS);
     if (sProgress && Object.keys(sProgress).length) {
       setLessonProgressRecords(sProgress);
@@ -641,28 +615,34 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     // Live Supabase Sync & Realtime Data Sync
     const syncFromSupabase = async () => {
       try {
-        const [dbStudents, dbParents, dbGroups, dbTeachers] = await Promise.all([
+        const [dbStudents, dbParents, dbGroups, dbTeachers, dbCurricula, dbHomework] = await Promise.all([
           fetchStudentsFromDb().catch(() => []),
           fetchParentsFromDb().catch(() => []),
           fetchGroupsFromDb().catch(() => []),
           fetchTeachersFromDb().catch(() => []),
+          fetchCurriculaFromDb().catch(() => []),
+          fetchHomeworkFromDb().catch(() => []),
         ]);
 
-        if (Array.isArray(dbStudents)) {
+        if (Array.isArray(dbStudents) && dbStudents.length > 0) {
           setStudents(dbStudents);
           setItem(ADMIN_STORAGE_KEYS.STUDENTS, dbStudents);
         }
-        if (Array.isArray(dbParents)) {
+        if (Array.isArray(dbParents) && dbParents.length > 0) {
           setParents(dbParents);
           setItem(ADMIN_STORAGE_KEYS.PARENTS, dbParents);
         }
-        if (Array.isArray(dbGroups)) {
+        if (Array.isArray(dbGroups) && dbGroups.length > 0) {
           setGroups(dbGroups);
           setItem(ADMIN_STORAGE_KEYS.GROUPS, dbGroups);
         }
-        if (Array.isArray(dbTeachers)) {
+        if (Array.isArray(dbTeachers) && dbTeachers.length > 0) {
           setTeachers(dbTeachers);
           setItem(ADMIN_STORAGE_KEYS.TEACHERS, dbTeachers);
+        }
+        if (Array.isArray(dbCurricula) && dbCurricula.length > 0) {
+          setCurricula(dbCurricula);
+          setItem(ADMIN_STORAGE_KEYS.CURRICULA, dbCurricula);
         }
       } catch (err) {
         console.warn('Supabase sync notice:', err);
@@ -703,6 +683,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           if (Array.isArray(fresh)) {
             setGroups(fresh);
             setItem(ADMIN_STORAGE_KEYS.GROUPS, fresh);
+          }
+        }).catch(() => {});
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'curricula' }, () => {
+        fetchCurriculaFromDb().then((fresh) => {
+          if (Array.isArray(fresh) && fresh.length > 0) {
+            setCurricula(fresh);
+            setItem(ADMIN_STORAGE_KEYS.CURRICULA, fresh);
           }
         }).catch(() => {});
       })
@@ -1717,6 +1705,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         saveCustomLevelColor(levelData.levelNumber, levelData.color);
       }
 
+      saveCurriculumLevelInDb(levelData).catch((err) => {
+        console.warn('Supabase save curriculum level warning:', err);
+      });
+
       setCurricula((prev) => {
         const existingIdx = prev.findIndex(
           (c) => c.levelNumber === levelData.levelNumber && c.language === levelData.language
@@ -1728,17 +1720,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           updated = [...prev, levelData];
         }
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
-        saveSystemConfigInDb('curricula', updated);
         return updated;
       });
 
       if (typeof window !== 'undefined') {
-        const rawColors = localStorage.getItem(CUSTOM_LEVEL_COLORS_KEY);
-        if (rawColors) {
-          try {
-            saveSystemConfigInDb('level_colors', JSON.parse(rawColors));
-          } catch {}
-        }
         setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
       }
 
@@ -1760,22 +1745,19 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         saveCustomLevelColor(levelData.levelNumber, levelData.color);
       }
 
+      saveCurriculumLevelInDb(levelData).catch((err) => {
+        console.warn('Supabase update curriculum level warning:', err);
+      });
+
       setCurricula((prev) => {
         const updated = prev.map((c) =>
           c.levelNumber === oldLevelNumber && c.language === lang ? levelData : c
         );
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
-        saveSystemConfigInDb('curricula', updated);
         return updated;
       });
 
       if (typeof window !== 'undefined') {
-        const rawColors = localStorage.getItem(CUSTOM_LEVEL_COLORS_KEY);
-        if (rawColors) {
-          try {
-            saveSystemConfigInDb('level_colors', JSON.parse(rawColors));
-          } catch {}
-        }
         setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
       }
 
@@ -1793,15 +1775,19 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const reorderCurriculumLevels = useCallback(
     (lang: 'English' | 'French', newOrderedLevels: CurriculumLevel[]) => {
+      const renumbered = newOrderedLevels.map((lvl, idx) => ({
+        ...lvl,
+        levelNumber: idx + 1,
+      }));
+
+      saveAllCurriculaInDb(renumbered).catch((err) => {
+        console.warn('Supabase save all curricula warning:', err);
+      });
+
       setCurricula((prev) => {
         const otherLang = prev.filter((c) => c.language !== lang);
-        const renumbered = newOrderedLevels.map((lvl, idx) => ({
-          ...lvl,
-          levelNumber: idx + 1,
-        }));
         const updated = [...otherLang, ...renumbered];
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
-        saveSystemConfigInDb('curricula', updated);
         return updated;
       });
 
@@ -1820,6 +1806,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const deleteCurriculumLevel = useCallback(
     (lvlNum: number, lang: 'English' | 'French') => {
+      deleteCurriculumLevelInDb(lvlNum, lang).catch((err) => {
+        console.warn('Supabase delete curriculum level warning:', err);
+      });
+
       let target: CurriculumLevel | undefined;
       setCurricula((prev) => {
         target = prev.find((c) => c.levelNumber === lvlNum && c.language === lang);
@@ -1828,7 +1818,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         const otherLang = filtered.filter((c) => c.language !== lang);
         const updated = [...otherLang, ...sameLang];
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
-        saveSystemConfigInDb('curricula', updated);
         return updated;
       });
 
@@ -2357,6 +2346,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return updated;
       });
 
+      updateHomeworkInDb(hwId, updates).catch((err) => {
+        console.warn('Supabase update homework warning:', err);
+      });
+
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('awliya-data-sync'));
       }
@@ -2379,6 +2372,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         const updated = prev.filter((h) => h.id !== hwId);
         setItem(ADMIN_STORAGE_KEYS.HOMEWORK, updated);
         return updated;
+      });
+
+      deleteHomeworkInDb(hwId, deletedName).catch((err) => {
+        console.warn('Supabase delete homework warning:', err);
       });
 
       if (typeof window !== 'undefined') {

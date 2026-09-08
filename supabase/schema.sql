@@ -193,6 +193,26 @@ CREATE TABLE IF NOT EXISTS public.messages (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 12. CURRICULUM LEVELS & ACADEMIC PATH
+CREATE TABLE IF NOT EXISTS public.curricula (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  level_number INT NOT NULL,
+  language TEXT NOT NULL DEFAULT 'English' CHECK (language IN ('English', 'French', 'Dual')),
+  cefr_code TEXT NOT NULL DEFAULT 'A1',
+  name_ar TEXT NOT NULL,
+  name_en TEXT,
+  description_ar TEXT,
+  description_en TEXT,
+  passing_score NUMERIC DEFAULT 93,
+  honors_degree_ar TEXT DEFAULT 'تقدير: ممتاز مرتفع (مع مرتبة الشرف)',
+  honors_degree_en TEXT,
+  color TEXT DEFAULT '#84CC16',
+  units JSONB NOT NULL DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (level_number, language)
+);
+
 -- =========================================================================
 -- Enable Row Level Security (RLS) on all tables
 -- =========================================================================
@@ -207,6 +227,7 @@ ALTER TABLE public.homeworks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.announcements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.curricula ENABLE ROW LEVEL SECURITY;
 
 -- Permissive Development Policies (Allow Anon/Auth Full Access for testing & initial sync)
 CREATE POLICY "Allow public read access" ON public.profiles FOR SELECT USING (true);
@@ -222,9 +243,12 @@ CREATE POLICY "Allow public all on homeworks" ON public.homeworks FOR ALL USING 
 CREATE POLICY "Allow public all on invoices" ON public.invoices FOR ALL USING (true);
 CREATE POLICY "Allow public all on announcements" ON public.announcements FOR ALL USING (true);
 CREATE POLICY "Allow public all on messages" ON public.messages FOR ALL USING (true);
+CREATE POLICY "Allow public all on curricula" ON public.curricula FOR ALL USING (true);
 
 -- Enable Realtime replication on dynamic tables
 ALTER PUBLICATION supabase_realtime ADD TABLE public.attendance;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.announcements;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.students;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.homeworks;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.curricula;

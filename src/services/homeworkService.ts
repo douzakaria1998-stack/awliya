@@ -18,7 +18,7 @@ export async function fetchHomeworkFromDb(studentId?: string): Promise<Homework[
     id: h.id,
     studentId: h.student_id,
     titleAr: h.title_ar,
-    subjectAr: h.subject_ar,
+    subjectAr: h.subject_ar || 'اللغة الإنجليزية',
     level: h.level || 1,
     status: h.status,
     dueDate: h.due_date || '',
@@ -33,7 +33,7 @@ export async function createHomeworkInDb(hw: Partial<AdminHomeworkAssignment>): 
   if (!hw.studentIds || hw.studentIds.length === 0) return;
 
   const records = hw.studentIds
-    .filter((stId) => !stId.startsWith('stu-'))
+    .filter((stId) => stId && stId.length > 5)
     .map((stId) => ({
       student_id: stId,
       group_id: hw.groupId && !hw.groupId.startsWith('grp-') ? hw.groupId : null,
@@ -53,13 +53,53 @@ export async function createHomeworkInDb(hw: Partial<AdminHomeworkAssignment>): 
   }
 }
 
+export async function updateHomeworkInDb(
+  homeworkId: string,
+  updates: Partial<AdminHomeworkAssignment>
+): Promise<void> {
+  if (!homeworkId) return;
+
+  const payload: any = {};
+  if (updates.assignmentNameAr) payload.title_ar = updates.assignmentNameAr;
+  if (updates.dueDate) payload.due_date = updates.dueDate;
+  if (updates.totalScore) payload.total_score = updates.totalScore;
+  if (updates.teacherNote) payload.teacher_note = updates.teacherNote;
+
+  if (Object.keys(payload).length === 0) return;
+
+  const { error } = await supabase
+    .from('homeworks')
+    .update(payload)
+    .eq('id', homeworkId);
+
+  if (error) {
+    console.error('Error updating homework in Supabase:', error);
+  }
+}
+
+export async function deleteHomeworkInDb(homeworkId: string, assignmentNameAr?: string): Promise<void> {
+  if (!homeworkId) return;
+
+  let query = supabase.from('homeworks').delete();
+  if (homeworkId.startsWith('hw-') && assignmentNameAr) {
+    query = query.eq('title_ar', assignmentNameAr);
+  } else {
+    query = query.eq('id', homeworkId);
+  }
+
+  const { error } = await query;
+  if (error) {
+    console.error('Error deleting homework from Supabase:', error);
+  }
+}
+
 export async function evaluateHomeworkInDb(
   homeworkId: string,
   score: number,
   comment: string,
   status: 'completed' | 'needs_revision'
 ): Promise<void> {
-  if (!homeworkId || homeworkId.startsWith('hw-')) return;
+  if (!homeworkId) return;
 
   const { error } = await supabase
     .from('homeworks')

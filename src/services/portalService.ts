@@ -9,11 +9,10 @@ export async function fetchParentPortalBundle(parentId?: string) {
   }
   const { data: studentsData } = await studentQuery;
 
-  // 2. Fetch Announcements/Notifications (excluding system_config records)
+  // 2. Fetch Announcements/Notifications
   const { data: announcementsData } = await supabase
     .from('announcements')
     .select('*')
-    .neq('category', 'system_config')
     .order('published_at', { ascending: false });
 
   // 3. Fetch Homeworks

@@ -43,8 +43,7 @@ import { supabase } from '@/lib/supabase/client';
 import { fetchParentPortalBundle } from '@/services/portalService';
 import { fetchStudentsFromDb } from '@/services/studentService';
 import { fetchParentsFromDb } from '@/services/parentService';
-import { fetchSystemConfigFromDb } from '@/services/systemConfigService';
-import { CUSTOM_LEVEL_COLORS_KEY } from '@/lib/themes';
+import { fetchCurriculaFromDb } from '@/services/curriculumService';
 
 const emptyAttendanceSummary: AttendanceSummary = {
   totalDays: 0,
@@ -172,9 +171,10 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     // Live Supabase sync for Parent Portal
     const syncFromSupabase = async () => {
       try {
-        const [dbStudents, dbParents] = await Promise.all([
+        const [dbStudents, dbParents, dbCurricula] = await Promise.all([
           fetchStudentsFromDb().catch(() => []),
           fetchParentsFromDb().catch(() => []),
+          fetchCurriculaFromDb().catch(() => []),
         ]);
 
         if (dbStudents && dbStudents.length > 0) {
@@ -183,8 +183,22 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         if (dbParents && dbParents.length > 0) {
           setItem(STORAGE_KEYS.ADMIN_PARENTS, dbParents);
         }
+        if (dbCurricula && dbCurricula.length > 0) {
+          setCurricula(dbCurricula);
+          setItem(STORAGE_KEYS.ADMIN_CURRICULA, dbCurricula);
+        }
 
         const bundle = await fetchParentPortalBundle();
+        if (bundle.homeworks) {
+          const hwMap: Record<string, Homework[]> = {};
+          bundle.homeworks.forEach((h) => {
+            if (!hwMap[h.studentId]) hwMap[h.studentId] = [];
+            hwMap[h.studentId].push(h);
+          });
+          setHomeworkMap(hwMap);
+          setItem(STORAGE_KEYS.HOMEWORK, hwMap);
+        }
+
         if (bundle.attendance && bundle.attendance.length > 0) {
           const sessionsMap = new Map<string, AttendanceSession>();
           bundle.attendance.forEach((rec) => {
@@ -245,15 +259,21 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        if (bundle.homeworks && bundle.homeworks.length > 0) {
-          const hwMapByStudent: Record<string, Homework[]> = {};
-          bundle.homeworks.forEach((h) => {
-            if (!hwMapByStudent[h.studentId]) {
-              hwMapByStudent[h.studentId] = [];
-            }
-            hwMapByStudent[h.studentId].push(h);
-          });
-          setHomeworkMap((prev) => ({ ...prev, ...hwMapByStudent }));
+        if (bundle.invoices && bundle.invoices.length > 0) {
+          const syncedFees: Fee[] = bundle.invoices.map((inv: any) => ({
+            id: inv.id,
+            studentId: inv.student_id || '',
+            descriptionAr: inv.title,
+            categoryAr: 'رسوم دراسية',
+            amount: Number(inv.amount || 0),
+            currency: 'د.ج',
+            status: inv.status || 'pending',
+            dueDate: inv.due_date || '',
+            paidDate: inv.paid_date,
+            invoiceNumber: inv.invoice_number,
+          }));
+          setFees(syncedFees);
+          setItem(STORAGE_KEYS.FEES, syncedFees);
         }
 
         if (bundle.notifications && bundle.notifications.length > 0) {
@@ -266,22 +286,6 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           });
         }
 
-        // Fetch remote curricula and custom level colors
-        const [remoteCurricula, remoteColors] = await Promise.all([
-          fetchSystemConfigFromDb<CurriculumLevel[]>('curricula').catch(() => null),
-          fetchSystemConfigFromDb<Record<string, string>>('level_colors').catch(() => null),
-        ]);
-
-        if (remoteCurricula && remoteCurricula.length > 0) {
-          setCurricula(remoteCurricula);
-          setItem(STORAGE_KEYS.ADMIN_CURRICULA, remoteCurricula);
-        }
-
-        if (remoteColors && Object.keys(remoteColors).length > 0 && typeof window !== 'undefined') {
-          localStorage.setItem(CUSTOM_LEVEL_COLORS_KEY, JSON.stringify(remoteColors));
-          window.dispatchEvent(new CustomEvent('awliya-data-sync'));
-        }
-
         syncParentStudents();
       } catch (err) {
         console.warn('Supabase parent portal sync notice:', err);
@@ -290,7 +294,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     syncFromSupabase();
 
-    // Supabase Realtime Channel for live students, attendance, homeworks and announcements
+    // Supabase Realtime Channel for live students, attendance, homeworks, curricula, invoices and announcements
     const channel = supabase
       .channel('portal-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, () => {
@@ -306,6 +310,12 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         syncFromSupabase();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'homeworks' }, () => {
+        syncFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'curricula' }, () => {
+        syncFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices' }, () => {
         syncFromSupabase();
       })
       .subscribe();
