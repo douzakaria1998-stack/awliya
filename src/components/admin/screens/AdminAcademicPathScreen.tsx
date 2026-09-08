@@ -43,6 +43,7 @@ import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { CurriculumLevel, LessonProgressStatus, AdminGroup } from '@/types/admin';
 import { formatStudentCount } from '@/lib/utils';
+import { autoTranslateLevelName, autoTranslateUnitTitle, autoTranslateLessonTitle } from '@/lib/translations';
 import { ConfirmModal } from '../modals/ConfirmModal';
 
 export function AdminAcademicPathScreen() {
@@ -751,32 +752,39 @@ export function AdminAcademicPathScreen() {
   const handleFinalSaveLevel = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const formattedUnits = unitsDraft.map((u, uIdx) => ({
-      id: u.id.startsWith('draft-') ? `unit-${Date.now()}-${uIdx + 1}` : u.id,
-      unitNumber: uIdx + 1,
-      titleAr: u.titleAr.trim() || `الوحدة ${uIdx + 1}`,
-      titleEn: u.titleEn.trim() || `Unit ${uIdx + 1}`,
-      lessons: u.lessons.map((l, lIdx) => ({
-        id: l.id.startsWith('draft-') ? `lesson-${Date.now()}-${uIdx + 1}-${lIdx + 1}` : l.id,
-        lessonNumber: lIdx + 1,
-        titleAr: l.titleAr.trim() || `الدرس ${lIdx + 1}`,
-        titleEn: l.titleEn.trim() || `Lesson ${lIdx + 1}`,
-        contentSummary: l.contentSummary.trim() || 'محتوى الدرس المعتمد.',
-        vocabulary: l.vocabString
-          .split(',')
-          .map((v) => v.trim())
-          .filter(Boolean),
-        exercisesCount: 4,
-        hasAssessment: l.hasAssessment,
-      })),
-    }));
+    const formattedUnits = unitsDraft.map((u, uIdx) => {
+      const uTitleAr = u.titleAr.trim() || `الوحدة ${uIdx + 1}`;
+      return {
+        id: u.id.startsWith('draft-') ? `unit-${Date.now()}-${uIdx + 1}` : u.id,
+        unitNumber: uIdx + 1,
+        titleAr: uTitleAr,
+        titleEn: u.titleEn?.trim() || autoTranslateUnitTitle(uTitleAr, uIdx + 1, 'en'),
+        lessons: u.lessons.map((l, lIdx) => {
+          const lTitleAr = l.titleAr.trim() || `الدرس ${lIdx + 1}`;
+          return {
+            id: l.id.startsWith('draft-') ? `lesson-${Date.now()}-${uIdx + 1}-${lIdx + 1}` : l.id,
+            lessonNumber: lIdx + 1,
+            titleAr: lTitleAr,
+            titleEn: l.titleEn?.trim() || autoTranslateLessonTitle(lTitleAr, lIdx + 1, 'en'),
+            contentSummary: l.contentSummary.trim() || 'محتوى الدرس المعتمد.',
+            vocabulary: l.vocabString
+              .split(',')
+              .map((v) => v.trim())
+              .filter(Boolean),
+            exercisesCount: 4,
+            hasAssessment: l.hasAssessment,
+          };
+        }),
+      };
+    });
 
     if (editingLevelNumber !== null) {
+      const levelNameAr = newLevelNameAr.trim();
       const updatedLevel: CurriculumLevel = {
         levelNumber: editingLevelNumber,
         cefrCode: newLevelCode,
-        nameAr: newLevelNameAr.trim(),
-        nameEn: newLevelNameEn.trim() || `${newLevelCode} - Level`,
+        nameAr: levelNameAr,
+        nameEn: newLevelNameEn.trim() || autoTranslateLevelName(levelNameAr, editingLevelNumber, 'en'),
         descriptionAr: newLevelDescAr.trim() || 'مستوى تعليمي معتمد يركز على الكفاءات اللغوية التأسيسية.',
         descriptionEn: newLevelDescEn.trim() || 'Accredited curriculum level focusing on core competencies.',
         color: newLevelColor || '#3B82F6',
@@ -797,12 +805,13 @@ export function AdminAcademicPathScreen() {
     } else {
       const sameLangLevels = curricula.filter((c) => c.language === newLevelLanguage);
       const newLevelNumber = sameLangLevels.length + 1;
+      const levelNameAr = newLevelNameAr.trim();
 
       const newLevel: CurriculumLevel = {
         levelNumber: newLevelNumber,
         cefrCode: newLevelCode,
-        nameAr: newLevelNameAr.trim(),
-        nameEn: newLevelNameEn.trim() || `${newLevelCode} - Level`,
+        nameAr: levelNameAr,
+        nameEn: newLevelNameEn.trim() || autoTranslateLevelName(levelNameAr, newLevelNumber, 'en'),
         descriptionAr: newLevelDescAr.trim() || 'مستوى تعليمي معتمد يركز على الكفاءات اللغوية التأسيسية.',
         descriptionEn: newLevelDescEn.trim() || 'Accredited curriculum level focusing on core competencies.',
         color: newLevelColor || '#3B82F6',
@@ -2541,21 +2550,6 @@ export function AdminAcademicPathScreen() {
 
                 <div>
                   <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
-                    {language === 'ar' ? 'اسم المستوى بالإنجليزية (اختياري)' : 'Level Name (English)'}
-                  </label>
-                  <input
-                    type="text"
-                    value={newLevelNameEn}
-                    onChange={(e) => setNewLevelNameEn(e.target.value)}
-                    placeholder="e.g. Level A1 — Beginner & Foundation"
-                    className="w-full h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors"
-                    style={{ paddingLeft: '16px', paddingRight: '16px' }}
-                    dir="ltr"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 text-xs font-bold mb-1.5">
                     {language === 'ar' ? 'عدد الوحدات الأولية' : 'Initial Units Count'}
                   </label>
                   <input
@@ -2790,30 +2784,16 @@ export function AdminAcademicPathScreen() {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                             <div>
                               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">
-                                {language === 'ar' ? 'اسم الوحدة بالعربية *' : 'Unit Title (Arabic) *'}
+                                {language === 'ar' ? 'اسم وعنوان الوحدة *' : 'Unit Title *'}
                               </label>
                               <input
                                 type="text"
                                 value={unit.titleAr}
                                 onChange={(e) => handleUpdateUnit(unit.id, { titleAr: e.target.value })}
-                                placeholder={language === 'ar' ? `مثال: الوحدة ${uIdx + 1}: محاور التأسيس` : `Unit ${uIdx + 1} Title (AR)`}
+                                placeholder={language === 'ar' ? `مثال: الوحدة ${uIdx + 1}: محاور التأسيس` : `Unit ${uIdx + 1} Title`}
                                 className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
                                 style={{ paddingLeft: '18px', paddingRight: '18px' }}
                                 dir="rtl"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">
-                                {language === 'ar' ? 'اسم الوحدة بالإنجليزية:' : 'Unit Title (English):'}
-                              </label>
-                              <input
-                                type="text"
-                                value={unit.titleEn}
-                                onChange={(e) => handleUpdateUnit(unit.id, { titleEn: e.target.value })}
-                                placeholder={`e.g. Unit ${uIdx + 1}: Core Foundations`}
-                                className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
-                                style={{ paddingLeft: '18px', paddingRight: '18px' }}
-                                dir="ltr"
                               />
                             </div>
                           </div>
@@ -2856,36 +2836,20 @@ export function AdminAcademicPathScreen() {
                                     )}
                                   </div>
 
-                                  {/* Lesson Titles Row */}
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
-                                        {language === 'ar' ? 'عنوان الدرس (عربي) *' : 'Lesson Title (Arabic) *'}
-                                      </label>
-                                      <input
-                                        type="text"
-                                        value={lesson.titleAr}
-                                        onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleAr: e.target.value })}
-                                        placeholder={language === 'ar' ? `عنوان الدرس ${lIdx + 1}` : `Lesson ${lIdx + 1} Title (AR)`}
-                                        className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                                        style={{ paddingLeft: '16px', paddingRight: '16px' }}
-                                        dir="rtl"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="block text-[11px] font-bold text-slate-400 mb-1">
-                                        {language === 'ar' ? 'عنوان الدرس (إنجليزي):' : 'Lesson Title (English):'}
-                                      </label>
-                                      <input
-                                        type="text"
-                                        value={lesson.titleEn}
-                                        onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleEn: e.target.value })}
-                                        placeholder={`Lesson ${lIdx + 1} Title (EN)`}
-                                        className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors"
-                                        style={{ paddingLeft: '16px', paddingRight: '16px' }}
-                                        dir="ltr"
-                                      />
-                                    </div>
+                                  {/* Lesson Title */}
+                                  <div>
+                                    <label className="block text-[11px] font-bold text-slate-400 mb-1">
+                                      {language === 'ar' ? 'عنوان الدرس *' : 'Lesson Title *'}
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={lesson.titleAr}
+                                      onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { titleAr: e.target.value })}
+                                      placeholder={language === 'ar' ? `عنوان الدرس ${lIdx + 1}` : `Lesson ${lIdx + 1} Title`}
+                                      className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                                      style={{ paddingLeft: '16px', paddingRight: '16px' }}
+                                      dir="rtl"
+                                    />
                                   </div>
 
                                   {/* Lesson Summary & Vocabulary inputs */}

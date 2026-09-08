@@ -20,6 +20,7 @@ import {
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdminGroup } from '@/types/admin';
+import { autoTranslateGroupName } from '@/lib/translations';
 import { GroupDetailModal } from '../modals/GroupDetailModal';
 import { SearchableSelect } from '@/components/common/SearchableSelect';
 import { DateInputDMY } from '@/components/common/DateInputDMY';
@@ -443,7 +444,9 @@ export function AdminGroupsScreen() {
                       >
                         {grp.code}
                       </span>
-                      <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">{grp.name}</span>
+                      <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                        {autoTranslateGroupName(grp.name, language)}
+                      </span>
                       <span className="text-slate-300 dark:text-slate-600 text-xs">•</span>
                       <span className="text-[11px] text-slate-400 font-medium bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
                         {grp.language}

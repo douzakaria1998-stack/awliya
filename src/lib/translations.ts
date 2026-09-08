@@ -809,3 +809,11 @@ export function translateTeacherNote(note: string, lang: Language): string {
 
   return note;
 }
+
+export {
+  transliterateArabicName,
+  autoTranslateGroupName,
+  autoTranslateLevelName,
+  autoTranslateUnitTitle,
+  autoTranslateLessonTitle,
+} from './transliterate';

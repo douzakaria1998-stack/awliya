@@ -29,6 +29,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { SearchableSelect } from '@/components/common/SearchableSelect';
 import { DateInputDMY, formatDateDMY } from '@/components/common/DateInputDMY';
 import { ConfirmModal } from './ConfirmModal';
+import { transliterateArabicName, autoTranslateGroupName } from '@/lib/translations';
 
 interface ScheduleSlot {
   id: string;
@@ -105,8 +106,6 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
   // New Student fields
   const [newFirstNameAr, setNewFirstNameAr] = useState('');
   const [newLastNameAr, setNewLastNameAr] = useState('');
-  const [newFirstNameEn, setNewFirstNameEn] = useState('');
-  const [newLastNameEn, setNewLastNameEn] = useState('');
   const [newGender, setNewGender] = useState<'male' | 'female'>('male');
   const [newBirthDate, setNewBirthDate] = useState('2015-05-15');
   const [selectedParentId, setSelectedParentId] = useState('');
@@ -349,7 +348,7 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
     if (!group || !newFirstNameAr.trim()) return;
 
     const fullAr = `${newFirstNameAr.trim()} ${newLastNameAr.trim()}`.trim();
-    const fullEn = `${newFirstNameEn.trim()} ${newLastNameEn.trim()}`.trim() || fullAr;
+    const fullEn = transliterateArabicName(fullAr);
     const linkedParent = parents.find((p) => p.id === selectedParentId);
 
     addStudent({
@@ -369,8 +368,6 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
 
     setNewFirstNameAr('');
     setNewLastNameAr('');
-    setNewFirstNameEn('');
-    setNewLastNameEn('');
     setNewBirthDate('2015-05-15');
     setNewGender('male');
     setSelectedParentId('');
@@ -427,7 +424,7 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
                   className="rounded-xl bg-sky-500/20 text-sky-200 font-black text-xs sm:text-sm border border-sky-400/40 shadow-xs flex items-center justify-center shrink-0"
                   style={{ padding: '4px 14px' }}
                 >
-                  {group.name.replace(/\s*\([A-Z0-9\.\+\-]+\)/g, '')}
+                  {autoTranslateGroupName(group.name.replace(/\s*\([A-Z0-9\.\+\-]+\)/g, ''), language)}
                 </span>
 
                 {/* 4. Language Badge */}
@@ -1033,40 +1030,6 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      <div>
-                        <label
-                          className="text-xs font-bold text-slate-700 dark:text-slate-300 block"
-                          style={{ marginBottom: '8px' }}
-                        >
-                          {language === 'ar' ? 'الاسم باللاتينية' : 'First Name (Latin)'}
-                        </label>
-                        <input
-                          type="text"
-                          value={newFirstNameEn}
-                          onChange={(e) => setNewFirstNameEn(e.target.value)}
-                          placeholder="Mohamed"
-                          className="w-full rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                          style={{ height: '46px', padding: '10px 14px' }}
-                        />
-                      </div>
-                      <div>
-                        <label
-                          className="text-xs font-bold text-slate-700 dark:text-slate-300 block"
-                          style={{ marginBottom: '8px' }}
-                        >
-                          {language === 'ar' ? 'اللقب باللاتينية' : 'Last Name (Latin)'}
-                        </label>
-                        <input
-                          type="text"
-                          value={newLastNameEn}
-                          onChange={(e) => setNewLastNameEn(e.target.value)}
-                          placeholder="Benali"
-                          className="w-full rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                          style={{ height: '46px', padding: '10px 14px' }}
-                        />
-                      </div>
-                    </div>
 
                     {/* Birthday & Gender */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

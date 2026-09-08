@@ -26,6 +26,7 @@ import { AdminTeacher } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { generateAutoPassword, formatStudentCount } from '@/lib/utils';
+import { transliterateArabicName } from '@/lib/translations';
 import { ConfirmModal } from './ConfirmModal';
 
 interface TeacherDetailModalProps {
@@ -99,9 +100,10 @@ export function TeacherDetailModal({ teacher, isOpen, onClose }: TeacherDetailMo
   const activePassword = currentTeacher.password || 'MS-Teach-2026!';
 
   const executeSaveProfile = () => {
+    const finalNameAr = editFullNameAr.trim() || currentTeacher.fullNameAr;
     updateTeacher(currentTeacher.id, {
-      fullNameAr: editFullNameAr.trim() || currentTeacher.fullNameAr,
-      fullNameEn: editFullNameEn.trim() || currentTeacher.fullNameEn,
+      fullNameAr: finalNameAr,
+      fullNameEn: transliterateArabicName(finalNameAr),
       username: editUsername.trim() || currentTeacher.username,
       phone: editPhone.trim() || currentTeacher.phone,
       email: editEmail.trim() || currentTeacher.email,
@@ -264,35 +266,19 @@ export function TeacherDetailModal({ teacher, isOpen, onClose }: TeacherDetailMo
             {isEditing ? (
               /* EDIT MODE FORM */
               <form onSubmit={handleSaveProfile} className="flex flex-col gap-3.5 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      {language === 'ar' ? 'الاسم بالعربية *' : 'Arabic Name *'}
-                    </label>
-                    <input
-                      type="text"
-                      dir="auto"
-                      required
-                      value={editFullNameAr}
-                      onChange={(e) => setEditFullNameAr(e.target.value)}
-                      style={{ paddingLeft: '14px', paddingRight: '14px' }}
-                      className="w-full h-10 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500/20"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      {language === 'ar' ? 'الاسم بالإنجليزية' : 'English Name'}
-                    </label>
-                    <input
-                      type="text"
-                      dir="ltr"
-                      value={editFullNameEn}
-                      onChange={(e) => setEditFullNameEn(e.target.value)}
-                      style={{ paddingLeft: '14px', paddingRight: '14px' }}
-                      className="w-full h-10 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-mono text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500/20"
-                    />
-                  </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {language === 'ar' ? 'الاسم الكامل للأستاذ *' : 'Teacher Full Name *'}
+                  </label>
+                  <input
+                    type="text"
+                    dir="auto"
+                    required
+                    value={editFullNameAr}
+                    onChange={(e) => setEditFullNameAr(e.target.value)}
+                    style={{ paddingLeft: '14px', paddingRight: '14px' }}
+                    className="w-full h-10 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500/20"
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">

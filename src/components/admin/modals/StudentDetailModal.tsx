@@ -28,6 +28,7 @@ import {
 import { AdminStudent } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { transliterateArabicName } from '@/lib/translations';
 import { ConfirmModal } from './ConfirmModal';
 
 interface StudentDetailModalProps {
@@ -151,7 +152,7 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
 
     updateStudent(student?.id || '', {
       fullNameAr: editFullNameAr.trim(),
-      fullNameEn: editFullNameEn.trim() || editFullNameAr.trim(),
+      fullNameEn: transliterateArabicName(editFullNameAr.trim()),
       gender: editGender,
       language: (editLanguage as any) || '',
       currentLevel: typeof editLevel === 'number' ? editLevel : 1,
@@ -363,35 +364,19 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                     </h4>
                   </div>
 
-                  {/* Row 1: Names */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
-                    <div className="flex flex-col gap-2">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        {language === 'ar' ? 'الاسم الكامل بالعربية *' : 'Full Name (Arabic) *'}
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={editFullNameAr}
-                        onChange={(e) => setEditFullNameAr(e.target.value)}
-                        className="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-2xs transition-all"
-                        style={{ height: '46px', padding: '10px 16px' }}
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        {language === 'ar' ? 'الاسم الكامل بالإنجليزية' : 'Full Name (English)'}
-                      </label>
-                      <input
-                        type="text"
-                        value={editFullNameEn}
-                        onChange={(e) => setEditFullNameEn(e.target.value)}
-                        className="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-2xs transition-all"
-                        style={{ height: '46px', padding: '10px 16px' }}
-                        dir="ltr"
-                      />
-                    </div>
+                  {/* Row 1: Name */}
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      {language === 'ar' ? 'الاسم الكامل للطالب *' : 'Student Full Name *'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editFullNameAr}
+                      onChange={(e) => setEditFullNameAr(e.target.value)}
+                      className="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 shadow-2xs transition-all"
+                      style={{ height: '46px', padding: '10px 16px' }}
+                    />
                   </div>
 
                   {/* Row 2: Gender, Language Track, Status */}

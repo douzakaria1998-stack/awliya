@@ -44,6 +44,8 @@ import { getThemeForLevel } from '@/lib/themes';
 import { generateAutoPassword } from '@/lib/utils';
 import { StudentDetailModal } from '../modals/StudentDetailModal';
 
+import { transliterateArabicName } from '@/lib/translations';
+
 export function StudentsManagementScreen() {
   const { visibleStudents, groups, teachers, parents, addStudent, addParent, updateStudent, archiveStudent, curricula } = useAdmin();
   const { isRTL, language } = useLanguage();
@@ -64,8 +66,6 @@ export function StudentsManagementScreen() {
   // New Student Form State (First Name, Last Name, Birthday, Link to Parent, etc.)
   const [firstNameAr, setFirstNameAr] = useState('');
   const [lastNameAr, setLastNameAr] = useState('');
-  const [firstNameEn, setFirstNameEn] = useState('');
-  const [lastNameEn, setLastNameEn] = useState('');
   const [birthDate, setBirthDate] = useState('2015-05-15');
   const [newGender, setNewGender] = useState<'male' | 'female'>('male');
   const [newLanguage, setNewLanguage] = useState<'English' | 'French' | ''>('');
@@ -217,9 +217,7 @@ export function StudentsManagementScreen() {
     if (!firstNameAr.trim() || !lastNameAr.trim()) return;
 
     const fullNameAr = `${firstNameAr.trim()} ${lastNameAr.trim()}`;
-    const fullNameEn = firstNameEn.trim() && lastNameEn.trim()
-      ? `${firstNameEn.trim()} ${lastNameEn.trim()}`
-      : fullNameAr;
+    const fullNameEn = transliterateArabicName(fullNameAr);
 
     const matchedGroup = newGroupId ? groups.find((g) => g.id === newGroupId) : undefined;
     const matchedTeacher = matchedGroup ? teachers.find((t) => t.id === matchedGroup?.teacherId) : undefined;
@@ -277,8 +275,6 @@ export function StudentsManagementScreen() {
     // Reset Form
     setFirstNameAr('');
     setLastNameAr('');
-    setFirstNameEn('');
-    setLastNameEn('');
     setNewLanguage('');
     setNewLevel('');
     setNewGroupId('');
@@ -293,8 +289,6 @@ export function StudentsManagementScreen() {
   const handleOpenAddStudent = () => {
     setFirstNameAr('');
     setLastNameAr('');
-    setFirstNameEn('');
-    setLastNameEn('');
     setNewLanguage('');
     setNewLevel('');
     setNewGroupId('');
@@ -747,45 +741,6 @@ export function StudentsManagementScreen() {
                     placeholder="مثال: التواتي"
                     className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
                     style={{ height: '42px', padding: '8px 14px' }}
-                  />
-                </div>
-              </div>
-
-              {/* Optional English Name */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label
-                    className="block text-[11px] font-bold text-slate-500 dark:text-slate-400"
-                    style={{ marginBottom: '4px' }}
-                  >
-                    First Name (English)
-                  </label>
-                  <input
-                    type="text"
-                    value={firstNameEn}
-                    onChange={(e) => setFirstNameEn(e.target.value)}
-                    placeholder="e.g. Yasmine"
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
-                    style={{ height: '40px', padding: '6px 12px' }}
-                    dir="ltr"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="block text-[11px] font-bold text-slate-500 dark:text-slate-400"
-                    style={{ marginBottom: '4px' }}
-                  >
-                    Last Name (English)
-                  </label>
-                  <input
-                    type="text"
-                    value={lastNameEn}
-                    onChange={(e) => setLastNameEn(e.target.value)}
-                    placeholder="e.g. Touati"
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all placeholder:text-slate-400"
-                    style={{ height: '40px', padding: '6px 12px' }}
-                    dir="ltr"
                   />
                 </div>
               </div>

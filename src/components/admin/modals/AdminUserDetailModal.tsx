@@ -27,6 +27,7 @@ import { AdminUser, AdminRole } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { generateAutoPassword } from '@/lib/utils';
+import { transliterateArabicName } from '@/lib/translations';
 import { ConfirmModal } from './ConfirmModal';
 
 interface AdminUserDetailModalProps {
@@ -132,7 +133,7 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
       onConfirm: () => {
         updateAdminUser(currentUser.id, {
           fullNameAr: fullNameAr.trim(),
-          fullNameEn: fullNameEn.trim() || fullNameAr.trim(),
+          fullNameEn: transliterateArabicName(fullNameAr.trim()),
           username: username.trim().toLowerCase(),
           email: email.trim(),
           phone: phone.trim(),
@@ -248,31 +249,17 @@ export function AdminUserDetailModal({ adminUser, isOpen, onClose }: AdminUserDe
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
-                  <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">
-                      {language === 'ar' ? 'الاسم الكامل بالعربية' : 'Full Name (Arabic)'} <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={fullNameAr}
-                      onChange={(e) => setFullNameAr(e.target.value)}
-                      className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-purple-500 transition-colors shadow-2xs"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">
-                      {language === 'ar' ? 'الاسم باللاتينية / الإنجليزية' : 'Full Name (Latin/English)'}
-                    </label>
-                    <input
-                      type="text"
-                      value={fullNameEn}
-                      onChange={(e) => setFullNameEn(e.target.value)}
-                      className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-purple-500 transition-colors shadow-2xs"
-                    />
-                  </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">
+                    {language === 'ar' ? 'الاسم الكامل للحساب' : 'Account Full Name'} <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={fullNameAr}
+                    onChange={(e) => setFullNameAr(e.target.value)}
+                    className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-purple-500 transition-colors shadow-2xs"
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">

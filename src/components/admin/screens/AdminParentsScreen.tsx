@@ -28,6 +28,7 @@ import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdminParent } from '@/types/admin';
 import { generateAutoPassword, formatChildrenCount } from '@/lib/utils';
+import { transliterateArabicName } from '@/lib/translations';
 import { ParentDetailModal } from '../modals/ParentDetailModal';
 import { ConfirmModal } from '../modals/ConfirmModal';
 
@@ -58,7 +59,6 @@ export function AdminParentsScreen() {
   // New Parent Form State
   const [isAddParentOpen, setIsAddParentOpen] = useState(false);
   const [newNameAr, setNewNameAr] = useState('');
-  const [newNameEn, setNewNameEn] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newAddress, setNewAddress] = useState('');
@@ -85,7 +85,6 @@ export function AdminParentsScreen() {
 
   const handleOpenAddParent = () => {
     setNewNameAr('');
-    setNewNameEn('');
     setNewPhone('');
     setNewEmail('');
     setNewAddress('');
@@ -100,8 +99,8 @@ export function AdminParentsScreen() {
     if (!newNameAr || !newPhone) return;
 
     addParent({
-      fullNameAr: newNameAr,
-      fullNameEn: newNameEn || newNameAr,
+      fullNameAr: newNameAr.trim(),
+      fullNameEn: transliterateArabicName(newNameAr),
       phone: newPhone,
       email: newEmail || 'parent@myschool.edu',
       address: newAddress || 'الجزائر العاصمة',
@@ -110,7 +109,6 @@ export function AdminParentsScreen() {
     });
 
     setNewNameAr('');
-    setNewNameEn('');
     setNewPhone('');
     setNewEmail('');
     setNewAddress('');
@@ -343,35 +341,19 @@ export function AdminParentsScreen() {
             </div>
 
             <form onSubmit={handleCreateParent} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }} className="text-xs font-bold">
-              {/* Row 1: Names (Arabic & English) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 text-[11px] font-bold" style={{ marginBottom: '5px' }}>
-                    {language === 'ar' ? 'الاسم بالعربية *' : 'Arabic Name *'}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newNameAr}
-                    onChange={(e) => setNewNameAr(e.target.value)}
-                    placeholder="مثال: عبد الرحمن بن سالم"
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs text-slate-900 dark:text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-700 dark:text-slate-300 text-[11px] font-bold" style={{ marginBottom: '5px' }}>
-                    {language === 'ar' ? 'الاسم بالإنجليزية' : 'English Name'}
-                  </label>
-                  <input
-                    type="text"
-                    value={newNameEn}
-                    onChange={(e) => setNewNameEn(e.target.value)}
-                    placeholder="Ex: Abderrahmane Bensalem"
-                    className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs text-slate-900 dark:text-white"
-                    dir="ltr"
-                  />
-                </div>
+              {/* Name */}
+              <div>
+                <label className="block text-slate-700 dark:text-slate-300 text-[11px] font-bold" style={{ marginBottom: '5px' }}>
+                  {language === 'ar' ? 'الاسم الكامل لولي الأمر *' : 'Parent Full Name *'}
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newNameAr}
+                  onChange={(e) => setNewNameAr(e.target.value)}
+                  placeholder={language === 'ar' ? 'مثال: عبد الرحمن بن سالم' : 'e.g. Abderrahmane Bensalem'}
+                  className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 outline-none transition-all text-xs text-slate-900 dark:text-white"
+                />
               </div>
 
               {/* Row 2: Phone & Email */}

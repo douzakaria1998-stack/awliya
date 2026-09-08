@@ -32,6 +32,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { generateAutoPassword } from '@/lib/utils';
 import { setItem } from '@/lib/localStorage';
 import { STORAGE_KEYS } from '@/lib/constants';
+import { transliterateArabicName } from '@/lib/translations';
 
 import { ConfirmModal } from './ConfirmModal';
 
@@ -154,7 +155,7 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
       onConfirm: () => {
         updateParent(currentParent.id, {
           fullNameAr: editNameAr.trim(),
-          fullNameEn: editNameEn.trim() || editNameAr.trim(),
+          fullNameEn: transliterateArabicName(editNameAr.trim()),
           phone: editPhone.trim(),
           email: editEmail.trim() || currentParent.email,
           address: editAddress.trim() || currentParent.address,
@@ -263,33 +264,20 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
 
               {isEditing ? (
                 <form onSubmit={handleSaveParentDetails} className="space-y-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 p-5 animate-fade-in">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                      {language === 'ar' ? 'الاسم الكامل لولي الأمر *' : 'Parent Full Name *'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editNameAr}
+                      onChange={(e) => setEditNameAr(e.target.value)}
+                      className="w-full text-xs sm:text-sm font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                      style={{ padding: '11px 18px', minHeight: '44px' }}
+                    />
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-                        {language === 'ar' ? 'الاسم بالعربية *' : 'Full Name (Arabic) *'}
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={editNameAr}
-                        onChange={(e) => setEditNameAr(e.target.value)}
-                        className="w-full text-xs sm:text-sm font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                        style={{ padding: '11px 18px', minHeight: '44px' }}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-                        {language === 'ar' ? 'الاسم بالإنجليزية' : 'Full Name (English)'}
-                      </label>
-                      <input
-                        type="text"
-                        value={editNameEn}
-                        onChange={(e) => setEditNameEn(e.target.value)}
-                        className="w-full text-xs sm:text-sm font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                        style={{ padding: '11px 18px', minHeight: '44px' }}
-                        dir="ltr"
-                      />
-                    </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
                         {language === 'ar' ? 'رقم الهاتف *' : 'Phone Number *'}
