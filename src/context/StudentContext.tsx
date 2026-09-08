@@ -43,6 +43,8 @@ import { supabase } from '@/lib/supabase/client';
 import { fetchParentPortalBundle } from '@/services/portalService';
 import { fetchStudentsFromDb } from '@/services/studentService';
 import { fetchParentsFromDb } from '@/services/parentService';
+import { fetchSystemConfigFromDb } from '@/services/systemConfigService';
+import { CUSTOM_LEVEL_COLORS_KEY } from '@/lib/themes';
 
 const emptyAttendanceSummary: AttendanceSummary = {
   totalDays: 0,
@@ -243,6 +245,17 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
+        if (bundle.homeworks && bundle.homeworks.length > 0) {
+          const hwMapByStudent: Record<string, Homework[]> = {};
+          bundle.homeworks.forEach((h) => {
+            if (!hwMapByStudent[h.studentId]) {
+              hwMapByStudent[h.studentId] = [];
+            }
+            hwMapByStudent[h.studentId].push(h);
+          });
+          setHomeworkMap((prev) => ({ ...prev, ...hwMapByStudent }));
+        }
+
         if (bundle.notifications && bundle.notifications.length > 0) {
           setNotifications((prev) => {
             const seen = new Set(bundle.notifications.map((n) => n.id));
@@ -251,6 +264,22 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
             setItem(STORAGE_KEYS.NOTIFICATIONS, merged);
             return merged;
           });
+        }
+
+        // Fetch remote curricula and custom level colors
+        const [remoteCurricula, remoteColors] = await Promise.all([
+          fetchSystemConfigFromDb<CurriculumLevel[]>('curricula').catch(() => null),
+          fetchSystemConfigFromDb<Record<string, string>>('level_colors').catch(() => null),
+        ]);
+
+        if (remoteCurricula && remoteCurricula.length > 0) {
+          setCurricula(remoteCurricula);
+          setItem(STORAGE_KEYS.ADMIN_CURRICULA, remoteCurricula);
+        }
+
+        if (remoteColors && Object.keys(remoteColors).length > 0 && typeof window !== 'undefined') {
+          localStorage.setItem(CUSTOM_LEVEL_COLORS_KEY, JSON.stringify(remoteColors));
+          window.dispatchEvent(new CustomEvent('awliya-data-sync'));
         }
 
         syncParentStudents();

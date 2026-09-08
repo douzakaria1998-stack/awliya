@@ -57,7 +57,8 @@ import {
 } from '@/services/groupService';
 import { saveAttendanceRecordsInDb } from '@/services/attendanceService';
 import { createHomeworkInDb, evaluateHomeworkInDb } from '@/services/homeworkService';
-import { saveCustomLevelColor } from '@/lib/themes';
+import { saveCustomLevelColor, CUSTOM_LEVEL_COLORS_KEY } from '@/lib/themes';
+import { fetchSystemConfigFromDb, saveSystemConfigInDb } from '@/services/systemConfigService';
 
 interface AdminContextType {
   // Current user & role & auth
@@ -459,6 +460,32 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
     const sCurricula = getItem<CurriculumLevel[]>(ADMIN_STORAGE_KEYS.CURRICULA);
     if (sCurricula?.length) setCurricula(sCurricula);
+
+    // Sync curricula & level colors from / to Supabase
+    fetchSystemConfigFromDb<CurriculumLevel[]>('curricula').then((remote) => {
+      if (remote && remote.length > 0) {
+        setCurricula(remote);
+        setItem(ADMIN_STORAGE_KEYS.CURRICULA, remote);
+      } else if (sCurricula && sCurricula.length > 0) {
+        saveSystemConfigInDb('curricula', sCurricula);
+      }
+    }).catch((err) => console.warn('Supabase curricula sync error:', err));
+
+    fetchSystemConfigFromDb<Record<string, string>>('level_colors').then((remoteColors) => {
+      if (remoteColors && Object.keys(remoteColors).length > 0) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(CUSTOM_LEVEL_COLORS_KEY, JSON.stringify(remoteColors));
+          window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+        }
+      } else if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem(CUSTOM_LEVEL_COLORS_KEY);
+        if (raw) {
+          try {
+            saveSystemConfigInDb('level_colors', JSON.parse(raw));
+          } catch {}
+        }
+      }
+    }).catch((err) => console.warn('Supabase level colors sync error:', err));
 
     const sProgress = getItem<Record<string, LessonProgressStatus>>(ADMIN_STORAGE_KEYS.LESSON_PROGRESS);
     if (sProgress && Object.keys(sProgress).length) {
@@ -1701,10 +1728,17 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           updated = [...prev, levelData];
         }
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        saveSystemConfigInDb('curricula', updated);
         return updated;
       });
 
       if (typeof window !== 'undefined') {
+        const rawColors = localStorage.getItem(CUSTOM_LEVEL_COLORS_KEY);
+        if (rawColors) {
+          try {
+            saveSystemConfigInDb('level_colors', JSON.parse(rawColors));
+          } catch {}
+        }
         setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
       }
 
@@ -1731,10 +1765,17 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           c.levelNumber === oldLevelNumber && c.language === lang ? levelData : c
         );
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        saveSystemConfigInDb('curricula', updated);
         return updated;
       });
 
       if (typeof window !== 'undefined') {
+        const rawColors = localStorage.getItem(CUSTOM_LEVEL_COLORS_KEY);
+        if (rawColors) {
+          try {
+            saveSystemConfigInDb('level_colors', JSON.parse(rawColors));
+          } catch {}
+        }
         setTimeout(() => window.dispatchEvent(new CustomEvent('awliya-data-sync')), 0);
       }
 
@@ -1760,6 +1801,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }));
         const updated = [...otherLang, ...renumbered];
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        saveSystemConfigInDb('curricula', updated);
         return updated;
       });
 
@@ -1786,6 +1828,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         const otherLang = filtered.filter((c) => c.language !== lang);
         const updated = [...otherLang, ...sameLang];
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        saveSystemConfigInDb('curricula', updated);
         return updated;
       });
 
