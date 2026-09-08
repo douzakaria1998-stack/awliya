@@ -54,11 +54,11 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
 
   return (
     <div
-      className={`w-full animate-fade-in select-none ${isRTL ? 'text-right' : 'text-left'}`}
-      style={{ paddingBottom: '60px' }}
+      className={`w-full animate-fade-in select-none space-y-6 sm:space-y-8 ${isRTL ? 'text-right' : 'text-left'}`}
+      style={{ paddingBottom: '70px' }}
     >
       {/* 1. Screen Header */}
-      <div className="flex items-center justify-between gap-3 my-4 sm:my-6">
+      <div className="flex items-center justify-between gap-3 pt-1 pb-1">
         <div>
           <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 block mb-1">
             {language === 'ar' ? `خارطة المسار الأكاديمي (${academicLevels.length} مستويات)` : `${academicLevels.length}-Level Roadmap`}
@@ -71,7 +71,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
         {/* Current Level Pill Badge */}
         <div className="shrink-0">
           <div
-            className="inline-flex items-center rounded-full font-black text-xs sm:text-sm shadow-xs select-none px-3.5 py-1.5 gap-2 bg-slate-900 text-white dark:bg-slate-800 dark:text-slate-100 border border-slate-700/60"
+            className="inline-flex items-center rounded-full font-black text-xs sm:text-sm shadow-xs select-none px-4 py-2 gap-2 bg-slate-900 text-white dark:bg-slate-800 dark:text-slate-100 border border-slate-700/60"
           >
             <Sparkles size={14} className="text-lime-400 shrink-0" />
             <span className="whitespace-nowrap leading-none">
@@ -83,7 +83,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
 
       {/* 2. Path Overview Summary Card */}
       <div
-        className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-sm p-4 sm:p-6 rounded-3xl mb-5 space-y-4"
+        className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-sm p-5 sm:p-6 rounded-3xl space-y-5"
       >
         {/* Student track name and completion status */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -102,7 +102,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
         </div>
 
         {/* Progress Timeline Segments */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
             {academicLevels.map((lvl) => {
               const lvlObjTheme = getThemeForLevel(lvl.level as LevelId, lvl.color);
@@ -135,7 +135,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs font-bold">
+        <div className="flex flex-wrap items-center gap-4 pt-3.5 border-t border-slate-100 dark:border-slate-800 text-xs font-bold">
           <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0" />
             <span>{t.statusStudied} ({completedCount})</span>
@@ -154,7 +154,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
       </div>
 
       {/* 3. Vertical Timeline Roadmap with comfortable spacing */}
-      <div className="space-y-4">
+      <div className="space-y-5 sm:space-y-6">
         {academicLevels.map((lvl) => {
           const isStudied = lvl.status === 'studied';
           const isCurrent = lvl.status === 'current';
@@ -168,7 +168,7 @@ export function AcademicPathScreen({ onOpenAddStudent }: AcademicPathScreenProps
               tabIndex={isLocked ? -1 : 0}
               onClick={() => !isLocked && setSelectedLevel(lvl)}
               onKeyDown={(e) => e.key === 'Enter' && !isLocked && setSelectedLevel(lvl)}
-              className={`w-full transition-all flex flex-col justify-between cursor-pointer p-4 sm:p-5 rounded-3xl ${
+              className={`w-full transition-all flex flex-col justify-between cursor-pointer p-5 sm:p-6 rounded-3xl ${
                 isCurrent
                   ? 'bg-white dark:bg-slate-850 shadow-md border-2 border-lime-500/60 dark:border-lime-500/40 ring-1 ring-lime-500/20'
                   : isStudied

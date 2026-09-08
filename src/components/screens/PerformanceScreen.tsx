@@ -540,9 +540,9 @@ export function PerformanceScreen({
   };
 
   return (
-    <div className={`space-y-6 animate-fade-in ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className={`space-y-6 sm:space-y-8 animate-fade-in ${isRTL ? 'text-right' : 'text-left'}`} style={{ paddingBottom: '70px' }}>
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 my-4 sm:my-6">
+      <div className="flex items-center justify-between gap-3 pt-1 pb-1">
         <div>
           <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 block mb-1">
             {t.performanceSubtitle}
@@ -554,7 +554,7 @@ export function PerformanceScreen({
 
         <div className="shrink-0">
           <span
-            className="inline-flex items-center rounded-full font-black text-xs sm:text-sm shadow-xs select-none px-3.5 py-1.5 bg-slate-900 text-white dark:bg-slate-800 dark:text-slate-100 border border-slate-700/60"
+            className="inline-flex items-center rounded-full font-black text-xs sm:text-sm shadow-xs select-none px-4 py-2 bg-slate-900 text-white dark:bg-slate-800 dark:text-slate-100 border border-slate-700/60"
           >
             {t.level} {activeStudent.currentLevel}
           </span>
@@ -563,7 +563,7 @@ export function PerformanceScreen({
 
       {/* Top Segmented Tab Navigation */}
       <div
-        className="rounded-2xl bg-slate-100 dark:bg-slate-850 flex gap-1.5 border border-slate-200/80 dark:border-slate-800 shadow-2xs p-1.5 mb-5"
+        className="rounded-3xl bg-slate-100 dark:bg-slate-850 flex gap-2 border border-slate-200/80 dark:border-slate-800 shadow-sm p-2 mb-6 sm:mb-8"
       >
         {performanceTabs.map((tab) => {
           const isActive = activeTab === tab.key;
@@ -577,7 +577,7 @@ export function PerformanceScreen({
                 setActiveTab(tab.key);
                 onTabChange?.(tab.key);
               }}
-              className={`flex-1 rounded-xl transition-all relative flex items-center justify-center gap-1.5 cursor-pointer select-none py-2.5 px-2 text-xs sm:text-sm ${
+              className={`flex-1 rounded-2xl transition-all relative flex items-center justify-center gap-1.5 cursor-pointer select-none py-3 px-2 text-xs sm:text-sm ${
                 isActive
                   ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-black'
                   : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 font-bold'
@@ -599,10 +599,10 @@ export function PerformanceScreen({
       {/* TAB 1: Homework */}
       {/* ============================================================ */}
       {activeTab === 'homework' && (
-        <div className="space-y-4 animate-fade-in">
+        <div className="space-y-5 sm:space-y-6 animate-fade-in">
           {/* Filter Pills */}
           <div
-            className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 mb-2"
+            className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1 mb-4"
           >
             <button
               type="button"

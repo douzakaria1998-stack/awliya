@@ -83,27 +83,19 @@ export function FinancialsScreen({ onOpenAddStudent }: FinancialsScreenProps) {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in text-right" style={{ paddingBottom: '48px' }}>
+    <div className="space-y-6 sm:space-y-8 animate-fade-in text-right" style={{ paddingBottom: '70px' }}>
       {/* Header */}
-      <div
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5"
-        style={{ marginTop: '28px', marginBottom: '20px' }}
-      >
+      <div className="flex items-center justify-between gap-3 pt-1 pb-1">
         <div>
-          <span className="text-xs sm:text-sm font-bold text-slate-400">الإدارة المالية والاشتراكات</span>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
+          <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 block mb-1">الإدارة المالية والاشتراكات</span>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
             المالية والفواتير
           </h1>
         </div>
       </div>
 
-      {/* Mobile-only student switcher */}
-      <div className="block md:hidden">
-        <StudentSwitcher onOpenAddStudent={onOpenAddStudent} />
-      </div>
-
       {/* Stacked Containers: Current Balance Card + Fee Tracking under each other */}
-      <div className="space-y-6">
+      <div className="space-y-6 sm:space-y-8">
         {/* Module 1: الرصيد الحالي (Current Balance Hero Card - Full Width Banner) */}
         <div
           className="dynamic-hero-card relative overflow-hidden shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-6"

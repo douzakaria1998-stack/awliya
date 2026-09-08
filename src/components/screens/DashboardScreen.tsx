@@ -185,21 +185,21 @@ export function DashboardScreen({
 
   return (
     <div
-      className={`w-full animate-fade-in select-none ${isRTL ? 'text-right' : 'text-left'}`}
-      style={{ paddingBottom: '60px' }}
+      className={`w-full animate-fade-in select-none space-y-5 sm:space-y-7 ${isRTL ? 'text-right' : 'text-left'}`}
+      style={{ paddingBottom: '70px' }}
     >
       {/* =========================================================================
           1. Welcome Card
           ========================================================================= */}
       <div
-        className="relative overflow-hidden p-5 sm:p-6 rounded-3xl mb-4 shadow-sm transition-all border border-black/5 dark:border-white/10"
+        className="relative overflow-hidden p-5 sm:p-6 rounded-3xl shadow-sm transition-all border border-black/5 dark:border-white/10"
         style={{
           background: `linear-gradient(135deg, ${activeLevelTheme.primary} 0%, ${activeLevelTheme.primaryDark || activeLevelTheme.primary} 100%)`,
         }}
       >
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
           <div>
-            <span className="text-xs sm:text-sm font-bold text-black/75 dark:text-black/85 block mb-0.5">
+            <span className="text-xs sm:text-sm font-bold text-black/75 dark:text-black/85 block mb-1">
               {t.greeting}, {parentFirstName} 👋
             </span>
             <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight leading-tight">
@@ -209,13 +209,13 @@ export function DashboardScreen({
 
           <div className="self-start sm:self-auto shrink-0">
             {activeStudent.status === 'pending' ? (
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500 text-white text-xs font-black shadow-md">
+              <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-500 text-white text-xs font-black shadow-md">
                 <Clock size={14} />
                 <span>{language === 'ar' ? 'طلب قيد المراجعة' : 'Pending Review'}</span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-950/85 text-white text-xs font-black shadow-md backdrop-blur-md">
-                <Layers size={14} className="text-lime-400" />
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-950/85 text-white text-xs font-black shadow-md backdrop-blur-md">
+                <Layers size={15} className="text-lime-400" />
                 <span>{t.level} {levelWord}</span>
               </span>
             )}
@@ -226,16 +226,16 @@ export function DashboardScreen({
       {/* Pending Account Notice Banner */}
       {activeStudent.status === 'pending' && (
         <div
-          className={`bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/80 rounded-2xl flex items-start gap-3 p-4 mb-4 shadow-xs ${isRTL ? 'text-right' : 'text-left'} animate-fade-in`}
+          className={`bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/80 rounded-3xl flex items-start gap-3.5 p-4 sm:p-5 shadow-xs ${isRTL ? 'text-right' : 'text-left'} animate-fade-in`}
         >
-          <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
-            <Clock size={16} />
+          <div className="w-9 h-9 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <Clock size={18} />
           </div>
           <div className="min-w-0 flex-1">
-            <h4 className="font-bold text-amber-950 dark:text-amber-100 text-xs sm:text-sm mb-0.5">
+            <h4 className="font-bold text-amber-950 dark:text-amber-100 text-sm mb-1">
               {language === 'ar' ? `طلب تسجيل ${getStudentGenderNoun(activeStudent)} قيد المراجعة لدى الإدارة` : language === 'fr' ? "Demande d'inscription en cours d'examen" : 'Registration Request Under Review'}
             </h4>
-            <p className="text-xs text-amber-800/90 dark:text-amber-300/90 leading-relaxed font-medium">
+            <p className="text-xs sm:text-sm text-amber-800/90 dark:text-amber-300/90 leading-relaxed font-medium">
               {language === 'ar'
                 ? `تم استلام طلب تسجيل ${getStudentGenderNoun(activeStudent)} (${activeStudent.fullNameAr}) بنجاح. سيقوم فريق الإدارة بالتواصل لتحديد موعد اختبار تحديد المستوى.`
                 : language === 'fr'
@@ -254,20 +254,20 @@ export function DashboardScreen({
         tabIndex={0}
         onClick={() => onNavigate('academic')}
         onKeyDown={(e) => e.key === 'Enter' && onNavigate('academic')}
-        className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer p-4 sm:p-5 rounded-3xl mb-4"
+        className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer p-5 sm:p-6 rounded-3xl"
       >
-        <div className="flex items-center justify-between gap-3 mb-3">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center justify-between gap-3 mb-3.5">
+          <div className="flex items-center gap-3.5 min-w-0">
             <div
-              className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-slate-950 shrink-0 shadow-xs"
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-slate-950 shrink-0 shadow-xs"
               style={{
                 backgroundColor: activeLevelTheme.primary,
               }}
             >
-              <Check size={20} strokeWidth={3} />
+              <Check size={22} strokeWidth={3} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white leading-tight truncate">
+              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight truncate">
                 {activeStudent.gender === 'female' ? t.daughterProgress : t.sonProgress}
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-semibold mt-0.5 truncate">
@@ -285,7 +285,7 @@ export function DashboardScreen({
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-slate-100 dark:bg-slate-800 overflow-hidden h-2.5 sm:h-3 rounded-full">
+        <div className="w-full bg-slate-100 dark:bg-slate-800 overflow-hidden h-3 rounded-full">
           <div
             className="h-full transition-all duration-700 rounded-full"
             style={{
@@ -299,8 +299,8 @@ export function DashboardScreen({
       {/* =========================================================================
           3. Notifications & Homework Alerts Section
           ========================================================================= */}
-      <div className="mb-5">
-        <div className="flex items-center justify-between mb-3 px-1">
+      <div className="space-y-3.5">
+        <div className="flex items-center justify-between px-1">
           <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
             {t.recentNotifications}
           </h3>
@@ -316,7 +316,7 @@ export function DashboardScreen({
         </div>
 
         {/* Notification Cards */}
-        <div className="space-y-3">
+        <div className="space-y-3.5">
           {recentHomeworkNotifications.length > 0 ? (
             recentHomeworkNotifications.map((notif) => {
               const IconComp = notif.icon;
@@ -340,7 +340,7 @@ export function DashboardScreen({
                     }
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'homework')}
-                  className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs transition-all cursor-pointer p-4 rounded-2xl flex flex-col gap-2"
+                  className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer p-4 sm:p-5 rounded-3xl flex flex-col gap-2.5"
                 >
                   {/* Top Header Row: Icon + Badge + Date */}
                   <div className="flex items-center justify-between gap-2">
@@ -365,7 +365,7 @@ export function DashboardScreen({
 
                   {/* Title & Description */}
                   <div className="pt-0.5">
-                    <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug">
+                    <h4 className="text-base font-bold text-slate-900 dark:text-white leading-snug">
                       {notif.title}
                     </h4>
                     <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed mt-0.5">
@@ -381,24 +381,24 @@ export function DashboardScreen({
               tabIndex={0}
               onClick={() => onNavigate('performance', 'homework')}
               onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'homework')}
-              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-700 transition-all p-4 rounded-2xl flex items-center justify-between cursor-pointer"
+              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:border-indigo-300 dark:hover:border-indigo-700 transition-all p-5 rounded-3xl flex items-center justify-between cursor-pointer"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3.5">
                 <div
-                  className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 border border-indigo-200/70 dark:border-indigo-800/60 flex items-center justify-center shrink-0"
+                  className="w-11 h-11 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 border border-indigo-200/70 dark:border-indigo-800/60 flex items-center justify-center shrink-0"
                 >
-                  <BookOpen size={18} />
+                  <BookOpen size={20} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                  <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
                     {language === 'ar' ? 'قسم الواجبات والأنشطة' : 'Homework & Activities'}
                   </h4>
-                  <p className="text-slate-400 font-medium text-xs mt-0.5">
+                  <p className="text-slate-400 font-medium text-xs sm:text-sm mt-0.5">
                     {language === 'ar' ? 'اضغط لمتابعة الواجبات والمهام لهذا الأسبوع' : 'Click to view assigned tasks'}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 text-xs font-bold shrink-0">
+              <div className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm font-bold shrink-0">
                 <span>{language === 'ar' ? 'فتح' : 'Open'}</span>
                 {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
               </div>
@@ -410,8 +410,8 @@ export function DashboardScreen({
       {/* =========================================================================
           4. Teacher Notes Section
           ========================================================================= */}
-      <div>
-        <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white mb-3 px-1">
+      <div className="space-y-3.5">
+        <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white px-1">
           {t.latestTeacherNote}
         </h3>
 
@@ -421,18 +421,18 @@ export function DashboardScreen({
             tabIndex={0}
             onClick={() => onNavigate('performance', 'feedback')}
             onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'feedback')}
-            className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer p-4 sm:p-5 rounded-2xl"
+            className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer p-5 sm:p-6 rounded-3xl"
           >
             {/* Teacher Header */}
-            <div className="flex items-center gap-3 mb-2.5">
+            <div className="flex items-center gap-3.5 mb-3">
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-950 font-black text-xs shrink-0 shadow-xs"
+                className="w-10 h-10 rounded-2xl flex items-center justify-center text-slate-950 font-black text-xs shrink-0 shadow-xs"
                 style={{ backgroundColor: activeLevelTheme.primary }}
               >
                 {language === 'ar' ? 'أ.س' : 'T.M'}
               </div>
               <div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
                   {latestFeedback.teacherNameAr || 'معلم المادة'}
                 </h4>
                 <p className="text-xs text-slate-400 font-medium">
@@ -441,12 +441,12 @@ export function DashboardScreen({
               </div>
             </div>
 
-            <div className="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+            <div className="bg-slate-50 dark:bg-slate-900/60 p-3.5 sm:p-4 rounded-2xl text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
               {translateTeacherNote(latestFeedback.messageAr || t.teacherDefaultNote, language)}
             </div>
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-850 border border-slate-200/70 dark:border-slate-800 shadow-2xs rounded-2xl p-5 text-center text-xs sm:text-sm text-slate-400 font-medium">
+          <div className="bg-white dark:bg-slate-850 border border-slate-200/70 dark:border-slate-800 shadow-sm rounded-3xl p-6 text-center text-xs sm:text-sm text-slate-400 font-medium">
             {language === 'ar'
               ? 'لم يتم تسجيل ملاحظات أو توجيهات لهذا الطالب بعد من قِبل المعلم.'
               : 'No teacher notes or feedback recorded for this student yet.'}

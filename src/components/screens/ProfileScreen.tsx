@@ -85,9 +85,9 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
   };
 
   return (
-    <div className={`space-y-4 animate-fade-in ${isRTL ? 'text-right' : 'text-left'}`} style={{ paddingBottom: '40px' }}>
+    <div className={`space-y-6 sm:space-y-8 animate-fade-in ${isRTL ? 'text-right' : 'text-left'}`} style={{ paddingBottom: '70px' }}>
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 my-4 sm:my-6">
+      <div className="flex items-center justify-between gap-3 pt-1 pb-1">
         <div>
           <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 block mb-1">
             {language === 'ar' ? 'إدارة الحساب والإعدادات' : language === 'fr' ? 'Gestion du Compte & Préférences' : 'Account Management & Settings'}
@@ -99,10 +99,10 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
       </div>
 
       {/* Stacked Layout: All Containers Under Each Other with Spacious & Clean Spacing */}
-      <div className="flex flex-col gap-4 sm:gap-6">
+      <div className="flex flex-col gap-6 sm:gap-8">
         {/* Module 1: Student Information */}
         <div
-          className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-sm p-4 sm:p-6 rounded-3xl"
+          className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-sm p-5 sm:p-6 rounded-3xl"
         >
           <div>
             <div

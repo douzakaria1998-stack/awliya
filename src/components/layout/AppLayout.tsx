@@ -173,7 +173,7 @@ export function AppLayout() {
         />
 
         {/* Dynamic Screen Content: Responsive padding for phone vs desktop */}
-        <main className="w-full pb-28 md:pb-16 px-3.5 sm:px-6 md:px-12 lg:px-14 pt-3 sm:pt-6 md:pt-8">
+        <main className="w-full pb-32 md:pb-16 px-4 sm:px-6 md:px-12 lg:px-14 pt-4 sm:pt-6 md:pt-8">
           <div className="w-full max-w-5xl mx-auto">
             {activeTab === 'profile' ? (
               <ProfileScreen onOpenAddStudent={() => setIsAddStudentOpen(true)} />
