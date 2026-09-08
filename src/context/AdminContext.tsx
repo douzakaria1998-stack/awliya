@@ -21,6 +21,7 @@ import {
   AdminNotificationItem,
   PendingStudentApproval,
   EntityStatus,
+  StudentGroupHistoryEntry,
 } from '@/types/admin';
 import {
   mockAdminUsers,
@@ -116,6 +117,7 @@ interface AdminContextType {
   deleteGroup: (groupId: string) => void;
   assignStudentToGroup: (groupId: string, studentId: string) => void;
   removeStudentFromGroup: (groupId: string, studentId: string) => void;
+  transferStudentGroup: (studentId: string, newGroupId: string, transferReason?: string) => { success: boolean; message?: string };
 
   addCurriculumLevel: (levelData: CurriculumLevel) => void;
   updateCurriculumLevel: (oldLevelNumber: number, language: 'English' | 'French', levelData: CurriculumLevel) => void;
@@ -1701,6 +1703,123 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     [updateStudent]
   );
 
+  const transferStudentGroup = useCallback(
+    (studentId: string, newGroupId: string, transferReason?: string) => {
+      const targetStudent = students.find((s) => s.id === studentId);
+      if (!targetStudent) {
+        return { success: false, message: 'Student not found' };
+      }
+
+      if (targetStudent.groupId === newGroupId) {
+        return { success: false, message: 'Student is already in this group' };
+      }
+
+      const newGroup = groups.find((g) => g.id === newGroupId);
+      if (!newGroup) {
+        return { success: false, message: 'Target group not found' };
+      }
+
+      const oldGroupId = targetStudent.groupId;
+      const oldGroupName = targetStudent.groupName;
+      const oldGroup = groups.find((g) => g.id === oldGroupId);
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      // 1. Compute updated groupHistory
+      let currentHistory: StudentGroupHistoryEntry[] = Array.isArray(targetStudent.groupHistory)
+        ? [...targetStudent.groupHistory]
+        : [];
+
+      // If student has an existing active group but no history records yet, backfill the previous active group record
+      if (currentHistory.length === 0 && oldGroupId && oldGroupId !== 'بدون فوج') {
+        currentHistory.push({
+          id: `hist-${Date.now()}-1`,
+          groupId: oldGroupId,
+          groupName: oldGroupName,
+          groupCode: oldGroup?.code || '',
+          teacherId: targetStudent.teacherId,
+          teacherName: targetStudent.teacherName,
+          level: oldGroup?.level || `Level ${targetStudent.currentLevel}`,
+          levelNumber: targetStudent.currentLevel,
+          language: targetStudent.language,
+          startDate: targetStudent.enrollmentDate || todayStr,
+          status: 'active',
+        });
+      }
+
+      // Mark all existing active history items as 'transferred'
+      currentHistory = currentHistory.map((h) => {
+        if (h.status === 'active' || h.groupId === oldGroupId) {
+          return {
+            ...h,
+            endDate: todayStr,
+            status: 'transferred' as const,
+            transferReason: transferReason || h.transferReason || 'تم النقل إلى فوج جديد',
+          };
+        }
+        return h;
+      });
+
+      // Add the new active group record
+      currentHistory.push({
+        id: `hist-${Date.now()}`,
+        groupId: newGroup.id,
+        groupName: newGroup.name,
+        groupCode: newGroup.code,
+        teacherId: newGroup.teacherId,
+        teacherName: newGroup.teacherName,
+        level: newGroup.level || `Level ${newGroup.levelNumber || targetStudent.currentLevel}`,
+        levelNumber: newGroup.levelNumber || targetStudent.currentLevel,
+        language: newGroup.language || targetStudent.language,
+        startDate: todayStr,
+        status: 'active',
+        transferReason: transferReason || undefined,
+        transferredBy: currentAdmin?.fullNameAr || 'الإدارة',
+      });
+
+      // 2. Update Group rosters
+      setGroups((prev) => {
+        const updated = prev.map((g) => {
+          if (g.id === newGroup.id) {
+            const currentIds = g.studentIds || [];
+            return {
+              ...g,
+              studentIds: currentIds.includes(studentId) ? currentIds : [...currentIds, studentId],
+            };
+          }
+          if (g.id === oldGroupId) {
+            return {
+              ...g,
+              studentIds: (g.studentIds || []).filter((id) => id !== studentId),
+            };
+          }
+          return g;
+        });
+        setItem(ADMIN_STORAGE_KEYS.GROUPS, updated);
+        return updated;
+      });
+
+      // 3. Update Student object (preserves ALL attendance, homework, assessments, progress!)
+      updateStudent(studentId, {
+        groupId: newGroup.id,
+        groupName: newGroup.name,
+        teacherId: newGroup.teacherId,
+        teacherName: newGroup.teacherName,
+        currentLevel: newGroup.levelNumber || targetStudent.currentLevel,
+        groupHistory: currentHistory,
+      });
+
+      // 4. Audit Log
+      logAudit(
+        `نقل الطالب ${targetStudent.fullNameAr} من الفوج "${oldGroupName}" إلى الفوج "${newGroup.name}"${transferReason ? ` (السبب: ${transferReason})` : ''}`,
+        `Transferred student ${targetStudent.fullNameEn} from Group "${oldGroupName}" to "${newGroup.name}"${transferReason ? ` (Reason: ${transferReason})` : ''}`,
+        'group'
+      );
+
+      return { success: true };
+    },
+    [students, groups, updateStudent, currentAdmin, logAudit]
+  );
+
   // ==========================================
   // Curriculum Actions
   // ==========================================
@@ -2923,6 +3042,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         deleteGroup,
         assignStudentToGroup,
         removeStudentFromGroup,
+        transferStudentGroup,
         addCurriculumLevel,
         updateCurriculumLevel,
         reorderCurriculumLevels,

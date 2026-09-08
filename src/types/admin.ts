@@ -91,6 +91,25 @@ export interface AdminStudent {
     date: string;
     comment: string;
   };
+  groupHistory?: StudentGroupHistoryEntry[];
+}
+
+// Student Group Enrollment History Entry
+export interface StudentGroupHistoryEntry {
+  id: string;
+  groupId: string;
+  groupName: string;
+  groupCode?: string;
+  teacherId: string;
+  teacherName: string;
+  level: string;
+  levelNumber: number;
+  language?: 'English' | 'French' | 'Dual';
+  startDate: string;
+  endDate?: string;
+  status: 'active' | 'completed' | 'transferred' | 'historical';
+  transferReason?: string;
+  transferredBy?: string;
 }
 
 // Parent Entity (Multi-Student Relationship)

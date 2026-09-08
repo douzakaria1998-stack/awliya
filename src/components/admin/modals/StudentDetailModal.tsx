@@ -30,6 +30,8 @@ import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { transliterateArabicName } from '@/lib/translations';
 import { ConfirmModal } from './ConfirmModal';
+import { TransferGroupModal } from './TransferGroupModal';
+import { ArrowRightLeft } from 'lucide-react';
 
 interface StudentDetailModalProps {
   student: AdminStudent | null;
@@ -143,6 +145,9 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
     message: '',
     onConfirm: () => {},
   });
+
+  // Transfer Student Group Modal State
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
 
   const executeSaveStudentInfo = () => {
     if (!editFullNameAr.trim()) return;
@@ -272,6 +277,17 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsTransferModalOpen(true)}
+              style={{ paddingLeft: '14px', paddingRight: '14px', gap: '6px' }}
+              className="h-9 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 font-bold text-xs flex items-center transition-all cursor-pointer border border-purple-500/40 shadow-xs active:scale-95 shrink-0"
+              title={language === 'ar' ? 'نقل الطالب إلى فوج آخر مع حفظ السجل الأكاديمي' : 'Transfer student to another group'}
+            >
+              <ArrowRightLeft size={14} className="shrink-0" />
+              <span>{language === 'ar' ? 'تغيير الفوج' : 'Change Group'}</span>
+            </button>
+
             {!isEditingInfo ? (
               <button
                 type="button"
@@ -687,6 +703,87 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                     >
                       <span className="text-xs text-slate-400 block mb-1">{language === 'ar' ? 'تاريخ التسجيل:' : 'Join Date:'}</span>
                       <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm font-mono">{currentStudent.enrollmentDate || (currentStudent as any).joinDate}</span>
+                    </div>
+                  </div>
+
+                  {/* Group History Section */}
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <School size={14} className="text-purple-500" />
+                        <span>{language === 'ar' ? 'سجل الأفواج والمجموعات (Group History)' : 'Group History'}</span>
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => setIsTransferModalOpen(true)}
+                        className="text-xs font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 flex items-center gap-1 cursor-pointer"
+                      >
+                        <ArrowRightLeft size={13} />
+                        <span>{language === 'ar' ? 'نقل إلى فوج آخر' : 'Change Group'}</span>
+                      </button>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {/* Current Active Group Entry */}
+                      <div className="p-3.5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200/90 dark:border-purple-800/90 flex items-center justify-between gap-3 shadow-2xs">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                            <School size={15} />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
+                                {currentStudent.groupName}
+                              </span>
+                              <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 font-bold text-[10px]">
+                                {language === 'ar' ? 'الفوج النشط حالياً' : 'Current Active'}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                              {language === 'ar' ? 'المشرف:' : 'Teacher:'} {currentStudent.teacherName || (language === 'ar' ? 'غير مسند' : 'Unassigned')} • {language === 'ar' ? 'المستوى:' : 'Level:'} {currentStudent.currentLevel}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsTransferModalOpen(true)}
+                          className="h-7 px-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-bold flex items-center gap-1 transition-all shadow-xs cursor-pointer shrink-0"
+                        >
+                          <ArrowRightLeft size={12} />
+                          <span>{language === 'ar' ? 'تغيير' : 'Transfer'}</span>
+                        </button>
+                      </div>
+
+                      {/* Historical Groups List */}
+                      {Array.isArray(currentStudent.groupHistory) &&
+                        currentStudent.groupHistory.filter((h) => h.status !== 'active').map((hist) => (
+                          <div
+                            key={hist.id || hist.groupId}
+                            className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs shrink-0">
+                                <Clock size={15} />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate">
+                                    {hist.groupName}
+                                  </span>
+                                  <span className="px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-[10px]">
+                                    {language === 'ar' ? 'سابق / مؤرشف' : 'Historical'}
+                                  </span>
+                                </div>
+                                <div className="text-[11px] text-slate-400 font-medium mt-0.5">
+                                  {language === 'ar' ? 'المعلم السابق:' : 'Prev Teacher:'} {hist.teacherName}
+                                  {hist.startDate && hist.endDate ? ` • ${hist.startDate} ⬅️ ${hist.endDate}` : ''}
+                                  {hist.transferReason ? ` • (${hist.transferReason})` : ''}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                     </div>
                   </div>
                 </div>
@@ -1137,6 +1234,13 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
         cancelText={confirmConfig.cancelText}
         variant={confirmConfig.variant}
         icon={confirmConfig.icon}
+      />
+
+      {/* Transfer Student Group Modal */}
+      <TransferGroupModal
+        student={currentStudent}
+        isOpen={isTransferModalOpen}
+        onClose={() => setIsTransferModalOpen(false)}
       />
     </div>
   );

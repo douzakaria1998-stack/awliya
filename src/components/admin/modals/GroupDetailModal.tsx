@@ -22,6 +22,7 @@ import {
   CheckCircle2,
   Pencil,
   Trash2,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { AdminGroup } from '@/types/admin';
 import { useAdmin } from '@/context/AdminContext';
@@ -29,7 +30,9 @@ import { useLanguage } from '@/context/LanguageContext';
 import { SearchableSelect } from '@/components/common/SearchableSelect';
 import { DateInputDMY, formatDateDMY } from '@/components/common/DateInputDMY';
 import { ConfirmModal } from './ConfirmModal';
+import { TransferGroupModal } from './TransferGroupModal';
 import { transliterateArabicName, autoTranslateGroupName } from '@/lib/translations';
+import { AdminStudent } from '@/types/admin';
 
 interface ScheduleSlot {
   id: string;
@@ -102,6 +105,10 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
   const [addMode, setAddMode] = useState<'existing' | 'new'>('existing');
   const [studentSearch, setStudentSearch] = useState('');
   const [justAddedStudentId, setJustAddedStudentId] = useState<string | null>(null);
+
+  // Sub-modal state: Transfer Student Group
+  const [transferStudent, setTransferStudent] = useState<AdminStudent | null>(null);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
 
   // New Student fields
   const [newFirstNameAr, setNewFirstNameAr] = useState('');
@@ -643,6 +650,18 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
                         <span className="font-mono font-black text-xs sm:text-sm">{st.overallProgress}%</span>
                         <span className="text-xs font-bold text-purple-700/85 dark:text-purple-300/85">{language === 'ar' ? 'تقدم' : 'Prog.'}</span>
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTransferStudent(st);
+                          setIsTransferModalOpen(true);
+                        }}
+                        className="h-8 px-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/60 border border-purple-200/80 dark:border-purple-800/60 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        title={language === 'ar' ? 'نقل الطالب إلى فوج آخر' : 'Change student group'}
+                      >
+                        <ArrowRightLeft size={13} />
+                        <span>{language === 'ar' ? 'تغيير الفوج' : 'Change Group'}</span>
+                      </button>
                       <button
                         type="button"
                         onClick={() => removeStudentFromGroup(group.id, st.id)}
@@ -1524,6 +1543,16 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
         cancelText={confirmConfig.cancelText}
         variant={confirmConfig.variant}
         icon={confirmConfig.icon}
+      />
+
+      {/* Transfer Student Group Modal */}
+      <TransferGroupModal
+        student={transferStudent}
+        isOpen={isTransferModalOpen}
+        onClose={() => {
+          setIsTransferModalOpen(false);
+          setTransferStudent(null);
+        }}
       />
     </div>
   );
