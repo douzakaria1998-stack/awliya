@@ -636,25 +636,25 @@ export function AdminAcademicPathScreen() {
         return {
           id: `draft-unit-${uNum}-${Date.now()}`,
           unitNumber: uNum,
-          titleAr: `الوحدة ${uNum}: محاور التأسيس والمفردات (${newLevelCode})`,
-          titleEn: `Unit ${uNum}: Core Vocabulary & Concepts`,
+          titleAr: `الوحدة ${uNum}: المحاور والمهارات المستهدفة (${newLevelCode})`,
+          titleEn: `Unit ${uNum}: Core Skills & Competencies`,
           lessons: [
             {
               id: `draft-lesson-${uNum}-1-${Date.now()}`,
               lessonNumber: 1,
-              titleAr: `الدرس 1: القواعد والمفردات التأسيسية`,
-              titleEn: `Lesson 1: Foundations & Structure`,
-              contentSummary: 'شرح القواعد الأساسية والمفردات المحورية وتطبيقاتها.',
-              vocabString: 'Introduction, Grammar, Vocabulary',
+              titleAr: `الدرس 1: القواعد وبناء الجمل الأساسية`,
+              titleEn: `Lesson 1: Sentence Structure & Grammar`,
+              contentSummary: 'شرح القواعد الأساسية والمهارات اللغوية وتطبيقاتها.',
+              vocabString: 'Speaking Fluency, Listening Comprehension, Sentence Structure',
               hasAssessment: false,
             },
             {
               id: `draft-lesson-${uNum}-2-${Date.now()}`,
               lessonNumber: 2,
               titleAr: `الدرس 2: التعبير الشفهي والتطبيق العملي`,
-              titleEn: `Lesson 2: Speaking & Practice`,
+              titleEn: `Lesson 2: Oral Expression & Practice`,
               contentSummary: 'تمارين تطبيقية وتدريبات محادثة تفاعلية.',
-              vocabString: 'Conversation, Dialogue, Practice',
+              vocabString: 'Conversation, Pronunciation, Interactive Dialogue',
               hasAssessment: true,
             },
           ],
@@ -674,16 +674,16 @@ export function AdminAcademicPathScreen() {
     const newUnit: UnitDraft = {
       id: `draft-unit-${nextNum}-${Date.now()}`,
       unitNumber: nextNum,
-      titleAr: `الوحدة ${nextNum}: المحور التعليمي الجديد`,
-      titleEn: `Unit ${nextNum}: New Topic`,
+      titleAr: `الوحدة ${nextNum}: المحور التعليمي والمهارات الجديدة`,
+      titleEn: `Unit ${nextNum}: New Skills & Topic`,
       lessons: [
         {
           id: `draft-lesson-${nextNum}-1-${Date.now()}`,
           lessonNumber: 1,
-          titleAr: `الدرس 1: المفردات والتطبيق`,
-          titleEn: `Lesson 1: Vocabulary & Practice`,
-          contentSummary: 'شرح المفردات والمفاهيم الأساسية للوحدة.',
-          vocabString: 'Topic, Words, Exercises',
+          titleAr: `الدرس 1: المهارات والتطبيق العملي`,
+          titleEn: `Lesson 1: Skills & Applied Practice`,
+          contentSummary: 'شرح المهارات اللغوية والمفاهيم الأساسية للوحدة.',
+          vocabString: 'Listening, Speaking Fluency, Grammar Accuracy',
           hasAssessment: false,
         },
       ],
@@ -711,8 +711,8 @@ export function AdminAcademicPathScreen() {
           lessonNumber: nextLNum,
           titleAr: `الدرس ${nextLNum}: عنوان الدرس الجديد`,
           titleEn: `Lesson ${nextLNum}: New Lesson`,
-          contentSummary: 'محتوى الدرس والأنشطة المقررة.',
-          vocabString: 'New Words, Phrases',
+          contentSummary: 'محتوى الدرس والأنشطة والمهارات المقررة.',
+          vocabString: 'Speaking, Listening, Reading Comprehension',
           hasAssessment: false,
         };
         return { ...unit, lessons: [...unit.lessons, newLesson] };
@@ -1188,7 +1188,7 @@ export function AdminAcademicPathScreen() {
 
                               <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800/60">
                                 <span className="text-[10px] font-bold text-slate-400">
-                                  {language === 'ar' ? 'المفردات الرئيسية:' : 'Key Vocabulary:'}
+                                  {language === 'ar' ? 'المهارات المستهدفة:' : language === 'fr' ? 'Compétences Ciblées :' : 'Target Skills & Focus:'}
                                 </span>
                                 {lesson.vocabulary.map((vocab, vIdx) => (
                                   <span
@@ -2288,7 +2288,7 @@ export function AdminAcademicPathScreen() {
                                 {lesson.vocabulary?.length > 0 && (
                                   <div className="flex flex-wrap items-center gap-1.5 pt-1">
                                     <span className="text-[10px] font-bold text-slate-400">
-                                      {language === 'ar' ? 'المفردات:' : 'Vocab:'}
+                                      {language === 'ar' ? 'المهارات المستهدفة:' : language === 'fr' ? 'Compétences :' : 'Target Skills:'}
                                     </span>
                                     {lesson.vocabulary.map((vocab, vIdx) => (
                                       <span
@@ -2646,8 +2646,8 @@ export function AdminAcademicPathScreen() {
                     </div>
                     <p className="text-xs text-slate-400 font-medium mt-1">
                       {language === 'ar'
-                        ? 'الخطوة 2: تحديد مسميات الوحدات وتفاصيل الدروس والمفردات والتقييمات'
-                        : 'Step 2: Enter unit names, lessons, vocabulary, and assessments'}
+                        ? 'الخطوة 2: تحديد مسميات الوحدات وتفاصيل الدروس والمهارات المستهدفة والتقييمات'
+                        : 'Step 2: Enter unit names, lessons, target skills, and assessments'}
                     </p>
                   </div>
                 </div>
@@ -2903,13 +2903,13 @@ export function AdminAcademicPathScreen() {
                                     </div>
                                     <div>
                                       <label className="block text-[11px] font-bold text-slate-400 mb-1">
-                                        {language === 'ar' ? 'المفردات المفتاحية:' : 'Key Vocabulary (comma-separated):'}
+                                        {language === 'ar' ? 'المهارات المستهدفة والتركيز التعليمي:' : language === 'fr' ? 'Compétences et Objectifs Clés :' : 'Target Skills & Key Focus (comma-separated):'}
                                       </label>
                                       <input
                                         type="text"
                                         value={lesson.vocabString}
                                         onChange={(e) => handleUpdateLesson(unit.id, lesson.id, { vocabString: e.target.value })}
-                                        placeholder={language === 'ar' ? 'المفردات (مفصولة بفواصل)' : 'Key Vocabulary (comma-separated)'}
+                                        placeholder={language === 'ar' ? 'مثال: المحادثة، الاستماع، بناء الجمل، النطق السليم' : 'e.g. Speaking Fluency, Listening, Sentence Structure'}
                                         className="w-full h-10 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-600 dark:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
                                         style={{ paddingLeft: '16px', paddingRight: '16px' }}
                                         dir="ltr"
