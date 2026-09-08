@@ -1319,11 +1319,19 @@ export function PerformanceScreen({
                   {historyYearGroups.map((yearGroup) => (
                     <div key={yearGroup.year} className="space-y-4">
                       {/* Year Section Header Badge */}
-                      <div className="flex items-center justify-between gap-3 px-1">
+                      <div className="flex items-center justify-between gap-3 px-1 pt-2">
                         <div className="flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: theme.primary }} />
-                          <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono">
-                            {language === 'ar' ? `السنة الدراسية ${yearGroup.year}` : `Academic Year ${yearGroup.year}`}
+                          <h4 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                            {language === 'ar' ? (
+                              <>
+                                السنة الدراسية <span className="font-mono font-black">{yearGroup.year}</span>
+                              </>
+                            ) : (
+                              <>
+                                Academic Year <span className="font-mono font-black">{yearGroup.year}</span>
+                              </>
+                            )}
                           </h4>
                         </div>
 
@@ -1332,7 +1340,7 @@ export function PerformanceScreen({
                             {yearGroup.totalSessions} {language === 'ar' ? 'حصص مسجلة' : 'sessions'}
                           </span>
                           <span
-                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black shadow-2xs"
+                            className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black shadow-2xs"
                             style={{
                               backgroundColor: `${theme.primary}18`,
                               color: theme.primary,
@@ -1344,7 +1352,7 @@ export function PerformanceScreen({
                       </div>
 
                       {/* Months Accordions in this Year */}
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {yearGroup.months.map((monthGroup) => {
                           const isExpanded = expandedMonths[monthGroup.monthKey] !== false; // default expanded
 
@@ -1357,24 +1365,24 @@ export function PerformanceScreen({
                               <button
                                 type="button"
                                 onClick={() => toggleMonthExpand(monthGroup.monthKey)}
-                                className="w-full flex items-center justify-between gap-3 p-4 text-right cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                                className="w-full flex items-center justify-between gap-3 p-4 sm:p-5 text-right cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                               >
                                 <div className="flex items-center gap-3">
                                   <div
-                                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-2xs"
+                                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs"
                                     style={{
                                       backgroundColor: `${theme.primary}12`,
                                       color: theme.primary,
                                     }}
                                   >
-                                    <CalendarDays size={18} />
+                                    <CalendarDays size={20} />
                                   </div>
                                   <div>
-                                    <h5 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                                    <h5 className="text-base font-bold text-slate-900 dark:text-white">
                                       {monthGroup.monthName}
                                     </h5>
-                                    <span className="text-[11px] text-slate-400 font-medium block">
-                                      {monthGroup.displayedRecords.length} {language === 'ar' ? 'حصص دراسية' : 'sessions'}
+                                    <span className="text-xs text-slate-400 font-medium block mt-0.5">
+                                      {monthGroup.displayedRecords.length} {language === 'ar' ? 'حصص دراسية مسجلة' : 'sessions recorded'}
                                     </span>
                                   </div>
                                 </div>
@@ -1382,23 +1390,23 @@ export function PerformanceScreen({
                                 <div className="flex items-center gap-2 sm:gap-3">
                                   {/* Stats Pills */}
                                   <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold">
-                                    <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300">
+                                    <span className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300">
                                       {monthGroup.presentCount} {t.present}
                                     </span>
                                     {monthGroup.lateCount > 0 && (
-                                      <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300">
+                                      <span className="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300">
                                         {monthGroup.lateCount} {t.late}
                                       </span>
                                     )}
                                     {monthGroup.absentCount > 0 && (
-                                      <span className="px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300">
+                                      <span className="px-2.5 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300">
                                         {monthGroup.absentCount} {t.absent}
                                       </span>
                                     )}
                                   </div>
 
                                   <span
-                                    className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black"
+                                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black shadow-2xs"
                                     style={{
                                       backgroundColor: `${theme.primary}15`,
                                       color: theme.primary,
@@ -1408,16 +1416,16 @@ export function PerformanceScreen({
                                   </span>
 
                                   <div className="p-1 rounded-lg text-slate-400">
-                                    {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                    {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                                   </div>
                                 </div>
                               </button>
 
                               {/* Expanded Month Sessions Timeline */}
                               {isExpanded && (
-                                <div className="p-4 pt-1 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30">
-                                  <div className="relative pl-3 pr-3 pt-2 space-y-3.5">
-                                    {monthGroup.displayedRecords.map((rec, idx) => {
+                                <div className="p-4 sm:p-5 pt-2 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                    {monthGroup.displayedRecords.map((rec) => {
                                       const isPresent = rec.status === 'present';
                                       const isAbsent = rec.status === 'absent';
                                       const isLate = rec.status === 'late';
@@ -1429,71 +1437,21 @@ export function PerformanceScreen({
                                       return (
                                         <div
                                           key={rec.id}
-                                          className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-white dark:bg-slate-850 border border-slate-200/70 dark:border-slate-800 shadow-2xs hover:shadow-xs transition-all"
+                                          className={`p-4 rounded-2xl border ${langBadge.bgClass} ${langBadge.borderClass} shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-3`}
                                         >
-                                          <div className="flex items-center gap-3">
-                                            {/* Status Node Circle */}
-                                            <div
-                                              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-xs ${
-                                                isPresent
-                                                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                                                  : isAbsent
-                                                  ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
-                                                  : isLate
-                                                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
-                                                  : 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
-                                              }`}
-                                            >
-                                              {isPresent ? '✓' : isAbsent ? '✕' : isLate ? '⏱' : '✉'}
-                                            </div>
-
-                                            <div>
-                                              <div className="flex items-center gap-2">
-                                                <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white">
-                                                  {dayLabel}
-                                                </span>
-                                                <span dir="ltr" className="text-[11px] text-slate-400 font-mono font-bold">
-                                                  {rec.date}
-                                                </span>
-                                              </div>
-
-                                              <div className="flex items-center gap-2 mt-1">
-                                                <span
-                                                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold ${langBadge.badgeContainer}`}
-                                                >
-                                                  <BookOpen size={11} className={langBadge.iconClass} />
-                                                  <span>{translatedSubject}</span>
-                                                </span>
-
-                                                <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
-                                                  <Clock size={11} />
-                                                  {(() => {
-                                                    const raw = rec.sessionTimeAr || '04:30 PM - 06:00 PM';
-                                                    if (raw.includes(' / ')) {
-                                                      const parts = raw.split(' - ');
-                                                      if (parts.length === 2) {
-                                                        const startParts = parts[0].split(' / ');
-                                                        return `${startParts[startParts.length - 1].trim()} - ${parts[1].trim()}`;
-                                                      }
-                                                      const slashParts = raw.split(' / ');
-                                                      return slashParts[slashParts.length - 1].trim();
-                                                    }
-                                                    return raw;
-                                                  })()}
-                                                </span>
-                                              </div>
-                                            </div>
-                                          </div>
-
-                                          <div className="flex items-center gap-2 self-end sm:self-center">
-                                            {rec.noteAr && (
-                                              <span className="text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/60 px-2 py-0.5 rounded-md font-medium">
-                                                {rec.noteAr}
+                                          {/* Top Row: Day + Date and Status Badges */}
+                                          <div className="flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                                                {dayLabel}
                                               </span>
-                                            )}
+                                              <span dir="ltr" className="text-xs text-slate-400 font-mono font-bold">
+                                                {rec.date}
+                                              </span>
+                                            </div>
 
                                             <span
-                                              className={`inline-flex items-center justify-center rounded-full text-[11px] font-black px-2.5 py-0.5 shadow-2xs ${
+                                              className={`inline-flex items-center justify-center rounded-full text-xs font-black px-3 py-1 shadow-2xs ${
                                                 isPresent
                                                   ? 'bg-emerald-500 text-white'
                                                   : isAbsent
@@ -1512,6 +1470,45 @@ export function PerformanceScreen({
                                                 : `${t.excused} ✉`}
                                             </span>
                                           </div>
+
+                                          {/* Middle Row: Subject and Timing */}
+                                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                                            <span
+                                              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold shadow-2xs ${langBadge.badgeContainer}`}
+                                            >
+                                              <BookOpen size={13} className={langBadge.iconClass} />
+                                              <span>{translatedSubject}</span>
+                                            </span>
+
+                                            <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-mono">
+                                              <Clock size={13} className="shrink-0 text-slate-400" />
+                                              <span dir="ltr" className="font-mono font-bold text-[11px]">
+                                                {(() => {
+                                                  const raw = rec.sessionTimeAr || '04:30 PM - 06:00 PM';
+                                                  if (raw.includes(' / ')) {
+                                                    const parts = raw.split(' - ');
+                                                    if (parts.length === 2) {
+                                                      const startParts = parts[0].split(' / ');
+                                                      return `${startParts[startParts.length - 1].trim()} - ${parts[1].trim()}`;
+                                                    }
+                                                    const slashParts = raw.split(' / ');
+                                                    return slashParts[slashParts.length - 1].trim();
+                                                  }
+                                                  return raw;
+                                                })()}
+                                              </span>
+                                            </div>
+                                          </div>
+
+                                          {/* Footer: Note if present */}
+                                          {rec.noteAr && (
+                                            <div className="pt-2 border-t border-slate-200/50 dark:border-slate-800/60">
+                                              <span className="inline-block text-[11px] text-amber-800 dark:text-amber-200 bg-amber-100/70 dark:bg-amber-950/60 border border-amber-200/80 dark:border-amber-800/60 px-2.5 py-1 rounded-lg font-medium">
+                                                <span className="font-bold">{language === 'ar' ? 'ملاحظة: ' : 'Note: '}</span>
+                                                {rec.noteAr}
+                                              </span>
+                                            </div>
+                                          )}
                                         </div>
                                       );
                                     })}
