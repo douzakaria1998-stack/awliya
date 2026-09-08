@@ -12,6 +12,7 @@ import {
   Calendar,
   FileCheck,
   Check,
+  ChevronDown,
 } from 'lucide-react';
 import { AcademicLevel } from '@/types';
 import { levelThemes, getThemeForLevel } from '@/lib/themes';
@@ -29,6 +30,7 @@ interface LevelDetailModalProps {
 
 export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalProps) {
   const [downloaded, setDownloaded] = useState(false);
+  const [expandedLessonId, setExpandedLessonId] = useState<string | null>(null);
   const { activeStudent } = useStudent();
   const { t, isRTL, language } = useLanguage();
 
@@ -281,50 +283,136 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
                         {mod.lessons.map((lesson) => {
                           const isDone = lesson.status === 'completed';
                           const isInProg = lesson.status === 'in_progress';
+                          const isExpanded = expandedLessonId === lesson.id;
+
+                          // Extract or resolve targeted skills
+                          const resolvedSkills: string[] = (
+                            Array.isArray(lesson.vocabulary) && lesson.vocabulary.length > 0
+                              ? lesson.vocabulary
+                              : typeof (lesson as any).vocabulary === 'string' && (lesson as any).vocabulary.trim()
+                              ? (lesson as any).vocabulary.split(',').map((s: string) => s.trim())
+                              : [
+                                  language === 'ar' ? 'المحادثة والطلاقة الشفهية' : 'Speaking Fluency',
+                                  language === 'ar' ? 'الفهم والاستيعاب السمعي' : 'Listening Comprehension',
+                                  language === 'ar' ? 'القواعد وبناء الجمل' : 'Sentence Structure & Grammar',
+                                ]
+                          ).filter(Boolean);
 
                           return (
                             <div
                               key={lesson.id}
-                              className="flex items-center justify-between gap-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800/60 text-xs sm:text-sm transition-colors"
-                              style={{
-                                padding: '10px 16px',
-                                minHeight: '42px',
-                              }}
+                              className="rounded-2xl border transition-all overflow-hidden bg-slate-50/80 dark:bg-slate-900/60 border-slate-200/70 dark:border-slate-800/70"
                             >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <span
-                                  className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                                    isDone
-                                      ? 'bg-emerald-500 ring-2 ring-emerald-200 dark:ring-emerald-900'
-                                      : isInProg
-                                      ? 'bg-amber-500 animate-pulse ring-2 ring-amber-200 dark:ring-amber-900'
-                                      : 'bg-slate-300 dark:bg-slate-600'
-                                  }`}
-                                />
-                                <span className={`truncate font-bold ${isDone ? 'text-slate-800 dark:text-slate-200' : 'text-slate-600 dark:text-slate-400'}`}>
-                                  {lesson.titleAr}
-                                </span>
-                              </div>
-                              <span
-                                className={`font-bold rounded-lg shrink-0 text-xs flex items-center justify-center ${
-                                  isDone
-                                    ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60'
-                                    : isInProg
-                                    ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60'
-                                    : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60'
-                                }`}
+                              {/* Lesson Header Clickable Row */}
+                              <div
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => setExpandedLessonId(isExpanded ? null : lesson.id)}
+                                onKeyDown={(e) => e.key === 'Enter' && setExpandedLessonId(isExpanded ? null : lesson.id)}
+                                className="flex items-center justify-between gap-3.5 text-xs sm:text-sm cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-850/80 transition-colors"
                                 style={{
-                                  padding: '5px 14px',
-                                  minHeight: '28px',
-                                  whiteSpace: 'nowrap',
+                                  padding: '12px 16px',
+                                  minHeight: '46px',
                                 }}
                               >
-                                {isDone
-                                  ? (language === 'ar' ? 'مكتمل' : 'Completed')
-                                  : isInProg
-                                  ? (language === 'ar' ? 'قيد الدراسة' : 'In Progress')
-                                  : (language === 'ar' ? 'لم يبدأ بعد' : 'Pending')}
-                              </span>
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <span
+                                    className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                                      isDone
+                                        ? 'bg-emerald-500 ring-2 ring-emerald-200 dark:ring-emerald-900'
+                                        : isInProg
+                                        ? 'bg-amber-500 animate-pulse ring-2 ring-amber-200 dark:ring-amber-900'
+                                        : 'bg-slate-300 dark:bg-slate-600'
+                                    }`}
+                                  />
+                                  <span className={`truncate font-bold ${isDone ? 'text-slate-800 dark:text-slate-200' : 'text-slate-700 dark:text-slate-300'}`}>
+                                    {lesson.titleAr}
+                                  </span>
+                                  <ChevronDown
+                                    size={15}
+                                    className={`text-slate-400 shrink-0 transition-transform duration-200 ${
+                                      isExpanded ? 'rotate-180 text-indigo-500' : ''
+                                    }`}
+                                  />
+                                </div>
+
+                                <span
+                                  className={`font-bold rounded-lg shrink-0 text-xs flex items-center justify-center ${
+                                    isDone
+                                      ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60'
+                                      : isInProg
+                                      ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60'
+                                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60'
+                                  }`}
+                                  style={{
+                                    padding: '5px 14px',
+                                    minHeight: '28px',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {isDone
+                                    ? (language === 'ar' ? 'مكتمل' : 'Completed')
+                                    : isInProg
+                                    ? (language === 'ar' ? 'قيد الدراسة' : 'In Progress')
+                                    : (language === 'ar' ? 'لم يبدأ بعد' : 'Pending')}
+                                </span>
+                              </div>
+
+                              {/* Lesson Expanded Details Section */}
+                              {isExpanded && (
+                                <div
+                                  className="border-t border-slate-200/70 dark:border-slate-800/70 bg-white/95 dark:bg-slate-850/95 space-y-3 animate-fade-in"
+                                  style={{ padding: '14px 18px' }}
+                                >
+                                  {/* 1. Lesson Content Summary */}
+                                  <div>
+                                    <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 block mb-1">
+                                      {language === 'ar' ? 'محتوى وملخص الدرس:' : language === 'fr' ? 'Contenu du cours :' : 'Lesson Content Summary:'}
+                                    </span>
+                                    <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+                                      {lesson.contentSummary ||
+                                        (language === 'ar'
+                                          ? 'شرح المفاهيم اللغوية والتأسيسية وبناء الجمل وتطبيقات المحادثة والقواعد المقررة مع تدريبات عملية.'
+                                          : 'Comprehensive study of foundational language concepts, sentence building, and interactive spoken practice.')}
+                                    </p>
+                                  </div>
+
+                                  {/* 2. Target Skills & Competencies */}
+                                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                                    <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 block mb-1.5">
+                                      {language === 'ar'
+                                        ? 'المهارات المستهدفة والتركيز التعليمي:'
+                                        : language === 'fr'
+                                        ? 'Compétences et Objectifs Clés :'
+                                        : 'Target Skills & Learning Focus:'}
+                                    </span>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {resolvedSkills.map((skill, sIdx) => (
+                                        <span
+                                          key={sIdx}
+                                          className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60 text-[11px] font-bold shadow-2xs"
+                                          style={{ padding: '4px 12px' }}
+                                        >
+                                          <Sparkles size={11} className="shrink-0 text-indigo-500" />
+                                          <span>{skill}</span>
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {/* 3. Assessment status if present */}
+                                  {lesson.hasAssessment && (
+                                    <div className="pt-1.5 flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-xs">
+                                      <CheckCircle2 size={14} className="shrink-0" />
+                                      <span>
+                                        {language === 'ar'
+                                          ? 'يتضمن هذا الدرس اختبار كفاءة وتقييم مهارة مكتسبة ✓'
+                                          : 'This lesson includes a skill proficiency assessment checkpoint ✓'}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           );
                         })}

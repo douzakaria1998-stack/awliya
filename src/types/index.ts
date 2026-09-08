@@ -79,6 +79,8 @@ export interface LevelLessonItem {
   durationMinutes?: number;
   exercisesCount?: number;
   hasAssessment?: boolean;
+  contentSummary?: string;
+  vocabulary?: string[];
 }
 
 export interface LevelModule {

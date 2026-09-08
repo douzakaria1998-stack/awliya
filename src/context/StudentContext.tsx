@@ -624,6 +624,8 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
             status: lStatus,
             exercisesCount: l.exercisesCount,
             hasAssessment: l.hasAssessment,
+            contentSummary: (l as any).contentSummary,
+            vocabulary: (l as any).vocabulary,
           };
         });
 
