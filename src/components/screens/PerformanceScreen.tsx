@@ -1424,7 +1424,7 @@ export function PerformanceScreen({
                               {/* Expanded Month Sessions Timeline */}
                               {isExpanded && (
                                 <div className="p-4 sm:p-5 pt-2 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30">
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                  <div className="flex flex-col gap-3">
                                     {monthGroup.displayedRecords.map((rec) => {
                                       const isPresent = rec.status === 'present';
                                       const isAbsent = rec.status === 'absent';
@@ -1437,10 +1437,10 @@ export function PerformanceScreen({
                                       return (
                                         <div
                                           key={rec.id}
-                                          className={`p-4 rounded-2xl border ${langBadge.bgClass} ${langBadge.borderClass} shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-3`}
+                                          className={`p-3.5 sm:p-4 rounded-2xl border ${langBadge.bgClass} ${langBadge.borderClass} shadow-2xs hover:shadow-xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3`}
                                         >
-                                          {/* Top Row: Day + Date and Status Badges */}
-                                          <div className="flex items-center justify-between gap-2">
+                                          {/* Left / Primary Info (Day, Date, Subject, Time) */}
+                                          <div className="flex items-center flex-wrap gap-2.5 sm:gap-4">
                                             <div className="flex items-center gap-2">
                                               <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                                                 {dayLabel}
@@ -1450,29 +1450,6 @@ export function PerformanceScreen({
                                               </span>
                                             </div>
 
-                                            <span
-                                              className={`inline-flex items-center justify-center rounded-full text-xs font-black px-3 py-1 shadow-2xs ${
-                                                isPresent
-                                                  ? 'bg-emerald-500 text-white'
-                                                  : isAbsent
-                                                  ? 'bg-rose-500 text-white'
-                                                  : isLate
-                                                  ? 'bg-amber-500 text-white'
-                                                  : 'bg-blue-500 text-white'
-                                              }`}
-                                            >
-                                              {isPresent
-                                                ? `${t.present} ✓`
-                                                : isAbsent
-                                                ? `${t.absent} ✕`
-                                                : isLate
-                                                ? `${t.late} ⏱`
-                                                : `${t.excused} ✉`}
-                                            </span>
-                                          </div>
-
-                                          {/* Middle Row: Subject and Timing */}
-                                          <div className="flex items-center justify-between gap-2 flex-wrap">
                                             <span
                                               className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold shadow-2xs ${langBadge.badgeContainer}`}
                                             >
@@ -1500,15 +1477,35 @@ export function PerformanceScreen({
                                             </div>
                                           </div>
 
-                                          {/* Footer: Note if present */}
-                                          {rec.noteAr && (
-                                            <div className="pt-2 border-t border-slate-200/50 dark:border-slate-800/60">
+                                          {/* Right / Secondary Info (Note, Status) */}
+                                          <div className="flex items-center flex-wrap gap-2.5 sm:self-center">
+                                            {rec.noteAr && (
                                               <span className="inline-block text-[11px] text-amber-800 dark:text-amber-200 bg-amber-100/70 dark:bg-amber-950/60 border border-amber-200/80 dark:border-amber-800/60 px-2.5 py-1 rounded-lg font-medium">
                                                 <span className="font-bold">{language === 'ar' ? 'ملاحظة: ' : 'Note: '}</span>
                                                 {rec.noteAr}
                                               </span>
-                                            </div>
-                                          )}
+                                            )}
+
+                                            <span
+                                              className={`inline-flex items-center justify-center rounded-full text-xs font-black px-3.5 py-1 shadow-2xs ${
+                                                isPresent
+                                                  ? 'bg-emerald-500 text-white'
+                                                  : isAbsent
+                                                  ? 'bg-rose-500 text-white'
+                                                  : isLate
+                                                  ? 'bg-amber-500 text-white'
+                                                  : 'bg-blue-500 text-white'
+                                              }`}
+                                            >
+                                              {isPresent
+                                                ? `${t.present} ✓`
+                                                : isAbsent
+                                                ? `${t.absent} ✕`
+                                                : isLate
+                                                ? `${t.late} ⏱`
+                                                : `${t.excused} ✉`}
+                                            </span>
+                                          </div>
                                         </div>
                                       );
                                     })}
