@@ -656,7 +656,8 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
                           setTransferStudent(st);
                           setIsTransferModalOpen(true);
                         }}
-                        className="h-8 px-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/60 border border-purple-200/80 dark:border-purple-800/60 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/60 border border-purple-200/80 dark:border-purple-800/60 text-xs font-bold transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                        style={{ padding: '6px 14px', minHeight: '32px' }}
                         title={language === 'ar' ? 'نقل الطالب إلى فوج آخر' : 'Change student group'}
                       >
                         <ArrowRightLeft size={13} />
@@ -665,7 +666,8 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
                       <button
                         type="button"
                         onClick={() => removeStudentFromGroup(group.id, st.id)}
-                        className="h-8 px-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800/60 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/80 dark:border-rose-800/60 text-xs font-bold transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                        style={{ padding: '6px 14px', minHeight: '32px' }}
                         title={language === 'ar' ? 'إلغاء الإسناد من الفوج' : 'Remove from group'}
                       >
                         <UserMinus size={13} />

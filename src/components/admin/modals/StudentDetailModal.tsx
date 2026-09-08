@@ -744,15 +744,6 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                             </div>
                           </div>
                         </div>
-
-                        <button
-                          type="button"
-                          onClick={() => setIsTransferModalOpen(true)}
-                          className="h-7 px-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-bold flex items-center gap-1 transition-all shadow-xs cursor-pointer shrink-0"
-                        >
-                          <ArrowRightLeft size={12} />
-                          <span>{language === 'ar' ? 'تغيير' : 'Transfer'}</span>
-                        </button>
                       </div>
 
                       {/* Historical Groups List */}
