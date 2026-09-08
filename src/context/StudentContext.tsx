@@ -117,15 +117,11 @@ const StudentContext = createContext<StudentContextType | undefined>(undefined);
 
 export function StudentProvider({ children }: { children: React.ReactNode }) {
   const { setLevel } = useTheme();
-  const { parent } = useAuth();
+  const { parent, isAuthenticated } = useAuth();
 
   // 1. Initial states
-  const [students, setStudents] = useState<Student[]>(() => {
-    return getItem<Student[]>(STORAGE_KEYS.STUDENTS_LIST) || [];
-  });
-  const [activeStudentId, setActiveStudentIdState] = useState<string>(() => {
-    return getItem<string>(STORAGE_KEYS.ACTIVE_STUDENT_ID) || '';
-  });
+  const [students, setStudents] = useState<Student[]>([]);
+  const [activeStudentId, setActiveStudentIdState] = useState<string>('');
   const [homeworkMap, setHomeworkMap] = useState<Record<string, Homework[]>>(mockHomeworkMap);
   const [fees, setFees] = useState<Fee[]>(mockFees);
   const [payments, setPayments] = useState<PaymentRecord[]>(mockPayments);
@@ -226,9 +222,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
   // Dynamically resolve students belonging to the authenticated parent
   const syncParentStudents = useCallback(() => {
-    // Check latest parent session
-    const currentAuthUser = getItem<any>(STORAGE_KEYS.AUTH_USER) || getItem<any>('awliya_auth_user');
-    const activeParent = currentAuthUser || parent;
+    const isAuth = getItem<string>(STORAGE_KEYS.AUTH_STATUS) === 'logged_in';
+    const currentAuthUser = getItem<any>(STORAGE_KEYS.AUTH_USER);
+    const activeParent = isAuth ? (currentAuthUser || (isAuthenticated ? parent : null)) : null;
 
     if (!activeParent) {
       setStudents([]);

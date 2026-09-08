@@ -24,8 +24,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [parent, setParent] = useState<Parent>(mockParent);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [dbParentsList, setDbParentsList] = useState<Parent[]>([]);
 
   // Helper to get all registered parents from Supabase + backoffice storage + mocks
@@ -81,10 +81,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const syncAuth = async () => {
       const storedStatus = getItem<string>(STORAGE_KEYS.AUTH_STATUS);
-      if (storedStatus === 'logged_out') {
-        setIsAuthenticated(false);
-      } else {
+      const storedParent = getItem<Parent>(STORAGE_KEYS.AUTH_USER);
+
+      if (storedStatus === 'logged_in' && storedParent) {
         setIsAuthenticated(true);
+        setParent(storedParent);
+      } else {
+        setIsAuthenticated(false);
       }
 
       // Fetch live parents from Supabase
@@ -108,10 +111,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('Supabase auth parents fetch notice:', err);
       }
 
-      const storedParent = getItem<Parent>(STORAGE_KEYS.AUTH_USER);
-      if (storedParent) {
-        setParent(storedParent);
-      }
       setIsLoading(false);
     };
 
@@ -241,7 +240,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(() => {
     setItem(STORAGE_KEYS.AUTH_STATUS, 'logged_out');
+    removeItem(STORAGE_KEYS.AUTH_USER);
     setIsAuthenticated(false);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('awliya-data-sync'));
+    }
   }, []);
 
   const updateParent = useCallback((data: Partial<Parent>) => {
