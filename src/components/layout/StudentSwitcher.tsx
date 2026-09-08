@@ -35,46 +35,39 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200/80 dark:border-slate-700/80 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-600 active:scale-[0.99] cursor-pointer"
+        className="w-full flex items-center justify-between p-2 sm:p-2.5 rounded-2xl bg-white/95 dark:bg-slate-850/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-750 shadow-xs transition-all hover:border-slate-300 dark:hover:border-slate-600 active:scale-[0.99] cursor-pointer"
       >
-        <div className="flex items-center gap-3">
-          {/* Avatar with dynamic level color ring */}
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          {/* Avatar with dynamic level color */}
           <div
-            className="relative w-11 h-11 rounded-full flex items-center justify-center text-white font-extrabold text-base shadow-sm ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 shrink-0"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-black text-sm shadow-xs shrink-0"
             style={{
               background: activeLevelTheme.gradient,
-              borderColor: activeLevelTheme.primary,
             }}
           >
             {activeStudent.nicknameAr ? activeStudent.nicknameAr[0] : activeStudent.fullNameAr[0]}
-            <span
-              className="absolute -bottom-1 -left-1 px-1.5 py-0.2 rounded-full text-[9px] font-black text-white bg-slate-900/90 shadow"
-              style={{ backgroundColor: activeLevelTheme.primaryDark }}
-            >
-              L{activeStudent.currentLevel}
-            </span>
           </div>
 
           {/* Student Info */}
-          <div className={isRTL ? 'text-right' : 'text-left'}>
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+          <div className={`min-w-0 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
                 {activeStudent.fullNameAr}
               </span>
               {activeStudent.status === 'pending' ? (
-                <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold text-white bg-amber-500 shadow-xs">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white bg-amber-500 shadow-xs shrink-0">
                   {language === 'ar' ? 'بانتظار الاختبار' : language === 'fr' ? 'Test prévu' : 'Awaiting Test'}
                 </span>
               ) : (
                 <span
-                  className="px-2 py-0.5 rounded-full text-[10.5px] font-bold text-white shadow-xs"
+                  className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs shrink-0"
                   style={{ backgroundColor: activeLevelTheme.primary }}
                 >
                   {language === 'ar' ? activeLevelTheme.shortNameAr : `${t.level} ${activeStudent.currentLevel}`}
                 </span>
               )}
             </div>
-            <p className="text-[11.5px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[210px]">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
               {translateTrack(activeStudent.enrolledPathAr, language)}
             </p>
           </div>
@@ -82,7 +75,7 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
 
         {/* Chevron */}
         <div
-          className={`w-7 h-7 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 transition-transform duration-200 ${
+          className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 shrink-0 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`}
         >

@@ -107,33 +107,25 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
       </div>
 
       {/* Stacked Layout: All Containers Under Each Other with Compact & Clean Spacing */}
-      <div className="flex flex-col" style={{ gap: '14px' }}>
+      <div className="flex flex-col gap-3 sm:gap-4">
         {/* Module 1: Student Information */}
         <div
-          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs"
-          style={{
-            padding: '16px 20px',
-            borderRadius: '18px',
-          }}
+          className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs p-4 sm:p-5 rounded-2xl"
         >
           <div>
             <div
-              className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800"
-              style={{ paddingBottom: '12px', marginBottom: '14px' }}
+              className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-3.5"
             >
-              <div className="flex items-center gap-2.5">
-                <GraduationCap size={20} className="text-slate-500 shrink-0" />
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+              <div className="flex items-center gap-2">
+                <GraduationCap size={18} className="text-slate-500 shrink-0" />
+                <h3 className="text-xs sm:text-base font-bold text-slate-900 dark:text-white">
                   {language === 'ar' ? 'بيانات الطالب الأكاديمية (قراءة فقط)' : language === 'fr' ? 'Dossier Académique de l’Élève' : 'Student Academic Profile (Read-Only)'}
                 </h3>
               </div>
               <span
-                className="inline-flex items-center justify-center rounded-full text-xs font-bold text-white shadow-2xs select-none"
+                className="inline-flex items-center justify-center rounded-full text-[10.5px] sm:text-xs font-bold text-white shadow-2xs select-none px-3 py-1 shrink-0"
                 style={{
                   backgroundColor: theme.primary,
-                  height: '28px',
-                  paddingRight: '14px',
-                  paddingLeft: '14px',
                 }}
               >
                 {students.length > 0 ? (language === 'ar' ? theme.shortNameAr : `${t.level} ${activeStudent.currentLevel}`) : (language === 'ar' ? 'بانتظار الربط' : 'Pending Link')}
@@ -142,8 +134,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
 
             {students.length === 0 ? (
               <div
-                className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 text-center space-y-1"
-                style={{ padding: '20px 16px', borderRadius: '14px' }}
+                className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 text-center space-y-1 p-4 rounded-xl"
               >
                 <p className="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm">
                   {language === 'ar' ? 'لا يوجد ملف طالب مرتبط بحسابك حالياً' : 'No student profile currently linked'}
@@ -153,12 +144,11 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 text-xs">
                 <div
-                  className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-0.5"
-                  style={{ padding: '10px 14px', borderRadius: '12px' }}
+                  className="bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 p-2.5 sm:p-3 rounded-xl space-y-0.5"
                 >
-                  <span className="text-[11px] text-slate-400 font-semibold block">
+                  <span className="text-[10.5px] text-slate-400 font-semibold block">
                     {language === 'ar' ? 'الاسم الأول' : language === 'fr' ? 'Prénom' : 'First Name'}
                   </span>
                   <span className="font-bold text-slate-900 dark:text-white truncate block text-xs sm:text-sm">
@@ -167,10 +157,9 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 </div>
 
                 <div
-                  className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-0.5"
-                  style={{ padding: '10px 14px', borderRadius: '12px' }}
+                  className="bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 p-2.5 sm:p-3 rounded-xl space-y-0.5"
                 >
-                  <span className="text-[11px] text-slate-400 font-semibold block">
+                  <span className="text-[10.5px] text-slate-400 font-semibold block">
                     {language === 'ar' ? 'اللقب / اسم العائلة' : language === 'fr' ? 'Nom de Famille' : 'Last Name'}
                   </span>
                   <span className="font-bold text-slate-900 dark:text-white truncate block text-xs sm:text-sm">
@@ -179,10 +168,9 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 </div>
 
                 <div
-                  className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-0.5"
-                  style={{ padding: '10px 14px', borderRadius: '12px' }}
+                  className="bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 p-2.5 sm:p-3 rounded-xl space-y-0.5"
                 >
-                  <span className="text-[11px] text-slate-400 font-semibold block">
+                  <span className="text-[10.5px] text-slate-400 font-semibold block">
                     {language === 'ar' ? 'تاريخ الميلاد' : language === 'fr' ? 'Date de Naissance' : 'Date of Birth'}
                   </span>
                   <span className="font-mono font-bold text-slate-900 dark:text-white block text-xs sm:text-sm">
@@ -191,10 +179,9 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 </div>
 
                 <div
-                  className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-0.5"
-                  style={{ padding: '10px 14px', borderRadius: '12px' }}
+                  className="bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 p-2.5 sm:p-3 rounded-xl space-y-0.5"
                 >
-                  <span className="text-[11px] text-slate-400 font-semibold block">
+                  <span className="text-[10.5px] text-slate-400 font-semibold block">
                     {language === 'ar' ? 'المستوى المدرسي' : language === 'fr' ? 'Niveau Scolaire' : 'School Grade'}
                   </span>
                   <span className="font-bold text-slate-900 dark:text-white truncate block text-xs sm:text-sm">
@@ -203,22 +190,20 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 </div>
 
                 <div
-                  className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-0.5"
-                  style={{ padding: '10px 14px', borderRadius: '12px' }}
+                  className="bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 p-2.5 sm:p-3 rounded-xl space-y-0.5 col-span-2 sm:col-span-1"
                 >
-                  <span className="text-[11px] text-slate-400 font-semibold block">
+                  <span className="text-[10.5px] text-slate-400 font-semibold block">
                     {language === 'ar' ? 'الرقم الأكاديمي' : language === 'fr' ? 'Identifiant Étudiant' : 'Student ID'}
                   </span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-white block text-xs sm:text-sm">
+                  <span className="font-mono font-bold text-slate-900 dark:text-white block text-xs truncate">
                     {activeStudent.studentIdNumber}
                   </span>
                 </div>
 
                 <div
-                  className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-0.5"
-                  style={{ padding: '10px 14px', borderRadius: '12px' }}
+                  className="bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 p-2.5 sm:p-3 rounded-xl space-y-0.5 col-span-2 sm:col-span-1"
                 >
-                  <span className="text-[11px] text-slate-400 font-semibold block">
+                  <span className="text-[10.5px] text-slate-400 font-semibold block">
                     {t.studentTrack}
                   </span>
                   <span className="font-bold text-slate-900 dark:text-white truncate block text-xs sm:text-sm">
@@ -227,10 +212,9 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                 </div>
 
                 <div
-                  className="bg-slate-50 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-800 space-y-0.5 sm:col-span-2"
-                  style={{ padding: '10px 14px', borderRadius: '12px' }}
+                  className="bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 p-2.5 sm:p-3 rounded-xl space-y-0.5 col-span-2 sm:col-span-2 lg:col-span-2"
                 >
-                  <span className="text-[11px] text-slate-400 font-semibold block">
+                  <span className="text-[10.5px] text-slate-400 font-semibold block">
                     {language === 'ar' ? 'الفرع والسنة الدراسية' : language === 'fr' ? 'Campus & Année Scolaire' : 'Campus & Academic Year'}
                   </span>
                   <span className="font-bold text-slate-900 dark:text-white truncate block text-xs sm:text-sm">

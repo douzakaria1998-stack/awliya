@@ -542,31 +542,21 @@ export function PerformanceScreen({
   return (
     <div className={`space-y-6 animate-fade-in ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header */}
-      <div
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-        style={{
-          marginTop: '16px',
-          marginBottom: '14px',
-        }}
-      >
+      <div className="flex items-center justify-between gap-3 my-3 sm:my-4">
         <div>
           <span className="text-xs font-semibold text-slate-400 block mb-0.5">
             {t.performanceSubtitle}
           </span>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             {t.performanceTitle}
           </h1>
         </div>
 
-        <div className="self-start sm:self-auto shrink-0">
+        <div className="shrink-0">
           <span
-            className="inline-flex items-center rounded-full font-bold text-white shadow-xs select-none"
+            className="inline-flex items-center rounded-full font-bold text-white shadow-2xs select-none px-3 py-1 text-xs"
             style={{
               backgroundColor: theme.primary,
-              height: '30px',
-              paddingRight: '14px',
-              paddingLeft: '14px',
-              fontSize: '12px',
             }}
           >
             {t.level} {activeStudent.currentLevel}
@@ -575,18 +565,13 @@ export function PerformanceScreen({
       </div>
 
       {/* Mobile-only student switcher */}
-      <div className="block md:hidden mb-4">
+      <div className="block md:hidden mb-3.5">
         <StudentSwitcher onOpenAddStudent={onOpenAddStudent} />
       </div>
 
       {/* Top Segmented Tab Navigation */}
       <div
-        className="rounded-xl bg-slate-100 dark:bg-slate-850 flex gap-1 border border-slate-200/80 dark:border-slate-800 shadow-2xs"
-        style={{
-          marginBottom: '16px',
-          padding: '3px',
-          minHeight: '38px',
-        }}
+        className="rounded-2xl bg-slate-100 dark:bg-slate-850 flex gap-1 border border-slate-200/80 dark:border-slate-800 shadow-2xs p-1 mb-4"
       >
         {performanceTabs.map((tab) => {
           const isActive = activeTab === tab.key;
@@ -600,19 +585,16 @@ export function PerformanceScreen({
                 setActiveTab(tab.key);
                 onTabChange?.(tab.key);
               }}
-              className={`flex-1 rounded-lg transition-all relative flex items-center justify-center gap-2 cursor-pointer select-none ${
+              className={`flex-1 rounded-xl transition-all relative flex items-center justify-center gap-1.5 cursor-pointer select-none py-2 px-2 text-xs ${
                 isActive
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
+                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-black'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 font-bold'
               }`}
               style={{
-                height: '32px',
-                padding: '0 10px',
-                fontSize: '12px',
                 color: isActive ? theme.primary : undefined,
               }}
             >
-              <span className="font-black tracking-tight">{tab.label}</span>
+              <span className="tracking-tight text-[11px] sm:text-xs truncate">{tab.label}</span>
               {showBadge && (
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0 ring-2 ring-white dark:ring-slate-900" />
               )}
@@ -625,25 +607,21 @@ export function PerformanceScreen({
       {/* TAB 1: Homework */}
       {/* ============================================================ */}
       {activeTab === 'homework' && (
-        <div className="space-y-3.5 animate-fade-in">
+        <div className="space-y-3 animate-fade-in">
           {/* Filter Pills */}
           <div
-            className="flex items-center gap-2.5 flex-wrap"
-            style={{ marginBottom: '16px' }}
+            className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 mb-3"
           >
             <button
               type="button"
               onClick={() => setHomeworkFilter('all')}
-              className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
+              className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs px-3 py-1 shrink-0 ${
                 homeworkFilter === 'all'
                   ? 'text-white'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
               }`}
               style={{
                 backgroundColor: homeworkFilter === 'all' ? theme.primary : undefined,
-                height: '30px',
-                paddingRight: '14px',
-                paddingLeft: '14px',
               }}
             >
               {t.filterAll} ({homeworkList.length})
@@ -652,16 +630,11 @@ export function PerformanceScreen({
             <button
               type="button"
               onClick={() => setHomeworkFilter('needs_revision')}
-              className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
+              className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs px-3 py-1 shrink-0 ${
                 homeworkFilter === 'needs_revision'
                   ? 'bg-amber-500 text-white'
                   : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100'
               }`}
-              style={{
-                height: '30px',
-                paddingRight: '14px',
-                paddingLeft: '14px',
-              }}
             >
               {t.needsRevision} ({needsRevisionCount})
             </button>
@@ -669,16 +642,11 @@ export function PerformanceScreen({
             <button
               type="button"
               onClick={() => setHomeworkFilter('completed')}
-              className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
+              className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs px-3 py-1 shrink-0 ${
                 homeworkFilter === 'completed'
                   ? 'bg-emerald-600 text-white'
                   : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100'
               }`}
-              style={{
-                height: '30px',
-                paddingRight: '14px',
-                paddingLeft: '14px',
-              }}
             >
               {t.completed} ({completedCount})
             </button>

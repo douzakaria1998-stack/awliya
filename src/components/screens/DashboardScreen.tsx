@@ -192,14 +192,10 @@ export function DashboardScreen({
           1. Welcome Card
           ========================================================================= */}
       <div
-        className="text-white shadow-md relative overflow-hidden flex flex-col justify-between"
+        className="text-white shadow-sm relative overflow-hidden flex flex-col justify-between p-4 sm:p-6 rounded-2xl mb-4"
         style={{
           backgroundColor: activeLevelTheme.primary,
-          minHeight: '130px',
-          padding: '18px 22px',
-          borderRadius: '18px',
-          marginTop: '16px',
-          marginBottom: '14px',
+          minHeight: '110px',
         }}
       >
         {/* Subtle decorative background shapes */}
@@ -207,32 +203,30 @@ export function DashboardScreen({
         <div className="absolute left-16 -top-12 w-32 h-32 rounded-full bg-white/5 pointer-events-none" />
 
         {/* Content inside the card */}
-        <div className="relative z-10" style={{ padding: '2px 4px' }}>
+        <div className="relative z-10">
           {/* Greeting */}
-          <p className="text-xs font-medium text-white/90" style={{ marginBottom: '2px' }}>
+          <p className="text-xs font-medium text-white/90 mb-0.5">
             {t.greeting}, {parentFirstName} 👋
           </p>
 
           {/* Student's name/title */}
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug" style={{ marginBottom: '10px' }}>
+          <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-snug mb-2.5">
             {t.parentOf} {studentFirstName}
           </h2>
         </div>
 
         {/* Level Badge Pill / Pending Pill */}
-        <div className={`relative z-10 ${isRTL ? 'self-start' : 'self-start'}`} style={{ padding: '0 4px 4px 4px' }}>
+        <div className={`relative z-10 ${isRTL ? 'self-start' : 'self-start'}`}>
           {activeStudent.status === 'pending' ? (
             <div
-              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 text-xs font-bold text-white shadow-2xs leading-normal select-none"
-              style={{ padding: '6px 16px', minHeight: '30px' }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 text-xs font-bold text-white shadow-2xs px-3.5 py-1 select-none"
             >
               <Clock size={13} />
               <span>{language === 'ar' ? 'طلب قيد المراجعة - بانتظار الاختبار' : language === 'fr' ? 'En attente - Test prévu' : 'Pending - Placement Test'}</span>
             </div>
           ) : (
             <div
-              className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-white border border-white/25 shadow-2xs leading-normal select-none"
-              style={{ padding: '6px 16px', minHeight: '30px' }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-white border border-white/25 shadow-2xs px-3.5 py-1 select-none"
             >
               <Layers size={13} />
               <span>{t.level} {levelWord}</span>
@@ -244,13 +238,9 @@ export function DashboardScreen({
       {/* Pending Account Notice Banner */}
       {activeStudent.status === 'pending' && (
         <div
-          className={`bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/80 rounded-xl flex items-start gap-3 shadow-xs ${isRTL ? 'text-right' : 'text-left'} animate-fade-in`}
-          style={{
-            padding: '14px 18px',
-            marginBottom: '14px',
-          }}
+          className={`bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/80 rounded-2xl flex items-start gap-3 p-3.5 sm:p-4 mb-4 shadow-xs ${isRTL ? 'text-right' : 'text-left'} animate-fade-in`}
         >
-          <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+          <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
             <Clock size={16} />
           </div>
           <div className="min-w-0 flex-1">
@@ -276,59 +266,48 @@ export function DashboardScreen({
         tabIndex={0}
         onClick={() => onNavigate('academic')}
         onKeyDown={(e) => e.key === 'Enter' && onNavigate('academic')}
-        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer"
-        style={{
-          padding: '16px 20px',
-          borderRadius: '16px',
-          marginBottom: '18px',
-        }}
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer p-4 sm:p-5 rounded-2xl mb-4"
       >
         {/* Percentage and Level Info */}
-        <div className="flex items-center justify-between gap-3" style={{ marginBottom: '10px' }}>
+        <div className="flex items-center justify-between gap-3 mb-2.5">
           {/* Icon + Title + Subtitle */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div
-              className="rounded-full flex items-center justify-center text-white shrink-0 shadow-xs"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs"
               style={{
                 backgroundColor: activeLevelTheme.primary,
-                width: '38px',
-                height: '38px',
-                minWidth: '38px',
-                minHeight: '38px',
               }}
             >
-              <Check size={20} strokeWidth={3} />
+              <Check size={18} strokeWidth={3} />
             </div>
-            <div>
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-tight">
+            <div className="min-w-0">
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 dark:text-white leading-tight truncate">
                 {activeStudent.gender === 'female' ? t.daughterProgress : t.sonProgress}
               </h3>
-              <p className="text-xs text-slate-400 font-semibold" style={{ marginTop: '2px' }}>
-                {t.level} {levelWord} • {t.levelOfTen}
+              <p className="text-[11px] text-slate-400 font-semibold mt-0.5 truncate">
+                {t.level} {levelWord} • {language === 'ar' ? `من ${academicLevels.length} مستويات` : `of ${academicLevels.length} levels`}
               </p>
             </div>
           </div>
 
           {/* Percentage text */}
           <div
-            className="text-xl sm:text-2xl font-bold font-mono tracking-tight"
+            className="text-lg sm:text-2xl font-black font-mono tracking-tight shrink-0 whitespace-nowrap"
             style={{ color: activeLevelTheme.primary }}
           >
-            % {activeStudent.currentLevelProgress ?? 0}
+            {activeStudent.currentLevelProgress ?? 0}%
           </div>
         </div>
 
         {/* Progress Bar */}
         <div
-          className="w-full bg-slate-100 dark:bg-slate-800 overflow-hidden"
-          style={{ height: '10px', borderRadius: '6px', marginTop: '10px' }}
+          className="w-full bg-slate-100 dark:bg-slate-800 overflow-hidden h-2.5 rounded-full mt-2"
         >
           <div
-            className="h-full transition-all duration-700"
+            className="h-full transition-all duration-700 rounded-full"
             style={{
               width: `${activeStudent.currentLevelProgress ?? 0}%`,
               backgroundColor: activeLevelTheme.primary,
-              borderRadius: '6px',
             }}
           />
         </div>
@@ -337,18 +316,9 @@ export function DashboardScreen({
       {/* =========================================================================
           3. Notifications & Homework Alerts Section
           ========================================================================= */}
-      <div style={{ marginBottom: '18px' }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: '10px' }}>
-          <h3
-            className="text-slate-900 dark:text-white"
-            style={{
-              fontSize: '16px',
-              fontWeight: '700',
-              lineHeight: '24px',
-              paddingRight: isRTL ? '4px' : '0',
-              paddingLeft: isRTL ? '0' : '4px',
-            }}
-          >
+      <div className="mb-5">
+        <div className="flex items-center justify-between mb-2.5 px-0.5">
+          <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
             {t.recentNotifications}
           </h3>
 
@@ -363,7 +333,7 @@ export function DashboardScreen({
         </div>
 
         {/* Notification Cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="space-y-2 sm:space-y-2.5">
           {recentHomeworkNotifications.length > 0 ? (
             recentHomeworkNotifications.map((notif) => {
               const IconComp = notif.icon;
@@ -392,47 +362,40 @@ export function DashboardScreen({
                     }
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'homework')}
-                  className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
-                  style={{
-                    minHeight: '64px',
-                    padding: '12px 16px',
-                    borderRadius: '16px',
-                    gap: '12px',
-                  }}
+                  className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group p-3 sm:p-3.5 rounded-2xl gap-2.5 sm:gap-3"
                 >
-                  <div className="flex items-center min-w-0" style={{ gap: '12px' }}>
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     <div
-                      className={`rounded-xl flex items-center justify-center shrink-0 border ${notif.colorClass}`}
-                      style={{ width: '38px', height: '38px', minWidth: '38px' }}
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${notif.colorClass}`}
                     >
-                      <IconComp size={18} />
+                      <IconComp size={16} />
                     </div>
 
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
                         <h4 className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm">
                           {notif.title}
                         </h4>
                         {notif.badgeText && (
                           <span
-                            className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold leading-normal ${notif.badgeClass} shrink-0 shadow-2xs`}
+                            className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold ${notif.badgeClass} shrink-0 shadow-2xs`}
                           >
                             {notif.badgeText}
                           </span>
                         )}
                       </div>
-                      <p className="text-slate-500 dark:text-slate-400 font-medium truncate text-[11.5px]">
+                      <p className="text-slate-500 dark:text-slate-400 font-medium truncate text-[11px] sm:text-xs">
                         {notif.description}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-slate-400 font-semibold whitespace-nowrap text-[11px]">
+                  <div className="flex items-center gap-1.5 shrink-0 text-slate-400">
+                    <span className="text-[10px] sm:text-xs font-semibold whitespace-nowrap">
                       {notif.time}
                     </span>
-                    <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      {isRTL ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      {isRTL ? <ChevronLeft size={13} /> : <ChevronRight size={13} />}
                     </div>
                   </div>
                 </div>
