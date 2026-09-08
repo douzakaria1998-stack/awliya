@@ -142,12 +142,12 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
                           {student.fullNameAr}
                         </span>
                         {student.status === 'pending' ? (
-                          <span className="px-1.5 py-0.2 rounded text-[10px] font-bold text-white bg-amber-500">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10.5px] font-bold text-white bg-amber-500 shadow-2xs">
                             {language === 'ar' ? 'بانتظار الاختبار' : language === 'fr' ? 'Test prévu' : 'Awaiting Test'}
                           </span>
                         ) : (
                           <span
-                            className="px-1.5 py-0.2 rounded text-[10px] font-bold text-white"
+                            className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10.5px] font-bold text-white shadow-2xs"
                             style={{ backgroundColor: stTheme.primary }}
                           >
                             {t.level} {student.currentLevel}

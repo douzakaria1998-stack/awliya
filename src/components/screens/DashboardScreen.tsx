@@ -390,7 +390,7 @@ export function DashboardScreen({
                         </h4>
                         {notif.badgeText && (
                           <span
-                            className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${notif.badgeClass} shrink-0`}
+                            className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[11px] font-bold leading-normal ${notif.badgeClass} shrink-0 shadow-2xs`}
                           >
                             {notif.badgeText}
                           </span>
