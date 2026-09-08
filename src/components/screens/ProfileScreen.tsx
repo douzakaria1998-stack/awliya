@@ -481,17 +481,17 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                           </span>
                           {st.status === 'pending' ? (
                             <span
-                              className="inline-flex items-center gap-1 rounded-full text-[11px] font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 select-none whitespace-nowrap shrink-0"
-                              style={{ height: '24px', padding: '0 10px', lineHeight: '1' }}
+                              className="inline-flex items-center gap-1 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 select-none whitespace-nowrap shrink-0 shadow-2xs"
+                              style={{ minHeight: '28px', padding: '4px 12px' }}
                             >
-                              <Clock size={11} className="shrink-0" />
+                              <Clock size={12} className="shrink-0" />
                               <span>{language === 'ar' ? 'قيد المراجعة' : language === 'fr' ? 'En validation' : 'Pending'}</span>
                             </span>
                           ) : (
                             isSelected && (
                               <span
-                                className="inline-flex items-center justify-center rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 select-none whitespace-nowrap shrink-0"
-                                style={{ height: '24px', padding: '0 10px', lineHeight: '1' }}
+                                className="inline-flex items-center justify-center rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 select-none whitespace-nowrap shrink-0 shadow-2xs"
+                                style={{ minHeight: '28px', padding: '4px 12px' }}
                               >
                                 {language === 'ar' ? 'النشط حالياً' : language === 'fr' ? 'Actif' : 'Active'}
                               </span>
@@ -508,7 +508,7 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                       {st.status === 'pending' ? (
                         <span
                           className="inline-flex items-center justify-center rounded-full text-xs font-bold text-white bg-amber-500 shadow-2xs select-none whitespace-nowrap"
-                          style={{ height: '28px', padding: '0 14px', lineHeight: '1' }}
+                          style={{ minHeight: '30px', padding: '4px 16px' }}
                         >
                           {language === 'ar' ? 'بانتظار الاختبار' : language === 'fr' ? 'Test prévu' : 'Awaiting Test'}
                         </span>
@@ -517,9 +517,8 @@ export function ProfileScreen({ onOpenAddStudent }: ProfileScreenProps) {
                           className="inline-flex items-center justify-center rounded-full text-xs font-bold text-white shadow-2xs select-none whitespace-nowrap"
                           style={{
                             backgroundColor: stTheme.primary,
-                            height: '28px',
-                            padding: '0 14px',
-                            lineHeight: '1',
+                            minHeight: '30px',
+                            padding: '4px 16px',
                           }}
                         >
                           {t.level} {st.currentLevel}

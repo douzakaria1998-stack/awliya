@@ -223,16 +223,16 @@ export function DashboardScreen({
         <div className={`relative z-10 ${isRTL ? 'self-start' : 'self-start'}`} style={{ padding: '0 4px 4px 4px' }}>
           {activeStudent.status === 'pending' ? (
             <div
-              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 text-[11px] font-bold text-white shadow-2xs"
-              style={{ padding: '4px 14px', height: '26px' }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 text-xs font-bold text-white shadow-2xs leading-normal select-none"
+              style={{ padding: '6px 16px', minHeight: '30px' }}
             >
               <Clock size={13} />
               <span>{language === 'ar' ? 'طلب قيد المراجعة - بانتظار الاختبار' : language === 'fr' ? 'En attente - Test prévu' : 'Pending - Placement Test'}</span>
             </div>
           ) : (
             <div
-              className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-bold text-white border border-white/25 shadow-2xs"
-              style={{ padding: '4px 12px', height: '26px' }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-white border border-white/25 shadow-2xs leading-normal select-none"
+              style={{ padding: '6px 16px', minHeight: '30px' }}
             >
               <Layers size={13} />
               <span>{t.level} {levelWord}</span>
@@ -415,7 +415,7 @@ export function DashboardScreen({
                         </h4>
                         {notif.badgeText && (
                           <span
-                            className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[11px] font-bold leading-normal ${notif.badgeClass} shrink-0 shadow-2xs`}
+                            className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold leading-normal ${notif.badgeClass} shrink-0 shadow-2xs`}
                           >
                             {notif.badgeText}
                           </span>

@@ -705,9 +705,10 @@ export function PerformanceScreen({
                           <span
                             className="inline-flex items-center rounded-full text-xs font-bold bg-amber-500 text-white shadow-xs animate-pulse"
                             style={{
-                              height: '26px',
-                              paddingRight: '12px',
-                              paddingLeft: '12px',
+                              height: '30px',
+                              paddingRight: '14px',
+                              paddingLeft: '14px',
+                              lineHeight: 'normal',
                             }}
                           >
                             {t.needsRevision}
@@ -718,9 +719,10 @@ export function PerformanceScreen({
                           <span
                             className="inline-flex items-center rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
                             style={{
-                              height: '26px',
-                              paddingRight: '12px',
-                              paddingLeft: '12px',
+                              height: '30px',
+                              paddingRight: '14px',
+                              paddingLeft: '14px',
+                              lineHeight: 'normal',
                             }}
                           >
                             {t.completed} ✓
@@ -731,9 +733,10 @@ export function PerformanceScreen({
                           <span
                             className="inline-flex items-center rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
                             style={{
-                              height: '26px',
-                              paddingRight: '12px',
-                              paddingLeft: '12px',
+                              height: '30px',
+                              paddingRight: '14px',
+                              paddingLeft: '14px',
+                              lineHeight: 'normal',
                             }}
                           >
                             {t.pending}
@@ -1129,7 +1132,7 @@ export function PerformanceScreen({
                             </div>
 
                             <span
-                              className={`inline-flex items-center justify-center rounded-full text-[11px] font-black shadow-2xs select-none ${
+                              className={`inline-flex items-center justify-center rounded-full text-xs font-black shadow-2xs select-none ${
                                 isPresent
                                   ? 'bg-emerald-500 text-white'
                                   : isAbsent
@@ -1139,9 +1142,10 @@ export function PerformanceScreen({
                                   : 'bg-blue-500 text-white'
                               }`}
                               style={{
-                                height: '22px',
-                                paddingRight: '10px',
-                                paddingLeft: '10px',
+                                height: '28px',
+                                paddingRight: '14px',
+                                paddingLeft: '14px',
+                                lineHeight: 'normal',
                               }}
                             >
                               {isPresent
@@ -1155,9 +1159,9 @@ export function PerformanceScreen({
                           </div>
 
                           {/* Subject Pill in Colored Container */}
-                          <div className="flex items-center mb-2">
+                          <div className="flex items-center mb-2.5">
                             <span
-                              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold shadow-2xs ${langBadge.badgeContainer}`}
+                              className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold shadow-2xs leading-normal ${langBadge.badgeContainer}`}
                             >
                               <BookOpen size={13} className={`${langBadge.iconClass} shrink-0`} />
                               <span>{translatedSubject}</span>
@@ -1188,7 +1192,7 @@ export function PerformanceScreen({
                         {/* Note / Excuse Footer if present */}
                         {rec.noteAr && (
                           <div
-                            className="mt-2.5 p-2 px-3 rounded-lg bg-white/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 text-[11px] text-slate-700 dark:text-slate-300 font-medium"
+                            className="mt-3 p-3 px-3.5 rounded-xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-800/70 text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed"
                           >
                             <span className="font-bold">{language === 'ar' ? 'ملاحظة: ' : language === 'fr' ? 'Remarque : ' : 'Note: '}</span>
                             {rec.noteAr}
@@ -1480,14 +1484,19 @@ export function PerformanceScreen({
                                           {/* Right / Secondary Info (Note, Status) */}
                                           <div className="flex items-center flex-wrap gap-2.5 sm:self-center">
                                             {rec.noteAr && (
-                                              <span className="inline-block text-[11px] text-amber-800 dark:text-amber-200 bg-amber-100/70 dark:bg-amber-950/60 border border-amber-200/80 dark:border-amber-800/60 px-2.5 py-1 rounded-lg font-medium">
-                                                <span className="font-bold">{language === 'ar' ? 'ملاحظة: ' : 'Note: '}</span>
+                                              <span
+                                                className="inline-flex items-center text-xs text-amber-800 dark:text-amber-200 bg-amber-100/70 dark:bg-amber-950/60 border border-amber-200/80 dark:border-amber-800/60 rounded-xl font-medium leading-relaxed shadow-2xs"
+                                                style={{
+                                                  padding: '6px 14px',
+                                                }}
+                                              >
+                                                <span className="font-bold ml-1">{language === 'ar' ? 'ملاحظة: ' : 'Note: '}</span>
                                                 {rec.noteAr}
                                               </span>
                                             )}
 
                                             <span
-                                              className={`inline-flex items-center justify-center rounded-full text-xs font-black px-3.5 py-1 shadow-2xs ${
+                                              className={`inline-flex items-center justify-center rounded-full text-xs font-black shadow-2xs select-none ${
                                                 isPresent
                                                   ? 'bg-emerald-500 text-white'
                                                   : isAbsent
@@ -1496,6 +1505,11 @@ export function PerformanceScreen({
                                                   ? 'bg-amber-500 text-white'
                                                   : 'bg-blue-500 text-white'
                                               }`}
+                                              style={{
+                                                height: '30px',
+                                                padding: '0 16px',
+                                                lineHeight: 'normal',
+                                              }}
                                             >
                                               {isPresent
                                                 ? `${t.present} ✓`

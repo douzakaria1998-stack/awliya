@@ -308,8 +308,8 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                     </span>
                     {unreadCount > 0 && (
                       <span
-                        className="inline-flex items-center justify-center text-xs font-black bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 shadow-2xs"
-                        style={{ padding: '4px 12px', borderRadius: '12px', height: '26px' }}
+                        className="inline-flex items-center justify-center text-xs font-black bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 shadow-2xs leading-normal"
+                        style={{ padding: '4px 14px', borderRadius: '12px', minHeight: '28px' }}
                       >
                         {unreadCount} {language === 'ar' ? 'جديدة' : language === 'fr' ? 'non lus' : 'unread'}
                       </span>

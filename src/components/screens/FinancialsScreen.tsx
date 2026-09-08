@@ -189,7 +189,7 @@ export function FinancialsScreen({ onOpenAddStudent }: FinancialsScreenProps) {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2.5 mb-1.5 flex-wrap">
                       {fee.isCurrentCourse && (
-                        <span className="inline-flex items-center rounded-full text-xs font-black bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200 px-3 py-1 shadow-2xs select-none">
+                        <span className="inline-flex items-center rounded-full text-xs font-black bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200 px-3.5 py-1.5 shadow-2xs select-none leading-normal">
                           🎓 الدورة الحالية النشطة
                         </span>
                       )}
@@ -210,7 +210,7 @@ export function FinancialsScreen({ onOpenAddStudent }: FinancialsScreenProps) {
                       <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono block whitespace-nowrap">
                         {fee.amount} {financialSummary.currency || 'د.ج'}
                       </span>
-                      <span className="inline-flex items-center justify-center rounded-full text-xs font-black mt-1 px-3 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                      <span className="inline-flex items-center justify-center rounded-full text-xs font-black mt-1 px-3.5 py-1.5 bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 shadow-2xs leading-normal">
                         مطلوب سدادها
                       </span>
                     </div>
