@@ -176,7 +176,7 @@ export function PerformanceScreen({
   }, [initialTab]);
   const [selectedHomework, setSelectedHomework] = useState<Homework | null>(null);
   const [homeworkFilter, setHomeworkFilter] = useState<'all' | 'needs_revision' | 'completed'>('all');
-  const [selectedWeekIndex, setSelectedWeekIndex] = useState<number>(0);
+  const [selectedWeekKey, setSelectedWeekKey] = useState<string | null>(null);
   const [attendanceViewMode, setAttendanceViewMode] = useState<'timeline' | 'history'>('timeline');
   const [historyFilter, setHistoryFilter] = useState<'all' | 'present' | 'late' | 'absent' | 'excused'>('all');
   const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({});
@@ -359,8 +359,28 @@ export function PerformanceScreen({
     { key: 'feedback', label: t.tabTeacherFeedback },
   ];
 
+  // Find index of current week (This Week / الأسبوع الحالي)
+  const defaultCurrentWeekIndex = useMemo(() => {
+    const idx = WEEKS_LIST.findIndex((w) => w.isCurrent);
+    return idx >= 0 ? idx : 0;
+  }, [WEEKS_LIST]);
+
+  // Resolve currently active week index
+  const activeWeekIndex = useMemo(() => {
+    if (selectedWeekKey) {
+      const idx = WEEKS_LIST.findIndex((w) => w.key === selectedWeekKey);
+      if (idx >= 0) return idx;
+    }
+    return defaultCurrentWeekIndex;
+  }, [selectedWeekKey, WEEKS_LIST, defaultCurrentWeekIndex]);
+
+  // Reset selectedWeekKey to null whenever student changes so it always shows This Week
+  React.useEffect(() => {
+    setSelectedWeekKey(null);
+  }, [activeStudent?.id]);
+
   // Weekly Attendance calculations for the selected week
-  const selectedWeek = WEEKS_LIST[selectedWeekIndex] || WEEKS_LIST[0];
+  const selectedWeek = WEEKS_LIST[activeWeekIndex] || WEEKS_LIST[defaultCurrentWeekIndex] || WEEKS_LIST[0];
 
   const currentWeekRecords = useMemo(() => {
     if (!selectedWeek) return [];
@@ -973,12 +993,12 @@ export function PerformanceScreen({
                 {/* 3 Quick Timeline Buttons */}
                 <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-700/60 flex-wrap">
                   {WEEKS_LIST.map((wk) => {
-                    const isSelected = selectedWeekIndex === wk.index;
+                    const isSelected = activeWeekIndex === wk.index;
                     return (
                       <button
                         key={wk.key}
                         type="button"
-                        onClick={() => setSelectedWeekIndex(wk.index)}
+                        onClick={() => setSelectedWeekKey(wk.key)}
                         className={`rounded-lg font-black text-xs transition-all cursor-pointer select-none inline-flex items-center gap-1.5 ${
                           isSelected
                             ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
@@ -1003,12 +1023,15 @@ export function PerformanceScreen({
                 {/* Left / Right Chronological Navigation */}
                 <div className="flex items-center gap-1.5 self-end sm:self-auto">
                   <span className="text-xs text-slate-400 font-medium">
-                    {selectedWeekIndex + 1} / {WEEKS_LIST.length}
+                    {activeWeekIndex + 1} / {WEEKS_LIST.length}
                   </span>
                   <button
                     type="button"
-                    disabled={selectedWeekIndex >= WEEKS_LIST.length - 1}
-                    onClick={() => setSelectedWeekIndex((prev) => Math.min(WEEKS_LIST.length - 1, prev + 1))}
+                    disabled={activeWeekIndex >= WEEKS_LIST.length - 1}
+                    onClick={() => {
+                      const nextIdx = Math.min(WEEKS_LIST.length - 1, activeWeekIndex + 1);
+                      if (WEEKS_LIST[nextIdx]) setSelectedWeekKey(WEEKS_LIST[nextIdx].key);
+                    }}
                     className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                     title={isRTL ? 'الأسبوع السابق' : 'Previous Week'}
                   >
@@ -1017,8 +1040,11 @@ export function PerformanceScreen({
 
                   <button
                     type="button"
-                    disabled={selectedWeekIndex <= 0}
-                    onClick={() => setSelectedWeekIndex((prev) => Math.max(0, prev - 1))}
+                    disabled={activeWeekIndex <= 0}
+                    onClick={() => {
+                      const prevIdx = Math.max(0, activeWeekIndex - 1);
+                      if (WEEKS_LIST[prevIdx]) setSelectedWeekKey(WEEKS_LIST[prevIdx].key);
+                    }}
                     className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                     title={isRTL ? 'الأسبوع التالي' : 'Next Week'}
                   >
@@ -1037,10 +1063,10 @@ export function PerformanceScreen({
               >
                 <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
                   <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white">
-                    {WEEKS_LIST[selectedWeekIndex]?.label}:
+                    {selectedWeek?.label}:
                   </span>
                   <span className="font-mono text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-                    ({WEEKS_LIST[selectedWeekIndex]?.range})
+                    ({selectedWeek?.range})
                   </span>
                 </div>
 
