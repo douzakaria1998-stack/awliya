@@ -40,34 +40,30 @@ export function StudentSwitcher({ onOpenAddStudent }: StudentSwitcherProps) {
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           {/* Avatar with dynamic level color */}
           <div
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-black text-sm shadow-xs shrink-0"
-            style={{
-              background: activeLevelTheme.gradient,
-            }}
+            className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm shadow-xs shrink-0 bg-slate-900 text-white dark:bg-slate-800 dark:text-slate-100 border border-slate-700/60"
           >
             {activeStudent.nicknameAr ? activeStudent.nicknameAr[0] : activeStudent.fullNameAr[0]}
           </div>
 
           {/* Student Info */}
           <div className={`min-w-0 ${isRTL ? 'text-right' : 'text-left'}`}>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
                 {activeStudent.fullNameAr}
               </span>
               {activeStudent.status === 'pending' ? (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white bg-amber-500 shadow-xs shrink-0">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold text-white bg-amber-500 shadow-xs shrink-0">
                   {language === 'ar' ? 'بانتظار الاختبار' : language === 'fr' ? 'Test prévu' : 'Awaiting Test'}
                 </span>
               ) : (
                 <span
-                  className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs shrink-0"
-                  style={{ backgroundColor: activeLevelTheme.primary }}
+                  className="px-2.5 py-0.5 rounded-full text-xs font-black bg-slate-900 text-lime-400 dark:bg-slate-800 dark:text-lime-300 border border-slate-700/60 shadow-xs shrink-0"
                 >
                   {language === 'ar' ? activeLevelTheme.shortNameAr : `${t.level} ${activeStudent.currentLevel}`}
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">
               {translateTrack(activeStudent.enrolledPathAr, language)}
             </p>
           </div>
