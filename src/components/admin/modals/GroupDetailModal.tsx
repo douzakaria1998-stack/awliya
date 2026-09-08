@@ -1073,7 +1073,7 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block flex items-center gap-1.5">
                         <Users size={14} className="text-amber-500" />
-                        <span>{language === 'ar' ? 'ربط بولي الأمر (Link Parent)' : 'Link Parent'}</span>
+                        <span>{language === 'ar' ? 'ربط بولي الأمر' : 'Link to Parent'}</span>
                       </label>
 
                       {/* Parent Search Input */}

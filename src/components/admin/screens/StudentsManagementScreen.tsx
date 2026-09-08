@@ -782,33 +782,34 @@ export function StudentsManagementScreen() {
                     className="w-full rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/80 transition-all cursor-pointer"
                     style={{ height: '42px', padding: '8px 12px' }}
                   >
-                    <option value="male">{language === 'ar' ? 'ذكر (Male)' : 'Male'}</option>
-                    <option value="female">{language === 'ar' ? 'أنثى (Female)' : 'Female'}</option>
+                    <option value="male">{language === 'ar' ? 'ذكر' : 'Male'}</option>
+                    <option value="female">{language === 'ar' ? 'أنثى' : 'Female'}</option>
                   </select>
                 </div>
               </div>
 
-              {/* 3. Link to Parent Section (Enhanced Spacing & Search Container) */}
+              {/* 3. Link to Parent Section (Enhanced Spacing & Clean Layout) */}
               <div
                 className="rounded-2xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200/80 dark:border-purple-900/50"
-                style={{ padding: '20px 22px', marginTop: '6px', marginBottom: '6px' }}
+                style={{ padding: '20px 22px', marginTop: '8px', marginBottom: '8px' }}
               >
                 {/* Section Header & Toggle Buttons */}
                 <div
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-200/50 dark:border-purple-900/40"
+                  className="flex flex-col md:flex-row md:items-center justify-between gap-3.5 border-b border-purple-200/50 dark:border-purple-900/40"
                   style={{ paddingBottom: '16px', marginBottom: '18px' }}
                 >
-                  <div className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-xl bg-purple-100 dark:bg-purple-900/60 text-purple-600 dark:text-purple-300 flex items-center justify-center shrink-0">
-                      <Link2 size={15} />
+                  <div className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-100 flex items-center gap-2.5 shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-900/60 text-purple-600 dark:text-purple-300 flex items-center justify-center shrink-0 shadow-xs">
+                      <Link2 size={16} />
                     </div>
-                    <span>{language === 'ar' ? 'ربط الطالب بولي الأمر (Link to Parent):' : 'Link to Parent:'}</span>
+                    <span className="whitespace-nowrap font-bold text-slate-900 dark:text-white">
+                      {language === 'ar' ? 'ربط الطالب بولي الأمر:' : 'Link to Parent:'}
+                    </span>
                   </div>
 
                   {/* Mode Toggles */}
                   <div
-                    className="inline-flex items-center gap-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-purple-200/50 dark:border-slate-800 shadow-inner shrink-0 flex-wrap"
-                    style={{ padding: '3px 4px' }}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-purple-200/50 dark:border-slate-800 shadow-inner flex-wrap p-1"
                   >
                     <button
                       type="button"
@@ -821,9 +822,9 @@ export function StudentsManagementScreen() {
                           ? 'bg-purple-600 text-white shadow-xs scale-[1.01]'
                           : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
                       }`}
-                      style={{ padding: '6px 12px' }}
+                      style={{ padding: '6px 14px' }}
                     >
-                      <span>{language === 'ar' ? 'بدون ربط (غير مربوط)' : 'Unlinked (No Parent)'}</span>
+                      <span>{language === 'ar' ? 'بدون ربط (مستقل)' : 'Unlinked'}</span>
                     </button>
                     <button
                       type="button"
@@ -833,9 +834,9 @@ export function StudentsManagementScreen() {
                           ? 'bg-purple-600 text-white shadow-xs scale-[1.01]'
                           : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
                       }`}
-                      style={{ padding: '6px 12px' }}
+                      style={{ padding: '6px 14px' }}
                     >
-                      <UserCheck size={13} />
+                      <UserCheck size={14} />
                       <span>{language === 'ar' ? 'ولي أمر مسجل' : 'Existing Parent'}</span>
                     </button>
                     <button
@@ -849,9 +850,9 @@ export function StudentsManagementScreen() {
                           ? 'bg-purple-600 text-white shadow-xs scale-[1.01]'
                           : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
                       }`}
-                      style={{ padding: '6px 12px' }}
+                      style={{ padding: '6px 14px' }}
                     >
-                      <UserPlus size={13} />
+                      <UserPlus size={14} />
                       <span>{language === 'ar' ? 'ولي أمر جديد' : 'New Parent'}</span>
                     </button>
                   </div>
