@@ -172,6 +172,26 @@ export function PerformanceScreen({
   const [homeworkFilter, setHomeworkFilter] = useState<'all' | 'needs_revision' | 'completed'>('all');
   const [selectedWeekIndex, setSelectedWeekIndex] = useState<number>(0);
 
+  // Helper to safely parse local date from string YYYY-MM-DD or Date object without UTC timezone drift
+  const parseLocalDate = (dateInput: Date | string): Date => {
+    if (dateInput instanceof Date) {
+      const d = new Date(dateInput);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+    if (typeof dateInput === 'string') {
+      const str = dateInput.trim();
+      const match = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (match) {
+        const [, y, m, d] = match;
+        return new Date(Number(y), Number(m) - 1, Number(d), 0, 0, 0, 0);
+      }
+    }
+    const d = new Date(dateInput);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  };
+
   // Helper to format a week's Saturday-to-Thursday date range string
   const formatWeekRange = (startOfWeek: Date, endOfWeek: Date, lang: string) => {
     const startDay = String(startOfWeek.getDate()).padStart(2, '0');
@@ -213,9 +233,8 @@ export function PerformanceScreen({
   };
 
   // Helper to get the Saturday start of any date
-  const getSaturdayOfWeek = (dateInput: Date | string) => {
-    const d = new Date(dateInput);
-    d.setHours(0, 0, 0, 0);
+  const getSaturdayOfWeek = (dateInput: Date | string): Date => {
+    const d = parseLocalDate(dateInput);
     const day = d.getDay(); // 0: Sun, 1: Mon, ..., 6: Sat
     const diffToSaturday = (day + 1) % 7;
     const sat = new Date(d);
@@ -224,27 +243,26 @@ export function PerformanceScreen({
     return sat;
   };
 
+  // Formats Saturday as deterministic YYYY-MM-DD key
+  const getSaturdayKey = (dateInput: Date | string): string => {
+    const sat = getSaturdayOfWeek(dateInput);
+    const y = sat.getFullYear();
+    const m = String(sat.getMonth() + 1).padStart(2, '0');
+    const d = String(sat.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
   // Build dynamic, chronologically ordered weeks from both current date and recorded attendance sessions
   const WEEKS_LIST = useMemo(() => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     const currentSat = getSaturdayOfWeek(now);
+    const currentSatKey = getSaturdayKey(now);
 
-    // Map of unique Saturday timestamp -> { start, end }
-    const weeksMap = new Map<number, { start: Date; end: Date }>();
+    // Map of unique Saturday key ('YYYY-MM-DD') -> { start, end, satTimestamp }
+    const weeksMap = new Map<string, { start: Date; end: Date; satTimestamp: number }>();
 
-    // 1. Always include standard recent 3 weeks relative to current date
-    for (let w = 0; w < 3; w++) {
-      const sat = new Date(currentSat);
-      sat.setDate(currentSat.getDate() - w * 7);
-      sat.setHours(0, 0, 0, 0);
-      const thu = new Date(sat);
-      thu.setDate(sat.getDate() + 5);
-      thu.setHours(0, 0, 0, 0);
-      weeksMap.set(sat.getTime(), { start: sat, end: thu });
-    }
-
-    // 2. Also incorporate any actual recorded attendance sessions for the student
+    // 1. Incorporate any actual recorded attendance sessions for the student first
     (attendanceData?.records || []).forEach((rec) => {
       if (rec.date) {
         try {
@@ -252,28 +270,47 @@ export function PerformanceScreen({
           const thu = new Date(sat);
           thu.setDate(sat.getDate() + 5);
           thu.setHours(0, 0, 0, 0);
-          if (!weeksMap.has(sat.getTime())) {
-            weeksMap.set(sat.getTime(), { start: sat, end: thu });
+          const key = getSaturdayKey(rec.date);
+          if (!weeksMap.has(key)) {
+            weeksMap.set(key, { start: sat, end: thu, satTimestamp: sat.getTime() });
           }
         } catch {}
       }
     });
 
-    // 3. Sort weeks descending (most recent first)
-    const sortedWeeks = Array.from(weeksMap.entries()).sort((a, b) => b[0] - a[0]);
+    // 2. Always include recent standard 3 weeks relative to current date (Current, Last, Previous)
+    for (let w = 0; w < 3; w++) {
+      const sat = new Date(currentSat);
+      sat.setDate(currentSat.getDate() - w * 7);
+      sat.setHours(0, 0, 0, 0);
+      const thu = new Date(sat);
+      thu.setDate(sat.getDate() + 5);
+      thu.setHours(0, 0, 0, 0);
+      const key = `${sat.getFullYear()}-${String(sat.getMonth() + 1).padStart(2, '0')}-${String(sat.getDate()).padStart(2, '0')}`;
+      if (!weeksMap.has(key)) {
+        weeksMap.set(key, { start: sat, end: thu, satTimestamp: sat.getTime() });
+      }
+    }
 
-    // Current Saturday times for relative labels
-    const currentSatTime = currentSat.getTime();
-    const lastSatTime = new Date(currentSat.getTime() - 7 * 86400000).getTime();
-    const prevSatTime = new Date(currentSat.getTime() - 14 * 86400000).getTime();
+    // 3. Sort weeks descending (most recent Saturday first)
+    const sortedWeeks = Array.from(weeksMap.entries()).sort((a, b) => b[1].satTimestamp - a[1].satTimestamp);
 
-    return sortedWeeks.map(([satTimestamp, { start, end }], index) => {
-      let label = t.previousWeek;
-      if (satTimestamp === currentSatTime) {
+    // Saturday keys for relative labels
+    const lastSat = new Date(currentSat);
+    lastSat.setDate(currentSat.getDate() - 7);
+    const lastSatKey = `${lastSat.getFullYear()}-${String(lastSat.getMonth() + 1).padStart(2, '0')}-${String(lastSat.getDate()).padStart(2, '0')}`;
+
+    const prevSat = new Date(currentSat);
+    prevSat.setDate(currentSat.getDate() - 14);
+    const prevSatKey = `${prevSat.getFullYear()}-${String(prevSat.getMonth() + 1).padStart(2, '0')}-${String(prevSat.getDate()).padStart(2, '0')}`;
+
+    return sortedWeeks.map(([key, { start, end, satTimestamp }], index) => {
+      let label = '';
+      if (key === currentSatKey) {
         label = t.currentWeek;
-      } else if (satTimestamp === lastSatTime) {
+      } else if (key === lastSatKey) {
         label = t.lastWeek;
-      } else if (satTimestamp === prevSatTime) {
+      } else if (key === prevSatKey) {
         label = t.previousWeek;
       } else {
         const startDay = String(start.getDate()).padStart(2, '0');
@@ -283,6 +320,7 @@ export function PerformanceScreen({
       }
 
       return {
+        key,
         index,
         satTimestamp,
         start,
@@ -306,12 +344,12 @@ export function PerformanceScreen({
   const currentWeekRecords = useMemo(() => {
     if (!selectedWeek) return [];
     return (attendanceData?.records || []).filter((r) => {
-      if (!r.date) return (r.weekIndex ?? 0) === selectedWeek.index;
+      if (!r.date) return false;
       try {
-        const rSat = getSaturdayOfWeek(r.date);
-        return rSat.getTime() === selectedWeek.satTimestamp;
+        const rKey = getSaturdayKey(r.date);
+        return rKey === selectedWeek.key;
       } catch {
-        return (r.weekIndex ?? 0) === selectedWeek.index;
+        return false;
       }
     });
   }, [attendanceData?.records, selectedWeek]);
@@ -945,7 +983,19 @@ export function PerformanceScreen({
                           <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-mono">
                             <Clock size={13} className="shrink-0 text-slate-400" />
                             <span dir="ltr" className="font-mono font-bold text-[11px]">
-                              {rec.sessionTimeAr || '04:30 PM - 06:00 PM'}
+                              {(() => {
+                                const raw = rec.sessionTimeAr || '04:30 PM - 06:00 PM';
+                                if (raw.includes(' / ')) {
+                                  const parts = raw.split(' - ');
+                                  if (parts.length === 2) {
+                                    const startParts = parts[0].split(' / ');
+                                    return `${startParts[startParts.length - 1].trim()} - ${parts[1].trim()}`;
+                                  }
+                                  const slashParts = raw.split(' / ');
+                                  return slashParts[slashParts.length - 1].trim();
+                                }
+                                return raw;
+                              })()}
                             </span>
                           </div>
                         </div>

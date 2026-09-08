@@ -437,6 +437,27 @@ export function AdminAttendanceScreen() {
 
     const sessionId = drawerSession?.id || `att-sess-${activeDrawerGroup.id}-${selectedDate}`;
 
+    const enDay = dayMapEn[getDayOfWeekIndex(selectedDate)].toLowerCase();
+    const arDay = getDayName(selectedDate);
+    const daySchedule = activeDrawerGroup.schedules?.find((s) => {
+      const d = (s.day || '').toLowerCase();
+      return d.includes(enDay) || d.includes(arDay);
+    });
+    let resolvedTime = drawerSession?.sessionTime;
+    if (!resolvedTime) {
+      if (daySchedule?.time) {
+        resolvedTime = `${daySchedule.time}${daySchedule.period ? ' ' + daySchedule.period : ''}`;
+      } else if (activeDrawerGroup.startTime) {
+        const rawTimes = activeDrawerGroup.startTime.split(/\s*[\/]\s*/).filter(Boolean);
+        const rawDays = activeDrawerGroup.daysAr ? activeDrawerGroup.daysAr.split(/\s*[\+\•\/,]\s*/).filter(Boolean) : [];
+        const dIdx = rawDays.findIndex((d) => d.includes(arDay) || d.toLowerCase().includes(enDay));
+        const chosen = (dIdx >= 0 && rawTimes[dIdx]) ? rawTimes[dIdx] : (rawTimes[0] || activeDrawerGroup.startTime);
+        resolvedTime = activeDrawerGroup.endTime ? `${chosen} - ${activeDrawerGroup.endTime}` : chosen;
+      } else {
+        resolvedTime = '04:30 PM - 06:00 PM';
+      }
+    }
+
     recordAttendance(
       sessionId,
       records,
@@ -444,9 +465,9 @@ export function AdminAttendanceScreen() {
         groupId: activeDrawerGroup.id,
         groupName: activeDrawerGroup.name,
         date: selectedDate,
-        dayNameAr: getDayName(selectedDate),
+        dayNameAr: arDay,
         dayNameEn: dayMapEn[getDayOfWeekIndex(selectedDate)],
-        sessionTime: drawerSession?.sessionTime || `${activeDrawerGroup.startTime} - ${activeDrawerGroup.endTime}`,
+        sessionTime: resolvedTime,
         teacherId: drawerSession?.teacherId || activeDrawerGroup.teacherId,
         teacherName: drawerSession?.teacherName || activeDrawerGroup.teacherName,
         isCoveringSession: drawerSession?.isCoveringSession,
