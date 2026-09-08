@@ -787,15 +787,13 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       );
 
       // Helper to calculate week index dynamically relative to current week:
-      // Week 0: Current week (since latest Saturday)
-      // Week 1: Last week
-      // Week 2: Previous week
       const parseWeekIndex = (dateStr: string) => {
         try {
           const sessDate = new Date(dateStr);
           sessDate.setHours(0, 0, 0, 0);
 
           const now = new Date();
+          now.setHours(0, 0, 0, 0);
           const dayOfWeek = now.getDay();
           const diffToSaturday = (dayOfWeek + 1) % 7;
           
@@ -804,9 +802,10 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           currentSat.setHours(0, 0, 0, 0);
 
           const diffDays = Math.floor((currentSat.getTime() - sessDate.getTime()) / (1000 * 60 * 60 * 24));
-          if (diffDays <= 6 && diffDays >= -6) return 0; // Current week
+          if (diffDays <= 6 && diffDays >= -7) return 0; // Current / Upcoming week
           if (diffDays > 6 && diffDays <= 13) return 1;  // Last week
-          return 2;                                      // Previous week
+          if (diffDays > 13 && diffDays <= 20) return 2; // Previous week
+          return Math.max(0, Math.floor(diffDays / 7));
         } catch {
           return 0;
         }

@@ -172,20 +172,11 @@ export function PerformanceScreen({
   const [homeworkFilter, setHomeworkFilter] = useState<'all' | 'needs_revision' | 'completed'>('all');
   const [selectedWeekIndex, setSelectedWeekIndex] = useState<number>(0);
 
-  const getDynamicWeekRange = (weeksAgo: number, lang: string) => {
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const diffToSaturday = (dayOfWeek + 1) % 7;
-    
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - diffToSaturday - (weeksAgo * 7));
-    
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 5);
-
+  // Helper to format a week's Saturday-to-Thursday date range string
+  const formatWeekRange = (startOfWeek: Date, endOfWeek: Date, lang: string) => {
     const startDay = String(startOfWeek.getDate()).padStart(2, '0');
     const endDay = String(endOfWeek.getDate()).padStart(2, '0');
-    
+
     const monthNamesAr = [
       'جانفي', 'فيفري', 'مارس', 'أفريل', 'ماي', 'جوان',
       'جويلية', 'أوت', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
@@ -221,23 +212,86 @@ export function PerformanceScreen({
     }
   };
 
-  const WEEKS_LIST = useMemo(() => [
-    {
-      index: 0,
-      label: t.currentWeek,
-      range: getDynamicWeekRange(0, language),
-    },
-    {
-      index: 1,
-      label: t.lastWeek,
-      range: getDynamicWeekRange(1, language),
-    },
-    {
-      index: 2,
-      label: t.previousWeek,
-      range: getDynamicWeekRange(2, language),
-    },
-  ], [t, language]);
+  // Helper to get the Saturday start of any date
+  const getSaturdayOfWeek = (dateInput: Date | string) => {
+    const d = new Date(dateInput);
+    d.setHours(0, 0, 0, 0);
+    const day = d.getDay(); // 0: Sun, 1: Mon, ..., 6: Sat
+    const diffToSaturday = (day + 1) % 7;
+    const sat = new Date(d);
+    sat.setDate(d.getDate() - diffToSaturday);
+    sat.setHours(0, 0, 0, 0);
+    return sat;
+  };
+
+  // Build dynamic, chronologically ordered weeks from both current date and recorded attendance sessions
+  const WEEKS_LIST = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const currentSat = getSaturdayOfWeek(now);
+
+    // Map of unique Saturday timestamp -> { start, end }
+    const weeksMap = new Map<number, { start: Date; end: Date }>();
+
+    // 1. Always include standard recent 3 weeks relative to current date
+    for (let w = 0; w < 3; w++) {
+      const sat = new Date(currentSat);
+      sat.setDate(currentSat.getDate() - w * 7);
+      sat.setHours(0, 0, 0, 0);
+      const thu = new Date(sat);
+      thu.setDate(sat.getDate() + 5);
+      thu.setHours(0, 0, 0, 0);
+      weeksMap.set(sat.getTime(), { start: sat, end: thu });
+    }
+
+    // 2. Also incorporate any actual recorded attendance sessions for the student
+    (attendanceData?.records || []).forEach((rec) => {
+      if (rec.date) {
+        try {
+          const sat = getSaturdayOfWeek(rec.date);
+          const thu = new Date(sat);
+          thu.setDate(sat.getDate() + 5);
+          thu.setHours(0, 0, 0, 0);
+          if (!weeksMap.has(sat.getTime())) {
+            weeksMap.set(sat.getTime(), { start: sat, end: thu });
+          }
+        } catch {}
+      }
+    });
+
+    // 3. Sort weeks descending (most recent first)
+    const sortedWeeks = Array.from(weeksMap.entries()).sort((a, b) => b[0] - a[0]);
+
+    // Current Saturday times for relative labels
+    const currentSatTime = currentSat.getTime();
+    const lastSatTime = new Date(currentSat.getTime() - 7 * 86400000).getTime();
+    const prevSatTime = new Date(currentSat.getTime() - 14 * 86400000).getTime();
+
+    return sortedWeeks.map(([satTimestamp, { start, end }], index) => {
+      let label = t.previousWeek;
+      if (satTimestamp === currentSatTime) {
+        label = t.currentWeek;
+      } else if (satTimestamp === lastSatTime) {
+        label = t.lastWeek;
+      } else if (satTimestamp === prevSatTime) {
+        label = t.previousWeek;
+      } else {
+        const startDay = String(start.getDate()).padStart(2, '0');
+        const endDay = String(end.getDate()).padStart(2, '0');
+        const mAr = ['جانفي', 'فيفري', 'مارس', 'أفريل', 'ماي', 'جوان', 'جويلية', 'أوت', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'][end.getMonth()];
+        label = language === 'ar' ? `أسبوع ${startDay} - ${endDay} ${mAr}` : `Week ${startDay}-${endDay}`;
+      }
+
+      return {
+        index,
+        satTimestamp,
+        start,
+        end,
+        label,
+        range: formatWeekRange(start, end, language),
+      };
+    });
+  }, [attendanceData?.records, language, t]);
 
   const performanceTabs: { key: PerformanceTabKey; label: string }[] = [
     { key: 'homework', label: t.tabHomework },
@@ -246,10 +300,22 @@ export function PerformanceScreen({
     { key: 'feedback', label: t.tabTeacherFeedback },
   ];
 
-  // Weekly Attendance calculations
-  const currentWeekRecords = attendanceData.records.filter(
-    (r) => (r.weekIndex ?? 0) === selectedWeekIndex
-  );
+  // Weekly Attendance calculations for the selected week
+  const selectedWeek = WEEKS_LIST[selectedWeekIndex] || WEEKS_LIST[0];
+
+  const currentWeekRecords = useMemo(() => {
+    if (!selectedWeek) return [];
+    return (attendanceData?.records || []).filter((r) => {
+      if (!r.date) return (r.weekIndex ?? 0) === selectedWeek.index;
+      try {
+        const rSat = getSaturdayOfWeek(r.date);
+        return rSat.getTime() === selectedWeek.satTimestamp;
+      } catch {
+        return (r.weekIndex ?? 0) === selectedWeek.index;
+      }
+    });
+  }, [attendanceData?.records, selectedWeek]);
+
   const weekPresentCount = currentWeekRecords.filter((r) => r.status === 'present').length;
   const weekLateCount = currentWeekRecords.filter((r) => r.status === 'late').length;
   const weekAbsentCount = currentWeekRecords.filter((r) => r.status === 'absent').length;
