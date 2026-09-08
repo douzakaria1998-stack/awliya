@@ -43,7 +43,7 @@ import { supabase } from '@/lib/supabase/client';
 import { fetchParentPortalBundle } from '@/services/portalService';
 import { fetchStudentsFromDb } from '@/services/studentService';
 import { fetchParentsFromDb } from '@/services/parentService';
-import { fetchCurriculaFromDb } from '@/services/curriculumService';
+import { fetchCurriculaFromDb, saveAllCurriculaInDb } from '@/services/curriculumService';
 
 const emptyAttendanceSummary: AttendanceSummary = {
   totalDays: 0,
@@ -186,6 +186,11 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         if (dbCurricula && dbCurricula.length > 0) {
           setCurricula(dbCurricula);
           setItem(STORAGE_KEYS.ADMIN_CURRICULA, dbCurricula);
+        } else {
+          const localCurricula = getItem<CurriculumLevel[]>(STORAGE_KEYS.ADMIN_CURRICULA);
+          if (localCurricula && localCurricula.length > 0) {
+            saveAllCurriculaInDb(localCurricula).catch(() => {});
+          }
         }
 
         const bundle = await fetchParentPortalBundle();
@@ -682,9 +687,14 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
     // Filter curriculum levels for this language, ordered by levelNumber
     const list = Array.isArray(curricula) && curricula.length > 0 ? curricula : mockCurricula;
-    const studentCurricula = list
-      .filter((c) => c && c.language === studentLang)
+    let studentCurricula = list
+      .filter((c) => c && (c.language === studentLang || (!c.language && studentLang === 'English')))
       .sort((a, b) => a.levelNumber - b.levelNumber);
+
+    // Fallback: If no curricula found specifically for studentLang, but custom curricula exist in list, use all custom curricula
+    if (studentCurricula.length === 0 && Array.isArray(curricula) && curricula.length > 0) {
+      studentCurricula = [...curricula].sort((a, b) => a.levelNumber - b.levelNumber);
+    }
 
     if (studentCurricula.length === 0) {
       return getAcademicLevelsForStudent(activeStudent.currentLevel);

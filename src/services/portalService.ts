@@ -97,14 +97,16 @@ export async function fetchParentPortalBundle(parentId?: string) {
     totalScore: h.total_score ? Number(h.total_score) : 20,
   }));
 
-  const notifications: Notification[] = (announcementsData || []).map((an: any) => ({
-    id: an.id,
-    titleAr: an.title,
-    messageAr: an.content,
-    date: an.published_at?.split('T')[0] || an.created_at?.split('T')[0] || '',
-    type: (an.category as any) || 'general',
-    isRead: false,
-  }));
+  const notifications: Notification[] = (announcementsData || [])
+    .filter((an: any) => an.category !== 'system_curricula' && an.title !== 'SYSTEM_CURRICULA_CONFIG')
+    .map((an: any) => ({
+      id: an.id,
+      titleAr: an.title,
+      messageAr: an.content,
+      date: an.published_at?.split('T')[0] || an.created_at?.split('T')[0] || '',
+      type: (an.category as any) || 'general',
+      isRead: false,
+    }));
 
   return {
     students,

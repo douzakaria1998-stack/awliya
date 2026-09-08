@@ -459,7 +459,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     }
 
     const sCurricula = getItem<CurriculumLevel[]>(ADMIN_STORAGE_KEYS.CURRICULA);
-    if (sCurricula?.length) setCurricula(sCurricula);
+    if (sCurricula?.length) {
+      setCurricula(sCurricula);
+      saveAllCurriculaInDb(sCurricula).catch(() => {});
+    }
 
     const sProgress = getItem<Record<string, LessonProgressStatus>>(ADMIN_STORAGE_KEYS.LESSON_PROGRESS);
     if (sProgress && Object.keys(sProgress).length) {
@@ -503,35 +506,25 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
     const sHomework = getItem<AdminHomeworkAssignment[]>(ADMIN_STORAGE_KEYS.HOMEWORK);
     if (sHomework?.length) {
-      const validHomework = sHomework.filter(
-        (h) =>
-          h.assignmentNameAr?.trim() !== 'lkml' &&
-          h.assignmentNameAr?.trim() !== 'rethrth' &&
-          h.assignmentNameEn?.trim() !== 'lkml' &&
-          h.assignmentNameEn?.trim() !== 'rethrth'
-      );
-
-      const cleanedHw = validHomework.map((h) => {
+      const cleanedHw = sHomework.map((h) => {
         const targetGroup =
           cleanedGroupsState.find((g) => g.id === h.groupId) ||
           sGroups?.find((g) => g.id === h.groupId);
         const groupStudentIds = targetGroup?.studentIds || [];
 
         // Matching students for this homework: STRICTLY by groupId / group's studentIds
-        const matchingStudents = (cleanedStudents || []).filter(
-          (s) =>
-            !dalilaStudentIds.has(s.id) &&
-            !isDalilaRecord(s) &&
-            (groupStudentIds.includes(s.id) || (h.groupId && s.groupId === h.groupId))
-        );
+        let matchedStudents = (sStudents || []).filter((s) => groupStudentIds.includes(s.id));
+        if (matchedStudents.length === 0) {
+          matchedStudents = (sStudents || []).filter((s) => s.groupId === h.groupId);
+        }
 
-        const targetStudentIds = matchingStudents.map((s) => s.id);
+        const targetStudentIds = matchedStudents.map((s) => s.id);
         const existingEvals = (h.evaluations || []).filter(
-          (e) => !dalilaStudentIds.has(e.studentId) && !isDalilaRecord(e) && targetStudentIds.includes(e.studentId)
+          (e) => !dalilaStudentIds.has(e.studentId) && targetStudentIds.includes(e.studentId)
         );
         const evalMap = new Map(existingEvals.map((e) => [e.studentId, e]));
 
-        const mergedEvals = matchingStudents.map((s) => {
+        const mergedEvals = matchedStudents.map((s) => {
           const existing = evalMap.get(s.id);
           if (existing) return existing;
           return {
@@ -548,8 +541,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           evaluations: mergedEvals,
         };
       });
-      setItem(ADMIN_STORAGE_KEYS.HOMEWORK, cleanedHw);
+
       setHomeworkList(cleanedHw);
+      setItem(ADMIN_STORAGE_KEYS.HOMEWORK, cleanedHw);
     }
 
     const sAssessments = getItem<AdminAssessmentRecord[]>(ADMIN_STORAGE_KEYS.ASSESSMENTS);
@@ -643,6 +637,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         if (Array.isArray(dbCurricula) && dbCurricula.length > 0) {
           setCurricula(dbCurricula);
           setItem(ADMIN_STORAGE_KEYS.CURRICULA, dbCurricula);
+        } else if (sCurricula && sCurricula.length > 0) {
+          saveAllCurriculaInDb(sCurricula).catch(() => {});
         }
       } catch (err) {
         console.warn('Supabase sync notice:', err);
@@ -675,6 +671,22 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           if (Array.isArray(fresh)) {
             setTeachers(fresh);
             setItem(ADMIN_STORAGE_KEYS.TEACHERS, fresh);
+          }
+        }).catch(() => {});
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'curricula' }, () => {
+        fetchCurriculaFromDb().then((fresh) => {
+          if (Array.isArray(fresh) && fresh.length > 0) {
+            setCurricula(fresh);
+            setItem(ADMIN_STORAGE_KEYS.CURRICULA, fresh);
+          }
+        }).catch(() => {});
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => {
+        fetchCurriculaFromDb().then((fresh) => {
+          if (Array.isArray(fresh) && fresh.length > 0) {
+            setCurricula(fresh);
+            setItem(ADMIN_STORAGE_KEYS.CURRICULA, fresh);
           }
         }).catch(() => {});
       })
