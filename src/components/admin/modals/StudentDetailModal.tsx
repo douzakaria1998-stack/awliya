@@ -39,7 +39,7 @@ interface StudentDetailModalProps {
   onClose: () => void;
 }
 
-type StudentTabKey = 'overview' | 'academic' | 'attendance' | 'homework' | 'assessment' | 'feedback';
+type StudentTabKey = 'overview' | 'groupHistory' | 'academic' | 'attendance' | 'homework' | 'assessment' | 'feedback';
 
 export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailModalProps) {
   const {
@@ -239,6 +239,7 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
 
   const tabs: { key: StudentTabKey; labelAr: string; labelEn: string; icon: any }[] = [
     { key: 'overview', labelAr: 'نظرة عامة', labelEn: 'Overview', icon: User },
+    { key: 'groupHistory', labelAr: 'سجل الأفواج', labelEn: 'Group History', icon: School },
     { key: 'academic', labelAr: 'المسار الأكاديمي', labelEn: 'Academic Progress', icon: BookOpen },
     { key: 'attendance', labelAr: 'سجل الحضور', labelEn: 'Attendance', icon: CalendarCheck2 },
     { key: 'homework', labelAr: 'الواجبات', labelEn: 'Homework', icon: BookCheck },
@@ -705,78 +706,6 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                       <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm font-mono">{currentStudent.enrollmentDate || (currentStudent as any).joinDate}</span>
                     </div>
                   </div>
-
-                  {/* Group History Section */}
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <School size={14} className="text-purple-500" />
-                        <span>{language === 'ar' ? 'سجل الأفواج والمجموعات (Group History)' : 'Group History'}</span>
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => setIsTransferModalOpen(true)}
-                        className="text-xs font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 flex items-center gap-1 cursor-pointer"
-                      >
-                        <ArrowRightLeft size={13} />
-                        <span>{language === 'ar' ? 'نقل إلى فوج آخر' : 'Change Group'}</span>
-                      </button>
-                    </div>
-
-                    <div className="space-y-2.5">
-                      {/* Current Active Group Entry */}
-                      <div className="p-3.5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200/90 dark:border-purple-800/90 flex items-center justify-between gap-3 shadow-2xs">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
-                            <School size={15} />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
-                                {currentStudent.groupName}
-                              </span>
-                              <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 font-bold text-[10px]">
-                                {language === 'ar' ? 'الفوج النشط حالياً' : 'Current Active'}
-                              </span>
-                            </div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                              {language === 'ar' ? 'المشرف:' : 'Teacher:'} {currentStudent.teacherName || (language === 'ar' ? 'غير مسند' : 'Unassigned')} • {language === 'ar' ? 'المستوى:' : 'Level:'} {currentStudent.currentLevel}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Historical Groups List */}
-                      {Array.isArray(currentStudent.groupHistory) &&
-                        currentStudent.groupHistory.filter((h) => h.status !== 'active').map((hist) => (
-                          <div
-                            key={hist.id || hist.groupId}
-                            className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3"
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs shrink-0">
-                                <Clock size={15} />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate">
-                                    {hist.groupName}
-                                  </span>
-                                  <span className="px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-[10px]">
-                                    {language === 'ar' ? 'سابق / مؤرشف' : 'Historical'}
-                                  </span>
-                                </div>
-                                <div className="text-[11px] text-slate-400 font-medium mt-0.5">
-                                  {language === 'ar' ? 'المعلم السابق:' : 'Prev Teacher:'} {hist.teacherName}
-                                  {hist.startDate && hist.endDate ? ` • ${hist.startDate} ⬅️ ${hist.endDate}` : ''}
-                                  {hist.transferReason ? ` • (${hist.transferReason})` : ''}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
                 </div>
               )}
               {/* Placement Test Box (if exists) */}
@@ -802,6 +731,153 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
                   </p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* TAB 2: Group History */}
+          {activeTab === 'groupHistory' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Header with Transfer Button */}
+              <div className="flex items-center justify-between flex-wrap gap-3 pb-2 border-b border-slate-200 dark:border-slate-800">
+                <div>
+                  <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                    <School size={17} className="text-purple-600 dark:text-purple-400" />
+                    <span>{language === 'ar' ? 'سجل الأفواج والمجموعات الأكاديمية' : 'Group & Class Enrollment History'}</span>
+                  </h4>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">
+                    {language === 'ar'
+                      ? 'متابعة الفوج النشط حالياً والأفواج السابقة للطالب مع حفظ كامل السجلات'
+                      : 'Track active and historical groups with full historical record preservation'}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsTransferModalOpen(true)}
+                  className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold flex items-center transition-all cursor-pointer shadow-xs active:scale-95"
+                  style={{ padding: '9px 18px', gap: '8px' }}
+                >
+                  <ArrowRightLeft size={15} />
+                  <span>{language === 'ar' ? 'نقل إلى فوج آخر' : 'Transfer Group'}</span>
+                </button>
+              </div>
+
+              {/* Current Active Group Card */}
+              <div className="rounded-3xl bg-purple-50/80 dark:bg-purple-950/40 border-2 border-purple-300/80 dark:border-purple-800/80 p-5 sm:p-6 shadow-sm flex flex-col gap-4">
+                <div className="flex items-start justify-between flex-wrap gap-3">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-bold text-sm shadow-md shrink-0">
+                      <School size={22} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h5 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                          {currentStudent.groupName}
+                        </h5>
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center gap-1.5 border border-emerald-300/60 dark:border-emerald-800">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                          {language === 'ar' ? 'الفوج النشط حالياً' : 'Current Active Group'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+                        {language === 'ar' ? 'مسار الدراسة:' : 'Track:'} {currentStudent.enrolledPathAr || (language === 'ar' ? 'مسار اللغة الإنجليزية المكثف (CEFR)' : 'Intensive Track')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-purple-200/60 dark:border-purple-900/60">
+                  <div className="bg-white/80 dark:bg-slate-900/80 rounded-2xl p-3 border border-purple-100 dark:border-purple-900/40">
+                    <span className="text-[11px] text-slate-400 block font-bold mb-0.5">{language === 'ar' ? 'المعلم المشرف:' : 'Assigned Teacher:'}</span>
+                    <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{currentStudent.teacherName || (language === 'ar' ? 'غير مسند' : 'Unassigned')}</span>
+                  </div>
+                  <div className="bg-white/80 dark:bg-slate-900/80 rounded-2xl p-3 border border-purple-100 dark:border-purple-900/40">
+                    <span className="text-[11px] text-slate-400 block font-bold mb-0.5">{language === 'ar' ? 'المستوى الأكاديمي:' : 'Academic Level:'}</span>
+                    <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{language === 'ar' ? `المستوى ${currentStudent.currentLevel}` : `Level ${currentStudent.currentLevel}`}</span>
+                  </div>
+                  <div className="bg-white/80 dark:bg-slate-900/80 rounded-2xl p-3 border border-purple-100 dark:border-purple-900/40">
+                    <span className="text-[11px] text-slate-400 block font-bold mb-0.5">{language === 'ar' ? 'تاريخ التسجيل بالمركز:' : 'Enrollment Date:'}</span>
+                    <span className="text-xs sm:text-sm font-mono font-bold text-slate-900 dark:text-white">{currentStudent.enrollmentDate || (currentStudent as any).joinDate || '2026-09-08'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Historical Groups List */}
+              <div className="space-y-3">
+                <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Clock size={14} className="text-slate-400" />
+                  <span>{language === 'ar' ? 'سجل الأفواج السابقة (Previous Groups)' : 'Previous Groups History'}</span>
+                </h5>
+
+                {Array.isArray(currentStudent.groupHistory) &&
+                currentStudent.groupHistory.filter((h) => h.status !== 'active').length > 0 ? (
+                  <div className="space-y-2.5">
+                    {currentStudent.groupHistory
+                      .filter((h) => h.status !== 'active')
+                      .map((hist) => (
+                        <div
+                          key={hist.id || hist.groupId}
+                          className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3 transition-colors hover:border-slate-300 dark:hover:border-slate-700"
+                        >
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs shrink-0">
+                              <School size={18} />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                                  {hist.groupName}
+                                </span>
+                                <span className="px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-[10px]">
+                                  {language === 'ar' ? 'فوج سابق / مؤرشف' : 'Archived / Previous'}
+                                </span>
+                              </div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 flex items-center gap-2 flex-wrap">
+                                <span>{language === 'ar' ? 'المعلم:' : 'Teacher:'} {hist.teacherName}</span>
+                                {hist.startDate && hist.endDate && (
+                                  <span className="font-mono text-[11px] text-slate-400">
+                                    • {hist.startDate} ⬅️ {hist.endDate}
+                                  </span>
+                                )}
+                                {hist.transferReason && (
+                                  <span className="text-purple-600 dark:text-purple-400 font-semibold">
+                                    • {hist.transferReason}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <div
+                    className="text-center text-slate-400 dark:text-slate-400 text-xs sm:text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-2"
+                    style={{ padding: '32px 24px' }}
+                  >
+                    <School size={28} className="text-slate-300 dark:text-slate-600 mb-1" />
+                    <span>{language === 'ar' ? 'لا توجد أفواج سابقة مسجلة للطالب.' : 'No previous groups recorded.'}</span>
+                    <span className="text-xs text-slate-400 font-normal">
+                      {language === 'ar'
+                        ? 'الطالب مسند إلى فوجه الحالي منذ تسجيله في المركز.'
+                        : 'Student has been enrolled in their current group since registration.'}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Data Safety / Historical Preservation Note */}
+              <div
+                className="bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-900/60 rounded-2xl flex items-center gap-3 text-xs text-indigo-900 dark:text-indigo-300"
+                style={{ padding: '14px 18px' }}
+              >
+                <Sparkles size={18} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
+                <span>
+                  {language === 'ar'
+                    ? 'ملاحظة: سجلات حضور الطالب وواجباته وتقييماته المكتسبة في الأفواج السابقة تظل محفوظة بشكل دائم ومتاحة في التبويبات المخصصة.'
+                    : 'Note: Student attendance, homework, and assessment records from previous groups remain permanently saved.'}
+                </span>
+              </div>
             </div>
           )}
 
