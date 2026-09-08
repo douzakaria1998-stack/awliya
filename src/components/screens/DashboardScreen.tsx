@@ -192,53 +192,41 @@ export function DashboardScreen({
           1. Welcome Card
           ========================================================================= */}
       <div
-        className="text-white shadow-sm relative overflow-hidden flex flex-col justify-between p-4 sm:p-6 rounded-2xl mb-4"
+        className="relative overflow-hidden p-5 sm:p-6 rounded-3xl mb-4 shadow-sm transition-all border border-black/5 dark:border-white/10"
         style={{
-          backgroundColor: activeLevelTheme.primary,
-          minHeight: '110px',
+          background: `linear-gradient(135deg, ${activeLevelTheme.primary} 0%, ${activeLevelTheme.primaryDark || activeLevelTheme.primary} 100%)`,
         }}
       >
-        {/* Subtle decorative background shapes */}
-        <div className="absolute -left-12 -bottom-12 w-40 h-40 rounded-full bg-white/10 pointer-events-none" />
-        <div className="absolute left-16 -top-12 w-32 h-32 rounded-full bg-white/5 pointer-events-none" />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span className="text-xs sm:text-sm font-bold text-black/75 dark:text-black/85 block mb-0.5">
+              {t.greeting}, {parentFirstName} 👋
+            </span>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight leading-tight">
+              {t.parentOf} {studentFirstName}
+            </h2>
+          </div>
 
-        {/* Content inside the card */}
-        <div className="relative z-10">
-          {/* Greeting */}
-          <p className="text-xs font-medium text-white/90 mb-0.5">
-            {t.greeting}, {parentFirstName} 👋
-          </p>
-
-          {/* Student's name/title */}
-          <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-snug mb-2.5">
-            {t.parentOf} {studentFirstName}
-          </h2>
-        </div>
-
-        {/* Level Badge Pill / Pending Pill */}
-        <div className={`relative z-10 ${isRTL ? 'self-start' : 'self-start'}`}>
-          {activeStudent.status === 'pending' ? (
-            <div
-              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 text-xs font-bold text-white shadow-2xs px-3.5 py-1 select-none"
-            >
-              <Clock size={13} />
-              <span>{language === 'ar' ? 'طلب قيد المراجعة - بانتظار الاختبار' : language === 'fr' ? 'En attente - Test prévu' : 'Pending - Placement Test'}</span>
-            </div>
-          ) : (
-            <div
-              className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-white border border-white/25 shadow-2xs px-3.5 py-1 select-none"
-            >
-              <Layers size={13} />
-              <span>{t.level} {levelWord}</span>
-            </div>
-          )}
+          <div className="self-start sm:self-auto shrink-0">
+            {activeStudent.status === 'pending' ? (
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500 text-white text-xs font-black shadow-md">
+                <Clock size={14} />
+                <span>{language === 'ar' ? 'طلب قيد المراجعة' : 'Pending Review'}</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-950/85 text-white text-xs font-black shadow-md backdrop-blur-md">
+                <Layers size={14} className="text-lime-400" />
+                <span>{t.level} {levelWord}</span>
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Pending Account Notice Banner */}
       {activeStudent.status === 'pending' && (
         <div
-          className={`bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/80 rounded-2xl flex items-start gap-3 p-3.5 sm:p-4 mb-4 shadow-xs ${isRTL ? 'text-right' : 'text-left'} animate-fade-in`}
+          className={`bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/80 rounded-2xl flex items-start gap-3 p-4 mb-4 shadow-xs ${isRTL ? 'text-right' : 'text-left'} animate-fade-in`}
         >
           <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
             <Clock size={16} />
@@ -247,7 +235,7 @@ export function DashboardScreen({
             <h4 className="font-bold text-amber-950 dark:text-amber-100 text-xs sm:text-sm mb-0.5">
               {language === 'ar' ? `طلب تسجيل ${getStudentGenderNoun(activeStudent)} قيد المراجعة لدى الإدارة` : language === 'fr' ? "Demande d'inscription en cours d'examen" : 'Registration Request Under Review'}
             </h4>
-            <p className="text-[11px] text-amber-800/90 dark:text-amber-300/90 leading-relaxed font-medium">
+            <p className="text-xs text-amber-800/90 dark:text-amber-300/90 leading-relaxed font-medium">
               {language === 'ar'
                 ? `تم استلام طلب تسجيل ${getStudentGenderNoun(activeStudent)} (${activeStudent.fullNameAr}) بنجاح. سيقوم فريق الإدارة بالتواصل لتحديد موعد اختبار تحديد المستوى.`
                 : language === 'fr'
@@ -266,33 +254,30 @@ export function DashboardScreen({
         tabIndex={0}
         onClick={() => onNavigate('academic')}
         onKeyDown={(e) => e.key === 'Enter' && onNavigate('academic')}
-        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer p-4 sm:p-5 rounded-2xl mb-4"
+        className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer p-4 sm:p-5 rounded-3xl mb-4"
       >
-        {/* Percentage and Level Info */}
-        <div className="flex items-center justify-between gap-3 mb-2.5">
-          {/* Icon + Title + Subtitle */}
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-slate-950 shrink-0 shadow-xs"
               style={{
                 backgroundColor: activeLevelTheme.primary,
               }}
             >
-              <Check size={18} strokeWidth={3} />
+              <Check size={20} strokeWidth={3} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-xs sm:text-base font-bold text-slate-900 dark:text-white leading-tight truncate">
+              <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white leading-tight truncate">
                 {activeStudent.gender === 'female' ? t.daughterProgress : t.sonProgress}
               </h3>
-              <p className="text-[11px] text-slate-400 font-semibold mt-0.5 truncate">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-semibold mt-0.5 truncate">
                 {t.level} {levelWord} • {language === 'ar' ? `من ${academicLevels.length} مستويات` : `of ${academicLevels.length} levels`}
               </p>
             </div>
           </div>
 
-          {/* Percentage text */}
           <div
-            className="text-lg sm:text-2xl font-black font-mono tracking-tight shrink-0 whitespace-nowrap"
+            className="text-2xl sm:text-3xl font-black font-mono tracking-tight shrink-0 whitespace-nowrap"
             style={{ color: activeLevelTheme.primary }}
           >
             {activeStudent.currentLevelProgress ?? 0}%
@@ -300,9 +285,7 @@ export function DashboardScreen({
         </div>
 
         {/* Progress Bar */}
-        <div
-          className="w-full bg-slate-100 dark:bg-slate-800 overflow-hidden h-2.5 rounded-full mt-2"
-        >
+        <div className="w-full bg-slate-100 dark:bg-slate-800 overflow-hidden h-2.5 sm:h-3 rounded-full">
           <div
             className="h-full transition-all duration-700 rounded-full"
             style={{
@@ -317,23 +300,23 @@ export function DashboardScreen({
           3. Notifications & Homework Alerts Section
           ========================================================================= */}
       <div className="mb-5">
-        <div className="flex items-center justify-between mb-2.5 px-0.5">
-          <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+        <div className="flex items-center justify-between mb-3 px-1">
+          <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
             {t.recentNotifications}
           </h3>
 
           <button
             type="button"
             onClick={() => onNavigate('performance', 'homework')}
-            className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 flex items-center gap-1 cursor-pointer transition-colors"
+            className="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 flex items-center gap-1 cursor-pointer transition-colors"
           >
-            <span>{language === 'ar' ? 'الواجبات المنزلية' : language === 'fr' ? 'Devoirs' : 'Homework'}</span>
-            {isRTL ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+            <span>{language === 'ar' ? 'عرض الكل' : 'View All'}</span>
+            {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </button>
         </div>
 
         {/* Notification Cards */}
-        <div className="space-y-2 sm:space-y-2.5">
+        <div className="space-y-3">
           {recentHomeworkNotifications.length > 0 ? (
             recentHomeworkNotifications.map((notif) => {
               const IconComp = notif.icon;
@@ -343,15 +326,10 @@ export function DashboardScreen({
                   role="button"
                   tabIndex={0}
                   onClick={() => {
-                    // 1. Immediately hide notification from dashboard
                     setDismissedIds((prev) => [...prev, notif.id, (notif as any).rawNotifId].filter(Boolean));
-
-                    // 2. Mark notification as read in global state/storage if it has an id
                     if ((notif as any).rawNotifId) {
                       markNotificationRead((notif as any).rawNotifId);
                     }
-
-                    // 3. Open relevant homework or navigate to route
                     if (notif.homeworkId && onOpenHomeworkDetail) {
                       onOpenHomeworkDetail(notif.homeworkId);
                     } else if ((notif as any).routeTo) {
@@ -362,41 +340,37 @@ export function DashboardScreen({
                     }
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'homework')}
-                  className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group p-3 sm:p-3.5 rounded-2xl gap-2.5 sm:gap-3"
+                  className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs transition-all cursor-pointer p-4 rounded-2xl flex flex-col gap-2"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <div
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${notif.colorClass}`}
-                    >
-                      <IconComp size={16} />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-                        <h4 className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm">
-                          {notif.title}
-                        </h4>
-                        {notif.badgeText && (
-                          <span
-                            className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold ${notif.badgeClass} shrink-0 shadow-2xs`}
-                          >
-                            {notif.badgeText}
-                          </span>
-                        )}
+                  {/* Top Header Row: Icon + Badge + Date */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border ${notif.colorClass}`}
+                      >
+                        <IconComp size={14} />
                       </div>
-                      <p className="text-slate-500 dark:text-slate-400 font-medium truncate text-[11px] sm:text-xs">
-                        {notif.description}
-                      </p>
+                      {notif.badgeText && (
+                        <span
+                          className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-black ${notif.badgeClass} shadow-2xs`}
+                        >
+                          {notif.badgeText}
+                        </span>
+                      )}
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 shrink-0 text-slate-400">
-                    <span className="text-[10px] sm:text-xs font-semibold whitespace-nowrap">
+                    <span className="text-xs font-semibold text-slate-400 whitespace-nowrap">
                       {notif.time}
                     </span>
-                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      {isRTL ? <ChevronLeft size={13} /> : <ChevronRight size={13} />}
-                    </div>
+                  </div>
+
+                  {/* Title & Description */}
+                  <div className="pt-0.5">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug">
+                      {notif.title}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed mt-0.5">
+                      {notif.description}
+                    </p>
                   </div>
                 </div>
               );
@@ -407,27 +381,20 @@ export function DashboardScreen({
               tabIndex={0}
               onClick={() => onNavigate('performance', 'homework')}
               onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'homework')}
-              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-700 transition-all flex items-center justify-between cursor-pointer"
-              style={{
-                minHeight: '60px',
-                padding: '12px 16px',
-                borderRadius: '16px',
-                gap: '12px',
-              }}
+              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-700 transition-all p-4 rounded-2xl flex items-center justify-between cursor-pointer"
             >
-              <div className="flex items-center min-w-0" style={{ gap: '12px' }}>
+              <div className="flex items-center gap-3">
                 <div
-                  className="rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 border border-indigo-200/70 dark:border-indigo-800/60 flex items-center justify-center shrink-0"
-                  style={{ width: '38px', height: '38px', minWidth: '38px' }}
+                  className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 border border-indigo-200/70 dark:border-indigo-800/60 flex items-center justify-center shrink-0"
                 >
                   <BookOpen size={18} />
                 </div>
-                <div className="min-w-0">
-                  <h4 className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm" style={{ marginBottom: '2px' }}>
-                    {language === 'ar' ? 'قسم الواجبات والأنشطة المدرسية' : 'Homework & Activities Section'}
+                <div>
+                  <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                    {language === 'ar' ? 'قسم الواجبات والأنشطة' : 'Homework & Activities'}
                   </h4>
-                  <p className="text-slate-400 font-medium truncate text-[11px]">
-                    {language === 'ar' ? 'اضغط هنا لمتابعة المهام والواجبات المطلوبة لهذا الأسبوع' : 'Click here to view assigned homework and tasks'}
+                  <p className="text-slate-400 font-medium text-xs mt-0.5">
+                    {language === 'ar' ? 'اضغط لمتابعة الواجبات والمهام لهذا الأسبوع' : 'Click to view assigned tasks'}
                   </p>
                 </div>
               </div>
@@ -444,119 +411,42 @@ export function DashboardScreen({
           4. Teacher Notes Section
           ========================================================================= */}
       <div>
-        <h3
-          className="text-slate-900 dark:text-white"
-          style={{
-            fontSize: '16px',
-            fontWeight: '700',
-            lineHeight: '24px',
-            marginBottom: '10px',
-            paddingRight: isRTL ? '4px' : '0',
-            paddingLeft: isRTL ? '0' : '4px',
-          }}
-        >
+        <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white mb-3 px-1">
           {t.latestTeacherNote}
         </h3>
 
-        {/* Teacher Card if exists, or clean empty placeholder */}
         {latestFeedback ? (
           <div
             role="button"
             tabIndex={0}
             onClick={() => onNavigate('performance', 'feedback')}
             onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'feedback')}
-            className="border shadow-2xs transition-all cursor-pointer"
-            style={{
-              backgroundColor: `${theme.primary}0C`,
-              borderColor: `${theme.primary}26`,
-              padding: '16px 20px',
-              borderRadius: '16px',
-            }}
+            className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer p-4 sm:p-5 rounded-2xl"
           >
             {/* Teacher Header */}
-            <div className="flex items-center gap-2.5" style={{ marginBottom: '10px' }}>
+            <div className="flex items-center gap-3 mb-2.5">
               <div
-                className="rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-xs"
-                style={{
-                  backgroundColor: theme.primary,
-                  width: '36px',
-                  height: '36px',
-                  minWidth: '36px',
-                }}
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-950 font-black text-xs shrink-0 shadow-xs"
+                style={{ backgroundColor: activeLevelTheme.primary }}
               >
                 {language === 'ar' ? 'أ.س' : 'T.M'}
               </div>
               <div>
-                <h4
-                  className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm"
-                >
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm">
                   {latestFeedback.teacherNameAr || 'معلم المادة'}
                 </h4>
-                <p className="text-[11px] text-slate-400 font-medium">
+                <p className="text-xs text-slate-400 font-medium">
                   {latestFeedback.subjectAr || t.quranSubject}
                 </p>
               </div>
             </div>
 
-            {/* Note Bubble or Structured Guidance */}
-            {latestFeedback.teacherFeedbackDetails &&
-            (latestFeedback.teacherFeedbackDetails.strengths?.length ||
-              latestFeedback.teacherFeedbackDetails.needsImprovement?.length ||
-              latestFeedback.teacherFeedbackDetails.recommendations) ? (
-              <div
-                className="bg-white dark:bg-slate-850 border border-slate-100 dark:border-slate-800 shadow-2xs relative rounded-2xl"
-                style={{ padding: '14px 18px' }}
-              >
-                <div className="space-y-1.5 text-slate-700 dark:text-slate-300 leading-relaxed text-xs sm:text-sm">
-                  {latestFeedback.teacherFeedbackDetails.strengths && latestFeedback.teacherFeedbackDetails.strengths.length > 0 && (
-                    <div>
-                      • <span className="font-bold text-emerald-700 dark:text-emerald-400">{language === 'ar' ? 'نقاط القوة:' : 'Strengths:'}</span>{' '}
-                      {Array.isArray(latestFeedback.teacherFeedbackDetails.strengths)
-                        ? latestFeedback.teacherFeedbackDetails.strengths.join('، ')
-                        : latestFeedback.teacherFeedbackDetails.strengths}
-                    </div>
-                  )}
-                  {latestFeedback.teacherFeedbackDetails.needsImprovement && latestFeedback.teacherFeedbackDetails.needsImprovement.length > 0 && (
-                    <div>
-                      • <span className="font-bold text-amber-700 dark:text-amber-400">{language === 'ar' ? 'بحاجة لتطوير:' : 'Needs Improvement:'}</span>{' '}
-                      {Array.isArray(latestFeedback.teacherFeedbackDetails.needsImprovement)
-                        ? latestFeedback.teacherFeedbackDetails.needsImprovement.join('، ')
-                        : latestFeedback.teacherFeedbackDetails.needsImprovement}
-                    </div>
-                  )}
-                  {latestFeedback.teacherFeedbackDetails.recommendations && (
-                    <div>
-                      • <span className="font-bold text-purple-700 dark:text-purple-400">{language === 'ar' ? 'توصية للمنزل:' : 'Home Recommendation:'}</span>{' '}
-                      "{latestFeedback.teacherFeedbackDetails.recommendations}"
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div
-                className="bg-white dark:bg-slate-850 border border-slate-100 dark:border-slate-800 shadow-2xs relative flex items-center"
-                style={{ padding: '12px 16px', borderRadius: '12px' }}
-              >
-                <div
-                  className="rounded-full shrink-0"
-                  style={{
-                    backgroundColor: theme.primary,
-                    width: '4px',
-                    height: '24px',
-                    marginLeft: isRTL ? '12px' : '0',
-                    marginRight: isRTL ? '0' : '12px',
-                  }}
-                />
-                <p
-                  className="text-slate-700 dark:text-slate-200 font-medium text-xs sm:text-sm leading-relaxed"
-                >
-                  {translateTeacherNote(latestFeedback.messageAr || t.teacherDefaultNote, language)}
-                </p>
-              </div>
-            )}
+            <div className="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+              {translateTeacherNote(latestFeedback.messageAr || t.teacherDefaultNote, language)}
+            </div>
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-850 border border-slate-200/70 dark:border-slate-800 shadow-2xs rounded-2xl p-5 text-center text-xs text-slate-400 font-medium">
+          <div className="bg-white dark:bg-slate-850 border border-slate-200/70 dark:border-slate-800 shadow-2xs rounded-2xl p-5 text-center text-xs sm:text-sm text-slate-400 font-medium">
             {language === 'ar'
               ? 'لم يتم تسجيل ملاحظات أو توجيهات لهذا الطالب بعد من قِبل المعلم.'
               : 'No teacher notes or feedback recorded for this student yet.'}
