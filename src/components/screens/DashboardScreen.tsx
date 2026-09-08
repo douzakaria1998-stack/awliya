@@ -39,9 +39,11 @@ export function DashboardScreen({
     teacherFeedback,
     academicLevels,
     notifications,
+    markNotificationRead,
   } = useStudent();
   const { theme } = useTheme();
   const { t, language, isRTL } = useLanguage();
+  const [dismissedIds, setDismissedIds] = useState<string[]>([]);
 
   const currentLevelObj = academicLevels.find((l) => Number(l.level) === Number(activeStudent.currentLevel));
   const activeLevelTheme = getThemeForLevel(
@@ -101,9 +103,16 @@ export function DashboardScreen({
 
     // 4. System notifications for this student
     const studentNotifs = (notifications || [])
-      .filter((n) => !n.studentId || n.studentId === activeStudent.id)
+      .filter(
+        (n) =>
+          (!n.studentId || n.studentId === activeStudent.id) &&
+          !n.isRead &&
+          !dismissedIds.includes(n.id) &&
+          !dismissedIds.includes(`sys-${n.id}`)
+      )
       .map((n) => ({
         id: `sys-${n.id}`,
+        rawNotifId: n.id,
         homeworkId: (n.actionPayload as any)?.homeworkId || (n.actionPayload as any)?.itemId,
         type: 'system' as const,
         title: n.titleAr || (language === 'ar' ? 'إشعار جديد' : 'New Notification'),
@@ -113,11 +122,15 @@ export function DashboardScreen({
         colorClass: 'bg-cyan-50 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400 border-cyan-200/70 dark:border-cyan-800/60',
         badgeText: language === 'ar' ? 'إشعار' : 'Notice',
         badgeClass: 'bg-cyan-600 text-white',
+        routeTo: n.routeTo,
+        actionPayload: n.actionPayload,
       }));
 
-    const all = [...revision, ...pending, ...completed, ...studentNotifs];
+    const all = [...revision, ...pending, ...completed, ...studentNotifs].filter(
+      (item) => !dismissedIds.includes(item.id)
+    );
     return all.slice(0, 3);
-  }, [homeworkList, notifications, activeStudent.id, language, t]);
+  }, [homeworkList, notifications, activeStudent.id, language, t, dismissedIds]);
 
   const latestFeedback = teacherFeedback[0];
 
@@ -360,8 +373,20 @@ export function DashboardScreen({
                   role="button"
                   tabIndex={0}
                   onClick={() => {
+                    // 1. Immediately hide notification from dashboard
+                    setDismissedIds((prev) => [...prev, notif.id, (notif as any).rawNotifId].filter(Boolean));
+
+                    // 2. Mark notification as read in global state/storage if it has an id
+                    if ((notif as any).rawNotifId) {
+                      markNotificationRead((notif as any).rawNotifId);
+                    }
+
+                    // 3. Open relevant homework or navigate to route
                     if (notif.homeworkId && onOpenHomeworkDetail) {
                       onOpenHomeworkDetail(notif.homeworkId);
+                    } else if ((notif as any).routeTo) {
+                      const subTab = (notif as any).actionPayload?.tab as PerformanceTabKey | undefined;
+                      onNavigate((notif as any).routeTo as NavTabKey, subTab);
                     } else {
                       onNavigate('performance', 'homework');
                     }
