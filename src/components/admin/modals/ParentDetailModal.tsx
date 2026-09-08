@@ -198,7 +198,7 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
               {currentParent.fullNameAr[0]}
             </div>
             <div>
-              <h3 className="text-xl font-black text-white">{currentParent.fullNameAr} ({currentParent.fullNameEn})</h3>
+              <h3 className="text-xl font-black text-white">{language === 'ar' ? currentParent.fullNameAr : (currentParent.fullNameEn || currentParent.fullNameAr)}</h3>
               <p className="text-xs text-slate-400 font-medium mt-0.5">
                 {language === 'ar' ? 'ملف ولي الأمر وإدارة الأبناء المربوطين' : 'Parent Profile & Linked Students Management'}
               </p>
@@ -640,7 +640,7 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                               </div>
                               <div className="min-w-0">
                                 <span className="font-black text-xs sm:text-sm block truncate">
-                                  {s.fullNameAr} ({s.fullNameEn})
+                                  {language === 'ar' ? s.fullNameAr : (s.fullNameEn || s.fullNameAr)}
                                 </span>
                                 <span className={`text-[11px] block truncate font-medium mt-0.5 ${isSelected ? 'text-purple-100' : 'text-slate-400'}`}>
                                   {s.groupName} • {s.teacherName}
@@ -683,7 +683,7 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                       </div>
                       <div className="min-w-0">
                         <span className="text-xs sm:text-sm font-black text-purple-950 dark:text-purple-100 truncate block">
-                          {selectedStudentObj.fullNameAr} ({selectedStudentObj.fullNameEn})
+                          {language === 'ar' ? selectedStudentObj.fullNameAr : (selectedStudentObj.fullNameEn || selectedStudentObj.fullNameAr)}
                         </span>
                         <span className="text-[11px] text-purple-700 dark:text-purple-300 font-medium truncate block mt-0.5">
                           {selectedStudentObj.groupName} • Level {selectedStudentObj.cefrLevel}
@@ -734,7 +734,7 @@ export function ParentDetailModal({ parent, isOpen, onClose }: ParentDetailModal
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm text-slate-900 dark:text-white">
-                          {st.fullNameAr} ({st.fullNameEn})
+                          {language === 'ar' ? st.fullNameAr : (st.fullNameEn || st.fullNameAr)}
                         </span>
                         <span className="px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-mono font-bold text-[11px]">
                           Level: {st.cefrLevel}

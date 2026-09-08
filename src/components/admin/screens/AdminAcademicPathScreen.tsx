@@ -3361,10 +3361,7 @@ export function AdminAcademicPathScreen() {
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-bold text-sm text-slate-900 dark:text-white truncate">
-                                {st.fullNameAr}
-                              </span>
-                              <span className="font-mono text-xs text-slate-400 truncate">
-                                ({st.fullNameEn})
+                                {language === 'ar' ? st.fullNameAr : (st.fullNameEn || st.fullNameAr)}
                               </span>
                             </div>
                             <div className="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400" style={{ marginTop: '3px' }}>

@@ -623,7 +623,7 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
                     style={{ padding: '14px 18px' }}
                   >
                     <div>
-                      <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{st.fullNameAr} ({st.fullNameEn})</div>
+                      <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{language === 'ar' ? st.fullNameAr : (st.fullNameEn || st.fullNameAr)}</div>
                       <div className="text-[11px] text-slate-400 mt-0.5">
                         {language === 'ar' ? 'ولي الأمر:' : 'Parent:'} {st.parentName} ({st.parentPhone})
                       </div>
@@ -942,7 +942,7 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
                           >
                             <div className="min-w-0" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                               <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
-                                {st.fullNameAr} {st.fullNameEn ? `(${st.fullNameEn})` : ''}
+                                {language === 'ar' ? st.fullNameAr : (st.fullNameEn || st.fullNameAr)}
                               </div>
                               <div className="text-[11px] text-slate-400 font-medium flex items-center gap-2 flex-wrap">
                                 <span>{language === 'ar' ? 'ولي الأمر:' : 'Parent:'} {st.parentName}</span>
@@ -1143,7 +1143,7 @@ export function GroupDetailModal({ group: initialGroup, isOpen, onClose }: Group
                                   </div>
                                   <div>
                                     <div className="text-xs font-bold text-slate-900 dark:text-white">
-                                      {p.fullNameAr} <span className="font-normal text-[11px] text-slate-500 font-mono">({p.fullNameEn})</span>
+                                      {language === 'ar' ? p.fullNameAr : (p.fullNameEn || p.fullNameAr)}
                                     </div>
                                     <div className="text-[11px] font-mono text-amber-600 dark:text-amber-400" dir="ltr">
                                       📱 {p.phone}

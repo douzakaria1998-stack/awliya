@@ -811,7 +811,7 @@ export function AdminDashboardScreen() {
               >
                 <div className="space-y-0.5 min-w-0">
                   <div className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm leading-snug">
-                    {st.fullNameAr} ({st.fullNameEn})
+                    {language === 'ar' ? st.fullNameAr : (st.fullNameEn || st.fullNameAr)}
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                     {st.groupName} • {language === 'ar' ? 'المعلم:' : 'Teacher:'} {st.teacherName} • {language === 'ar' ? 'ولي الأمر:' : 'Parent:'} {st.parentName} ({st.parentPhone})

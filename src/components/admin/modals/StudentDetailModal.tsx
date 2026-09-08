@@ -256,7 +256,7 @@ export function StudentDetailModal({ student, isOpen, onClose }: StudentDetailMo
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base sm:text-lg font-black text-white truncate">
-                  {currentStudent.fullNameAr} ({currentStudent.fullNameEn})
+                  {language === 'ar' ? currentStudent.fullNameAr : (currentStudent.fullNameEn || currentStudent.fullNameAr)}
                 </h3>
                 <span
                   className="inline-flex items-center justify-center rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold font-mono tracking-wide"

@@ -881,10 +881,7 @@ export function StudentsManagementScreen() {
                             </div>
                             <div>
                               <div className="text-xs font-bold text-slate-900 dark:text-white">
-                                {selParent.fullNameAr}{' '}
-                                <span className="font-normal text-[11px] text-slate-500 font-mono">
-                                  ({selParent.fullNameEn})
-                                </span>
+                                {language === 'ar' ? selParent.fullNameAr : (selParent.fullNameEn || selParent.fullNameAr)}
                               </div>
                               <div className="text-[11px] font-mono text-purple-700 dark:text-purple-300" dir="ltr">
                                 📱 {selParent.phone}
@@ -962,13 +959,10 @@ export function StudentsManagementScreen() {
                                 <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 flex items-center justify-center font-black text-xs">
                                   {p.fullNameAr.charAt(0)}
                                 </div>
-                                <div>
-                                  <div className="text-xs font-bold text-slate-900 dark:text-white">
-                                    {p.fullNameAr}{' '}
-                                    <span className="font-normal text-[11px] text-slate-500 font-mono">
-                                      ({p.fullNameEn})
-                                    </span>
-                                  </div>
+                                  <div>
+                                    <div className="text-xs font-bold text-slate-900 dark:text-white">
+                                      {language === 'ar' ? p.fullNameAr : (p.fullNameEn || p.fullNameAr)}
+                                    </div>
                                   <div className="text-[11px] font-mono text-purple-600 dark:text-purple-400" dir="ltr">
                                     📱 {p.phone}
                                   </div>
