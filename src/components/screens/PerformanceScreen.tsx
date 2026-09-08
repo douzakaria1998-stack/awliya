@@ -16,12 +16,18 @@ import {
   ChevronRight,
   ChevronLeft,
   CalendarDays,
+  CalendarRange,
+  History,
+  ChevronDown,
+  ChevronUp,
+  Sparkles,
+  Layers,
 } from 'lucide-react';
 import { useStudent } from '@/context/StudentContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { PerformanceTabKey } from '@/lib/constants';
-import { Homework } from '@/types';
+import { Homework, AttendanceRecord } from '@/types';
 import { StudentSwitcher } from '../layout/StudentSwitcher';
 import { HomeworkDetailModal } from '../modals/HomeworkDetailModal';
 import {
@@ -171,6 +177,16 @@ export function PerformanceScreen({
   const [selectedHomework, setSelectedHomework] = useState<Homework | null>(null);
   const [homeworkFilter, setHomeworkFilter] = useState<'all' | 'needs_revision' | 'completed'>('all');
   const [selectedWeekIndex, setSelectedWeekIndex] = useState<number>(0);
+  const [attendanceViewMode, setAttendanceViewMode] = useState<'timeline' | 'history'>('timeline');
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'present' | 'late' | 'absent' | 'excused'>('all');
+  const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({});
+
+  const toggleMonthExpand = (key: string) => {
+    setExpandedMonths((prev) => ({
+      ...prev,
+      [key]: prev[key] === undefined ? false : !prev[key],
+    }));
+  };
 
   // Helper to safely parse local date from string YYYY-MM-DD or Date object without UTC timezone drift
   const parseLocalDate = (dateInput: Date | string): Date => {
@@ -259,6 +275,18 @@ export function PerformanceScreen({
     const currentSat = getSaturdayOfWeek(now);
     const currentSatKey = getSaturdayKey(now);
 
+    const nextSat = new Date(currentSat);
+    nextSat.setDate(currentSat.getDate() + 7);
+    const nextSatKey = getSaturdayKey(nextSat);
+
+    const lastSat = new Date(currentSat);
+    lastSat.setDate(currentSat.getDate() - 7);
+    const lastSatKey = getSaturdayKey(lastSat);
+
+    const prevSat = new Date(currentSat);
+    prevSat.setDate(currentSat.getDate() - 14);
+    const prevSatKey = getSaturdayKey(prevSat);
+
     // Map of unique Saturday key ('YYYY-MM-DD') -> { start, end, satTimestamp }
     const weeksMap = new Map<string, { start: Date; end: Date; satTimestamp: number }>();
 
@@ -278,40 +306,30 @@ export function PerformanceScreen({
       }
     });
 
-    // 2. Always include recent standard 3 weeks relative to current date (Current, Last, Previous)
-    for (let w = 0; w < 3; w++) {
-      const sat = new Date(currentSat);
-      sat.setDate(currentSat.getDate() - w * 7);
-      sat.setHours(0, 0, 0, 0);
+    // 2. Always include Next Week, Current Week, and Previous Week relative to today
+    [nextSat, currentSat, lastSat].forEach((sat) => {
       const thu = new Date(sat);
       thu.setDate(sat.getDate() + 5);
       thu.setHours(0, 0, 0, 0);
-      const key = `${sat.getFullYear()}-${String(sat.getMonth() + 1).padStart(2, '0')}-${String(sat.getDate()).padStart(2, '0')}`;
+      const key = getSaturdayKey(sat);
       if (!weeksMap.has(key)) {
         weeksMap.set(key, { start: sat, end: thu, satTimestamp: sat.getTime() });
       }
-    }
+    });
 
-    // 3. Sort weeks descending (most recent Saturday first)
+    // 3. Sort weeks descending (future -> current -> past)
     const sortedWeeks = Array.from(weeksMap.entries()).sort((a, b) => b[1].satTimestamp - a[1].satTimestamp);
-
-    // Saturday keys for relative labels
-    const lastSat = new Date(currentSat);
-    lastSat.setDate(currentSat.getDate() - 7);
-    const lastSatKey = `${lastSat.getFullYear()}-${String(lastSat.getMonth() + 1).padStart(2, '0')}-${String(lastSat.getDate()).padStart(2, '0')}`;
-
-    const prevSat = new Date(currentSat);
-    prevSat.setDate(currentSat.getDate() - 14);
-    const prevSatKey = `${prevSat.getFullYear()}-${String(prevSat.getMonth() + 1).padStart(2, '0')}-${String(prevSat.getDate()).padStart(2, '0')}`;
 
     return sortedWeeks.map(([key, { start, end, satTimestamp }], index) => {
       let label = '';
-      if (key === currentSatKey) {
+      if (key === nextSatKey) {
+        label = t.nextWeek;
+      } else if (key === currentSatKey) {
         label = t.currentWeek;
       } else if (key === lastSatKey) {
-        label = t.lastWeek;
-      } else if (key === prevSatKey) {
         label = t.previousWeek;
+      } else if (key === prevSatKey) {
+        label = language === 'ar' ? 'الأسبوع الأسبق' : 'Previous Week';
       } else {
         const startDay = String(start.getDate()).padStart(2, '0');
         const endDay = String(end.getDate()).padStart(2, '0');
@@ -326,6 +344,9 @@ export function PerformanceScreen({
         start,
         end,
         label,
+        isCurrent: key === currentSatKey,
+        isNext: key === nextSatKey,
+        isLast: key === lastSatKey,
         range: formatWeekRange(start, end, language),
       };
     });
@@ -360,6 +381,109 @@ export function PerformanceScreen({
   const weekExcusedCount = currentWeekRecords.filter((r) => r.status === 'excused').length;
   const weekTotal = currentWeekRecords.length || 1;
   const weekPercentage = Math.round(((weekPresentCount + weekExcusedCount) / weekTotal) * 100);
+
+  // Group all historical attendance records by Year and Month for the full history archive
+  const historyYearGroups = useMemo(() => {
+    const allRecords = attendanceData?.records || [];
+    if (allRecords.length === 0) return [];
+
+    const monthNamesAr = [
+      'جانفي', 'فيفري', 'مارس', 'أفريل', 'ماي', 'جوان',
+      'جويلية', 'أوت', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+    ];
+    const monthNamesFr = [
+      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    ];
+    const monthNamesEn = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    const yearMap = new Map<number, Map<string, {
+      monthKey: string;
+      year: number;
+      monthIndex: number;
+      monthName: string;
+      records: AttendanceRecord[];
+      presentCount: number;
+      lateCount: number;
+      absentCount: number;
+      excusedCount: number;
+      total: number;
+      percentage: number;
+    }>>();
+
+    allRecords.forEach((r) => {
+      if (!r.date) return;
+      try {
+        const d = parseLocalDate(r.date);
+        const y = d.getFullYear();
+        const m = d.getMonth();
+        const monthKey = `${y}-${String(m + 1).padStart(2, '0')}`;
+
+        if (!yearMap.has(y)) {
+          yearMap.set(y, new Map());
+        }
+        const mGroups = yearMap.get(y)!;
+        if (!mGroups.has(monthKey)) {
+          const mName = language === 'ar'
+            ? `${monthNamesAr[m]} ${y}`
+            : language === 'fr'
+            ? `${monthNamesFr[m]} ${y}`
+            : `${monthNamesEn[m]} ${y}`;
+
+          mGroups.set(monthKey, {
+            monthKey,
+            year: y,
+            monthIndex: m,
+            monthName: mName,
+            records: [],
+            presentCount: 0,
+            lateCount: 0,
+            absentCount: 0,
+            excusedCount: 0,
+            total: 0,
+            percentage: 0,
+          });
+        }
+
+        const mg = mGroups.get(monthKey)!;
+        mg.records.push(r);
+        if (r.status === 'present') mg.presentCount++;
+        else if (r.status === 'late') mg.lateCount++;
+        else if (r.status === 'absent') mg.absentCount++;
+        else if (r.status === 'excused') mg.excusedCount++;
+        mg.total++;
+        mg.percentage = Math.round(((mg.presentCount + mg.lateCount) / mg.total) * 100);
+      } catch {}
+    });
+
+    const sortedYears = Array.from(yearMap.keys()).sort((a, b) => b - a);
+
+    return sortedYears.map((year) => {
+      const mGroups = yearMap.get(year)!;
+      const sortedMonths = Array.from(mGroups.values()).sort((a, b) => b.monthIndex - a.monthIndex);
+
+      const monthsWithFilteredRecords = sortedMonths.map((m) => ({
+        ...m,
+        displayedRecords: m.records
+          .filter((r) => historyFilter === 'all' || r.status === historyFilter)
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+      })).filter((m) => m.displayedRecords.length > 0);
+
+      const totalYearSessions = sortedMonths.reduce((acc, m) => acc + m.total, 0);
+      const totalYearAttended = sortedMonths.reduce((acc, m) => acc + m.presentCount + m.lateCount, 0);
+      const yearPercentage = totalYearSessions > 0 ? Math.round((totalYearAttended / totalYearSessions) * 100) : 0;
+
+      return {
+        year,
+        months: monthsWithFilteredRecords,
+        totalSessions: totalYearSessions,
+        percentage: yearPercentage,
+      };
+    }).filter((yg) => yg.months.length > 0);
+  }, [attendanceData?.records, historyFilter, language]);
 
   // Homework filter
   const filteredHomework = homeworkList.filter((h) => {
@@ -763,39 +887,96 @@ export function PerformanceScreen({
             </div>
           </div>
 
-          {/* Weekly Timetable Schedule Section */}
-          <div className="space-y-10" style={{ marginTop: '36px' }}>
-            {/* Week Switcher Banner */}
-            <div
-              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3"
-              style={{
-                padding: '18px 22px',
-                borderRadius: '20px',
-              }}
-            >
+          {/* View Mode Switcher Header: Weekly Timeline vs Full History Archive */}
+          <div
+            className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+            style={{
+              marginTop: '28px',
+              padding: '16px 20px',
+              borderRadius: '20px',
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-xs"
+                style={{
+                  backgroundColor: `${theme.primary}15`,
+                  color: theme.primary,
+                }}
+              >
+                {attendanceViewMode === 'timeline' ? <CalendarRange size={20} /> : <History size={20} />}
+              </div>
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <CalendarDays size={18} className="text-slate-500 shrink-0" />
-                  <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
-                    {language === 'ar' ? 'جدول الحضور الأسبوعي للدروس والحلقات' : language === 'fr' ? 'Emploi du temps hebdomadaire des séances' : 'Weekly Attendance & Class Schedule'}
-                  </h3>
-                </div>
+                <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                  {attendanceViewMode === 'timeline'
+                    ? (language === 'ar' ? 'الجدول الزمني الأسبوعي للحصص' : language === 'fr' ? 'Chronologie Hebdomadaire des Séances' : 'Weekly Class Timeline')
+                    : (language === 'ar' ? 'سجل الحضور والأرشيف الزمني الشامل' : language === 'fr' ? 'Historique et Archives des Séances' : 'Full Attendance History & Archive')}
+                </h3>
                 <p className="text-[11px] sm:text-xs text-slate-400 font-medium">
-                  {language === 'ar' ? 'توزيع الحصص الأسبوعية مع إمكانية التنقل بين الأسابيع' : language === 'fr' ? 'Répartition des cours avec navigation entre les semaines' : 'Weekly session distribution with week navigation'}
+                  {attendanceViewMode === 'timeline'
+                    ? (language === 'ar' ? 'استعراض الحصص حسب الأسابيع (القادم، الحالي، السابق)' : 'Navigate sessions by timeline weeks')
+                    : (language === 'ar' ? 'سجل شامل مصنف حسب الأشهر والسنوات الدراسية' : 'Comprehensive archive grouped by months and years')}
                 </p>
               </div>
+            </div>
 
-              {/* Week Switcher Controls */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-700/60">
+            {/* Mode Switcher Tabs */}
+            <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 shrink-0">
+              <button
+                type="button"
+                onClick={() => setAttendanceViewMode('timeline')}
+                className={`inline-flex items-center gap-1.5 rounded-lg text-xs font-black transition-all cursor-pointer select-none ${
+                  attendanceViewMode === 'timeline'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+                style={{
+                  height: '32px',
+                  padding: '0 12px',
+                  color: attendanceViewMode === 'timeline' ? theme.primary : undefined,
+                }}
+              >
+                <CalendarRange size={14} />
+                <span>{language === 'ar' ? 'الجدول الأسبوعي' : 'Weekly View'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAttendanceViewMode('history')}
+                className={`inline-flex items-center gap-1.5 rounded-lg text-xs font-black transition-all cursor-pointer select-none ${
+                  attendanceViewMode === 'history'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+                style={{
+                  height: '32px',
+                  padding: '0 12px',
+                  color: attendanceViewMode === 'history' ? theme.primary : undefined,
+                }}
+              >
+                <History size={14} />
+                <span>{language === 'ar' ? 'سجل الأرشيف' : 'Full History'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* ============================================================ */}
+          {/* VIEW A: Weekly Timeline */}
+          {/* ============================================================ */}
+          {attendanceViewMode === 'timeline' && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Timeline Week Switcher Controls */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                {/* 3 Quick Timeline Buttons */}
+                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-700/60 flex-wrap">
                   {WEEKS_LIST.map((wk) => {
                     const isSelected = selectedWeekIndex === wk.index;
                     return (
                       <button
-                        key={wk.index}
+                        key={wk.key}
                         type="button"
                         onClick={() => setSelectedWeekIndex(wk.index)}
-                        className={`rounded-lg font-black text-xs transition-all cursor-pointer select-none ${
+                        className={`rounded-lg font-black text-xs transition-all cursor-pointer select-none inline-flex items-center gap-1.5 ${
                           isSelected
                             ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
                             : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -807,13 +988,20 @@ export function PerformanceScreen({
                           color: isSelected ? theme.primary : undefined,
                         }}
                       >
+                        {wk.isCurrent && (
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 ring-2 ring-emerald-300 dark:ring-emerald-900 animate-pulse" />
+                        )}
                         <span>{wk.label}</span>
                       </button>
                     );
                   })}
                 </div>
 
-                <div className="flex items-center gap-1">
+                {/* Left / Right Chronological Navigation */}
+                <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                  <span className="text-xs text-slate-400 font-medium">
+                    {selectedWeekIndex + 1} / {WEEKS_LIST.length}
+                  </span>
                   <button
                     type="button"
                     disabled={selectedWeekIndex >= WEEKS_LIST.length - 1}
@@ -835,64 +1023,63 @@ export function PerformanceScreen({
                   </button>
                 </div>
               </div>
-            </div>
 
-            {/* Active Week Status & Date Range Bar */}
-            <div
-              className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-750 flex items-center justify-between flex-wrap gap-2.5 text-xs font-bold"
-              style={{
-                padding: '12px 20px',
-                borderRadius: '16px',
-              }}
-            >
-              <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
-                <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white">
-                  {WEEKS_LIST[selectedWeekIndex]?.label}:
-                </span>
-                <span className="font-mono text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-                  ({WEEKS_LIST[selectedWeekIndex]?.range})
-                </span>
+              {/* Active Week Status & Date Range Bar */}
+              <div
+                className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-750 flex items-center justify-between flex-wrap gap-2.5 text-xs font-bold"
+                style={{
+                  padding: '12px 20px',
+                  borderRadius: '16px',
+                }}
+              >
+                <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
+                  <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white">
+                    {WEEKS_LIST[selectedWeekIndex]?.label}:
+                  </span>
+                  <span className="font-mono text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+                    ({WEEKS_LIST[selectedWeekIndex]?.range})
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 text-xs flex-wrap">
+                  <span className="text-emerald-600 font-black">
+                    {t.present}: {weekPresentCount} {language === 'ar' ? 'أيام' : language === 'fr' ? 'jours' : 'days'}
+                  </span>
+                  {weekLateCount > 0 && (
+                    <span className="text-amber-600 font-black">
+                      {t.late}: {weekLateCount}
+                    </span>
+                  )}
+                  {weekAbsentCount > 0 && (
+                    <span className="text-rose-600 font-black">
+                      {t.absent}: {weekAbsentCount}
+                    </span>
+                  )}
+                  {weekExcusedCount > 0 && (
+                    <span className="text-blue-600 font-black">
+                      {t.excused}: {weekExcusedCount}
+                    </span>
+                  )}
+                  <span
+                    className="inline-flex items-center rounded-full text-white font-black shadow-2xs select-none text-xs"
+                    style={{
+                      backgroundColor: theme.primary,
+                      height: '28px',
+                      paddingRight: '12px',
+                      paddingLeft: '12px',
+                    }}
+                  >
+                    {language === 'ar'
+                        ? `نسبة الأسبوع: ${currentWeekRecords.length === 0 ? 0 : weekPercentage}%`
+                        : language === 'fr'
+                        ? `Taux hebdo: ${currentWeekRecords.length === 0 ? 0 : weekPercentage}%`
+                        : `Week Rate: ${currentWeekRecords.length === 0 ? 0 : weekPercentage}%`}
+                  </span>
+                </div>
               </div>
 
-              <div className="flex items-center gap-3 text-xs flex-wrap">
-                <span className="text-emerald-600 font-black">
-                  {t.present}: {weekPresentCount} {language === 'ar' ? 'أيام' : language === 'fr' ? 'jours' : 'days'}
-                </span>
-                {weekLateCount > 0 && (
-                  <span className="text-amber-600 font-black">
-                    {t.late}: {weekLateCount}
-                  </span>
-                )}
-                {weekAbsentCount > 0 && (
-                  <span className="text-rose-600 font-black">
-                    {t.absent}: {weekAbsentCount}
-                  </span>
-                )}
-                {weekExcusedCount > 0 && (
-                  <span className="text-blue-600 font-black">
-                    {t.excused}: {weekExcusedCount}
-                  </span>
-                )}
-                <span
-                  className="inline-flex items-center rounded-full text-white font-black shadow-2xs select-none text-xs"
-                  style={{
-                    backgroundColor: theme.primary,
-                    height: '28px',
-                    paddingRight: '12px',
-                    paddingLeft: '12px',
-                  }}
-                >
-                  {language === 'ar'
-                      ? `نسبة الأسبوع: ${currentWeekRecords.length === 0 ? 0 : weekPercentage}%`
-                      : language === 'fr'
-                      ? `Taux hebdo: ${currentWeekRecords.length === 0 ? 0 : weekPercentage}%`
-                      : `Week Rate: ${currentWeekRecords.length === 0 ? 0 : weekPercentage}%`}
-                </span>
-              </div>
-            </div>
-
-            {/* Weekly Timetable Schedule Grid */}
-            {currentWeekRecords.length === 0 ? (
+              {/* Weekly Timetable Schedule Grid */}
+              {currentWeekRecords.length === 0 ? (
                 <div
                   className="rounded-[20px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 text-center flex flex-col items-center justify-center shadow-xs"
                   style={{ padding: '36px 20px', marginBottom: '36px' }}
@@ -901,12 +1088,12 @@ export function PerformanceScreen({
                     <CalendarDays size={24} />
                   </div>
                   <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white mb-1">
-                    {language === 'ar' ? 'طالب مسجل حديثاً — الحضور 0%' : 'Newly Enrolled Student — 0% Attendance'}
+                    {language === 'ar' ? 'لا توجد حصص مسجلة في هذا الأسبوع' : 'No sessions recorded for this week'}
                   </h4>
                   <p className="text-xs text-slate-400 max-w-md leading-relaxed">
                     {language === 'ar'
-                      ? 'لم يتم تسجيل أي حصص دراسية سابقة لهذا الطالب بعد، وتبدأ نسبة الحضور في الاحتساب فور بدء الجلسات.'
-                      : 'No previous class sessions have been recorded for this student yet. Attendance will begin calculating once sessions commence.'}
+                      ? 'يمكنك التنقل بين الأسابيع الأخرى أو التبديل إلى "سجل الأرشيف" للاطلاع على كامل الحصص التاريخية للطالب.'
+                      : 'You can navigate to other weeks or switch to the Full History tab to view all past records.'}
                   </p>
                 </div>
               ) : (
@@ -920,8 +1107,6 @@ export function PerformanceScreen({
                     const translatedSubject = translateSubject(subjectAr, language);
                     const dayLabel = translateDayName(rec.dayNameAr);
                     const langBadge = getLanguageBadgeTheme(subjectAr);
-                    const themeStyles =
-                      SUBJECT_CONTAINER_THEMES[subjectAr] || langBadge;
 
                     return (
                       <div
@@ -1014,7 +1199,335 @@ export function PerformanceScreen({
                   })}
                 </div>
               )}
-          </div>
+            </div>
+          )}
+
+          {/* ============================================================ */}
+          {/* VIEW B: Full Attendance History Archive (Grouped by Month & Year) */}
+          {/* ============================================================ */}
+          {attendanceViewMode === 'history' && (
+            <div className="space-y-6 animate-fade-in" style={{ paddingBottom: '40px' }}>
+              {/* History Filter Pills */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setHistoryFilter('all')}
+                  className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
+                    historyFilter === 'all'
+                      ? 'text-white'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                  }`}
+                  style={{
+                    backgroundColor: historyFilter === 'all' ? theme.primary : undefined,
+                    height: '30px',
+                    paddingRight: '14px',
+                    paddingLeft: '14px',
+                  }}
+                >
+                  {t.filterAll} ({attendanceData.records.length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setHistoryFilter('present')}
+                  className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
+                    historyFilter === 'present'
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100'
+                  }`}
+                  style={{
+                    height: '30px',
+                    paddingRight: '14px',
+                    paddingLeft: '14px',
+                  }}
+                >
+                  {t.present} ({attendanceData.records.filter((r) => r.status === 'present').length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setHistoryFilter('late')}
+                  className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
+                    historyFilter === 'late'
+                      ? 'bg-amber-500 text-white'
+                      : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100'
+                  }`}
+                  style={{
+                    height: '30px',
+                    paddingRight: '14px',
+                    paddingLeft: '14px',
+                  }}
+                >
+                  {t.late} ({attendanceData.records.filter((r) => r.status === 'late').length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setHistoryFilter('absent')}
+                  className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
+                    historyFilter === 'absent'
+                      ? 'bg-rose-600 text-white'
+                      : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 hover:bg-rose-100'
+                  }`}
+                  style={{
+                    height: '30px',
+                    paddingRight: '14px',
+                    paddingLeft: '14px',
+                  }}
+                >
+                  {t.absent} ({attendanceData.records.filter((r) => r.status === 'absent').length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setHistoryFilter('excused')}
+                  className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
+                    historyFilter === 'excused'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 hover:bg-blue-100'
+                  }`}
+                  style={{
+                    height: '30px',
+                    paddingRight: '14px',
+                    paddingLeft: '14px',
+                  }}
+                >
+                  {t.excused} ({attendanceData.records.filter((r) => r.status === 'excused').length})
+                </button>
+              </div>
+
+              {/* History Grouped by Year and Month */}
+              {historyYearGroups.length === 0 ? (
+                <div
+                  className="rounded-[20px] bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 text-center flex flex-col items-center justify-center shadow-xs"
+                  style={{ padding: '40px 20px' }}
+                >
+                  <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mb-3">
+                    <History size={24} />
+                  </div>
+                  <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white mb-1">
+                    {language === 'ar' ? 'لا يوجد سجل حصص تاريخي مطابق' : 'No historical session records found'}
+                  </h4>
+                  <p className="text-xs text-slate-400 max-w-md leading-relaxed">
+                    {language === 'ar'
+                      ? 'سيتم تسجيل وحفظ جميع الحصص الدراسية وتصنيفها تلقائياً حسب الأشهر والسنوات فور انعقادها.'
+                      : 'All attended sessions will be archived here by month and year automatically as they occur.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {historyYearGroups.map((yearGroup) => (
+                    <div key={yearGroup.year} className="space-y-4">
+                      {/* Year Section Header Badge */}
+                      <div className="flex items-center justify-between gap-3 px-1">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: theme.primary }} />
+                          <h4 className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono">
+                            {language === 'ar' ? `السنة الدراسية ${yearGroup.year}` : `Academic Year ${yearGroup.year}`}
+                          </h4>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-400">
+                            {yearGroup.totalSessions} {language === 'ar' ? 'حصص مسجلة' : 'sessions'}
+                          </span>
+                          <span
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-black shadow-2xs"
+                            style={{
+                              backgroundColor: `${theme.primary}18`,
+                              color: theme.primary,
+                            }}
+                          >
+                            {language === 'ar' ? `الانضباط السنوي: ${yearGroup.percentage}%` : `Discipline: ${yearGroup.percentage}%`}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Months Accordions in this Year */}
+                      <div className="space-y-3">
+                        {yearGroup.months.map((monthGroup) => {
+                          const isExpanded = expandedMonths[monthGroup.monthKey] !== false; // default expanded
+
+                          return (
+                            <div
+                              key={monthGroup.monthKey}
+                              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-2xs overflow-hidden transition-all"
+                            >
+                              {/* Month Accordion Header */}
+                              <button
+                                type="button"
+                                onClick={() => toggleMonthExpand(monthGroup.monthKey)}
+                                className="w-full flex items-center justify-between gap-3 p-4 text-right cursor-pointer select-none hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-2xs"
+                                    style={{
+                                      backgroundColor: `${theme.primary}12`,
+                                      color: theme.primary,
+                                    }}
+                                  >
+                                    <CalendarDays size={18} />
+                                  </div>
+                                  <div>
+                                    <h5 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                                      {monthGroup.monthName}
+                                    </h5>
+                                    <span className="text-[11px] text-slate-400 font-medium block">
+                                      {monthGroup.displayedRecords.length} {language === 'ar' ? 'حصص دراسية' : 'sessions'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 sm:gap-3">
+                                  {/* Stats Pills */}
+                                  <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold">
+                                    <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300">
+                                      {monthGroup.presentCount} {t.present}
+                                    </span>
+                                    {monthGroup.lateCount > 0 && (
+                                      <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300">
+                                        {monthGroup.lateCount} {t.late}
+                                      </span>
+                                    )}
+                                    {monthGroup.absentCount > 0 && (
+                                      <span className="px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300">
+                                        {monthGroup.absentCount} {t.absent}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <span
+                                    className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black"
+                                    style={{
+                                      backgroundColor: `${theme.primary}15`,
+                                      color: theme.primary,
+                                    }}
+                                  >
+                                    {monthGroup.percentage}%
+                                  </span>
+
+                                  <div className="p-1 rounded-lg text-slate-400">
+                                    {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                  </div>
+                                </div>
+                              </button>
+
+                              {/* Expanded Month Sessions Timeline */}
+                              {isExpanded && (
+                                <div className="p-4 pt-1 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/30">
+                                  <div className="relative pl-3 pr-3 pt-2 space-y-3.5">
+                                    {monthGroup.displayedRecords.map((rec, idx) => {
+                                      const isPresent = rec.status === 'present';
+                                      const isAbsent = rec.status === 'absent';
+                                      const isLate = rec.status === 'late';
+                                      const subjectAr = rec.subjectAr || 'اللغة الإنجليزية';
+                                      const translatedSubject = translateSubject(subjectAr, language);
+                                      const dayLabel = translateDayName(rec.dayNameAr);
+                                      const langBadge = getLanguageBadgeTheme(subjectAr);
+
+                                      return (
+                                        <div
+                                          key={rec.id}
+                                          className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-white dark:bg-slate-850 border border-slate-200/70 dark:border-slate-800 shadow-2xs hover:shadow-xs transition-all"
+                                        >
+                                          <div className="flex items-center gap-3">
+                                            {/* Status Node Circle */}
+                                            <div
+                                              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-xs ${
+                                                isPresent
+                                                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                                                  : isAbsent
+                                                  ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                                                  : isLate
+                                                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+                                                  : 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+                                              }`}
+                                            >
+                                              {isPresent ? '✓' : isAbsent ? '✕' : isLate ? '⏱' : '✉'}
+                                            </div>
+
+                                            <div>
+                                              <div className="flex items-center gap-2">
+                                                <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-white">
+                                                  {dayLabel}
+                                                </span>
+                                                <span dir="ltr" className="text-[11px] text-slate-400 font-mono font-bold">
+                                                  {rec.date}
+                                                </span>
+                                              </div>
+
+                                              <div className="flex items-center gap-2 mt-1">
+                                                <span
+                                                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold ${langBadge.badgeContainer}`}
+                                                >
+                                                  <BookOpen size={11} className={langBadge.iconClass} />
+                                                  <span>{translatedSubject}</span>
+                                                </span>
+
+                                                <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                                                  <Clock size={11} />
+                                                  {(() => {
+                                                    const raw = rec.sessionTimeAr || '04:30 PM - 06:00 PM';
+                                                    if (raw.includes(' / ')) {
+                                                      const parts = raw.split(' - ');
+                                                      if (parts.length === 2) {
+                                                        const startParts = parts[0].split(' / ');
+                                                        return `${startParts[startParts.length - 1].trim()} - ${parts[1].trim()}`;
+                                                      }
+                                                      const slashParts = raw.split(' / ');
+                                                      return slashParts[slashParts.length - 1].trim();
+                                                    }
+                                                    return raw;
+                                                  })()}
+                                                </span>
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          <div className="flex items-center gap-2 self-end sm:self-center">
+                                            {rec.noteAr && (
+                                              <span className="text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/60 px-2 py-0.5 rounded-md font-medium">
+                                                {rec.noteAr}
+                                              </span>
+                                            )}
+
+                                            <span
+                                              className={`inline-flex items-center justify-center rounded-full text-[11px] font-black px-2.5 py-0.5 shadow-2xs ${
+                                                isPresent
+                                                  ? 'bg-emerald-500 text-white'
+                                                  : isAbsent
+                                                  ? 'bg-rose-500 text-white'
+                                                  : isLate
+                                                  ? 'bg-amber-500 text-white'
+                                                  : 'bg-blue-500 text-white'
+                                              }`}
+                                            >
+                                              {isPresent
+                                                ? `${t.present} ✓`
+                                                : isAbsent
+                                                ? `${t.absent} ✕`
+                                                : isLate
+                                                ? `${t.late} ⏱`
+                                                : `${t.excused} ✉`}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

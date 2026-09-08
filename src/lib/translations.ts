@@ -114,6 +114,7 @@ export interface Translations {
   late: string;
   excused: string;
   currentWeek: string;
+  nextWeek: string;
   lastWeek: string;
   previousWeek: string;
   sessionNumber: string;
@@ -272,6 +273,7 @@ export const translations: Record<Language, Translations> = {
     late: 'متأخر',
     excused: 'معذور',
     currentWeek: 'الأسبوع الحالي',
+    nextWeek: 'الأسبوع القادم',
     lastWeek: 'الأسبوع الماضي',
     previousWeek: 'الأسبوع الأسبق',
     sessionNumber: 'حصة رقم',
@@ -427,6 +429,7 @@ export const translations: Record<Language, Translations> = {
     late: 'Late',
     excused: 'Excused',
     currentWeek: 'Current Week',
+    nextWeek: 'Next Week',
     lastWeek: 'Last Week',
     previousWeek: 'Previous Week',
     sessionNumber: 'Session #',
@@ -582,6 +585,7 @@ export const translations: Record<Language, Translations> = {
     late: 'En retard',
     excused: 'Excusé',
     currentWeek: 'Semaine actuelle',
+    nextWeek: 'Semaine prochaine',
     lastWeek: 'Semaine passée',
     previousWeek: 'Semaine précédente',
     sessionNumber: 'Séance N°',
