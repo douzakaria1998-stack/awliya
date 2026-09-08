@@ -187,9 +187,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           setCurricula(dbCurricula);
           setItem(STORAGE_KEYS.ADMIN_CURRICULA, dbCurricula);
         } else {
-          const localCurricula = getItem<CurriculumLevel[]>(STORAGE_KEYS.ADMIN_CURRICULA);
-          if (localCurricula && localCurricula.length > 0) {
-            saveAllCurriculaInDb(localCurricula).catch(() => {});
+          const storedAdminCurricula = getItem<CurriculumLevel[]>(STORAGE_KEYS.ADMIN_CURRICULA);
+          if (storedAdminCurricula && storedAdminCurricula.length > 0) {
+            saveAllCurriculaInDb(storedAdminCurricula).catch(() => {});
           }
         }
 
@@ -686,15 +686,21 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     const studentLang = isFrench ? 'French' : 'English';
 
     // Filter curriculum levels for this language, ordered by levelNumber
-    const list = Array.isArray(curricula) && curricula.length > 0 ? curricula : mockCurricula;
-    let studentCurricula = list
-      .filter((c) => c && (c.language === studentLang || (!c.language && studentLang === 'English')))
-      .sort((a, b) => a.levelNumber - b.levelNumber);
+    const list =
+      Array.isArray(curricula) && curricula.length > 0
+        ? curricula
+        : getItem<CurriculumLevel[]>(STORAGE_KEYS.ADMIN_CURRICULA) || mockCurricula;
 
-    // Fallback: If no curricula found specifically for studentLang, but custom curricula exist in list, use all custom curricula
-    if (studentCurricula.length === 0 && Array.isArray(curricula) && curricula.length > 0) {
-      studentCurricula = [...curricula].sort((a, b) => a.levelNumber - b.levelNumber);
+    let studentCurricula = list.filter(
+      (c) => c && (c.language === studentLang || (!c.language && studentLang === 'English'))
+    );
+
+    // If no levels found for exact language, use any custom levels in list before falling back to default mock
+    if (studentCurricula.length === 0 && list.length > 0) {
+      studentCurricula = list;
     }
+
+    studentCurricula.sort((a, b) => a.levelNumber - b.levelNumber);
 
     if (studentCurricula.length === 0) {
       return getAcademicLevelsForStudent(activeStudent.currentLevel);

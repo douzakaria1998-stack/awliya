@@ -185,57 +185,79 @@ export function DashboardScreen({
 
   return (
     <div
-      className={`w-full animate-fade-in select-none space-y-5 sm:space-y-7 ${isRTL ? 'text-right' : 'text-left'}`}
-      style={{ paddingBottom: '70px' }}
+      className={`w-full animate-fade-in select-none ${isRTL ? 'text-right' : 'text-left'}`}
+      style={{ paddingBottom: '60px' }}
     >
       {/* =========================================================================
           1. Welcome Card
           ========================================================================= */}
       <div
-        className="relative overflow-hidden p-5 sm:p-6 rounded-3xl shadow-sm transition-all border border-black/5 dark:border-white/10"
+        className="text-white shadow-md relative overflow-hidden flex flex-col justify-between"
         style={{
-          background: `linear-gradient(135deg, ${activeLevelTheme.primary} 0%, ${activeLevelTheme.primaryDark || activeLevelTheme.primary} 100%)`,
+          backgroundColor: activeLevelTheme.primary,
+          minHeight: '130px',
+          padding: '18px 22px',
+          borderRadius: '18px',
+          marginTop: '16px',
+          marginBottom: '14px',
         }}
       >
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
-          <div>
-            <span className="text-xs sm:text-sm font-bold text-black/75 dark:text-black/85 block mb-1">
-              {t.greeting}, {parentFirstName} 👋
-            </span>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight leading-tight">
-              {t.parentOf} {studentFirstName}
-            </h2>
-          </div>
+        {/* Subtle decorative background shapes */}
+        <div className="absolute -left-12 -bottom-12 w-40 h-40 rounded-full bg-white/10 pointer-events-none" />
+        <div className="absolute left-16 -top-12 w-32 h-32 rounded-full bg-white/5 pointer-events-none" />
 
-          <div className="self-start sm:self-auto shrink-0">
-            {activeStudent.status === 'pending' ? (
-              <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-500 text-white text-xs font-black shadow-md">
-                <Clock size={14} />
-                <span>{language === 'ar' ? 'طلب قيد المراجعة' : 'Pending Review'}</span>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-950/85 text-white text-xs font-black shadow-md backdrop-blur-md">
-                <Layers size={15} className="text-lime-400" />
-                <span>{t.level} {levelWord}</span>
-              </span>
-            )}
-          </div>
+        {/* Content inside the card */}
+        <div className="relative z-10" style={{ padding: '2px 4px' }}>
+          {/* Greeting */}
+          <p className="text-xs font-medium text-white/90" style={{ marginBottom: '2px' }}>
+            {t.greeting}, {parentFirstName} 👋
+          </p>
+
+          {/* Student's name/title */}
+          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug" style={{ marginBottom: '10px' }}>
+            {t.parentOf} {studentFirstName}
+          </h2>
+        </div>
+
+        {/* Level Badge Pill / Pending Pill */}
+        <div className={`relative z-10 ${isRTL ? 'self-start' : 'self-start'}`} style={{ padding: '0 4px 4px 4px' }}>
+          {activeStudent.status === 'pending' ? (
+            <div
+              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 text-xs font-bold text-white shadow-2xs leading-normal select-none"
+              style={{ padding: '6px 16px', minHeight: '30px' }}
+            >
+              <Clock size={13} />
+              <span>{language === 'ar' ? 'طلب قيد المراجعة - بانتظار الاختبار' : language === 'fr' ? 'En attente - Test prévu' : 'Pending - Placement Test'}</span>
+            </div>
+          ) : (
+            <div
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold text-white border border-white/25 shadow-2xs leading-normal select-none"
+              style={{ padding: '6px 16px', minHeight: '30px' }}
+            >
+              <Layers size={13} />
+              <span>{t.level} {levelWord}</span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Pending Account Notice Banner */}
       {activeStudent.status === 'pending' && (
         <div
-          className={`bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/80 rounded-3xl flex items-start gap-3.5 p-4 sm:p-5 shadow-xs ${isRTL ? 'text-right' : 'text-left'} animate-fade-in`}
+          className={`bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/80 rounded-xl flex items-start gap-3 shadow-xs ${isRTL ? 'text-right' : 'text-left'} animate-fade-in`}
+          style={{
+            padding: '14px 18px',
+            marginBottom: '14px',
+          }}
         >
-          <div className="w-9 h-9 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-            <Clock size={18} />
+          <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+            <Clock size={16} />
           </div>
           <div className="min-w-0 flex-1">
-            <h4 className="font-bold text-amber-950 dark:text-amber-100 text-sm mb-1">
+            <h4 className="font-bold text-amber-950 dark:text-amber-100 text-xs sm:text-sm mb-0.5">
               {language === 'ar' ? `طلب تسجيل ${getStudentGenderNoun(activeStudent)} قيد المراجعة لدى الإدارة` : language === 'fr' ? "Demande d'inscription en cours d'examen" : 'Registration Request Under Review'}
             </h4>
-            <p className="text-xs sm:text-sm text-amber-800/90 dark:text-amber-300/90 leading-relaxed font-medium">
+            <p className="text-[11px] text-amber-800/90 dark:text-amber-300/90 leading-relaxed font-medium">
               {language === 'ar'
                 ? `تم استلام طلب تسجيل ${getStudentGenderNoun(activeStudent)} (${activeStudent.fullNameAr}) بنجاح. سيقوم فريق الإدارة بالتواصل لتحديد موعد اختبار تحديد المستوى.`
                 : language === 'fr'
@@ -254,43 +276,59 @@ export function DashboardScreen({
         tabIndex={0}
         onClick={() => onNavigate('academic')}
         onKeyDown={(e) => e.key === 'Enter' && onNavigate('academic')}
-        className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer p-5 sm:p-6 rounded-3xl"
+        className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer"
+        style={{
+          padding: '16px 20px',
+          borderRadius: '16px',
+          marginBottom: '18px',
+        }}
       >
-        <div className="flex items-center justify-between gap-3 mb-3.5">
-          <div className="flex items-center gap-3.5 min-w-0">
+        {/* Percentage and Level Info */}
+        <div className="flex items-center justify-between gap-3" style={{ marginBottom: '10px' }}>
+          {/* Icon + Title + Subtitle */}
+          <div className="flex items-center gap-3">
             <div
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-slate-950 shrink-0 shadow-xs"
+              className="rounded-full flex items-center justify-center text-white shrink-0 shadow-xs"
               style={{
                 backgroundColor: activeLevelTheme.primary,
+                width: '38px',
+                height: '38px',
+                minWidth: '38px',
+                minHeight: '38px',
               }}
             >
-              <Check size={22} strokeWidth={3} />
+              <Check size={20} strokeWidth={3} />
             </div>
-            <div className="min-w-0">
-              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight truncate">
+            <div>
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-tight">
                 {activeStudent.gender === 'female' ? t.daughterProgress : t.sonProgress}
               </h3>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-semibold mt-0.5 truncate">
-                {t.level} {levelWord} • {language === 'ar' ? `من ${academicLevels.length} مستويات` : `of ${academicLevels.length} levels`}
+              <p className="text-xs text-slate-400 font-semibold" style={{ marginTop: '2px' }}>
+                {t.level} {levelWord} • {academicLevels.length > 0 ? (language === 'ar' ? `من ${academicLevels.length}` : language === 'fr' ? `sur ${academicLevels.length}` : `of ${academicLevels.length}`) : t.levelOfTen}
               </p>
             </div>
           </div>
 
+          {/* Percentage text */}
           <div
-            className="text-2xl sm:text-3xl font-black font-mono tracking-tight shrink-0 whitespace-nowrap"
+            className="text-xl sm:text-2xl font-bold font-mono tracking-tight"
             style={{ color: activeLevelTheme.primary }}
           >
-            {activeStudent.currentLevelProgress ?? 0}%
+            % {activeStudent.currentLevelProgress ?? 0}
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-slate-100 dark:bg-slate-800 overflow-hidden h-3 rounded-full">
+        <div
+          className="w-full bg-slate-100 dark:bg-slate-800 overflow-hidden"
+          style={{ height: '10px', borderRadius: '6px', marginTop: '10px' }}
+        >
           <div
-            className="h-full transition-all duration-700 rounded-full"
+            className="h-full transition-all duration-700"
             style={{
               width: `${activeStudent.currentLevelProgress ?? 0}%`,
               backgroundColor: activeLevelTheme.primary,
+              borderRadius: '6px',
             }}
           />
         </div>
@@ -299,24 +337,33 @@ export function DashboardScreen({
       {/* =========================================================================
           3. Notifications & Homework Alerts Section
           ========================================================================= */}
-      <div className="space-y-3.5">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+      <div style={{ marginBottom: '18px' }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: '10px' }}>
+          <h3
+            className="text-slate-900 dark:text-white"
+            style={{
+              fontSize: '16px',
+              fontWeight: '700',
+              lineHeight: '24px',
+              paddingRight: isRTL ? '4px' : '0',
+              paddingLeft: isRTL ? '0' : '4px',
+            }}
+          >
             {t.recentNotifications}
           </h3>
 
           <button
             type="button"
             onClick={() => onNavigate('performance', 'homework')}
-            className="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 flex items-center gap-1 cursor-pointer transition-colors"
+            className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 flex items-center gap-1 cursor-pointer transition-colors"
           >
-            <span>{language === 'ar' ? 'عرض الكل' : 'View All'}</span>
-            {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            <span>{language === 'ar' ? 'الواجبات المنزلية' : language === 'fr' ? 'Devoirs' : 'Homework'}</span>
+            {isRTL ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
           </button>
         </div>
 
         {/* Notification Cards */}
-        <div className="space-y-3.5">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {recentHomeworkNotifications.length > 0 ? (
             recentHomeworkNotifications.map((notif) => {
               const IconComp = notif.icon;
@@ -326,10 +373,15 @@ export function DashboardScreen({
                   role="button"
                   tabIndex={0}
                   onClick={() => {
+                    // 1. Immediately hide notification from dashboard
                     setDismissedIds((prev) => [...prev, notif.id, (notif as any).rawNotifId].filter(Boolean));
+
+                    // 2. Mark notification as read in global state/storage if it has an id
                     if ((notif as any).rawNotifId) {
                       markNotificationRead((notif as any).rawNotifId);
                     }
+
+                    // 3. Open relevant homework or navigate to route
                     if (notif.homeworkId && onOpenHomeworkDetail) {
                       onOpenHomeworkDetail(notif.homeworkId);
                     } else if ((notif as any).routeTo) {
@@ -340,37 +392,48 @@ export function DashboardScreen({
                     }
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'homework')}
-                  className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer p-4 sm:p-5 rounded-3xl flex flex-col gap-2.5"
+                  className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs transition-all flex items-center justify-between cursor-pointer group"
+                  style={{
+                    minHeight: '64px',
+                    padding: '12px 16px',
+                    borderRadius: '16px',
+                    gap: '12px',
+                  }}
                 >
-                  {/* Top Header Row: Icon + Badge + Date */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border ${notif.colorClass}`}
-                      >
-                        <IconComp size={14} />
-                      </div>
-                      {notif.badgeText && (
-                        <span
-                          className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-black ${notif.badgeClass} shadow-2xs`}
-                        >
-                          {notif.badgeText}
-                        </span>
-                      )}
+                  <div className="flex items-center min-w-0" style={{ gap: '12px' }}>
+                    <div
+                      className={`rounded-xl flex items-center justify-center shrink-0 border ${notif.colorClass}`}
+                      style={{ width: '38px', height: '38px', minWidth: '38px' }}
+                    >
+                      <IconComp size={18} />
                     </div>
-                    <span className="text-xs font-semibold text-slate-400 whitespace-nowrap">
-                      {notif.time}
-                    </span>
+
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h4 className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm">
+                          {notif.title}
+                        </h4>
+                        {notif.badgeText && (
+                          <span
+                            className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold leading-normal ${notif.badgeClass} shrink-0 shadow-2xs`}
+                          >
+                            {notif.badgeText}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-slate-500 dark:text-slate-400 font-medium truncate text-[11.5px]">
+                        {notif.description}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Title & Description */}
-                  <div className="pt-0.5">
-                    <h4 className="text-base font-bold text-slate-900 dark:text-white leading-snug">
-                      {notif.title}
-                    </h4>
-                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed mt-0.5">
-                      {notif.description}
-                    </p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-slate-400 font-semibold whitespace-nowrap text-[11px]">
+                      {notif.time}
+                    </span>
+                    <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      {isRTL ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+                    </div>
                   </div>
                 </div>
               );
@@ -381,24 +444,31 @@ export function DashboardScreen({
               tabIndex={0}
               onClick={() => onNavigate('performance', 'homework')}
               onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'homework')}
-              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:border-indigo-300 dark:hover:border-indigo-700 transition-all p-5 rounded-3xl flex items-center justify-between cursor-pointer"
+              className="bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-700 transition-all flex items-center justify-between cursor-pointer"
+              style={{
+                minHeight: '60px',
+                padding: '12px 16px',
+                borderRadius: '16px',
+                gap: '12px',
+              }}
             >
-              <div className="flex items-center gap-3.5">
+              <div className="flex items-center min-w-0" style={{ gap: '12px' }}>
                 <div
-                  className="w-11 h-11 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 border border-indigo-200/70 dark:border-indigo-800/60 flex items-center justify-center shrink-0"
+                  className="rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 border border-indigo-200/70 dark:border-indigo-800/60 flex items-center justify-center shrink-0"
+                  style={{ width: '38px', height: '38px', minWidth: '38px' }}
                 >
-                  <BookOpen size={20} />
+                  <BookOpen size={18} />
                 </div>
-                <div>
-                  <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
-                    {language === 'ar' ? 'قسم الواجبات والأنشطة' : 'Homework & Activities'}
+                <div className="min-w-0">
+                  <h4 className="font-bold text-slate-900 dark:text-white truncate text-xs sm:text-sm" style={{ marginBottom: '2px' }}>
+                    {language === 'ar' ? 'قسم الواجبات والأنشطة المدرسية' : 'Homework & Activities Section'}
                   </h4>
-                  <p className="text-slate-400 font-medium text-xs sm:text-sm mt-0.5">
-                    {language === 'ar' ? 'اضغط لمتابعة الواجبات والمهام لهذا الأسبوع' : 'Click to view assigned tasks'}
+                  <p className="text-slate-400 font-medium truncate text-[11px]">
+                    {language === 'ar' ? 'اضغط هنا لمتابعة المهام والواجبات المطلوبة لهذا الأسبوع' : 'Click here to view assigned homework and tasks'}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm font-bold shrink-0">
+              <div className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 text-xs font-bold shrink-0">
                 <span>{language === 'ar' ? 'فتح' : 'Open'}</span>
                 {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
               </div>
@@ -410,43 +480,120 @@ export function DashboardScreen({
       {/* =========================================================================
           4. Teacher Notes Section
           ========================================================================= */}
-      <div className="space-y-3.5">
-        <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white px-1">
+      <div>
+        <h3
+          className="text-slate-900 dark:text-white"
+          style={{
+            fontSize: '16px',
+            fontWeight: '700',
+            lineHeight: '24px',
+            marginBottom: '10px',
+            paddingRight: isRTL ? '4px' : '0',
+            paddingLeft: isRTL ? '0' : '4px',
+          }}
+        >
           {t.latestTeacherNote}
         </h3>
 
+        {/* Teacher Card if exists, or clean empty placeholder */}
         {latestFeedback ? (
           <div
             role="button"
             tabIndex={0}
             onClick={() => onNavigate('performance', 'feedback')}
             onKeyDown={(e) => e.key === 'Enter' && onNavigate('performance', 'feedback')}
-            className="bg-white dark:bg-slate-850 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer p-5 sm:p-6 rounded-3xl"
+            className="border shadow-2xs transition-all cursor-pointer"
+            style={{
+              backgroundColor: `${theme.primary}0C`,
+              borderColor: `${theme.primary}26`,
+              padding: '16px 20px',
+              borderRadius: '16px',
+            }}
           >
             {/* Teacher Header */}
-            <div className="flex items-center gap-3.5 mb-3">
+            <div className="flex items-center gap-2.5" style={{ marginBottom: '10px' }}>
               <div
-                className="w-10 h-10 rounded-2xl flex items-center justify-center text-slate-950 font-black text-xs shrink-0 shadow-xs"
-                style={{ backgroundColor: activeLevelTheme.primary }}
+                className="rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-xs"
+                style={{
+                  backgroundColor: theme.primary,
+                  width: '36px',
+                  height: '36px',
+                  minWidth: '36px',
+                }}
               >
                 {language === 'ar' ? 'أ.س' : 'T.M'}
               </div>
               <div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
+                <h4
+                  className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm"
+                >
                   {latestFeedback.teacherNameAr || 'معلم المادة'}
                 </h4>
-                <p className="text-xs text-slate-400 font-medium">
+                <p className="text-[11px] text-slate-400 font-medium">
                   {latestFeedback.subjectAr || t.quranSubject}
                 </p>
               </div>
             </div>
 
-            <div className="bg-slate-50 dark:bg-slate-900/60 p-3.5 sm:p-4 rounded-2xl text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-              {translateTeacherNote(latestFeedback.messageAr || t.teacherDefaultNote, language)}
-            </div>
+            {/* Note Bubble or Structured Guidance */}
+            {latestFeedback.teacherFeedbackDetails &&
+            (latestFeedback.teacherFeedbackDetails.strengths?.length ||
+              latestFeedback.teacherFeedbackDetails.needsImprovement?.length ||
+              latestFeedback.teacherFeedbackDetails.recommendations) ? (
+              <div
+                className="bg-white dark:bg-slate-850 border border-slate-100 dark:border-slate-800 shadow-2xs relative rounded-2xl"
+                style={{ padding: '14px 18px' }}
+              >
+                <div className="space-y-1.5 text-slate-700 dark:text-slate-300 leading-relaxed text-xs sm:text-sm">
+                  {latestFeedback.teacherFeedbackDetails.strengths && latestFeedback.teacherFeedbackDetails.strengths.length > 0 && (
+                    <div>
+                      • <span className="font-bold text-emerald-700 dark:text-emerald-400">{language === 'ar' ? 'نقاط القوة:' : 'Strengths:'}</span>{' '}
+                      {Array.isArray(latestFeedback.teacherFeedbackDetails.strengths)
+                        ? latestFeedback.teacherFeedbackDetails.strengths.join('، ')
+                        : latestFeedback.teacherFeedbackDetails.strengths}
+                    </div>
+                  )}
+                  {latestFeedback.teacherFeedbackDetails.needsImprovement && latestFeedback.teacherFeedbackDetails.needsImprovement.length > 0 && (
+                    <div>
+                      • <span className="font-bold text-amber-700 dark:text-amber-400">{language === 'ar' ? 'بحاجة لتطوير:' : 'Needs Improvement:'}</span>{' '}
+                      {Array.isArray(latestFeedback.teacherFeedbackDetails.needsImprovement)
+                        ? latestFeedback.teacherFeedbackDetails.needsImprovement.join('، ')
+                        : latestFeedback.teacherFeedbackDetails.needsImprovement}
+                    </div>
+                  )}
+                  {latestFeedback.teacherFeedbackDetails.recommendations && (
+                    <div>
+                      • <span className="font-bold text-purple-700 dark:text-purple-400">{language === 'ar' ? 'توصية للمنزل:' : 'Home Recommendation:'}</span>{' '}
+                      "{latestFeedback.teacherFeedbackDetails.recommendations}"
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div
+                className="bg-white dark:bg-slate-850 border border-slate-100 dark:border-slate-800 shadow-2xs relative flex items-center"
+                style={{ padding: '12px 16px', borderRadius: '12px' }}
+              >
+                <div
+                  className="rounded-full shrink-0"
+                  style={{
+                    backgroundColor: theme.primary,
+                    width: '4px',
+                    height: '24px',
+                    marginLeft: isRTL ? '12px' : '0',
+                    marginRight: isRTL ? '0' : '12px',
+                  }}
+                />
+                <p
+                  className="text-slate-700 dark:text-slate-200 font-medium text-xs sm:text-sm leading-relaxed"
+                >
+                  {translateTeacherNote(latestFeedback.messageAr || t.teacherDefaultNote, language)}
+                </p>
+              </div>
+            )}
           </div>
         ) : (
-          <div className="bg-white dark:bg-slate-850 border border-slate-200/70 dark:border-slate-800 shadow-sm rounded-3xl p-6 text-center text-xs sm:text-sm text-slate-400 font-medium">
+          <div className="bg-white dark:bg-slate-850 border border-slate-200/70 dark:border-slate-800 shadow-2xs rounded-2xl p-5 text-center text-xs text-slate-400 font-medium">
             {language === 'ar'
               ? 'لم يتم تسجيل ملاحظات أو توجيهات لهذا الطالب بعد من قِبل المعلم.'
               : 'No teacher notes or feedback recorded for this student yet.'}

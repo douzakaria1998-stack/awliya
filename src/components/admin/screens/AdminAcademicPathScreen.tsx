@@ -139,7 +139,9 @@ export function AdminAcademicPathScreen() {
     );
   };
 
-  const currentLangLevels = curricula.filter((c) => c.language === selectedCurriculumLanguage);
+  const currentLangLevels = curricula.filter(
+    (c) => c.language === selectedCurriculumLanguage || (!c.language && selectedCurriculumLanguage === 'English')
+  );
 
   const activeLevel = currentLangLevels.find(
     (c) => c.levelNumber === selectedLevelNumber

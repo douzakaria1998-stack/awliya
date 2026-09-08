@@ -172,9 +172,17 @@ export function AppLayout() {
           onNavigate={handleNavigate}
         />
 
-        {/* Dynamic Screen Content: Responsive padding for phone vs desktop */}
-        <main className="w-full pb-32 md:pb-16 px-4 sm:px-6 md:px-12 lg:px-14 pt-4 sm:pt-6 md:pt-8">
-          <div className="w-full max-w-5xl mx-auto">
+        {/* Dynamic Screen Content: Generous 32px top padding & 56px margin from sidebar */}
+        <main
+          className="w-full pb-28 md:pb-16"
+          style={{
+            width: '100%',
+            paddingTop: '32px',
+            paddingRight: isRTL ? '56px' : '48px',
+            paddingLeft: isRTL ? '48px' : '56px',
+          }}
+        >
+          <div className="w-full max-w-5xl">
             {activeTab === 'profile' ? (
               <ProfileScreen onOpenAddStudent={() => setIsAddStudentOpen(true)} />
             ) : students.length === 0 ? (

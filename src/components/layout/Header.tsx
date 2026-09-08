@@ -159,20 +159,24 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
 
   return (
     <header
-      className="w-full h-14 sm:h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-30 flex items-center shadow-2xs select-none px-3.5 sm:px-6 md:px-12 lg:px-14"
+      className="w-full h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-30 flex items-center shadow-2xs select-none"
+      style={{
+        paddingRight: isRTL ? '56px' : '48px',
+        paddingLeft: isRTL ? '48px' : '56px',
+      }}
       suppressHydrationWarning
     >
       {/* Container aligned with cards grid */}
-      <div className="w-full max-w-5xl mx-auto flex items-center justify-between">
+      <div className="w-full max-w-5xl flex items-center justify-between">
         {/* Screen Title */}
         <div>
-          <h1 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             {currentTitle}
           </h1>
         </div>
 
         {/* Controls: Language Switcher, Dark Mode, Notifications, Parent Profile */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           {/* Language Switcher Dropdown */}
           <div ref={langRef} className="relative">
             <button
@@ -182,17 +186,23 @@ export function Header({ activeTab = 'dashboard', onOpenAddStudent, onNavigate }
                 setIsProfileOpen(false);
                 setIsNotifOpen(false);
               }}
-              className="h-8 sm:h-10 px-2.5 sm:px-4 rounded-full bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1.5 cursor-pointer transition-all shadow-2xs whitespace-nowrap"
+              className="rounded-full bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-center cursor-pointer transition-all shadow-2xs whitespace-nowrap"
+              style={{
+                height: '44px',
+                paddingRight: '18px',
+                paddingLeft: '18px',
+                gap: '10px',
+              }}
               title="تغيير اللغة / Change Language / Changer la langue"
             >
               <img
                 src={currentLangObj.flagUrl}
                 alt={currentLangObj.label}
-                className="w-4 h-4 sm:w-5 sm:h-5 rounded-full object-cover shrink-0 shadow-2xs border border-slate-200 dark:border-slate-700"
+                className="w-5 h-5 min-w-[20px] min-h-[20px] rounded-full object-cover shrink-0 shadow-2xs border border-slate-200 dark:border-slate-700"
               />
               <span className="hidden sm:inline font-mono uppercase tracking-wider font-extrabold">{currentLangObj.code}</span>
               <ChevronDown
-                size={13}
+                size={14}
                 className={`text-slate-400 shrink-0 transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`}
               />
             </button>

@@ -459,10 +459,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     }
 
     const sCurricula = getItem<CurriculumLevel[]>(ADMIN_STORAGE_KEYS.CURRICULA);
-    if (sCurricula?.length) {
-      setCurricula(sCurricula);
-      saveAllCurriculaInDb(sCurricula).catch(() => {});
-    }
+    if (sCurricula?.length) setCurricula(sCurricula);
 
     const sProgress = getItem<Record<string, LessonProgressStatus>>(ADMIN_STORAGE_KEYS.LESSON_PROGRESS);
     if (sProgress && Object.keys(sProgress).length) {
@@ -506,25 +503,35 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
     const sHomework = getItem<AdminHomeworkAssignment[]>(ADMIN_STORAGE_KEYS.HOMEWORK);
     if (sHomework?.length) {
-      const cleanedHw = sHomework.map((h) => {
+      const validHomework = sHomework.filter(
+        (h) =>
+          h.assignmentNameAr?.trim() !== 'lkml' &&
+          h.assignmentNameAr?.trim() !== 'rethrth' &&
+          h.assignmentNameEn?.trim() !== 'lkml' &&
+          h.assignmentNameEn?.trim() !== 'rethrth'
+      );
+
+      const cleanedHw = validHomework.map((h) => {
         const targetGroup =
           cleanedGroupsState.find((g) => g.id === h.groupId) ||
           sGroups?.find((g) => g.id === h.groupId);
         const groupStudentIds = targetGroup?.studentIds || [];
 
         // Matching students for this homework: STRICTLY by groupId / group's studentIds
-        let matchedStudents = (sStudents || []).filter((s) => groupStudentIds.includes(s.id));
-        if (matchedStudents.length === 0) {
-          matchedStudents = (sStudents || []).filter((s) => s.groupId === h.groupId);
-        }
+        const matchingStudents = (cleanedStudents || []).filter(
+          (s) =>
+            !dalilaStudentIds.has(s.id) &&
+            !isDalilaRecord(s) &&
+            (groupStudentIds.includes(s.id) || (h.groupId && s.groupId === h.groupId))
+        );
 
-        const targetStudentIds = matchedStudents.map((s) => s.id);
+        const targetStudentIds = matchingStudents.map((s) => s.id);
         const existingEvals = (h.evaluations || []).filter(
-          (e) => !dalilaStudentIds.has(e.studentId) && targetStudentIds.includes(e.studentId)
+          (e) => !dalilaStudentIds.has(e.studentId) && !isDalilaRecord(e) && targetStudentIds.includes(e.studentId)
         );
         const evalMap = new Map(existingEvals.map((e) => [e.studentId, e]));
 
-        const mergedEvals = matchedStudents.map((s) => {
+        const mergedEvals = matchingStudents.map((s) => {
           const existing = evalMap.get(s.id);
           if (existing) return existing;
           return {
@@ -541,9 +548,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           evaluations: mergedEvals,
         };
       });
-
-      setHomeworkList(cleanedHw);
       setItem(ADMIN_STORAGE_KEYS.HOMEWORK, cleanedHw);
+      setHomeworkList(cleanedHw);
     }
 
     const sAssessments = getItem<AdminAssessmentRecord[]>(ADMIN_STORAGE_KEYS.ASSESSMENTS);
@@ -637,8 +643,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         if (Array.isArray(dbCurricula) && dbCurricula.length > 0) {
           setCurricula(dbCurricula);
           setItem(ADMIN_STORAGE_KEYS.CURRICULA, dbCurricula);
-        } else if (sCurricula && sCurricula.length > 0) {
-          saveAllCurriculaInDb(sCurricula).catch(() => {});
+        } else {
+          const sCurricula = getItem<CurriculumLevel[]>(ADMIN_STORAGE_KEYS.CURRICULA);
+          if (sCurricula && sCurricula.length > 0) {
+            saveAllCurriculaInDb(sCurricula).catch(() => {});
+          }
         }
       } catch (err) {
         console.warn('Supabase sync notice:', err);
@@ -671,22 +680,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           if (Array.isArray(fresh)) {
             setTeachers(fresh);
             setItem(ADMIN_STORAGE_KEYS.TEACHERS, fresh);
-          }
-        }).catch(() => {});
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'curricula' }, () => {
-        fetchCurriculaFromDb().then((fresh) => {
-          if (Array.isArray(fresh) && fresh.length > 0) {
-            setCurricula(fresh);
-            setItem(ADMIN_STORAGE_KEYS.CURRICULA, fresh);
-          }
-        }).catch(() => {});
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => {
-        fetchCurriculaFromDb().then((fresh) => {
-          if (Array.isArray(fresh) && fresh.length > 0) {
-            setCurricula(fresh);
-            setItem(ADMIN_STORAGE_KEYS.CURRICULA, fresh);
           }
         }).catch(() => {});
       })
@@ -1717,10 +1710,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         saveCustomLevelColor(levelData.levelNumber, levelData.color);
       }
 
-      saveCurriculumLevelInDb(levelData).catch((err) => {
-        console.warn('Supabase save curriculum level warning:', err);
-      });
-
       setCurricula((prev) => {
         const existingIdx = prev.findIndex(
           (c) => c.levelNumber === levelData.levelNumber && c.language === levelData.language
@@ -1732,6 +1721,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           updated = [...prev, levelData];
         }
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        saveAllCurriculaInDb(updated).catch((err) => {
+          console.warn('Supabase save all curricula warning:', err);
+        });
         return updated;
       });
 
@@ -1757,15 +1749,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         saveCustomLevelColor(levelData.levelNumber, levelData.color);
       }
 
-      saveCurriculumLevelInDb(levelData).catch((err) => {
-        console.warn('Supabase update curriculum level warning:', err);
-      });
-
       setCurricula((prev) => {
         const updated = prev.map((c) =>
           c.levelNumber === oldLevelNumber && c.language === lang ? levelData : c
         );
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        saveAllCurriculaInDb(updated).catch((err) => {
+          console.warn('Supabase update all curricula warning:', err);
+        });
         return updated;
       });
 
@@ -1792,14 +1783,13 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         levelNumber: idx + 1,
       }));
 
-      saveAllCurriculaInDb(renumbered).catch((err) => {
-        console.warn('Supabase save all curricula warning:', err);
-      });
-
       setCurricula((prev) => {
         const otherLang = prev.filter((c) => c.language !== lang);
         const updated = [...otherLang, ...renumbered];
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        saveAllCurriculaInDb(updated).catch((err) => {
+          console.warn('Supabase save all curricula warning:', err);
+        });
         return updated;
       });
 
@@ -1830,6 +1820,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         const otherLang = filtered.filter((c) => c.language !== lang);
         const updated = [...otherLang, ...sameLang];
         setItem(ADMIN_STORAGE_KEYS.CURRICULA, updated);
+        saveAllCurriculaInDb(updated).catch(() => {});
         return updated;
       });
 

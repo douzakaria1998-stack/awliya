@@ -47,18 +47,18 @@ export function LevelDetailModal({ level, isOpen, onClose }: LevelDetailModalPro
   };
 
   const levelName =
-    language === 'en' && LEVEL_TITLES_EN[level.level]
-      ? LEVEL_TITLES_EN[level.level].name
-      : language === 'fr' && LEVEL_TITLES_FR[level.level]
-      ? LEVEL_TITLES_FR[level.level].name
-      : level.nameAr;
+    language === 'en'
+      ? (level.nameEn || LEVEL_TITLES_EN[level.level]?.name || level.nameAr)
+      : language === 'fr'
+      ? (LEVEL_TITLES_FR[level.level]?.name || level.nameAr)
+      : (level.nameAr || `المستوى ${level.level}`);
 
   const levelStage =
-    language === 'en' && LEVEL_TITLES_EN[level.level]
-      ? LEVEL_TITLES_EN[level.level].stage
-      : language === 'fr' && LEVEL_TITLES_FR[level.level]
-      ? LEVEL_TITLES_FR[level.level].stage
-      : level.stageAr;
+    language === 'en'
+      ? (level.stageEn || LEVEL_TITLES_EN[level.level]?.stage || level.stageAr)
+      : language === 'fr'
+      ? (LEVEL_TITLES_FR[level.level]?.stage || level.stageAr)
+      : (level.stageAr || level.descriptionAr || `المرحلة ${level.level}`);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fade-in select-none">

@@ -540,30 +540,53 @@ export function PerformanceScreen({
   };
 
   return (
-    <div className={`space-y-6 sm:space-y-8 animate-fade-in ${isRTL ? 'text-right' : 'text-left'}`} style={{ paddingBottom: '70px' }}>
+    <div className={`space-y-6 animate-fade-in ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 pt-1 pb-1">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+        style={{
+          marginTop: '16px',
+          marginBottom: '14px',
+        }}
+      >
         <div>
-          <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 block mb-1">
+          <span className="text-xs font-semibold text-slate-400 block mb-0.5">
             {t.performanceSubtitle}
           </span>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             {t.performanceTitle}
           </h1>
         </div>
 
-        <div className="shrink-0">
+        <div className="self-start sm:self-auto shrink-0">
           <span
-            className="inline-flex items-center rounded-full font-black text-xs sm:text-sm shadow-xs select-none px-4 py-2 bg-slate-900 text-white dark:bg-slate-800 dark:text-slate-100 border border-slate-700/60"
+            className="inline-flex items-center rounded-full font-bold text-white shadow-xs select-none"
+            style={{
+              backgroundColor: theme.primary,
+              height: '30px',
+              paddingRight: '14px',
+              paddingLeft: '14px',
+              fontSize: '12px',
+            }}
           >
             {t.level} {activeStudent.currentLevel}
           </span>
         </div>
       </div>
 
+      {/* Mobile-only student switcher */}
+      <div className="block md:hidden mb-4">
+        <StudentSwitcher onOpenAddStudent={onOpenAddStudent} />
+      </div>
+
       {/* Top Segmented Tab Navigation */}
       <div
-        className="rounded-3xl bg-slate-100 dark:bg-slate-850 flex gap-2 border border-slate-200/80 dark:border-slate-800 shadow-sm p-2 mb-6 sm:mb-8"
+        className="rounded-xl bg-slate-100 dark:bg-slate-850 flex gap-1 border border-slate-200/80 dark:border-slate-800 shadow-2xs"
+        style={{
+          marginBottom: '16px',
+          padding: '3px',
+          minHeight: '38px',
+        }}
       >
         {performanceTabs.map((tab) => {
           const isActive = activeTab === tab.key;
@@ -577,18 +600,21 @@ export function PerformanceScreen({
                 setActiveTab(tab.key);
                 onTabChange?.(tab.key);
               }}
-              className={`flex-1 rounded-2xl transition-all relative flex items-center justify-center gap-1.5 cursor-pointer select-none py-3 px-2 text-xs sm:text-sm ${
+              className={`flex-1 rounded-lg transition-all relative flex items-center justify-center gap-2 cursor-pointer select-none ${
                 isActive
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-black'
-                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 font-bold'
+                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
               }`}
               style={{
+                height: '32px',
+                padding: '0 10px',
+                fontSize: '12px',
                 color: isActive ? theme.primary : undefined,
               }}
             >
-              <span className="tracking-tight truncate">{tab.label}</span>
+              <span className="font-black tracking-tight">{tab.label}</span>
               {showBadge && (
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0 ring-2 ring-white dark:ring-slate-900" />
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0 ring-2 ring-white dark:ring-slate-900" />
               )}
             </button>
           );
@@ -599,19 +625,26 @@ export function PerformanceScreen({
       {/* TAB 1: Homework */}
       {/* ============================================================ */}
       {activeTab === 'homework' && (
-        <div className="space-y-5 sm:space-y-6 animate-fade-in">
+        <div className="space-y-3.5 animate-fade-in">
           {/* Filter Pills */}
           <div
-            className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1 mb-4"
+            className="flex items-center gap-2.5 flex-wrap"
+            style={{ marginBottom: '16px' }}
           >
             <button
               type="button"
               onClick={() => setHomeworkFilter('all')}
-              className={`rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer select-none px-4 py-2 shrink-0 ${
+              className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
                 homeworkFilter === 'all'
-                  ? 'bg-slate-950 text-white dark:bg-slate-100 dark:text-slate-950 font-black shadow-xs'
-                  : 'bg-white dark:bg-slate-850 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
               }`}
+              style={{
+                backgroundColor: homeworkFilter === 'all' ? theme.primary : undefined,
+                height: '30px',
+                paddingRight: '14px',
+                paddingLeft: '14px',
+              }}
             >
               {t.filterAll} ({homeworkList.length})
             </button>
@@ -619,11 +652,16 @@ export function PerformanceScreen({
             <button
               type="button"
               onClick={() => setHomeworkFilter('needs_revision')}
-              className={`rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer select-none px-4 py-2 shrink-0 ${
+              className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
                 homeworkFilter === 'needs_revision'
-                  ? 'bg-amber-500 text-white font-black shadow-xs'
-                  : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/40 hover:bg-amber-100'
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100'
               }`}
+              style={{
+                height: '30px',
+                paddingRight: '14px',
+                paddingLeft: '14px',
+              }}
             >
               {t.needsRevision} ({needsRevisionCount})
             </button>
@@ -631,20 +669,25 @@ export function PerformanceScreen({
             <button
               type="button"
               onClick={() => setHomeworkFilter('completed')}
-              className={`rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer select-none px-4 py-2 shrink-0 ${
+              className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
                 homeworkFilter === 'completed'
-                  ? 'bg-emerald-600 text-white font-black shadow-xs'
-                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40 hover:bg-emerald-100'
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100'
               }`}
+              style={{
+                height: '30px',
+                paddingRight: '14px',
+                paddingLeft: '14px',
+              }}
             >
               {t.completed} ({completedCount})
             </button>
           </div>
 
           {/* Homework Items List */}
-          <div className="flex flex-col gap-3.5">
+          <div className="flex flex-col gap-3">
             {filteredHomework.length === 0 ? (
-              <div className="text-center py-12 text-slate-400 text-xs sm:text-sm font-semibold bg-white dark:bg-slate-850 rounded-3xl border border-slate-200/80 dark:border-slate-800">
+              <div className="text-center py-10 text-slate-400 text-xs font-semibold bg-white dark:bg-slate-850 rounded-2xl border border-slate-200/80 dark:border-slate-800">
                 {t.noHomeworkFound}
               </div>
             ) : (
@@ -659,24 +702,34 @@ export function PerformanceScreen({
                     tabIndex={0}
                     onClick={() => setSelectedHomework(hw)}
                     onKeyDown={(e) => e.key === 'Enter' && setSelectedHomework(hw)}
-                    className={`border transition-all cursor-pointer flex flex-col justify-between select-none p-4 sm:p-5 rounded-3xl ${
+                    className={`border transition-all cursor-pointer flex flex-col justify-between select-none ${
                       isRevision
                         ? 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-300 dark:border-amber-700/70 shadow-sm ring-1 ring-amber-400/20'
                         : isCompleted
-                        ? 'bg-white dark:bg-slate-850 border-slate-200/90 dark:border-slate-800 hover:border-emerald-300 shadow-sm'
-                        : 'bg-white dark:bg-slate-850 border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-slate-300 dark:hover:border-slate-700'
+                        ? 'bg-white dark:bg-slate-850 border-slate-200/80 dark:border-slate-800 hover:border-emerald-300 shadow-2xs'
+                        : 'bg-white dark:bg-slate-850 border-slate-200/80 dark:border-slate-800 shadow-2xs'
                     }`}
+                    style={{
+                      padding: '16px 20px',
+                      borderRadius: '18px',
+                    }}
                   >
                     <div>
                       {/* Top Bar */}
-                      <div className="flex items-center justify-between gap-3 mb-2.5">
-                        <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400">
+                      <div className="flex items-center justify-between gap-3 mb-2">
+                        <span className="text-xs font-bold text-slate-400">
                           {t.level} {hw.level} • {translateSubject(hw.subjectAr, language)}
                         </span>
 
                         {isRevision && (
                           <span
-                            className="inline-flex items-center rounded-full text-xs font-black bg-amber-500 text-white shadow-xs animate-pulse px-3.5 py-1"
+                            className="inline-flex items-center rounded-full text-xs font-bold bg-amber-500 text-white shadow-xs animate-pulse"
+                            style={{
+                              height: '30px',
+                              paddingRight: '14px',
+                              paddingLeft: '14px',
+                              lineHeight: 'normal',
+                            }}
                           >
                             {t.needsRevision}
                           </span>
@@ -684,7 +737,13 @@ export function PerformanceScreen({
 
                         {isCompleted && (
                           <span
-                            className="inline-flex items-center rounded-full text-xs font-black bg-emerald-600 text-white shadow-xs px-3.5 py-1"
+                            className="inline-flex items-center rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                            style={{
+                              height: '30px',
+                              paddingRight: '14px',
+                              paddingLeft: '14px',
+                              lineHeight: 'normal',
+                            }}
                           >
                             {t.completed} ✓
                           </span>
@@ -692,7 +751,13 @@ export function PerformanceScreen({
 
                         {!isRevision && !isCompleted && (
                           <span
-                            className="inline-flex items-center rounded-full text-xs font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200/80 dark:border-slate-750 px-3 py-1"
+                            className="inline-flex items-center rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                            style={{
+                              height: '30px',
+                              paddingRight: '14px',
+                              paddingLeft: '14px',
+                              lineHeight: 'normal',
+                            }}
                           >
                             {t.pending}
                           </span>
@@ -701,7 +766,8 @@ export function PerformanceScreen({
 
                       {/* Title */}
                       <h3
-                        className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-snug my-1.5"
+                        className="text-base font-bold text-slate-900 dark:text-white leading-snug"
+                        style={{ margin: '4px 0 8px 0' }}
                       >
                         {translateHomeworkTitle(hw.titleAr, language)}
                       </h3>
@@ -709,23 +775,27 @@ export function PerformanceScreen({
                       {/* Teacher Feedback Alert if needs revision */}
                       {hw.teacherNote && isRevision && (
                         <div
-                          className="rounded-2xl bg-amber-100/80 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800 text-xs sm:text-sm text-amber-900 dark:text-amber-200 leading-relaxed font-medium p-3 sm:p-3.5 mt-2.5"
+                          className="rounded-xl bg-amber-100/70 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 leading-relaxed font-medium"
+                          style={{
+                            padding: '10px 14px',
+                            marginTop: '8px',
+                          }}
                         >
-                          <span className="font-bold">{t.teacherNoteLabel}: </span>
+                          <span className="font-bold">{t.teacherNoteLabel} </span>
                           {translateTeacherNote(hw.teacherNote, language)}
                         </div>
                       )}
                     </div>
 
                     {/* Footer */}
-                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-                      <span className="flex items-center gap-1.5 font-bold">
-                        <Clock size={15} />
-                        {t.dueDateLabel}: {hw.dueDate}
+                    <div className="mt-3.5 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 font-medium">
+                      <span className="flex items-center gap-1.5">
+                        <Clock size={13} />
+                        {t.dueDateLabel} {hw.dueDate}
                       </span>
 
                       {hw.score !== undefined && (
-                        <span className="font-black text-slate-900 dark:text-white text-xs sm:text-sm font-mono bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-lg">
+                        <span className="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-mono">
                           {t.scoreLabel} {hw.score} / {hw.totalScore || (hw as any).maxScore || 20}
                         </span>
                       )}
@@ -1172,11 +1242,17 @@ export function PerformanceScreen({
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('all')}
-                  className={`rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer select-none px-4 py-2 shrink-0 ${
+                  className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
                     historyFilter === 'all'
-                      ? 'bg-slate-950 text-white dark:bg-slate-100 dark:text-slate-950 font-black shadow-xs'
-                      : 'bg-white dark:bg-slate-850 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-100'
+                      ? 'text-white'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
                   }`}
+                  style={{
+                    backgroundColor: historyFilter === 'all' ? theme.primary : undefined,
+                    height: '30px',
+                    paddingRight: '14px',
+                    paddingLeft: '14px',
+                  }}
                 >
                   {t.filterAll} ({attendanceData.records.length})
                 </button>
@@ -1184,11 +1260,16 @@ export function PerformanceScreen({
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('present')}
-                  className={`rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer select-none px-4 py-2 shrink-0 ${
+                  className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
                     historyFilter === 'present'
-                      ? 'bg-emerald-600 text-white font-black shadow-xs'
-                      : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40 hover:bg-emerald-100'
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100'
                   }`}
+                  style={{
+                    height: '30px',
+                    paddingRight: '14px',
+                    paddingLeft: '14px',
+                  }}
                 >
                   {t.present} ({attendanceData.records.filter((r) => r.status === 'present').length})
                 </button>
@@ -1196,11 +1277,16 @@ export function PerformanceScreen({
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('late')}
-                  className={`rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer select-none px-4 py-2 shrink-0 ${
+                  className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
                     historyFilter === 'late'
-                      ? 'bg-amber-500 text-white font-black shadow-xs'
-                      : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/40 hover:bg-amber-100'
+                      ? 'bg-amber-500 text-white'
+                      : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100'
                   }`}
+                  style={{
+                    height: '30px',
+                    paddingRight: '14px',
+                    paddingLeft: '14px',
+                  }}
                 >
                   {t.late} ({attendanceData.records.filter((r) => r.status === 'late').length})
                 </button>
@@ -1208,11 +1294,16 @@ export function PerformanceScreen({
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('absent')}
-                  className={`rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer select-none px-4 py-2 shrink-0 ${
+                  className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
                     historyFilter === 'absent'
-                      ? 'bg-rose-600 text-white font-black shadow-xs'
-                      : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/40 hover:bg-rose-100'
+                      ? 'bg-rose-600 text-white'
+                      : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 hover:bg-rose-100'
                   }`}
+                  style={{
+                    height: '30px',
+                    paddingRight: '14px',
+                    paddingLeft: '14px',
+                  }}
                 >
                   {t.absent} ({attendanceData.records.filter((r) => r.status === 'absent').length})
                 </button>
@@ -1220,11 +1311,16 @@ export function PerformanceScreen({
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('excused')}
-                  className={`rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer select-none px-4 py-2 shrink-0 ${
+                  className={`rounded-full font-bold text-xs transition-colors cursor-pointer select-none shadow-2xs ${
                     historyFilter === 'excused'
-                      ? 'bg-blue-600 text-white font-black shadow-xs'
-                      : 'bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/40 hover:bg-blue-100'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 hover:bg-blue-100'
                   }`}
+                  style={{
+                    height: '30px',
+                    paddingRight: '14px',
+                    paddingLeft: '14px',
+                  }}
                 >
                   {t.excused} ({attendanceData.records.filter((r) => r.status === 'excused').length})
                 </button>
@@ -1578,7 +1674,13 @@ export function PerformanceScreen({
                           {t.level} {asm.level} • {translateSubject(asm.typeAr, language)}
                         </span>
                         <span
-                          className="inline-flex items-center justify-center rounded-full text-xs font-black bg-slate-900 text-white dark:bg-slate-800 dark:text-slate-100 border border-slate-750 shadow-2xs select-none px-3 py-1"
+                          className="inline-flex items-center justify-center rounded-full text-[11px] font-bold text-white shadow-2xs select-none"
+                          style={{
+                            backgroundColor: theme.primary,
+                            height: '26px',
+                            paddingRight: '12px',
+                            paddingLeft: '12px',
+                          }}
                         >
                           {asm.score}% ({language === 'ar' ? asm.gradeLetterAr || 'ممتاز' : asm.score >= 90 ? 'A+' : 'A'})
                         </span>
