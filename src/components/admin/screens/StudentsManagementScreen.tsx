@@ -516,7 +516,6 @@ export function StudentsManagementScreen() {
                 </th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'المستوى' : 'Level'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'ولي الأمر' : 'Parent'}</th>
-                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الانضباط' : 'Attendance'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الحالة' : 'Status'}</th>
@@ -536,7 +535,7 @@ export function StudentsManagementScreen() {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400 font-bold">
+                  <td colSpan={7} className="py-12 text-center text-slate-400 font-bold">
                     {language === 'ar' ? 'لم يتم العثور على أي طالب مطابق لمعايير البحث' : 'No students found matching your filters'}
                   </td>
                 </tr>
@@ -605,11 +604,6 @@ export function StudentsManagementScreen() {
                           {language === 'ar' ? 'غير مربوط' : 'Unlinked'}
                         </span>
                       )}
-                    </td>
-
-                    {/* Teacher */}
-                    <td className="py-3.5 px-4 text-center font-medium text-slate-600 dark:text-slate-400 text-xs">
-                      {st.teacherName}
                     </td>
 
                     {/* Attendance */}
