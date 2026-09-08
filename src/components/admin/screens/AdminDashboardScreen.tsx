@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { formatStudentCount } from '@/lib/utils';
+import { formatStudentCount, formatCaseCount, formatSessionCount } from '@/lib/utils';
 import { LevelId } from '@/types';
 import { getThemeForLevel } from '@/lib/themes';
 
@@ -621,7 +621,7 @@ export function AdminDashboardScreen() {
                   {language === 'ar' ? 'عدد الحصص المنجزة:' : 'Sessions Done (Completed):'}
                 </span>
                 <span className="font-mono font-black text-slate-900 dark:text-white text-xs sm:text-sm">
-                  {totalSessionsDone} {language === 'ar' ? 'حصة' : 'sessions'}
+                  {formatSessionCount(totalSessionsDone, language)}
                 </span>
               </div>
 
@@ -634,7 +634,7 @@ export function AdminDashboardScreen() {
                   {language === 'ar' ? 'عدد الحصص غير المنجزة (حتى اليوم):' : 'Sessions Not Done (Up to Today):'}
                 </span>
                 <span className="font-mono font-black text-rose-600 dark:text-rose-400 text-xs sm:text-sm">
-                  {totalSessionsNotDone} {language === 'ar' ? 'حصة' : 'sessions'}
+                  {formatSessionCount(totalSessionsNotDone, language)}
                 </span>
               </div>
 
@@ -647,7 +647,7 @@ export function AdminDashboardScreen() {
                   {language === 'ar' ? 'عدد حالات الحضور (Present):' : 'Present Count:'}
                 </span>
                 <span className="font-mono font-black text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm">
-                  {totalPresentCount} {language === 'ar' ? 'حالات' : 'cases'}
+                  {formatCaseCount(totalPresentCount, language)}
                 </span>
               </div>
 
@@ -660,7 +660,7 @@ export function AdminDashboardScreen() {
                   {language === 'ar' ? 'عدد حالات التأخير (Late):' : 'Late Arrivals:'}
                 </span>
                 <span className="font-mono font-black text-amber-600 dark:text-amber-400 text-xs sm:text-sm">
-                  {totalLateCount} {language === 'ar' ? 'حالات' : 'cases'}
+                  {formatCaseCount(totalLateCount, language)}
                 </span>
               </div>
 
@@ -673,7 +673,7 @@ export function AdminDashboardScreen() {
                   {language === 'ar' ? 'عدد حالات الغياب المبرر (بموافقة):' : 'Absent (With Approval):'}
                 </span>
                 <span className="font-mono font-black text-blue-600 dark:text-blue-400 text-xs sm:text-sm">
-                  {totalExcusedAbsences} {language === 'ar' ? 'حالات' : 'cases'}
+                  {formatCaseCount(totalExcusedAbsences, language)}
                 </span>
               </div>
 
@@ -686,7 +686,7 @@ export function AdminDashboardScreen() {
                   {language === 'ar' ? 'عدد حالات الغياب غير المبرر (Absent):' : 'Absent (Unexcused):'}
                 </span>
                 <span className="font-mono font-black text-rose-600 dark:text-rose-400 text-xs sm:text-sm">
-                  {totalUnexcusedAbsences} {language === 'ar' ? 'حالات' : 'cases'}
+                  {formatCaseCount(totalUnexcusedAbsences, language)}
                 </span>
               </div>
             </div>

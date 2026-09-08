@@ -183,8 +183,74 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         }
 
         const bundle = await fetchParentPortalBundle();
+        if (bundle.attendance && bundle.attendance.length > 0) {
+          const sessionsMap = new Map<string, AttendanceSession>();
+          bundle.attendance.forEach((rec) => {
+            const sessKey = `${rec.date}_${rec.sessionTimeAr || '18:00'}`;
+            if (!sessionsMap.has(sessKey)) {
+              sessionsMap.set(sessKey, {
+                id: `sess-${sessKey}`,
+                groupId: 'grp-main',
+                groupName: rec.subjectAr || 'اللغة الإنجليزية',
+                date: rec.date,
+                dayNameAr: rec.dayNameAr || 'اليوم',
+                dayNameEn: 'Day',
+                sessionTime: rec.sessionTimeAr || '18:00 - 20:00',
+                teacherId: 'teach-main',
+                teacherName: 'الأستاذ',
+                records: [],
+                isLocked: true,
+                isCoveringSession: rec.isCoveringSession,
+                coveringType: rec.coveringType,
+                coveringReason: rec.coveringReason,
+              });
+            }
+            const sess = sessionsMap.get(sessKey)!;
+            sess.records.push({
+              studentId: rec.studentId,
+              studentNameAr: '',
+              studentNameEn: '',
+              status: rec.status,
+              note: rec.noteAr,
+              recordedAt: rec.sessionTimeAr || '18:00',
+            });
+          });
+
+          const fetchedSessions = Array.from(sessionsMap.values());
+          if (fetchedSessions.length > 0) {
+            setAttendanceSessions((prev) => {
+              const merged = [...prev];
+              fetchedSessions.forEach((fs) => {
+                const matchIdx = merged.findIndex((m) => m.date === fs.date);
+                if (matchIdx >= 0) {
+                  const existingRecs = merged[matchIdx].records || [];
+                  fs.records.forEach((fr) => {
+                    const rIdx = existingRecs.findIndex((er) => er.studentId === fr.studentId);
+                    if (rIdx >= 0) {
+                      existingRecs[rIdx] = fr;
+                    } else {
+                      existingRecs.push(fr);
+                    }
+                  });
+                  merged[matchIdx].records = existingRecs;
+                } else {
+                  merged.push(fs);
+                }
+              });
+              setItem(STORAGE_KEYS.ADMIN_ATTENDANCE, merged);
+              return merged;
+            });
+          }
+        }
+
         if (bundle.notifications && bundle.notifications.length > 0) {
-          setNotifications(bundle.notifications);
+          setNotifications((prev) => {
+            const seen = new Set(bundle.notifications.map((n) => n.id));
+            const retainedCustom = prev.filter((p) => !seen.has(p.id));
+            const merged = [...bundle.notifications, ...retainedCustom];
+            setItem(STORAGE_KEYS.NOTIFICATIONS, merged);
+            return merged;
+          });
         }
 
         syncParentStudents();
@@ -853,11 +919,10 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     }
 
     // 3. Fallback: If no backoffice attendance has been recorded yet for this student:
-    // If the student is new (attendanceRate === 0 or currentLevelProgress === 0), return 0% and empty records!
+    // Only return 0% if the student is explicitly marked pending or explicitly has 0 attendance rate without enrollment
     const isNewStudent =
-      activeStudent.attendanceRate === 0 ||
-      activeStudent.currentLevelProgress === 0 ||
-      (activeStudent as any).overallProgress === 0;
+      activeStudent.status === 'pending' ||
+      (activeStudent.attendanceRate === 0 && activeStudent.status !== 'active');
 
     if (isNewStudent) {
       return {
@@ -974,13 +1039,83 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   // Central notifications for all registered students of the parent
   const filteredNotifications = useMemo(() => {
     const studentIds = new Set(students.map((s) => s.id));
-    return notifications.filter((n) => {
+    const baseNotifs = notifications.filter((n) => {
       if (!SHOW_FINANCIALS_TAB && (n.type === 'payment' || n.routeTo === 'financials')) {
         return false;
       }
       return !n.studentId || studentIds.has(n.studentId);
     });
-  }, [notifications, students]);
+
+    // Synthesize attendance & homework notifications from student records if missing
+    const generated: Notification[] = [];
+    const seenKeys = new Set(baseNotifs.map((n) => `${n.studentId}_${n.titleAr}_${n.date}`));
+
+    // 1. Attendance alerts (Absences and Tardiness)
+    students.forEach((st) => {
+      const stAttendance = attendanceData.records.filter((r) => r.studentId === st.id || st.id === activeStudent.id);
+      stAttendance.forEach((rec) => {
+        if (rec.status === 'absent') {
+          const title = `تنبيه تسجيل غياب: ${st.fullNameAr}`;
+          const key = `${st.id}_${title}_${rec.date}`;
+          if (!seenKeys.has(key)) {
+            seenKeys.add(key);
+            generated.push({
+              id: `notif-absent-${rec.id || rec.date}`,
+              studentId: st.id,
+              titleAr: title,
+              messageAr: `تم تسجيل غياب الطالب ${st.fullNameAr} عن حصة (${rec.subjectAr || 'اللغة الإنجليزية'}) بتاريخ ${rec.date}.`,
+              type: 'attendance',
+              date: rec.date,
+              isRead: false,
+              routeTo: 'performance',
+              actionPayload: { tab: 'attendance', itemId: rec.id },
+            });
+          }
+        } else if (rec.status === 'late') {
+          const title = `تنبيه تسجيل تأخر: ${st.fullNameAr}`;
+          const key = `${st.id}_${title}_${rec.date}`;
+          if (!seenKeys.has(key)) {
+            seenKeys.add(key);
+            generated.push({
+              id: `notif-late-${rec.id || rec.date}`,
+              studentId: st.id,
+              titleAr: title,
+              messageAr: `تم تسجيل تأخر الطالب ${st.fullNameAr} عن الحصة ${rec.noteAr ? `(${rec.noteAr})` : ''} بتاريخ ${rec.date}.`,
+              type: 'attendance',
+              date: rec.date,
+              isRead: false,
+              routeTo: 'performance',
+              actionPayload: { tab: 'attendance', itemId: rec.id },
+            });
+          }
+        }
+      });
+    });
+
+    // 2. Pending homework alerts
+    homeworkList.forEach((hw) => {
+      if (hw.status === 'pending' || hw.status === 'not_started' || hw.status === 'needs_revision') {
+        const title = `واجب منزلي مطلوب تسليمه`;
+        const key = `${hw.studentId}_${title}_${hw.id}`;
+        if (!seenKeys.has(key)) {
+          seenKeys.add(key);
+          generated.push({
+            id: `notif-hw-${hw.id}`,
+            studentId: hw.studentId,
+            titleAr: title,
+            messageAr: `${hw.titleAr} • ${hw.subjectAr}`,
+            type: 'homework',
+            date: hw.dueDate || new Date().toISOString().split('T')[0],
+            isRead: false,
+            routeTo: 'performance',
+            actionPayload: { tab: 'homework', itemId: hw.id },
+          });
+        }
+      }
+    });
+
+    return [...generated, ...baseNotifs];
+  }, [notifications, students, attendanceData.records, activeStudent.id, homeworkList]);
 
   // Handlers
   const updateNotificationSettings = useCallback((settings: Partial<NotificationSettings>) => {

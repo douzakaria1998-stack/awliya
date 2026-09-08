@@ -66,3 +66,31 @@ export function formatChildrenCount(count: number, language: string = 'ar'): str
     return count === 1 ? '1 child' : `${count} children`;
 }
 
+export function formatCaseCount(count: number, language: string = 'ar'): string {
+    if (language === 'ar') {
+        if (count === 0) return '0 حالة';
+        if (count === 1) return '1 حالة';
+        if (count === 2) return '2 حالات';
+        if (count >= 3 && count <= 10) return `${count} حالات`;
+        return `${count} حالة`;
+    }
+    if (language === 'fr') {
+        return count <= 1 ? `${count} cas` : `${count} cas`;
+    }
+    return count === 1 ? '1 case' : `${count} cases`;
+}
+
+export function formatSessionCount(count: number, language: string = 'ar'): string {
+    if (language === 'ar') {
+        if (count === 0) return '0 حصة';
+        if (count === 1) return '1 حصة';
+        if (count === 2) return '2 حصص';
+        if (count >= 3 && count <= 10) return `${count} حصص`;
+        return `${count} حصة`;
+    }
+    if (language === 'fr') {
+        return count <= 1 ? `${count} séance` : `${count} séances`;
+    }
+    return count === 1 ? '1 session' : `${count} sessions`;
+}
+

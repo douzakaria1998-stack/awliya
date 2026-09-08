@@ -10,12 +10,12 @@ export const levelThemes: Record<LevelId, LevelTheme> = {
     nameAr: 'المستوى الأول: التأسيس الصوتي والمفردات الأولية (Starter A1.1)',
     shortNameAr: 'المستوى الأول',
     stageAr: 'مرحلة التأسيس والحروف والنطق (Phonetics & Basics)',
-    primary: '#EA580C', // Vibrant Orange / Sunset
-    primaryLight: '#FFEDD5',
-    primaryDark: '#C2410C',
-    primaryRgb: '234, 88, 12',
-    gradient: 'linear-gradient(135deg, #EA580C 0%, #C2410C 100%)',
-    accentColor: '#FB923C',
+    primary: '#84CC16', // Vibrant Lime / Apple Green
+    primaryLight: '#ECFCCB',
+    primaryDark: '#4D7C0F',
+    primaryRgb: '132, 204, 22',
+    gradient: 'linear-gradient(135deg, #84CC16 0%, #65A30D 100%)',
+    accentColor: '#A3E635',
     descriptionAr: 'تعلم الأبجدية، مخارج الأصوات الصوتية، التحيات اليومية، والمفردات التأسيسية بالإنجليزية والفرنسية',
   },
   2: {
