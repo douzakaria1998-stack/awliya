@@ -515,7 +515,7 @@ export function StudentsManagementScreen() {
                   {language === 'ar' ? 'الطالب' : 'Student'}
                 </th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'المستوى' : 'Level'}</th>
-                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الفوج' : 'Group'}</th>
+                <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'ولي الأمر' : 'Parent'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'المعلم' : 'Teacher'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'الانضباط' : 'Attendance'}</th>
                 <th className="py-3.5 px-4 text-center font-extrabold text-xs">{language === 'ar' ? 'التقدم' : 'Progress'}</th>
@@ -583,9 +583,28 @@ export function StudentsManagementScreen() {
                       </span>
                     </td>
 
-                    {/* Group */}
+                    {/* Parent */}
                     <td className="py-3.5 px-4 text-center font-semibold text-slate-700 dark:text-slate-300 text-xs">
-                      {st.groupName.split('(')[0].trim()}
+                      {st.parentName && st.parentName !== 'غير مربوط' ? (
+                        <div className="flex flex-col items-center">
+                          <span className="font-bold text-slate-900 dark:text-white">
+                            {(() => {
+                              const pObj = parents.find((p) => p.id === st.parentId);
+                              if (language === 'ar') return pObj?.fullNameAr || st.parentName;
+                              return pObj?.fullNameEn || transliterateArabicName(st.parentName);
+                            })()}
+                          </span>
+                          {st.parentPhone && (
+                            <span className="text-[10px] text-slate-400 font-mono mt-0.5" dir="ltr">
+                              📱 {st.parentPhone}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 font-medium text-[11px] px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
+                          {language === 'ar' ? 'غير مربوط' : 'Unlinked'}
+                        </span>
+                      )}
                     </td>
 
                     {/* Teacher */}
